@@ -38,6 +38,13 @@ import { Color, Vec3, Rect, Vec2, Mat4, Quat } from '../core/math';
 import { Node } from '../core/scene-graph/node';
 import { Layers } from '../core/scene-graph/layers';
 
+import * as features from './ar-features';
+import { ARFeature, IFeature } from './ar-feature-base'
+
+interface FeaturesConfigs {
+    features : IFeature[]
+}
+
 const _temp_vec3a = new Vec3();
 const _temp_quat = new Quat();
 
@@ -71,7 +78,9 @@ export class ARSession extends Component {
     //#endregion
 
     // features config
+    @property(JsonAsset)
     featuresConfigs : JsonAsset | null = null;
+    private featuresMap = new Map<string, IFeature>();
 
     @property
     smooth = false;
@@ -109,6 +118,30 @@ export class ARSession extends Component {
 
         game.on(Game.EVENT_SHOW, this.onResume);
         game.on(Game.EVENT_HIDE, this.onPause);
+
+        let feaData : FeaturesConfigs = <FeaturesConfigs>this.featuresConfigs?.json;
+        if(feaData == null) return;
+
+        console.log(feaData);
+        console.log(feaData.features);
+        feaData.features.forEach(element => {
+            if(element != null) {
+                console.log(element.name);
+                var featureInstance = new (<any>features)[element.name](element, this);
+                console.log(featureInstance instanceof ARFeature);
+                if(!this.featuresMap.has(element.name)) {
+                    this.featuresMap.set(element.name, featureInstance);
+                } else {
+                    console.log("Error, Duplicate Feature:", element.name);
+                }
+                console.log(featureInstance);
+            }
+        });
+        this.featuresMap.forEach((feature, id) => {
+            console.log(feature);
+
+            feature.init();
+        });
     }
 
     public __preload () {
@@ -164,6 +197,11 @@ export class ARSession extends Component {
     lateUpdate (dt: number) { 
         //*
         if (!BUILD) return;
+
+        this.featuresMap.forEach((feature, id) => {
+            feature.update();
+        });
+
         if (this.lerpPosition) {
             if (!Vec3.equals(this._targetCamera!.node.worldPosition, this.targetOrigin)) {
                 Vec3.lerp(_temp_vec3a, this._targetCamera!.node.worldPosition, this.targetOrigin, 0.33333333);
@@ -197,6 +235,14 @@ export class ARSession extends Component {
             //this._targetCamera!.camera.matProj = this._matProj;
         }
         //*/
+    }
+
+    tryGetFeature(featureName : string, outFeature : IFeature) : boolean {
+        if (this.featuresMap.has(featureName)) {
+            outFeature = this.featuresMap.get(featureName)!;
+            return true;
+        }
+        return false;
     }
 }
 

@@ -43,4 +43,24 @@ class ARModuleNative extends ARModule {
     getCameraProjectionMatrix () {
         return this._native.getCameraProjectionMatrix();
     }
+
+    updatePlanesInfo () {
+        return this._native.updatePlanesInfo();
+    }
+
+    getAddedPlanesInfo () {
+        return this._native.getAddedPlanesInfo();
+    }
+
+    getRemovedPlanesInfo () {
+        return this._native.getRemovedPlanesInfo();
+    }
+
+    getUpdatedPlanesInfo () {
+        return this._native.getUpdatedPlanesInfo();
+    }
+
+    getAddedPlanesCount () {
+        return this._native.getAddedPlanesCount();
+    }
 }

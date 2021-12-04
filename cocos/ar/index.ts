@@ -30,3 +30,4 @@ THE SOFTWARE.
 export * from './ar-module-base';
 export * from './ar-module-helper';
 export * from './ar-session-component';
+export * from './ar-features';
