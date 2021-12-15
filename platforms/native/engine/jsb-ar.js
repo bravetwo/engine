@@ -24,6 +24,10 @@ class ARModuleNative extends ARModule {
         this._native.onPause();
     }
 
+    beforeUpdate() {
+        this._native.beforeUpdate();
+    }
+
     update() {
         this._native.update();
     }

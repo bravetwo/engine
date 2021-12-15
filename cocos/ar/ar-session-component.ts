@@ -118,6 +118,7 @@ export class ARSession extends Component {
 
         game.on(Game.EVENT_SHOW, this.onResume);
         game.on(Game.EVENT_HIDE, this.onPause);
+        legacyCC.director.on(legacyCC.Director.EVENT_BEFORE_UPDATE, this.beforeUpdateEvent, this);
 
         let feaData : FeaturesConfigs = <FeaturesConfigs>this.featuresConfigs?.json;
         if(feaData == null) return;
@@ -170,6 +171,11 @@ export class ARSession extends Component {
             console.log(this._camera);
         }
         //*/
+
+    }
+
+    public onDestroy () {
+        legacyCC.director.off(legacyCC.Director.EVENT_BEFORE_UPDATE, this.beforeUpdateEvent, this);
     }
 
     public onEnable () {
@@ -192,6 +198,12 @@ export class ARSession extends Component {
         console.log("session pause");
         const instance = ARModuleHelper.getInstance();
         instance.onPause();
+    }
+
+    beforeUpdateEvent () {
+        console.log("session before update");
+        const instance = ARModuleHelper.getInstance();
+        instance.beforeUpdate();
     }
 
     lateUpdate (dt: number) { 
@@ -230,8 +242,8 @@ export class ARSession extends Component {
             if (!this.smooth) {
                 this._targetCamera!.node.setWorldRotation(this.targetOrient);
             }
-            const matArr = instance.getCameraProjectionMatrix();
-            Mat4.fromArray(this._matProj, matArr);
+            //const matArr = instance.getCameraProjectionMatrix();
+            //Mat4.fromArray(this._matProj, matArr);
             //this._targetCamera!.camera.matProj = this._matProj;
         }
         //*/
