@@ -49,9 +49,9 @@ export class ARFeaturePlane extends ARFeature {
     private planesInfo : number[];
 
     private planesNodeMap = new Map<number, Node>();
-    private addedPlanesInfo : number[];
-    private removedPlanesInfo : Int32Array;
-    private updatedPlanesInfo : number[];
+    addedPlanesInfo : number[];
+    removedPlanesInfo : Int32Array;
+    updatedPlanesInfo : number[];
 
     constructor(jsonObject : any, session : ARSession) {
         super(jsonObject, session);
@@ -70,6 +70,10 @@ export class ARFeaturePlane extends ARFeature {
         });
     }
 
+    isReady() : boolean {
+        return this.planePrefab != null;
+    }
+
     init() {
 
     }
@@ -80,6 +84,8 @@ export class ARFeaturePlane extends ARFeature {
 
     update() {
         // check start
+        if(!this.isReady()) return;
+
         ARModuleHelper.getInstance().updatePlanesInfo();
         this.processChanges();
     }
@@ -99,10 +105,11 @@ export class ARFeaturePlane extends ARFeature {
         }
 
         this.addedPlanesInfo = armodule.getAddedPlanesInfo();
+        let planesInfo = this.addedPlanesInfo;
         let offset = 0;
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < armodule.getAddedPlanesCount(); i++) {
             offset = i * 12;
-            let planesInfo = this.addedPlanesInfo;
+            //let planesInfo = this.addedPlanesInfo;
             const width = planesInfo[offset + 3];
             const height = planesInfo[offset + 4];
             if (width > 0 && height > 0) {
@@ -126,10 +133,11 @@ export class ARFeaturePlane extends ARFeature {
         }
 
         this.updatedPlanesInfo = armodule.getUpdatedPlanesInfo();
+        planesInfo = this.updatedPlanesInfo;
         offset = 0;
         for (let i = 0; i < 5; i++) {
             offset = i * 12;
-            let planesInfo = this.updatedPlanesInfo;
+            //let planesInfo = this.updatedPlanesInfo;
             const width = planesInfo[offset + 3];
             const height = planesInfo[offset + 4];
             if (width > 0 && height > 0) {

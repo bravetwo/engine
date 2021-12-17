@@ -33,6 +33,8 @@ export class ARModuleWeb extends ARModule {
 
     public onPause (): void {}
 
+    public beforeUpdate (): void {}
+
     public update (): void {}
 
     public setCameraTextureName (id: number): void {}

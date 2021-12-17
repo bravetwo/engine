@@ -204,16 +204,21 @@ export class ARSession extends Component {
         console.log("session before update");
         const instance = ARModuleHelper.getInstance();
         instance.beforeUpdate();
+
+        this.featuresMap.forEach((feature, id) => {
+            feature.update();
+        });
     }
 
     lateUpdate (dt: number) { 
         //*
         if (!BUILD) return;
-
+        /*
         this.featuresMap.forEach((feature, id) => {
             feature.update();
         });
-
+        //*/
+        /*
         if (this.lerpPosition) {
             if (!Vec3.equals(this._targetCamera!.node.worldPosition, this.targetOrigin)) {
                 Vec3.lerp(_temp_vec3a, this._targetCamera!.node.worldPosition, this.targetOrigin, 0.33333333);
@@ -229,6 +234,7 @@ export class ARSession extends Component {
             return;
         }
         this._curFrame = 0;
+        //*/
         const instance = ARModuleHelper.getInstance();
 
         instance.update();
@@ -255,6 +261,12 @@ export class ARSession extends Component {
             return true;
         }
         return false;
+    }
+
+    getFeature<Type extends ARFeature>(fea : Type & Function) : Type | undefined {
+        if (this.featuresMap.has(fea.name)) {
+            return this.featuresMap.get(fea.name) as Type;
+        }
     }
 }
 
