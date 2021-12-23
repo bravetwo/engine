@@ -218,7 +218,7 @@ export class ARSession extends Component {
             feature.update();
         });
         //*/
-        /*
+        //*
         if (this.lerpPosition) {
             if (!Vec3.equals(this._targetCamera!.node.worldPosition, this.targetOrigin)) {
                 Vec3.lerp(_temp_vec3a, this._targetCamera!.node.worldPosition, this.targetOrigin, 0.33333333);
@@ -242,16 +242,29 @@ export class ARSession extends Component {
         if (Math.abs(pose[0]) < 200 && Math.abs(pose[1]) < 200 && Math.abs(pose[2]) < 200) {
             this.targetOrigin.x = pose[0], this.targetOrigin.y = pose[1], this.targetOrigin.z = pose[2];
             this.targetOrient.x = pose[3], this.targetOrient.y = pose[4], this.targetOrient.z = pose[5], this.targetOrient.w = pose[6];
+            //*
             if (!this.lerpPosition) {
                 this._targetCamera!.node.setWorldPosition(this.targetOrigin);
             }
             if (!this.smooth) {
                 this._targetCamera!.node.setWorldRotation(this.targetOrient);
             }
-            //const matArr = instance.getCameraProjectionMatrix();
+            //*/
+            //this._targetCamera!.node.setWorldPosition(this.targetOrigin);
+            //this._targetCamera!.node.setWorldRotation(this.targetOrient);
+            const matArr = instance.getCameraProjectionMatrix();
             //Mat4.fromArray(this._matProj, matArr);
             //this._targetCamera!.camera.matProj = this._matProj;
+            Mat4.fromArray(this._targetCamera!.camera.matProj, matArr);
+            console.log(`get mat: ${matArr}`);
+            var mat = new Array(16);
+            Mat4.toArray(mat, this._targetCamera!.camera.matProj);
+            console.log(`cam mat: ${mat}`);
         }
+        console.log(`cam pos: ${this._targetCamera!.node.position}`);
+        var eulerAngle = new Vec3();
+        this._targetCamera!.node.rotation.getEulerAngles(eulerAngle);
+        console.log(`cam rot: ${eulerAngle}`);
         //*/
     }
 
