@@ -839,6 +839,18 @@ module.exports = {
             label: "AR Module",
             description: "AR support.",
         },
+        ar_auto: {
+            label: "Android auto adaption",
+            description: "Auto adaptation of ar api on android device.",
+        },
+        ar_core: {
+            label: "Android use ARCore",
+            description: "For ARCore supported devices.",
+        },
+        ar_engine: {
+            label: "Android use AREngine",
+            description: "For AREngine supported devices, Huawei and HONOR.",
+        },
     },
     renderable_2d: {
         srcBlendFactor: 'Specifies the source blend mode, it will clone a new material object.',

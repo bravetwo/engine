@@ -181,11 +181,27 @@
             "category": "2d"
         },
         "ar": {
-            "default": ["ar"],
+            "default": ["ar-auto"],
             "label": "i18n:ENGINE.features.ar.label",
             "description": "i18n:ENGINE.features.ar.description",
-            "native": "USE_AR_MODULE",
-            "wechatPlugin": false
+            "wechatPlugin": false,
+            "options": {
+                "ar-auto": {
+                    "label": "i18n:ENGINE.features.ar_auto.label",
+                    "description": "i18n:ENGINE.features.ar_auto.description",
+                    "native": "USE_AR_AUTO"
+                },
+                "ar-core": {
+                    "label": "i18n:ENGINE.features.ar_core.label",
+                    "description": "i18n:ENGINE.features.ar_core.description",
+                    "native": "USE_AR_CORE"
+                },
+                "ar-engine": {
+                    "label": "i18n:ENGINE.features.ar_engine.label",
+                    "description": "i18n:ENGINE.features.ar_engine.description",
+                    "native": "USE_AR_ENGINE"
+                }
+            }
         },
         "marionette": {
             "default": ["marionette"],

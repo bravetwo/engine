@@ -30,6 +30,9 @@ export type EngineFeature =
     | 'primitive'
     | 'profiler'
     | 'ar'
+    | 'ar-auto'
+    | 'ar-core'
+    | 'ar-engine'
     | 'marionette';
 export interface ModuleRenderConfig {
     $schema?: string;
