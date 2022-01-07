@@ -93,7 +93,7 @@ export class ARFeaturePlane extends ARFeature {
     public processChanges() {
         const armodule = ARModuleHelper.getInstance();
         let planes = this.session.node;
-
+        /*
         this.removedPlanesInfo = armodule.getRemovedPlanesInfo();
         for (let i = 0; i < 5; i++) {
             let index = this.removedPlanesInfo[i];
@@ -103,7 +103,7 @@ export class ARFeaturePlane extends ARFeature {
                 this.planesNodeMap.delete(index);
             }
         }
-
+        //*/
         this.addedPlanesInfo = armodule.getAddedPlanesInfo();
         let planesInfo = this.addedPlanesInfo;
         let offset = 0;
@@ -128,14 +128,15 @@ export class ARFeaturePlane extends ARFeature {
                     node.setWorldPosition(vec3);
                     node.setWorldRotation(planesInfo[offset + 8], planesInfo[offset + 9], 
                         planesInfo[offset + 10], planesInfo[offset + 11]);
+                    console.log(`add plane: w ${width}, h ${height}`);
                 }
             }
         }
-
+        
         this.updatedPlanesInfo = armodule.getUpdatedPlanesInfo();
         planesInfo = this.updatedPlanesInfo;
         offset = 0;
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < armodule.getUpdatedPlanesCount(); i++) {
             offset = i * 12;
             //let planesInfo = this.updatedPlanesInfo;
             const width = planesInfo[offset + 3];

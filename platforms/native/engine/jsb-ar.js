@@ -67,4 +67,8 @@ class ARModuleNative extends ARModule {
     getAddedPlanesCount () {
         return this._native.getAddedPlanesCount();
     }
+
+    getUpdatedPlanesCount () {
+        return this._native.getUpdatedPlanesCount();
+    }
 }

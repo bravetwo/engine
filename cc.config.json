@@ -28,9 +28,6 @@
         "spine": { "modules": [ "spine" ] },
         "dragon-bones": { "modules": [ "dragon-bones" ] },
         "ar": { "modules": [ "ar" ] },
-        "ar-auto": { "modules": [ "ar-auto", "ar" ] },
-        "ar-core": { "modules": [ "ar-core", "ar" ] },
-        "ar-engine": { "modules": [ "ar-engine", "ar" ] },
         "marionette": {
             "modules": [],
             "intrinsicFlags": {

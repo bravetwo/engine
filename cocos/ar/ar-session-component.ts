@@ -201,7 +201,7 @@ export class ARSession extends Component {
     }
 
     beforeUpdateEvent () {
-        console.log("session before update");
+        //console.log("session before update");
         const instance = ARModuleHelper.getInstance();
         instance.beforeUpdate();
 
@@ -229,11 +229,13 @@ export class ARSession extends Component {
             Quat.slerp(_temp_quat, this._targetCamera!.node.worldRotation, this.targetOrient, 0.5);
             this._targetCamera!.node.setWorldRotation(_temp_quat);
         }
-        if (this._curFrame < this.skipFrame) {
-            this._curFrame++;
-            return;
+        if (this.lerpPosition || this.smooth) {
+            if (this._curFrame < this.skipFrame) {
+                this._curFrame++;
+                return;
+            }
+            this._curFrame = 0;
         }
-        this._curFrame = 0;
         //*/
         const instance = ARModuleHelper.getInstance();
 
@@ -256,11 +258,12 @@ export class ARSession extends Component {
             //Mat4.fromArray(this._matProj, matArr);
             //this._targetCamera!.camera.matProj = this._matProj;
             Mat4.fromArray(this._targetCamera!.camera.matProj, matArr);
-            console.log(`get mat: ${matArr}`);
+            //console.log(`get mat: ${matArr}`);
             var mat = new Array(16);
             Mat4.toArray(mat, this._targetCamera!.camera.matProj);
-            console.log(`cam mat: ${mat}`);
+            //console.log(`cam mat: ${mat}`);
         }
+        /*
         console.log(`cam pos: ${this._targetCamera!.node.position}`);
         var eulerAngle = new Vec3();
         this._targetCamera!.node.rotation.getEulerAngles(eulerAngle);

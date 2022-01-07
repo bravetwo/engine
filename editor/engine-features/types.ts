@@ -30,6 +30,7 @@ export type EngineFeature =
     | 'primitive'
     | 'profiler'
     | 'ar'
+    | 'ar-android'
     | 'ar-auto'
     | 'ar-core'
     | 'ar-engine'
