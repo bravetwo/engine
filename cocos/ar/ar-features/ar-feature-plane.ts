@@ -85,7 +85,6 @@ export class ARFeaturePlane extends ARFeature {
     update() {
         // check start
         if(!this.isReady()) return;
-
         ARModuleHelper.getInstance().updatePlanesInfo();
         this.processChanges();
     }
@@ -106,6 +105,13 @@ export class ARFeaturePlane extends ARFeature {
         //*/
         this.addedPlanesInfo = armodule.getAddedPlanesInfo();
         let planesInfo = this.addedPlanesInfo;
+        if(planesInfo.length > 0) {
+            console.log(`add planes length: ${planesInfo.length}`);
+            console.log(`add planes length: ${armodule.getAddedPlanesCount()}`);
+            for (let k = 0; k < 12; k++) {
+                console.log(`${k} : ${planesInfo[k]}`);
+            }
+        }
         let offset = 0;
         for (let i = 0; i < armodule.getAddedPlanesCount(); i++) {
             offset = i * 12;
