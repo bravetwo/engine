@@ -50,7 +50,7 @@ export class ARFeaturePlane extends ARFeature {
 
     private planesNodeMap = new Map<number, Node>();
     addedPlanesInfo : number[];
-    removedPlanesInfo : Int32Array;
+    removedPlanesInfo : number[];
     updatedPlanesInfo : number[];
 
     constructor(jsonObject : any, session : ARSession) {
@@ -61,7 +61,7 @@ export class ARFeaturePlane extends ARFeature {
         this.planesInfo = new Array();
 
         this.addedPlanesInfo = new Array();
-        this.removedPlanesInfo = new Int32Array();
+        this.removedPlanesInfo = new Array();
         this.updatedPlanesInfo = new Array();
 
         var self = this;
@@ -92,25 +92,31 @@ export class ARFeaturePlane extends ARFeature {
     public processChanges() {
         const armodule = ARModuleHelper.getInstance();
         let planes = this.session.node;
-        /*
+        //*
         this.removedPlanesInfo = armodule.getRemovedPlanesInfo();
-        for (let i = 0; i < 5; i++) {
+        let planesInfo = this.removedPlanesInfo;
+        if(planesInfo.length > 0) {
+            console.log(`remove planes length: ${planesInfo.length}`);
+            console.log(`remove planes count: ${armodule.getRemovedPlanesCount()}`);
+        }
+        for (let i = 0; i < armodule.getRemovedPlanesCount(); i++) {
             let index = this.removedPlanesInfo[i];
+            console.log(`remove plane: ${index}`);
+            console.log(`map contains: ${this.planesNodeMap.has(index)}`);
+            //??
             if (index >= 0 && this.planesNodeMap.has(index)) {
                 let node = this.planesNodeMap.get(index)!;
                 node.destroy();
                 this.planesNodeMap.delete(index);
+                console.log(`destroy plane: ${index}`);
             }
         }
         //*/
         this.addedPlanesInfo = armodule.getAddedPlanesInfo();
-        let planesInfo = this.addedPlanesInfo;
+        planesInfo = this.addedPlanesInfo;
         if(planesInfo.length > 0) {
             console.log(`add planes length: ${planesInfo.length}`);
-            console.log(`add planes length: ${armodule.getAddedPlanesCount()}`);
-            for (let k = 0; k < 12; k++) {
-                console.log(`${k} : ${planesInfo[k]}`);
-            }
+            console.log(`add planes count: ${armodule.getAddedPlanesCount()}`);
         }
         let offset = 0;
         for (let i = 0; i < armodule.getAddedPlanesCount(); i++) {
@@ -134,7 +140,10 @@ export class ARFeaturePlane extends ARFeature {
                     node.setWorldPosition(vec3);
                     node.setWorldRotation(planesInfo[offset + 8], planesInfo[offset + 9], 
                         planesInfo[offset + 10], planesInfo[offset + 11]);
-                    console.log(`add plane: w ${width}, h ${height}`);
+                    console.log(`add plane: ${index}`);
+                    for (let k = 1; k < 12; k++) {
+                        console.log(`${k} : ${planesInfo[k]}`);
+                    }
                 }
             }
         }
@@ -161,6 +170,7 @@ export class ARFeaturePlane extends ARFeature {
                     node.setWorldPosition(vec3);
                     node.setWorldRotation(planesInfo[offset + 8], planesInfo[offset + 9], 
                         planesInfo[offset + 10], planesInfo[offset + 11]);
+                    //console.log(`update plane: ${index}`);
                 }
             }
         }
