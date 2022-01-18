@@ -75,4 +75,24 @@ class ARModuleNative extends ARModule {
     getUpdatedPlanesCount () {
         return this._native.getUpdatedPlanesCount();
     }
+
+    tryHitAttachAnchor (planeIndex) {
+        return this._native.tryHitAttachAnchor(planeIndex);
+    }
+
+    getAnchorPose (anchorIndex) {
+        return this._native.getAnchorPose(anchorIndex);
+    }
+
+    tryHitTest (px, py) {
+        return this._native.tryHitTest(px, py);
+    }
+
+    getHitResult () {
+        return this._native.getHitResult();
+    }
+
+    getHitId () {
+        return this._native.getHitId();
+    }
 }

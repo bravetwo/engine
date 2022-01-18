@@ -97,6 +97,8 @@ export class ARSession extends Component {
     private _curFrame = 0;
     skipFrame = 3;
 
+    private anchorsMap = new Map<number, Array<Node>>();
+
     public onLoad() {
         if (BUILD) {
             const instance = ARModuleHelper.getInstance();
@@ -283,6 +285,47 @@ export class ARSession extends Component {
         if (this.featuresMap.has(fea.name)) {
             return this.featuresMap.get(fea.name) as Type;
         }
+    }
+
+    tryHitTest (xPx : number, yPx : number) : boolean {
+        const instance = ARModuleHelper.getInstance();
+        return instance.tryHitTest(xPx, yPx);
+    }
+
+    getHitResult () : number[] {
+        const instance = ARModuleHelper.getInstance();
+        return instance.getHitResult();
+    }
+
+    getHitId () : number {
+        const instance = ARModuleHelper.getInstance();
+        return instance.getHitId();
+    }
+
+    tryHitAttachAnchor (planeIndex : number, node : Node) {
+        const instance = ARModuleHelper.getInstance();
+        let tryResult = instance.tryHitAttachAnchor(planeIndex);
+        if(tryResult >= 0) {
+            if(this.anchorsMap.has(tryResult)) {
+                let nodes = this.anchorsMap.get(tryResult);
+                nodes?.push(node);
+            } else {
+                let nodes = new Array<Node>();
+                nodes.push(node);
+                this.anchorsMap.set(tryResult, nodes);
+            }
+        }
+    }
+
+    updateAnchors () {
+        const instance = ARModuleHelper.getInstance();
+        this.anchorsMap.forEach((nodes, index) => {
+            let pose = instance.getAnchorPose(index);
+            nodes.forEach((node) => {
+                node.setWorldPosition(pose[0], pose[1], pose[2]);
+                node.setWorldRotation(pose[3], pose[4], pose[5], pose[6]);
+            })
+        });
     }
 }
 
