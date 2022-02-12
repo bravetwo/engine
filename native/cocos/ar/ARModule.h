@@ -1,5 +1,5 @@
 /****************************************************************************
- Copyright (c) 2022 Xiamen Yaji Software Co., Ltd.
+ Copyright (c) 2021 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos.com
 
@@ -25,22 +25,56 @@
 
 #pragma once
 
-enum class CommonInsertPoint {
-    DIP_AR_BACKGROUND = 90,
-    DIP_BLOOM       = 350,
-    DIP_POSTPROCESS = 400,
+#include <memory>
+#include "base/Macros.h"
+
+namespace se {
+
+class Object;
+class HandleObject;
+
+} // namespace se
+
+namespace cc {
+namespace ar {
+
+class IARAPI;
+
+class CC_DLL ARModule final {
+public:
+    static ARModule* get();
+
+    ARModule();
+    ~ARModule();
+
+    void start();
+    void onResume();
+    void onPause();
+    void update();
+    bool checkStart();
+    int  getAPIState();
+
+    float* getCameraPose() const;
+    float* getCameraViewMatrix() const;
+    float* getCameraProjectionMatrix() const;
+    float* getCameraTexCoords() const;
+    void   setCameraTextureName(int id);
+    void*  getCameraTextureRef() const;
+
+    int    getAddedPlanesCount() const;
+    int    getRemovedPlanesCount() const;
+    int    getUpdatedPlanesCount() const;
+    void   updatePlanesInfo() const;
+    float* getAddedPlanesInfo() const;
+    int*   getRemovedPlanesInfo() const;
+    float* getUpdatedPlanesInfo() const;
+    int    getInfoLength() const;
+
+private:
+    std::unique_ptr<IARAPI> _impl;
 };
 
-enum class DeferredInsertPoint {
-    DIP_CLUSTER     = 80,
-    DIP_GBUFFER     = 100,
-    DIP_LIGHTING    = 200,
-    DIP_TRANSPARENT = 220,
-    DIP_SSPR        = 300,
-    DIP_INVALID
-};
+static std::unique_ptr<ARModule> arModuleInstance;
 
-enum class ForwardInsertPoint {
-    IP_FORWARD = 100,
-    IP_INVALID
-};
+} // namespace ar
+} // namespace cc

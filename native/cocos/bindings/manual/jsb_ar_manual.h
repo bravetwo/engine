@@ -1,5 +1,5 @@
 /****************************************************************************
- Copyright (c) 2022 Xiamen Yaji Software Co., Ltd.
+ Copyright (c) 2021 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos.com
 
@@ -25,22 +25,8 @@
 
 #pragma once
 
-enum class CommonInsertPoint {
-    DIP_AR_BACKGROUND = 90,
-    DIP_BLOOM       = 350,
-    DIP_POSTPROCESS = 400,
-};
+namespace se {
+    class Object;
+}
 
-enum class DeferredInsertPoint {
-    DIP_CLUSTER     = 80,
-    DIP_GBUFFER     = 100,
-    DIP_LIGHTING    = 200,
-    DIP_TRANSPARENT = 220,
-    DIP_SSPR        = 300,
-    DIP_INVALID
-};
-
-enum class ForwardInsertPoint {
-    IP_FORWARD = 100,
-    IP_INVALID
-};
+bool register_all_ar_manual(se::Object* obj); // NOLINT(readability-identifier-naming)

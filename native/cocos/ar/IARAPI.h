@@ -1,5 +1,5 @@
 /****************************************************************************
- Copyright (c) 2022 Xiamen Yaji Software Co., Ltd.
+ Copyright (c) 2021 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos.com
 
@@ -25,22 +25,46 @@
 
 #pragma once
 
-enum class CommonInsertPoint {
-    DIP_AR_BACKGROUND = 90,
-    DIP_BLOOM       = 350,
-    DIP_POSTPROCESS = 400,
+#include "base/Log.h"
+
+#define CC_ARAPI_DEBUG
+#ifdef CC_ARAPI_DEBUG
+    #define DLLOG(...) CC_LOG_DEBUG(__VA_ARGS__)
+#else
+    #define DLLOG(...) \
+        do {           \
+        } while (0)
+#endif
+
+namespace cc {
+namespace ar {
+
+using Pose      = std::array<float, 7>;
+using Matrix    = std::array<float, 16>;
+using TexCoords = std::array<float, 8>;
+
+class IARAPI {
+public:
+    virtual ~IARAPI()     = default;
+    virtual void start()  = 0;
+    virtual void resume() = 0;
+    virtual void pause()  = 0;
+    virtual void update()      = 0;
+    virtual int  getAPIState() = 0;
+
+    virtual float* getCameraPose()              = 0;
+    virtual float* getCameraViewMatrix()        = 0;
+    virtual float* getCameraProjectionMatrix()  = 0;
+    virtual float* getCameraTexCoords()         = 0;
+    virtual void   setCameraTextureName(int id) = 0;
+    virtual void*  getCameraTextureRef()        = 0;
+
+    virtual void   updatePlanesInfo()      = 0;
+    virtual float* getAddedPlanesInfo()    = 0;
+    virtual int*   getRemovedPlanesInfo()  = 0;
+    virtual float* getUpdatedPlanesInfo()  = 0;
+    virtual int    getInfoLength()         = 0;
 };
 
-enum class DeferredInsertPoint {
-    DIP_CLUSTER     = 80,
-    DIP_GBUFFER     = 100,
-    DIP_LIGHTING    = 200,
-    DIP_TRANSPARENT = 220,
-    DIP_SSPR        = 300,
-    DIP_INVALID
-};
-
-enum class ForwardInsertPoint {
-    IP_FORWARD = 100,
-    IP_INVALID
-};
+} // namespace ar
+} // namespace cc

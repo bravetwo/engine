@@ -1,5 +1,5 @@
 /****************************************************************************
- Copyright (c) 2022 Xiamen Yaji Software Co., Ltd.
+ Copyright (c) 2021 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos.com
 
@@ -25,22 +25,30 @@
 
 #pragma once
 
-enum class CommonInsertPoint {
-    DIP_AR_BACKGROUND = 90,
-    DIP_BLOOM       = 350,
-    DIP_POSTPROCESS = 400,
+#include "../RenderStage.h"
+
+namespace cc {
+namespace pipeline {
+
+class ARBackground;
+
+class CC_DLL ARStage : public RenderStage {
+public:
+    static const RenderStageInfo &getInitializeInfo();
+
+    ARStage();
+    ~ARStage() override;
+
+    bool initialize(const RenderStageInfo &info) override;
+    void activate(RenderPipeline *pipeline, RenderFlow *flow) override;
+    void destroy() override;
+    void render(scene::Camera *camera) override;
+
+private:
+    static RenderStageInfo initInfo;
+
+    ARBackground *_arBackground{nullptr};
 };
 
-enum class DeferredInsertPoint {
-    DIP_CLUSTER     = 80,
-    DIP_GBUFFER     = 100,
-    DIP_LIGHTING    = 200,
-    DIP_TRANSPARENT = 220,
-    DIP_SSPR        = 300,
-    DIP_INVALID
-};
-
-enum class ForwardInsertPoint {
-    IP_FORWARD = 100,
-    IP_INVALID
-};
+} // namespace pipeline
+} // namespace cc

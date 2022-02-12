@@ -1,5 +1,5 @@
 /****************************************************************************
- Copyright (c) 2022 Xiamen Yaji Software Co., Ltd.
+ Copyright (c) 2021 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos.com
 
@@ -25,22 +25,53 @@
 
 #pragma once
 
-enum class CommonInsertPoint {
-    DIP_AR_BACKGROUND = 90,
-    DIP_BLOOM       = 350,
-    DIP_POSTPROCESS = 400,
+#include <array>
+#include "ar/IARAPI.h"
+#include "base/threading/Semaphore.h"
+#include "renderer/gfx-agent/DeviceAgent.h"
+
+
+class _jobject;
+
+namespace cc {
+namespace ar {
+
+class ARAndroidAPIImpl : public IARAPI {
+public:
+    ARAndroidAPIImpl();
+    ~ARAndroidAPIImpl() override;
+    void start() override;
+    void resume() override;
+    void pause() override;
+    void update() override;
+    int  getAPIState() override;
+
+    float* getCameraPose() override;
+    float* getCameraViewMatrix() override;
+    float* getCameraProjectionMatrix() override;
+    float* getCameraTexCoords() override;
+    void   setCameraTextureName(int id) override;
+    void*  getCameraTextureRef() override;
+
+    void   updatePlanesInfo() override;
+    float* getAddedPlanesInfo() override;
+    int*   getRemovedPlanesInfo() override;
+    float* getUpdatedPlanesInfo() override;
+    int    getInfoLength() override;
+
+protected:
+    _jobject* _impl;
+
+    Pose*      _cameraPose{nullptr};
+    Matrix*    _viewMatrix{nullptr};
+    Matrix*    _projMatrix{nullptr};
+    TexCoords* _cameraTexCoords{nullptr};
+
+    float* _addedPlanesInfo{nullptr};
+    int*   _removedPlanesInfo{nullptr};
+    float* _updatedPlanesInfo{nullptr};
+    int    _infoLength{0};
 };
 
-enum class DeferredInsertPoint {
-    DIP_CLUSTER     = 80,
-    DIP_GBUFFER     = 100,
-    DIP_LIGHTING    = 200,
-    DIP_TRANSPARENT = 220,
-    DIP_SSPR        = 300,
-    DIP_INVALID
-};
-
-enum class ForwardInsertPoint {
-    IP_FORWARD = 100,
-    IP_INVALID
-};
+} // namespace ar
+} // namespace cc

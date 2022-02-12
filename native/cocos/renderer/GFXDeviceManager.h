@@ -118,9 +118,12 @@ private:
     static bool tryCreate(const DeviceInfo &info, Device **pDevice) {
         Device *device = CC_NEW(DeviceCtor);
 
+        // arcore & arengine currently only supports gles, session update requires gl context 
+        #if !(USE_AR_MODULE && CC_PLATFORM == CC_PLATFORM_ANDROID)
         if (DETACH_DEVICE_THREAD) {
             device = CC_NEW(gfx::DeviceAgent(device));
         }
+        #endif
 
         if (CC_DEBUG > 0 && !FORCE_DISABLE_VALIDATION || FORCE_ENABLE_VALIDATION) {
             device = CC_NEW(gfx::DeviceValidator(device));
