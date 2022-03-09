@@ -29,6 +29,7 @@ cc_set_if_undefined(USE_AR_MODULE            OFF)
 cc_set_if_undefined(USE_AR_AUTO              ON)
 cc_set_if_undefined(USE_AR_CORE              OFF)
 cc_set_if_undefined(USE_AR_ENGINE            OFF)
+cc_set_if_undefined(USE_SERVER_MODE          OFF)
 
 add_definitions()
 
@@ -45,6 +46,13 @@ elseif(MACOSX OR IOS)
     cc_set_if_undefined(CC_USE_VULKAN OFF)
     cc_set_if_undefined(CC_USE_GLES3 OFF)
     cc_set_if_undefined(CC_USE_GLES2 OFF)
+endif()
+
+if(USE_SERVER_MODE)
+    set(CC_USE_VULKAN OFF)
+    set(CC_USE_GLES3 OFF)
+    set(CC_USE_GLES2 OFF)
+    add_definitions(-DCC_SERVER_MODE)
 endif()
 
 if(USE_PHYSICS_PHYSX)
@@ -119,6 +127,7 @@ cc_inspect_values(
     USE_PHYSICS_PHYSX
     USE_JOB_SYSTEM_TBB
     USE_JOB_SYSTEM_TASKFLOW
+    USE_SERVER_MODE
 )
 
 ################################# external source code ################################
@@ -341,7 +350,11 @@ cocos_source_files(
 )
 
 ############ main
-if(WINDOWS)
+if(USE_SERVER_MODE)
+    cocos_source_files(
+        cocos/main/EmptyMain.cpp
+    )
+elseif(WINDOWS)
     cocos_source_files(
         cocos/main/main-win32.cpp
     )
@@ -371,7 +384,12 @@ cocos_source_files(
     cocos/platform/UniversalPlatform.cpp
     cocos/platform/UniversalPlatform.h
 )
-if(WINDOWS)
+if(USE_SERVER_MODE)
+    cocos_source_files(
+        cocos/platform/empty/EmptyPlatform.cpp
+        cocos/platform/empty/EmptyPlatform.h
+    )
+elseif(WINDOWS)
     cocos_source_files(
         cocos/platform/win32/WindowsPlatform.cpp
         cocos/platform/win32/WindowsPlatform.h
@@ -452,7 +470,12 @@ cocos_source_files(
     cocos/platform/interfaces/modules/canvas/ICanvasRenderingContext2D.cpp
     cocos/platform/interfaces/modules/canvas/ICanvasRenderingContext2D.h
 )
-if(WINDOWS)
+if(USE_SERVER_MODE)
+    cocos_source_files(
+        cocos/platform/empty/modules/CanvasRenderingContext2DDelegate.cpp
+        cocos/platform/empty/modules/CanvasRenderingContext2DDelegate.h
+    )
+elseif(WINDOWS)
     cocos_source_files(
         cocos/platform/win32/modules/CanvasRenderingContext2DDelegate.cpp
         cocos/platform/win32/modules/CanvasRenderingContext2DDelegate.h
@@ -481,7 +504,24 @@ endif()
 
 ############ platform : Interface implementation of windows
 
-if(WINDOWS)
+if(USE_SERVER_MODE)
+    cocos_source_files(
+        cocos/platform/empty/modules/Accelerometer.cpp
+        cocos/platform/empty/modules/Accelerometer.h
+        cocos/platform/empty/modules/Battery.cpp
+        cocos/platform/empty/modules/Battery.h
+        cocos/platform/empty/modules/Screen.cpp
+        cocos/platform/empty/modules/Screen.h
+        cocos/platform/empty/modules/Network.cpp
+        cocos/platform/empty/modules/Network.h
+        cocos/platform/empty/modules/Vibrate.cpp
+        cocos/platform/empty/modules/Vibrate.h
+        cocos/platform/empty/modules/System.cpp
+        cocos/platform/empty/modules/System.h
+        cocos/platform/empty/modules/SystemWindow.cpp
+        cocos/platform/empty/modules/SystemWindow.h
+    )
+elseif(WINDOWS)
     cocos_source_files(
         cocos/platform/win32/modules/Accelerometer.cpp
         cocos/platform/win32/modules/Accelerometer.h
@@ -516,7 +556,9 @@ elseif(ANDROID OR OHOS)
         cocos/platform/java/modules/SystemWindow.h
     )
 endif()
-if(ANDROID)
+if (USE_SERVER_MODE)
+#nothing
+elseif(ANDROID)
     cocos_source_files(
         cocos/platform/android/modules/Screen.cpp
         cocos/platform/android/modules/Screen.h
@@ -963,8 +1005,8 @@ cocos_source_files(
                  cocos/renderer/gfx-base/GFXSwapchain.h
                  cocos/renderer/gfx-base/GFXTexture.cpp
                  cocos/renderer/gfx-base/GFXTexture.h
-                 cocos/renderer/gfx-base/states/GFXGlobalBarrier.cpp
-                 cocos/renderer/gfx-base/states/GFXGlobalBarrier.h
+                 cocos/renderer/gfx-base/states/GFXGeneralBarrier.cpp
+                 cocos/renderer/gfx-base/states/GFXGeneralBarrier.h
                  cocos/renderer/gfx-base/states/GFXSampler.cpp
                  cocos/renderer/gfx-base/states/GFXSampler.h
                  cocos/renderer/gfx-base/states/GFXTextureBarrier.cpp
@@ -1282,8 +1324,8 @@ if(CC_USE_GLES3)
                      cocos/renderer/gfx-gles3/GLES3Texture.h
                      cocos/renderer/gfx-gles3/GLES3Wrangler.cpp
                      cocos/renderer/gfx-gles3/GLES3Wrangler.h
-                     cocos/renderer/gfx-gles3/states/GLES3GlobalBarrier.cpp
-                     cocos/renderer/gfx-gles3/states/GLES3GlobalBarrier.h
+                     cocos/renderer/gfx-gles3/states/GLES3GeneralBarrier.cpp
+                     cocos/renderer/gfx-gles3/states/GLES3GeneralBarrier.h
                      cocos/renderer/gfx-gles3/states/GLES3Sampler.cpp
                      cocos/renderer/gfx-gles3/states/GLES3Sampler.h
     )
@@ -1380,8 +1422,8 @@ if(CC_USE_VULKAN)
                      cocos/renderer/gfx-vulkan/VKUtils.h
                      cocos/renderer/gfx-vulkan/volk.c
                      cocos/renderer/gfx-vulkan/volk.h
-                     cocos/renderer/gfx-vulkan/states/VKGlobalBarrier.cpp
-                     cocos/renderer/gfx-vulkan/states/VKGlobalBarrier.h
+                     cocos/renderer/gfx-vulkan/states/VKGeneralBarrier.cpp
+                     cocos/renderer/gfx-vulkan/states/VKGeneralBarrier.h
                      cocos/renderer/gfx-vulkan/states/VKSampler.cpp
                      cocos/renderer/gfx-vulkan/states/VKSampler.h
                      cocos/renderer/gfx-vulkan/states/VKTextureBarrier.cpp
@@ -2433,6 +2475,7 @@ if(ANDROID)
         ${LIB_EGL}
         ${LIB_GLESv2}
         GLESv2
+        jnigraphics
         ${CC_EXTERNAL_LIBS}
     )
 endif()
@@ -2442,6 +2485,7 @@ if(OHOS)
         EGL
         GLESv3
         zgraphic.z
+        image_pixelmap.z
         rawfile.z
         z
         OpenSLES
@@ -2520,8 +2564,12 @@ if(QNX)
         ${CC_EXTERNAL_LIBS}
     )
 elseif(LINUX)
+    set(LINUX_GRAPHIC_LIBS "")
+    if(NOT USE_SERVER_MODE)
+        list(APPEND LINUX_GRAPHIC_LIBS X11)
+    endif()
     target_link_libraries(cocos2d PUBLIC
-        X11
+        ${LINUX_GRAPHIC_LIBS}
         ${CC_EXTERNAL_LIBS}
     )
 endif()
