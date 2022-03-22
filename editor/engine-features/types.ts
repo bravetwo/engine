@@ -34,7 +34,9 @@ export type EngineFeature =
     | 'ar-auto'
     | 'ar-core'
     | 'ar-engine'
-    | 'marionette';
+    | 'marionette'
+    | 'animation'
+    | 'skeletal-animation';
 export interface ModuleRenderConfig {
     $schema?: string;
 

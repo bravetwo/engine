@@ -92,8 +92,10 @@ public class CocosHelper {
     static class LockedTaskQ {
         private final Object readMtx = new Object();
         private Queue<Runnable> sTaskQ = new LinkedList<>();
-        public synchronized void addTask(Runnable runnable) {
-            sTaskQ.add(runnable);
+        public void addTask(Runnable runnable) {
+            synchronized (readMtx) {
+                sTaskQ.add(runnable);
+            }
         }
         public void runTasks(){
             Queue<Runnable> tmp;
@@ -342,6 +344,8 @@ public class CocosHelper {
             e.printStackTrace();
         }
     }
+
+    public static Activity getActivity() {return sActivity;}
 
     public static float[] getSafeArea() {
         if (android.os.Build.VERSION.SDK_INT >= 28) {

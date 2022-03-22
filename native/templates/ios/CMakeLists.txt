@@ -26,6 +26,10 @@ set(UI_RESOURCES
     ${CMAKE_CURRENT_LIST_DIR}/Base.lproj/LaunchScreen.storyboard
 )
 
+list(APPEND PROJ_SOURCES
+    ${UI_RESOURCES}
+)
+
 if(NOT CUSTOM_COPY_RESOURCE_HOOK)
     include_resources(${RES_DIR}/assets)
 endif()
@@ -36,6 +40,11 @@ source_group(TREE ${CMAKE_CURRENT_LIST_DIR} PREFIX "Source Files" FILES ${PROJ_S
 source_group(TREE ${CMAKE_CURRENT_LIST_DIR}/../common PREFIX "Source Files" FILES ${PROJ_COMMON_SOURCES})
 
 target_link_libraries(${LIB_NAME} cocos2d)
+
+target_compile_definitions(${LIB_NAME} PRIVATE
+    GAME_NAME="${APP_NAME}"
+)
+
 target_include_directories(${LIB_NAME} PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/../common/Classes
     ${CMAKE_CURRENT_LIST_DIR}/service
@@ -61,9 +70,3 @@ set_target_properties(${LIB_NAME} PROPERTIES
     XCODE_ATTRIBUTE_SKIP_INSTALL NO
     XCODE_ATTRIBUTE_INSTALL_PATH "$(LOCAL_APPS_DIR)"
 )
-
-if(CUSTOM_COPY_RESOURCE_HOOK)
-add_custom_command(TARGET ${LIB_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${RES_DIR}/assets $<TARGET_FILE_DIR:${LIB_NAME}>
-    )
-endif()

@@ -50,6 +50,12 @@ CommandBufferAgent::CommandBufferAgent(CommandBuffer *actor)
 }
 
 void CommandBufferAgent::flushCommands(uint32_t count, CommandBufferAgent *const *cmdBuffs, bool multiThreaded) {
+    // don't even touch the job system if we are only recording sequentially
+    if (count == 1) {
+        cmdBuffs[0]->getMessageQueue()->flushMessages();
+        return;
+    }
+
     uint32_t jobThreadCount    = JobSystem::getInstance()->threadCount();
     uint32_t workForThisThread = (count - 1) / jobThreadCount + 1; // ceil(count / jobThreadCount)
 
@@ -416,7 +422,7 @@ void CommandBufferAgent::dispatch(const DispatchInfo &info) {
         });
 }
 
-void CommandBufferAgent::pipelineBarrier(const GlobalBarrier *barrier, const TextureBarrier *const *textureBarriers, const Texture *const *textures, uint32_t textureBarrierCount) {
+void CommandBufferAgent::pipelineBarrier(const GeneralBarrier *barrier, const TextureBarrier *const *textureBarriers, const Texture *const *textures, uint32_t textureBarrierCount) {
     TextureBarrier **actorTextureBarriers = nullptr;
     Texture **       actorTextures        = nullptr;
 
