@@ -15,7 +15,7 @@ buildscript {
 }
 
 ext {
-    XR_OEM_PICO = false
+    XR_OEM_PICO = true
 }
 
 apply from: NATIVE_DIR +"/build.gradle"
