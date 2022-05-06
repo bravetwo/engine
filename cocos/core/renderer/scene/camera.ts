@@ -94,6 +94,12 @@ export enum CameraShutter {
     D4000,
 }
 
+export enum CameraType {
+    MAIN = -1,
+    LEFT_CAMERA = 0,
+    RIGHT_CAMERA = 1
+}
+
 const FSTOPS: number[] = [1.8, 2.0, 2.2, 2.5, 2.8, 3.2, 3.5, 4.0, 4.5, 5.0, 5.6, 6.3, 7.1, 8.0, 9.0, 10.0, 11.0, 13.0, 14.0, 16.0, 18.0, 20.0, 22.0];
 const SHUTTERS: number[] = [1.0, 1.0 / 2.0, 1.0 / 4.0, 1.0 / 8.0, 1.0 / 15.0, 1.0 / 30.0, 1.0 / 60.0, 1.0 / 125.0,
     1.0 / 250.0, 1.0 / 500.0, 1.0 / 1000.0, 1.0 / 2000.0, 1.0 / 4000.0];
@@ -107,6 +113,8 @@ export interface ICameraInfo {
     window?: RenderWindow | null;
     priority: number;
     pipeline?: string;
+    cameraType: CameraType;
+    isHMD: boolean;
 }
 
 const v_a = new Vec3();
@@ -163,6 +171,8 @@ export class Camera {
     private _exposure = 0;
     private _clearStencil = 0;
     private _geometryRenderer = legacyCC.internal.GeometryRenderer ? new GeometryRenderer() : null;
+    private _cameraType: CameraType = CameraType.MAIN;
+    private _isHMD = false;
 
     constructor (device: Device) {
         this._device = device;
@@ -209,6 +219,8 @@ export class Camera {
     }
 
     public initialize (info: ICameraInfo) {
+        this._isHMD = info.isHMD;
+        this._cameraType = info.cameraType;
         this.node = info.node;
         this._width = 1;
         this._height = 1;
@@ -271,7 +283,7 @@ export class Camera {
         }
     }
 
-    public update (forceUpdate = false) { // for lazy eval situations like the in-editor preview
+    public update (forceUpdate = false, xrEye = 0) { // for lazy eval situations like the in-editor preview
         if (!this._node) return;
 
         let viewProjDirty = false;
@@ -624,6 +636,22 @@ export class Camera {
 
     get geometryRenderer () {
         return this._geometryRenderer;
+    }
+
+    get cameraType () : CameraType {
+        return this._cameraType;
+    }
+
+    set cameraType (type: CameraType) {
+        this._cameraType = type;
+    }
+
+    get isHMD () : boolean {
+        return this._isHMD;
+    }
+
+    set isHMD (isHMD: boolean) {
+        this._isHMD = isHMD;
     }
 
     public changeTargetWindow (window: RenderWindow | null = null) {

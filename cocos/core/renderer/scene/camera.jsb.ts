@@ -87,6 +87,12 @@ export enum CameraShutter {
     D4000,
 }
 
+export enum CameraType {
+    MAIN = -1,
+    LEFT_CAMERA = 0,
+    RIGHT_CAMERA = 1
+}
+
 export interface ICameraInfo {
     name: string;
     node: Node;
@@ -95,6 +101,8 @@ export interface ICameraInfo {
     window?: RenderWindow | null;
     priority: number;
     pipeline?: string;
+    cameraType: CameraType;
+    isHMD: boolean;
 }
 
 export const SKYBOX_FLAG = ClearFlagBit.STENCIL << 1;

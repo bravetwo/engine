@@ -950,4 +950,9 @@ module.exports = {
         maxPos: '世界包围盒最大顶点的坐标',
         depth: '八叉树深度',
     },
+    xr: {
+        mrsight: {
+            layer: '图层'
+        },
+    },
 };

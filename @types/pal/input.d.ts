@@ -65,4 +65,15 @@ declare module 'pal/input' {
          */
         public on (eventType: import('cocos/input/types/event-enum').InputEventType, callback: AccelerometerCallback, target?: any);
     }
+
+    type HandleCallback = (res: import('cocos/input/types').EventHandle) => void;
+    /**
+     * Class designed for handle input.
+     */
+    export class HandleInputSource {
+        /**
+         * Register the handle event callback.
+         */
+        public on (eventType: import('cocos/input/types/event-enum').InputEventType, callback: HandleCallback, target?: any);
+    }
 }

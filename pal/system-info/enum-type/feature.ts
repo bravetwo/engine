@@ -56,4 +56,9 @@ export enum Feature {
      * @zh 是否支持派发 EventAcceleration。
      */
     EVENT_ACCELEROMETER = 'EVENT_ACCELEROMETER',
+    /**
+     * @en Feature to support dispatching EventHandle.
+     * @zh 是否支持派发 EventHandle
+     */
+    EVENT_HANDLE = 'EVENT_HANDLE',
 }
