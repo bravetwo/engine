@@ -45,6 +45,9 @@
 #include "states/GFXGeneralBarrier.h"
 #include "states/GFXSampler.h"
 #include "states/GFXTextureBarrier.h"
+#if USE_XR
+#include "Xr.h"
+#endif
 
 namespace cc {
 namespace gfx {
@@ -72,6 +75,10 @@ public:
     inline Queue *createQueue(const QueueInfo &info);
     inline QueryPool *createQueryPool(const QueryPoolInfo &info);
     inline Swapchain *createSwapchain(const SwapchainInfo &info);
+#if USE_XR
+    inline Swapchain *createSwapchainWithXr(const SwapchainInfo &info);
+    inline const ccstd::vector<Swapchain *> &getSwapchains() { return _swapchains; }
+#endif
     inline Buffer *createBuffer(const BufferInfo &info);
     inline Buffer *createBuffer(const BufferViewInfo &info);
     inline Texture *createTexture(const TextureInfo &info);
@@ -210,6 +217,7 @@ QueryPool *Device::createQueryPool(const QueryPoolInfo &info) {
 }
 
 Swapchain *Device::createSwapchain(const SwapchainInfo &info) {
+#if !USE_XR
     Swapchain *res = createSwapchain();
     res->initialize(info);
     _swapchains.push_back(res);
@@ -221,7 +229,37 @@ Swapchain *Device::createSwapchain(const SwapchainInfo &info) {
     setRendererAvailable(true);
 #endif
     return res;
+#else
+    return createSwapchainWithXr(info);
+#endif
 }
+
+#if USE_XR
+Swapchain *Device::createSwapchainWithXr(const SwapchainInfo &info) {
+    auto cocosXrSwapchains = xr::XrEntrance::getInstance()->GetCocosXrSwapchain();
+    for (const auto &cocosXrSwapchain : cocosXrSwapchains) {
+        Swapchain *res = createSwapchain();
+        SwapchainInfo swapchainInfo;
+        swapchainInfo.copy(info);
+#if !XR_OEM_HUAWEIVR
+        swapchainInfo.windowHandle = cocosXrSwapchain.handle;
+#endif
+        swapchainInfo.width = cocosXrSwapchain.width;
+        swapchainInfo.height = cocosXrSwapchain.height;
+        res->initialize(swapchainInfo);
+        _swapchains.push_back(res);
+    }
+#if CC_PLATFORM == CC_PLATFORM_ANDROID || CC_PLATFORM == CC_PLATFORM_OHOS
+    if (_swapchains.at(0)->getWindowHandle()) {
+        setRendererAvailable(true);
+    }
+#else
+    setRendererAvailable(true);
+#endif
+
+    return _swapchains.at(0);
+}
+#endif
 
 Buffer *Device::createBuffer(const BufferInfo &info) {
     Buffer *res = createBuffer();

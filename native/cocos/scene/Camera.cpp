@@ -31,6 +31,9 @@
 #include "renderer/gfx-base/GFXDevice.h"
 #include "renderer/pipeline/Define.h"
 #include "renderer/pipeline/GeometryRenderer.h"
+#if USE_XR
+#include "Xr.h"
+#endif
 
 namespace cc {
 namespace scene {
@@ -85,6 +88,8 @@ Camera::Camera(gfx::Device *device)
 }
 
 bool Camera::initialize(const ICameraInfo &info) {
+    _isHMD = info.isHMD;
+    _cameraType = info.cameraType;
     _node = info.node;
     _width = 1.F;
     _height = 1.F;
@@ -149,7 +154,7 @@ void Camera::syncCameraEditor(const Camera &camera) {
 #endif
 }
 
-void Camera::update(bool forceUpdate /*false*/) {
+void Camera::update(bool forceUpdate /*false*/, int xrEye /*0*/) {
     if (!_node) {
         return;
     }
@@ -173,8 +178,17 @@ void Camera::update(bool forceUpdate /*false*/) {
         const float projectionSignY = _device->getCapabilities().clipSpaceSignY;
         // Only for rendertexture processing
         if (_proj == CameraProjection::PERSPECTIVE) {
+#if !USE_XR
             Mat4::createPerspective(_fov, _aspect, _nearClip, _farClip,
                                     _fovAxis == CameraFOVAxis::VERTICAL, _device->getCapabilities().clipSpaceMinZ, projectionSignY, static_cast<int>(orientation), &_matProj);
+#else
+            const auto &projFloat = xr::XrEntrance::getInstance()->ComputeViewProjection(xrEye, _nearClip, _farClip, 1.f);
+            int i = 0;
+            for (auto value : projFloat) {
+                _matProj.m[i] = value;
+                i++;
+            }
+#endif
         } else {
             const float x = _orthoHeight * _aspect;
             const float y = _orthoHeight;
@@ -194,11 +208,30 @@ void Camera::update(bool forceUpdate /*false*/) {
         _frustum->update(_matViewProj, _matViewProjInv);
     }
 }
+
 void Camera::changeTargetWindow(RenderWindow *window) {
     if (_window) {
         _window->detachCamera(this);
     }
+#if !USE_XR
     RenderWindow *win = window ? window : Root::getInstance()->getMainWindow();
+    attachCamera(win);
+#else
+    if (_cameraType == CameraType::MAIN) {
+        auto windows = Root::getInstance()->getWindows();
+        for (const auto &win : windows) {
+            attachCamera(win);
+        }
+    } else {
+        if (_cameraType < Root::getInstance()->getWindows().size()) {
+            const auto &win = Root::getInstance()->getWindows().at(_cameraType);
+            attachCamera(win);
+        }
+    }
+#endif
+}
+
+void Camera::attachCamera(RenderWindow *win) {
     if (win) {
         win->attachCamera(this);
         _window = win;
@@ -213,6 +246,60 @@ void Camera::changeTargetWindow(RenderWindow *window) {
         }
     }
 }
+
+#if USE_XR
+ void Camera::changeTargetWindowByXrEye(int xrEye) {
+     if (_proj == CameraProjection::PERSPECTIVE) {
+         _isProjDirty = true;
+     }
+     if (_cameraType == CameraType::MAIN) {
+         auto win = Root::getInstance()->getWindows().at(xrEye);
+         if (win) {
+             _window = win;
+         }
+     }
+ }
+
+ void Camera::getOriginMatrix() {
+     if (!_node) {
+         return;
+     }
+     Mat4::fromRTS(_node->getRotation(), _node->getPosition(), _node->getScale(), &_matOrigin);
+ }
+
+ void Camera::dependUpdateData() {
+     if (!_node) {
+         return;
+     }
+
+     this->_node->setMatrix(_matOrigin);
+     // view matrix
+     _matView = this->_node->getWorldMatrix().getInversed();
+     _forward.set(-_matView.m[2], -_matView.m[6], -_matView.m[10]);
+
+     _position.set(_node->getWorldPosition());
+
+     // projection matrix
+     const float projectionSignY = _device->getCapabilities().clipSpaceSignY;
+     // Only for rendertexture processing
+     if (_proj == CameraProjection::PERSPECTIVE) {
+         Mat4::createPerspective(_fov, _aspect, _nearClip, _farClip,
+                                 _fovAxis == CameraFOVAxis::VERTICAL, _device->getCapabilities().clipSpaceMinZ, projectionSignY, static_cast<int>(_curTransform), &_matProj);
+     } else {
+         const float x = _orthoHeight * _aspect;
+         const float y = _orthoHeight;
+         Mat4::createOrthographicOffCenter(-x, x, -y, y, _nearClip, _farClip,
+                                           _device->getCapabilities().clipSpaceMinZ, projectionSignY,
+                                           static_cast<int>(_curTransform), &_matProj);
+     }
+     _matProjInv   = _matProj.getInversed();
+
+     // view-projection
+     Mat4::multiply(_matProj, _matView, &_matViewProj);
+     _matViewProjInv = _matViewProj.getInversed();
+     _frustum->update(_matViewProj, _matViewProjInv);
+ }
+#endif
 
 void Camera::detachCamera() {
     if (_window) {

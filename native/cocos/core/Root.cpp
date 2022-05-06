@@ -39,6 +39,9 @@
 #include "scene/DirectionalLight.h"
 #include "scene/DrawBatch2D.h"
 #include "scene/SpotLight.h"
+#if USE_XR
+#include "Xr.h"
+#endif
 
 namespace cc {
 
@@ -68,7 +71,13 @@ Root::~Root() {
 
 void Root::initialize(gfx::Swapchain *swapchain) {
     _swapchain = swapchain;
+    _allCameraList.clear();
 
+#if USE_XR
+    // TODO Xr _mainWindow _curWindow _swapchain invalid
+    auto swapchains = gfx::Device::getInstance()->getSwapchains();
+    for (const auto &swapchain : swapchains) {
+#endif
     gfx::RenderPassInfo renderPassInfo;
 
     gfx::ColorAttachment colorAttachment;
@@ -89,7 +98,9 @@ void Root::initialize(gfx::Swapchain *swapchain) {
     _mainWindow = createWindow(info);
 
     _curWindow = _mainWindow;
-
+#if USE_XR
+    }
+#endif
     // TODO(minggo):
     // return Promise.resolve(builtinResMgr.initBuiltinRes(this._device));
 }
@@ -270,6 +281,17 @@ void Root::frameMove(float deltaTime, int32_t totalFrames) {
         _fpsTime = 0.0;
     }
 
+#if USE_XR
+    if (xr::XrEntrance::getInstance()->BeginRenderFrame()) {
+        for (auto *camera : _allCameraList) {
+            if (camera->isHMD()) {
+                camera->getOriginMatrix();
+            }
+        }
+        auto swapchains = gfx::Device::getInstance()->getSwapchains();
+        for (int xrEye = 0; xrEye < 2; xrEye++) {
+            xr::XrEntrance::getInstance()->renderLoopStart(xrEye);
+#endif
     for (const auto &scene : _scenes) {
         scene->removeBatches();
     }
@@ -283,13 +305,22 @@ void Root::frameMove(float deltaTime, int32_t totalFrames) {
 
     //
     _cameraList.clear();
+#if !USE_XR
     for (const auto &window : _windows) {
         window->extractRenderCameras(_cameraList);
     }
+#else
+            _windows[xrEye]->extractRenderCameras(_cameraList, xrEye);
+            xr::XrEntrance::getInstance()->ByBeforeRenderFrame(xrEye);
+#endif
 
     if (_pipelineRuntime != nullptr && !_cameraList.empty()) {
         _swapchains.clear();
+#if !USE_XR
         _swapchains.emplace_back(_swapchain);
+#else
+        _swapchains.emplace_back(swapchains[xrEye]);
+#endif
         _device->acquire(_swapchains);
         // NOTE: c++ doesn't have a Director, so totalFrames need to be set from JS
         uint32_t stamp = totalFrames;
@@ -316,6 +347,19 @@ void Root::frameMove(float deltaTime, int32_t totalFrames) {
 
     _eventProcessor->emit(EventTypesToJS::ROOT_BATCH2D_RESET, this);
     // cjh TODO:    if (this._batcher) this._batcher.reset();
+#if USE_XR
+            xr::XrEntrance::getInstance()->renderLoopEnd(xrEye);
+            xr::XrEntrance::getInstance()->ByAfterRenderFrame(xrEye);
+        }
+        xr::XrEntrance::getInstance()->frameEnd();
+        xr::XrEntrance::getInstance()->EndRenderFrame();
+        for (auto *camera : _allCameraList) {
+            if (camera->isHMD()) {
+                camera->dependUpdateData();
+            }
+        }
+    }
+#endif
 }
 
 scene::RenderWindow *Root::createWindow(scene::IRenderWindowInfo &info) {
@@ -384,8 +428,10 @@ void Root::destroyLight(scene::Light *light) { // NOLINT(readability-convert-mem
     light->destroy();
 }
 
-scene::Camera *Root::createCamera() const {
-    return ccnew scene::Camera(_device);
+scene::Camera *Root::createCamera() {
+    auto *camera = ccnew scene::Camera(_device);
+    _allCameraList.emplace_back(camera);
+    return camera;
 }
 
 void Root::destroyScenes() {

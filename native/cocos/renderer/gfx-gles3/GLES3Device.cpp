@@ -47,9 +47,19 @@
 #include "states/GLES3GeneralBarrier.h"
 #include "states/GLES3Sampler.h"
 
+#if USE_XR
+#include "Xr.h"
+#include "platform/java/jni/JniHelper.h"
+#endif
+
 // when capturing GLES commands (RENDERDOC_HOOK_EGL=1, default value)
 // renderdoc doesn't support this extension during replay
 #define ALLOW_MULTISAMPLED_RENDER_TO_TEXTURE_ON_DESKTOP 0
+
+#if USE_XR
+#define ENABLE_MSAA 1
+#define MSAA_SAMPLES 4
+#endif
 
 namespace cc {
 namespace gfx {
@@ -72,6 +82,9 @@ GLES3Device::~GLES3Device() {
 }
 
 bool GLES3Device::doInit(const DeviceInfo & /*info*/) {
+#if USE_XR && !XR_OEM_PICO
+    xr::XrEntrance::getInstance()->createXrInstance("OpenGLES", JniHelper::getJavaVM(), JniHelper::getActivity());
+#endif
     _gpuContext = ccnew GLES3GPUContext;
     _gpuStateCache = ccnew GLES3GPUStateCache;
     _gpuFramebufferHub = ccnew GLES3GPUFramebufferHub;
@@ -224,6 +237,17 @@ bool GLES3Device::doInit(const DeviceInfo & /*info*/) {
     CC_LOG_INFO("COMPRESSED_FORMATS: %s", compressedFmts.c_str());
     CC_LOG_INFO("FRAMEBUFFER_FETCH: %s", fbfLevelStr.c_str());
 
+#if USE_XR
+    /* Query maximum number of samples for all formats. */
+    GLint maxSamples = 0;
+    glGetIntegerv(GL_MAX_SAMPLES, &maxSamples);
+    CC_LOG_INFO("GL MAX_SAMPLES = %d", maxSamples);
+
+    xr::XrEntrance::getInstance()->SetOpenGLESConfig(GLES3Device::getInstance()->context()->eglDisplay,
+        GLES3Device::getInstance()->context()->eglConfig, GLES3Device::getInstance()->context()->eglDefaultContext);
+    xr::XrEntrance::getInstance()->initXrSession();
+#endif
+
     return true;
 }
 
@@ -242,11 +266,92 @@ void GLES3Device::doDestroy() {
     CC_SAFE_DESTROY_AND_DELETE(_gpuContext)
 }
 
+#if USE_XR && !XR_OEM_HUAWEIVR
+std::map<uint32_t, uint32_t> m_colorToDepthMap;
+uint32_t GetDepthTexture(uint32_t colorTexture) {
+    // If a depth-stencil view has already been created for this back-buffer, use it.
+    auto depthBufferIt = m_colorToDepthMap.find(colorTexture);
+    if (depthBufferIt != m_colorToDepthMap.end()) {
+        return depthBufferIt->second;
+    }
+
+    // This back-buffer has no corresponding depth-stencil texture, so create one with matching dimensions.
+
+    GLint width;
+    GLint height;
+    glBindTexture(GL_TEXTURE_2D, colorTexture);
+    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width);
+    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &height);
+
+    uint32_t depthTexture;
+#if ENABLE_MSAA
+    // Create multisampled depth buffer.
+    glGenRenderbuffers(1, &depthTexture);
+    glBindRenderbuffer(GL_RENDERBUFFER, depthTexture);
+    glRenderbufferStorageMultisampleEXT(
+            GL_RENDERBUFFER, MSAA_SAMPLES, GL_DEPTH_COMPONENT24, width, height);
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+#else
+    glGenTextures(1, &depthTexture);
+    glBindTexture(GL_TEXTURE_2D, depthTexture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, width, height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, nullptr);
+#endif
+
+    m_colorToDepthMap.insert(std::make_pair(colorTexture, depthTexture));
+
+    return depthTexture;
+}
+#endif
+
 void GLES3Device::acquire(Swapchain *const *swapchains, uint32_t count) {
     if (_onAcquire) _onAcquire->execute();
 
     _swapchains.clear();
+#if USE_XR
+    #if XR_OEM_HUAWEIVR
+        stateCache()->glTextures[stateCache()->texUint] = 0;
+        glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, reinterpret_cast<GLint *>(&_xrFramebuffer));
+        stateCache()->glDrawFramebuffer = _xrFramebuffer;
+    #else
+        if (_xrFramebuffer == 0) {
+            GL_CHECK(glGenFramebuffers(1, &_xrFramebuffer));
+        }
+        if (stateCache()->glDrawFramebuffer != _xrFramebuffer) {
+            GL_CHECK(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _xrFramebuffer));
+            stateCache()->glDrawFramebuffer = _xrFramebuffer;
+        }
+    #endif
+#endif
+
     for (uint32_t i = 0; i < count; ++i) {
+#if USE_XR
+    #if !XR_OEM_HUAWEIVR
+        uint32_t index = xr::XrEntrance::getInstance()->GetSwapchainImageIndexsByHandle(swapchains[i]->getWindowHandle());
+        const uint32_t depthTexture = GetDepthTexture(index);
+        #if ENABLE_MSAA
+            glFramebufferTexture2DMultisampleEXT(
+                        GL_FRAMEBUFFER,
+                        GL_COLOR_ATTACHMENT0,
+                        GL_TEXTURE_2D,
+                        index,
+                        0,
+                        MSAA_SAMPLES);
+            glFramebufferRenderbuffer(
+                        GL_FRAMEBUFFER,
+                        GL_DEPTH_ATTACHMENT,
+                        GL_RENDERBUFFER,
+                        depthTexture);
+        #else
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTexture, 0);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, index, 0);
+        #endif
+    #endif
+        static_cast<GLES3Swapchain *>(swapchains[i])->gpuSwapchain()->glFramebuffer = _xrFramebuffer;
+#endif
         _swapchains.push_back(static_cast<GLES3Swapchain *>(swapchains[i])->gpuSwapchain());
     }
 }

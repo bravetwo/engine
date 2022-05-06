@@ -59,6 +59,10 @@
     #include "cocos/bindings/auto/jsb_audio_auto.h"
 #endif
 
+#if USE_XR
+    #include "cocos/bindings/auto/jsb_xr_auto.h"
+#endif
+
 #if (CC_PLATFORM == CC_PLATFORM_MAC_IOS || CC_PLATFORM == CC_PLATFORM_MAC_OSX)
     #include "cocos/bindings/manual/JavaScriptObjCBridge.h"
 #endif
@@ -147,6 +151,10 @@ bool jsb_register_all_modules() {
 
 #if CC_USE_AUDIO
     se->addRegisterCallback(register_all_audio);
+#endif
+
+#if USE_XR
+    se->addRegisterCallback(register_all_xr);
 #endif
 
 #if CC_USE_SOCKET

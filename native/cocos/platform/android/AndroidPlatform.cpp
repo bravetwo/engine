@@ -41,6 +41,9 @@
 #include "modules/System.h"
 #include "java/jni/JniHelper.h"
 #include "game-activity/native_app_glue/android_native_app_glue.h"
+#if USE_XR
+#include "Xr.h"
+#endif
 
 #include "bindings/event/EventDispatcher.h"
 
@@ -414,6 +417,14 @@ AndroidPlatform::~AndroidPlatform() {
 }
 
 int AndroidPlatform::init() {
+#if USE_XR
+    xr::XrEntrance::getInstance()->setEventsCallback(&EventDispatcher::dispatchHandleEvent);
+#if XR_OEM_PICO
+    // Prevent OEM from not calling AttachCurrentThread before using env.
+    JniHelper::getEnv();
+    xr::XrEntrance::getInstance()->createXrInstance("OpenGLES", JniHelper::getJavaVM(), JniHelper::getActivity());
+#endif
+#endif
     _inputProxy = new GameInputProxy(this);
     registerInterface(std::make_shared<Accelerometer>());
     registerInterface(std::make_shared<Battery>());
@@ -462,6 +473,23 @@ int32_t AndroidPlatform::loop() {
                 return 0;
             }
         }
+#if USE_XR
+        if(!xr::XrEntrance::getInstance()->isCreatedXRinstance())
+        {
+            continue;
+        }
+
+        if (xr::XrEntrance::getInstance()->PollEvents()) {
+            // TODO XR exitRenderLoop
+            continue;
+        }
+
+        if (!xr::XrEntrance::getInstance()->IsSessionRunning()) {
+            continue;
+        }
+
+        xr::XrEntrance::getInstance()->PollActions();
+#endif
         _inputProxy->handleInput();
         runTask();
 

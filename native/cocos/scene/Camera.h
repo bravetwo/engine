@@ -114,6 +114,12 @@ enum class CameraShutter {
     D4000,
 };
 
+enum CameraType {
+    MAIN = -1,
+    LEFT_CAMERA = 0,
+    RIGHT_CAMERA = 1
+};
+
 struct ICameraInfo {
     ccstd::string name;
     Node *node{nullptr};
@@ -122,6 +128,8 @@ struct ICameraInfo {
     RenderWindow *window{nullptr};
     uint32_t priority{0};
     cc::optional<ccstd::string> pipeline;
+    CameraType                  cameraType;
+    bool                        isHMD;
 };
 
 class Camera : public RefCounted {
@@ -152,8 +160,14 @@ public:
     void resize(uint32_t width, uint32_t height);
     void setFixedSize(uint32_t width, uint32_t height);
     void syncCameraEditor(const Camera &camera);
-    void update(bool forceUpdate = false); // for lazy eval situations like the in-editor preview
+    void update(bool forceUpdate = false, int xrEye = 0); // for lazy eval situations like the in-editor preview
     void changeTargetWindow(RenderWindow *window);
+    void attachCamera(RenderWindow *window);
+#if USE_XR
+    void changeTargetWindowByXrEye(int xrEye);
+    void getOriginMatrix();
+    void dependUpdateData();
+#endif
 
     /**
      * transform a screen position (in oriented space) to a world space ray
@@ -316,6 +330,12 @@ public:
 
     void detachCamera();
 
+    inline const CameraType &getCameraType() const { return _cameraType; }
+    inline void              setCameraType(const CameraType &type) { _cameraType = type; }
+
+    inline bool isHMD() const { return _isHMD; }
+    inline void setHMD(bool val) { _isHMD = val; }
+
 protected:
     void setExposure(float ev100);
 
@@ -363,6 +383,11 @@ private:
     uint32_t _height{0};
     gfx::ClearFlagBit _clearFlag{gfx::ClearFlagBit::NONE};
     float _clearDepth{1.0F};
+    CameraType            _cameraType = CameraType::MAIN;
+    bool                  _isHMD = false;
+#if USE_XR
+    Mat4                  _matOrigin;
+#endif
 
     IntrusivePtr<pipeline::GeometryRenderer> _geometryRenderer;
 

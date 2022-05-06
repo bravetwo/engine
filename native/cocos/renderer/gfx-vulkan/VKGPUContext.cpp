@@ -25,6 +25,10 @@
 
 #include "VKGPUObjects.h"
 
+#if USE_XR
+#include "Xr.h"
+#endif
+
 namespace cc {
 namespace gfx {
 
@@ -240,11 +244,20 @@ bool CCVKGPUContext::initialize() {
 #endif
 
     // Create the Vulkan instance
+#if USE_XR
+    vkInstance = xr::XrEntrance::getInstance()->XrVkCreateInstance(instanceInfo, vkGetInstanceProcAddr);
+    if (VK_NULL_HANDLE == vkInstance) {
+        CC_LOG_ERROR("Create XrVulkan instance failed due to missing layers, aborting...");
+        return false;
+    }
+    VkResult res;
+#else
     VkResult res = vkCreateInstance(&instanceInfo, nullptr, &vkInstance);
     if (res == VK_ERROR_LAYER_NOT_PRESENT) {
         CC_LOG_ERROR("Create Vulkan instance failed due to missing layers, aborting...");
         return false;
     }
+#endif
 
     volkLoadInstanceOnly(vkInstance);
 
@@ -268,7 +281,11 @@ bool CCVKGPUContext::initialize() {
     }
 
     ccstd::vector<VkPhysicalDevice> physicalDeviceHandles(physicalDeviceCount);
+#if USE_XR
+    physicalDeviceHandles[0] = xr::XrEntrance::getInstance()->GetXrVkGraphicsDevice(vkInstance);
+#else
     VK_CHECK(vkEnumeratePhysicalDevices(vkInstance, &physicalDeviceCount, physicalDeviceHandles.data()));
+#endif
 
     ccstd::vector<VkPhysicalDeviceProperties> physicalDevicePropertiesList(physicalDeviceCount);
 

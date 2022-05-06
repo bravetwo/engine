@@ -54,6 +54,11 @@
     #include "swappy/swappyVk.h"
 #endif
 
+#if USE_XR
+#include "Xr.h"
+#include "platform/java/jni/JniHelper.h"
+#endif
+
 CC_DISABLE_WARNINGS()
 #define VMA_IMPLEMENTATION
 #include "vk_mem_alloc.h"
@@ -95,6 +100,9 @@ CCVKDevice::~CCVKDevice() {
 }
 
 bool CCVKDevice::doInit(const DeviceInfo & /*info*/) {
+#if USE_XR
+    xr::XrEntrance::getInstance()->createXrInstance("Vulkan2", JniHelper::getJavaVM(), JniHelper::getActivity());
+#endif
     _gpuContext = ccnew CCVKGPUContext;
     if (!_gpuContext->initialize()) {
         CC_SAFE_DESTROY_AND_DELETE(_gpuContext)
@@ -217,7 +225,18 @@ bool CCVKDevice::doInit(const DeviceInfo & /*info*/) {
         }
     }
 
+#if USE_XR
+    for (const VkExtensionProperties &availableExtension : _gpuDevice->extensions) {
+        _extensions.push_back(availableExtension.extensionName);
+    }
+    deviceCreateInfo.enabledExtensionCount   = utils::toUint(_extensions.size());
+    deviceCreateInfo.ppEnabledExtensionNames = _extensions.data();
+
+    VK_CHECK(xr::XrEntrance::getInstance()->XrVkCreateDevice(&deviceCreateInfo, vkGetInstanceProcAddr,
+                                                       _gpuContext->physicalDevice, &_gpuDevice->vkDevice));
+#else
     VK_CHECK(vkCreateDevice(_gpuContext->physicalDevice, &deviceCreateInfo, nullptr, &_gpuDevice->vkDevice));
+#endif
 
     volkLoadDevice(_gpuDevice->vkDevice);
 
@@ -477,6 +496,11 @@ bool CCVKDevice::doInit(const DeviceInfo & /*info*/) {
     CC_LOG_INFO("DEVICE_EXTENSIONS: %s", deviceExtensions.c_str());
     CC_LOG_INFO("COMPRESSED_FORMATS: %s", compressedFmts.c_str());
 
+#if USE_XR
+    cc::gfx::CCVKGPUQueue* vkQueue = static_cast<cc::gfx::CCVKQueue *>(getQueue())->gpuQueue();
+    cc::xr::XrEntrance::getInstance()->initXrSession(_gpuContext->vkInstance, _gpuContext->physicalDevice, _gpuDevice->vkDevice, vkQueue->queueFamilyIndex);
+#endif
+
     return true;
 }
 
@@ -611,12 +635,17 @@ void CCVKDevice::acquire(Swapchain *const *swapchains, uint32_t count) {
 
     for (uint32_t i = 0U; i < count; ++i) {
         auto *swapchain = static_cast<CCVKSwapchain *>(swapchains[i]);
+#if USE_XR
+        uint32_t SwapchainImage = xr::XrEntrance::getInstance()->GetSwapchainImageIndexsByHandle(swapchains[i]->getWindowHandle());
+        swapchain->gpuSwapchain()->curImageIndex = SwapchainImage;
+#else
         if (swapchain->gpuSwapchain()->lastPresentResult == VK_NOT_READY) {
             if (!swapchain->checkSwapchainStatus()) continue;
         }
         vkSwapchains.push_back(swapchain->gpuSwapchain()->vkSwapchain);
         gpuSwapchains.push_back(swapchain->gpuSwapchain());
         vkSwapchainIndices.push_back(swapchain->gpuSwapchain()->curImageIndex);
+#endif
     }
 
     _gpuDescriptorSetHub->flush();

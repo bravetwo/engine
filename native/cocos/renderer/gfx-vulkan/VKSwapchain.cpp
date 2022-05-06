@@ -80,8 +80,15 @@ void CCVKSwapchain::doInit(const SwapchainInfo &info) {
     }
 
     Format colorFmt = Format::BGRA8;
+#if USE_XR
+#ifdef VK_USE_PLATFORM_ANDROID_KHR
+    // TODO XR need to get the suitable format from XR swapchain properties
+    colorFmt               = Format::SRGB8_A8;
+#endif
+#endif
     Format depthStencilFmt = Format::DEPTH_STENCIL;
 
+#if !USE_XR
     VkSurfaceCapabilitiesKHR surfaceCapabilities{};
     vkGetPhysicalDeviceSurfaceCapabilitiesKHR(gpuContext->physicalDevice, _gpuSwapchain->vkSurface, &surfaceCapabilities);
 
@@ -196,6 +203,7 @@ void CCVKSwapchain::doInit(const SwapchainInfo &info) {
     _gpuSwapchain->createInfo.compositeAlpha = compositeAlpha;
     _gpuSwapchain->createInfo.presentMode = swapchainPresentMode;
     _gpuSwapchain->createInfo.clipped = VK_TRUE; // Setting clipped to VK_TRUE allows the implementation to discard rendering outside of the surface area
+#endif
 
     ///////////////////// Texture Creation /////////////////////
 
@@ -254,10 +262,24 @@ void CCVKSwapchain::doDestroy() {
 }
 
 void CCVKSwapchain::doResize(uint32_t width, uint32_t height, SurfaceTransform /*transform*/) {
+#if !USE_XR
     checkSwapchainStatus(width, height); // the orientation info from system event is not reliable
+#endif
 }
 
 bool CCVKSwapchain::checkSwapchainStatus(uint32_t width, uint32_t height) {
+#if USE_XR
+    uint32_t newWidth  = width ? width : static_cast<CCVKTexture *>(_colorTexture.get())->_info.width;
+    uint32_t newHeight = height ? height : static_cast<CCVKTexture *>(_colorTexture.get())->_info.height;
+
+    ccstd::vector<VkImage> vkImages;
+    uint32_t imageCount;
+    xr::XrEntrance::getInstance()->GetSwapchainImages(vkImages, _windowHandle, imageCount);
+    _gpuSwapchain->swapchainImages.resize(imageCount);
+    for (uint32_t i = 0; i < imageCount; ++i) {
+        _gpuSwapchain->swapchainImages[i] = vkImages[i];
+    }
+#else
     if (_gpuSwapchain->vkSurface == VK_NULL_HANDLE) { // vkSurface will be set to VK_NULL_HANDLE after call doDestroySurface
         return false;
     }
@@ -324,6 +346,7 @@ bool CCVKSwapchain::checkSwapchainStatus(uint32_t width, uint32_t height) {
     CCVKDevice::getInstance()->updateBackBufferCount(imageCount);
     _gpuSwapchain->swapchainImages.resize(imageCount);
     VK_CHECK(vkGetSwapchainImagesKHR(gpuDevice->vkDevice, _gpuSwapchain->vkSwapchain, &imageCount, _gpuSwapchain->swapchainImages.data()));
+#endif
 
     // should skip size check, since the old swapchain has already been destroyed
     static_cast<CCVKTexture *>(_colorTexture.get())->_info.width = 1;
@@ -424,9 +447,11 @@ void CCVKSwapchain::createVkSurface() {
     const auto *gpuContext = CCVKDevice::getInstance()->gpuContext();
 
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
+#if !USE_XR
     VkAndroidSurfaceCreateInfoKHR surfaceCreateInfo{VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR};
     surfaceCreateInfo.window = reinterpret_cast<ANativeWindow *>(_windowHandle);
     VK_CHECK(vkCreateAndroidSurfaceKHR(gpuContext->vkInstance, &surfaceCreateInfo, nullptr, &_gpuSwapchain->vkSurface));
+#endif
 #elif defined(VK_USE_PLATFORM_WIN32_KHR)
     VkWin32SurfaceCreateInfoKHR surfaceCreateInfo{VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR};
     surfaceCreateInfo.hinstance = static_cast<HINSTANCE>(GetModuleHandle(nullptr));

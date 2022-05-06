@@ -566,6 +566,7 @@ extern se::Class * __jsb_cc_scene_Camera_class; // NOLINT
 
 bool js_register_cc_scene_Camera(se::Object *obj); // NOLINT
 
+SE_DECLARE_FUNC(js_scene_Camera_attachCamera);
 SE_DECLARE_FUNC(js_scene_Camera_attachToScene);
 SE_DECLARE_FUNC(js_scene_Camera_changeTargetWindow);
 SE_DECLARE_FUNC(js_scene_Camera_destroy);

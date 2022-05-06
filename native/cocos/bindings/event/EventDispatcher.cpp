@@ -39,6 +39,9 @@ se::Object *jsMouseEventObj = nullptr;
 se::Object *jsKeyboardEventObj = nullptr;
 se::Object *jsResizeEventObj = nullptr;
 se::Object *jsOrientationEventObj = nullptr;
+#if USE_XR
+se::Object *jsHandleEventObj = nullptr;
+#endif
 bool inited = false;
 } // namespace
 
@@ -90,6 +93,14 @@ void EventDispatcher::destroy() {
         jsResizeEventObj->decRef();
         jsResizeEventObj = nullptr;
     }
+
+#if USE_XR
+    if (jsHandleEventObj != nullptr) {
+        jsHandleEventObj->unroot();
+        jsHandleEventObj->decRef();
+        jsHandleEventObj = nullptr;
+    }
+#endif
     inited = false;
     tickVal.setUndefined();
 }
@@ -316,6 +327,85 @@ void EventDispatcher::dispatchDestroyWindowEvent() {
 void EventDispatcher::dispatchRecreateWindowEvent() {
     EventDispatcher::doDispatchEvent(EVENT_RECREATE_WINDOW, "", se::EmptyValueArray);
 }
+
+#if USE_XR
+void EventDispatcher::dispatchHandleEvent(const xr::HandleEvent &handleEvent) {
+    switch (handleEvent.type) {
+        case xr::HandleEvent::Type::VIEW_POSE_ACTIVE_LEFT:
+        case xr::HandleEvent::Type::HAND_POSE_ACTIVE_LEFT:
+        case xr::HandleEvent::Type::VIEW_POSE_ACTIVE_RIGHT:
+        case xr::HandleEvent::Type::HAND_POSE_ACTIVE_RIGHT:
+            {
+                se::AutoHandleScope scope;
+                if (!jsHandleEventObj) {
+                    jsHandleEventObj = se::Object::createPlainObject();
+                    jsHandleEventObj->root();
+                }
+
+                const auto &xVal = se::Value(handleEvent.handleInfo.x);
+                const auto &yVal = se::Value(handleEvent.handleInfo.y);
+                const auto &zVal = se::Value(handleEvent.handleInfo.z);
+                const auto &quaternionXVal = se::Value(handleEvent.handleInfo.quaternion.x);
+                const auto &quaternionYVal = se::Value(handleEvent.handleInfo.quaternion.y);
+                const auto &quaternionZVal = se::Value(handleEvent.handleInfo.quaternion.z);
+                const auto &quaternionWVal = se::Value(handleEvent.handleInfo.quaternion.w);
+                jsHandleEventObj->setProperty("x", xVal);
+                jsHandleEventObj->setProperty("y", yVal);
+                jsHandleEventObj->setProperty("z", zVal);
+                jsHandleEventObj->setProperty("quaternionX", quaternionXVal);
+                jsHandleEventObj->setProperty("quaternionY", quaternionYVal);
+                jsHandleEventObj->setProperty("quaternionZ", quaternionZVal);
+                jsHandleEventObj->setProperty("quaternionW", quaternionWVal);
+                se::ValueArray args;
+                args.emplace_back(se::Value(jsHandleEventObj));
+                EventDispatcher::doDispatchEvent(nullptr, xr::HandleEvent::TypeNames[(int)handleEvent.type], args);
+            }
+            break;
+        case xr::HandleEvent::Type::THUMBSTICK_MOVE_LEFT:
+        case xr::HandleEvent::Type::THUMBSTICK_MOVE_RIGHT:
+            {
+                se::AutoHandleScope scope;
+                if (!jsHandleEventObj) {
+                    jsHandleEventObj = se::Object::createPlainObject();
+                    jsHandleEventObj->root();
+                }
+
+                const auto &xVal = se::Value(handleEvent.handleInfo.x);
+                const auto &yVal = se::Value(handleEvent.handleInfo.y);
+                jsHandleEventObj->setProperty("x", xVal);
+                jsHandleEventObj->setProperty("y", yVal);
+                se::ValueArray args;
+                args.emplace_back(se::Value(jsHandleEventObj));
+                EventDispatcher::doDispatchEvent(nullptr, xr::HandleEvent::TypeNames[(int)handleEvent.type], args);
+            }
+            break;
+        case xr::HandleEvent::Type::TRIGGER_START_LEFT:
+        case xr::HandleEvent::Type::GRIP_START_LEFT:
+        case xr::HandleEvent::Type::TRIGGER_START_RIGHT:
+        case xr::HandleEvent::Type::GRIP_START_RIGHT:
+            {
+                se::AutoHandleScope scope;
+                if (!jsHandleEventObj) {
+                    jsHandleEventObj = se::Object::createPlainObject();
+                    jsHandleEventObj->root();
+                }
+
+                const auto &val = se::Value(handleEvent.handleInfo.value);
+                jsHandleEventObj->setProperty("value", val);
+                se::ValueArray args;
+                args.emplace_back(se::Value(jsHandleEventObj));
+                EventDispatcher::doDispatchEvent(nullptr, xr::HandleEvent::TypeNames[(int)handleEvent.type], args);
+            }
+            break;
+        case xr::HandleEvent::Type::UNKNOWN:
+            // unknown type, do nothing
+            break;
+        default:
+            EventDispatcher::doDispatchEvent(nullptr, xr::HandleEvent::TypeNames[(int)handleEvent.type], se::EmptyValueArray);
+            break;
+    }
+}
+#endif
 
 void EventDispatcher::doDispatchEvent(const char *eventName, const char *jsFunctionName, const ccstd::vector<se::Value> &args) {
     if (!se::ScriptEngine::getInstance()->isValid()) {

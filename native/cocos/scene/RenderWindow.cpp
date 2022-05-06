@@ -136,10 +136,13 @@ void RenderWindow::resize(uint32_t width, uint32_t height) {
     }
 }
 
-void RenderWindow::extractRenderCameras(ccstd::vector<Camera *> &cameras) {
+void RenderWindow::extractRenderCameras(ccstd::vector<Camera *> &cameras, int xrEye /*0*/) {
     for (Camera *camera : _cameras) {
         if (camera->isEnabled()) {
-            camera->update();
+#if USE_XR
+            camera->changeTargetWindowByXrEye(xrEye);
+#endif
+            camera->update(false, xrEye);
             cameras.emplace_back(camera);
         }
     }
