@@ -4,4 +4,13 @@
 
         <package android:name="org.freedesktop.monado.openxr_runtime.in_process" />
     </queries>
+
+    <application>
+        <meta-data
+            android:name="com.rokid.uxr.sdk.version"
+            android:value="10706" />
+        <meta-data
+            android:name="com.rokid.uxr.application.mode"
+            android:value="3d" />
+    </application>
 </manifest>
