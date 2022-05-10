@@ -32,8 +32,11 @@ SE_DECLARE_FUNC(js_xr_XrEntrance_destroyXrInstance);
 SE_DECLARE_FUNC(js_xr_XrEntrance_frameEnd);
 SE_DECLARE_FUNC(js_xr_XrEntrance_frameStart);
 SE_DECLARE_FUNC(js_xr_XrEntrance_initXrSession);
+SE_DECLARE_FUNC(js_xr_XrEntrance_isCreatedXRinstance);
+SE_DECLARE_FUNC(js_xr_XrEntrance_pauseXrInstance);
 SE_DECLARE_FUNC(js_xr_XrEntrance_renderLoopEnd);
 SE_DECLARE_FUNC(js_xr_XrEntrance_renderLoopStart);
+SE_DECLARE_FUNC(js_xr_XrEntrance_resumeXrInstance);
 SE_DECLARE_FUNC(js_xr_XrEntrance_getInstance);
 #endif //#if (USE_XR > 0)
 // clang-format on

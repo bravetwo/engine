@@ -13,6 +13,15 @@
 #ifndef JSB_FREE
 #define JSB_FREE(ptr) delete ptr
 #endif
+
+#if CC_DEBUG
+static bool js_xr_getter_return_true(se::State& s) // NOLINT(readability-identifier-naming)
+{
+    s.rval().setBoolean(true);
+    return true;
+}
+SE_BIND_PROP_GET(js_xr_getter_return_true)
+#endif
 se::Object* __jsb_cc_xr_XrEntrance_proto = nullptr; // NOLINT
 se::Class* __jsb_cc_xr_XrEntrance_class = nullptr;  // NOLINT
 
@@ -296,6 +305,40 @@ static bool js_xr_XrEntrance_initXrSession(se::State& s) // NOLINT(readability-i
 }
 SE_BIND_FUNC(js_xr_XrEntrance_initXrSession)
 
+static bool js_xr_XrEntrance_isCreatedXRinstance(se::State& s) // NOLINT(readability-identifier-naming)
+{
+    auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntrance>(s);
+    SE_PRECONDITION2(cobj, false, "js_xr_XrEntrance_isCreatedXRinstance : Invalid Native Object");
+    const auto& args = s.args();
+    size_t argc = args.size();
+    CC_UNUSED bool ok = true;
+    if (argc == 0) {
+        bool result = cobj->isCreatedXRinstance();
+        ok &= nativevalue_to_se(result, s.rval(), nullptr /*ctx*/);
+        SE_PRECONDITION2(ok, false, "js_xr_XrEntrance_isCreatedXRinstance : Error processing arguments");
+        SE_HOLD_RETURN_VALUE(result, s.thisObject(), s.rval());
+        return true;
+    }
+    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 0);
+    return false;
+}
+SE_BIND_FUNC(js_xr_XrEntrance_isCreatedXRinstance)
+
+static bool js_xr_XrEntrance_pauseXrInstance(se::State& s) // NOLINT(readability-identifier-naming)
+{
+    auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntrance>(s);
+    SE_PRECONDITION2(cobj, false, "js_xr_XrEntrance_pauseXrInstance : Invalid Native Object");
+    const auto& args = s.args();
+    size_t argc = args.size();
+    if (argc == 0) {
+        cobj->pauseXrInstance();
+        return true;
+    }
+    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 0);
+    return false;
+}
+SE_BIND_FUNC(js_xr_XrEntrance_pauseXrInstance)
+
 static bool js_xr_XrEntrance_renderLoopEnd(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntrance>(s);
@@ -334,6 +377,21 @@ static bool js_xr_XrEntrance_renderLoopStart(se::State& s) // NOLINT(readability
 }
 SE_BIND_FUNC(js_xr_XrEntrance_renderLoopStart)
 
+static bool js_xr_XrEntrance_resumeXrInstance(se::State& s) // NOLINT(readability-identifier-naming)
+{
+    auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntrance>(s);
+    SE_PRECONDITION2(cobj, false, "js_xr_XrEntrance_resumeXrInstance : Invalid Native Object");
+    const auto& args = s.args();
+    size_t argc = args.size();
+    if (argc == 0) {
+        cobj->resumeXrInstance();
+        return true;
+    }
+    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 0);
+    return false;
+}
+SE_BIND_FUNC(js_xr_XrEntrance_resumeXrInstance)
+
 static bool js_xr_XrEntrance_getInstance_static(se::State& s) // NOLINT(readability-identifier-naming)
 {
     const auto& args = s.args();
@@ -355,6 +413,9 @@ bool js_register_xr_XrEntrance(se::Object* obj) // NOLINT(readability-identifier
 {
     auto* cls = se::Class::create("XrEntrance", obj, nullptr, nullptr);
 
+#if CC_DEBUG
+    cls->defineStaticProperty("isJSBClass", _SE(js_xr_getter_return_true), nullptr);
+#endif
     cls->defineFunction("BeginRenderFrame", _SE(js_xr_XrEntrance_BeginRenderFrame));
     cls->defineFunction("ByAfterRenderFrame", _SE(js_xr_XrEntrance_ByAfterRenderFrame));
     cls->defineFunction("ByBeforeRenderFrame", _SE(js_xr_XrEntrance_ByBeforeRenderFrame));
@@ -370,8 +431,11 @@ bool js_register_xr_XrEntrance(se::Object* obj) // NOLINT(readability-identifier
     cls->defineFunction("frameEnd", _SE(js_xr_XrEntrance_frameEnd));
     cls->defineFunction("frameStart", _SE(js_xr_XrEntrance_frameStart));
     cls->defineFunction("initXrSession", _SE(js_xr_XrEntrance_initXrSession));
+    cls->defineFunction("isCreatedXRinstance", _SE(js_xr_XrEntrance_isCreatedXRinstance));
+    cls->defineFunction("pauseXrInstance", _SE(js_xr_XrEntrance_pauseXrInstance));
     cls->defineFunction("renderLoopEnd", _SE(js_xr_XrEntrance_renderLoopEnd));
     cls->defineFunction("renderLoopStart", _SE(js_xr_XrEntrance_renderLoopStart));
+    cls->defineFunction("resumeXrInstance", _SE(js_xr_XrEntrance_resumeXrInstance));
     cls->defineStaticFunction("getInstance", _SE(js_xr_XrEntrance_getInstance_static));
     cls->install();
     JSBClassType::registerClass<cc::xr::XrEntrance>(cls);
