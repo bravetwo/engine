@@ -100,7 +100,7 @@ CCVKDevice::~CCVKDevice() {
 }
 
 bool CCVKDevice::doInit(const DeviceInfo & /*info*/) {
-#if USE_XR
+#if USE_XR && !XR_OEM_PICO
     xr::XrEntrance::getInstance()->createXrInstance("Vulkan2", JniHelper::getJavaVM(), JniHelper::getActivity());
 #endif
     _gpuContext = ccnew CCVKGPUContext;

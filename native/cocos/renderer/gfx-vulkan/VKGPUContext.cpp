@@ -120,6 +120,16 @@ bool CCVKGPUContext::initialize() {
         }
     }
 
+#if USE_XR && XR_OEM_PICO
+    uint32_t major = VK_VERSION_MAJOR(apiVersion);
+    uint32_t minor = VK_VERSION_MINOR(apiVersion);
+    uint32_t patch = VK_VERSION_PATCH(apiVersion);
+    CC_LOG_DEBUG("Vulkan api version is %d-%d-%d.(V1.0_%d, V1.1_%d)",
+                 major, minor, patch, (apiVersion == VK_API_VERSION_1_0), (apiVersion == VK_API_VERSION_1_1));
+    apiVersion = VK_API_VERSION_1_0;
+#endif
+
+    majorVersion = VK_VERSION_MAJOR(apiVersion);
     minorVersion = VK_VERSION_MINOR(apiVersion);
     if (minorVersion < 1) {
         requestedExtensions.push_back(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
@@ -153,7 +163,7 @@ bool CCVKGPUContext::initialize() {
 
 #if CC_DEBUG > 0 && !FORCE_DISABLE_VALIDATION || FORCE_ENABLE_VALIDATION
     // Determine the optimal validation layers to enable that are necessary for useful debugging
-    vector<vector<const char *>> validationLayerPriorityList{
+    std::vector<std::vector<const char *>> validationLayerPriorityList{
         // The preferred validation layer is "VK_LAYER_KHRONOS_validation"
         {"VK_LAYER_KHRONOS_validation"},
 
@@ -172,7 +182,7 @@ bool CCVKGPUContext::initialize() {
         // Otherwise as a last resort we fallback to attempting to enable the LunarG core layer
         {"VK_LAYER_LUNARG_core_validation"},
     };
-    for (vector<const char *> &validationLayers : validationLayerPriorityList) {
+    for (std::vector<const char *> &validationLayers : validationLayerPriorityList) {
         bool found = true;
         for (const char *layer : validationLayers) {
             if (!isLayerSupported(layer, supportedLayers)) {

@@ -422,7 +422,11 @@ int AndroidPlatform::init() {
 #if XR_OEM_PICO
     // Prevent OEM from not calling AttachCurrentThread before using env.
     JniHelper::getEnv();
-    xr::XrEntrance::getInstance()->createXrInstance("OpenGLES", JniHelper::getJavaVM(), JniHelper::getActivity());
+    std::string graphicsApiName = "OpenGLES";
+#if CC_USE_VULKAN
+    graphicsApiName = "Vulkan1";
+#endif
+    xr::XrEntrance::getInstance()->createXrInstance(graphicsApiName.c_str(), JniHelper::getJavaVM(), JniHelper::getActivity());
 #endif
 #endif
     _inputProxy = new GameInputProxy(this);
