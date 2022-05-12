@@ -77,8 +77,8 @@ public:
     inline Swapchain *createSwapchain(const SwapchainInfo &info);
 #if USE_XR
     inline Swapchain *createSwapchainWithXr(const SwapchainInfo &info);
-    inline const ccstd::vector<Swapchain *> &getSwapchains() { return _swapchains; }
 #endif
+    inline const ccstd::vector<Swapchain *> &getSwapchains() { return _swapchains; }
     inline Buffer *createBuffer(const BufferInfo &info);
     inline Buffer *createBuffer(const BufferViewInfo &info);
     inline Texture *createTexture(const TextureInfo &info);

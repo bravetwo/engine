@@ -74,7 +74,8 @@ void Root::initialize(gfx::Swapchain *swapchain) {
     _allCameraList.clear();
 
 #if USE_XR
-    // TODO Xr _mainWindow _curWindow _swapchain invalid
+    // Xr: _mainWindow, _curWindow, _swapchain invalid.
+    // Xr: splash screen use _mainWindow->_swapchain width, height, surfaceTransform. The left and right eyes must be the same.
     auto swapchains = gfx::Device::getInstance()->getSwapchains();
     for (const auto &swapchain : swapchains) {
 #endif
@@ -351,14 +352,14 @@ void Root::frameMove(float deltaTime, int32_t totalFrames) {
             xr::XrEntrance::getInstance()->renderLoopEnd(xrEye);
             xr::XrEntrance::getInstance()->ByAfterRenderFrame(xrEye);
         }
-        xr::XrEntrance::getInstance()->frameEnd();
-        xr::XrEntrance::getInstance()->EndRenderFrame();
         for (auto *camera : _allCameraList) {
             if (camera->isHMD()) {
                 camera->dependUpdateData();
             }
         }
     }
+    xr::XrEntrance::getInstance()->frameEnd();
+    xr::XrEntrance::getInstance()->EndRenderFrame();
 #endif
 }
 

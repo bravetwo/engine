@@ -39,6 +39,8 @@ import { Root } from './root';
 import { SetIndex } from './pipeline/define';
 import { error } from './platform/debug';
 import { Mat4, Vec2 } from './math';
+import { sys } from './platform/sys';
+import { RenderWindow } from './renderer/core/render-window';
 
 const v2_0 = new Vec2();
 type SplashEffectType = 'NONE' | 'FADE-INOUT';
@@ -82,6 +84,7 @@ export class SplashScreen {
     private vertexBuffers!: Buffer;
     private indicesBuffers!: Buffer;
     private framebuffer!: Framebuffer;
+    private windows!: RenderWindow[];
     private renderArea!: Rect;
     private clearColors!: Color[];
     private projection!: Mat4;
@@ -142,6 +145,7 @@ export class SplashScreen {
             this.device = root.device;
             this.swapchain = root.mainWindow!.swapchain;
             this.framebuffer = root.mainWindow!.framebuffer;
+            this.windows = root.windows;
             legacyCC.game.once(legacyCC.Game.EVENT_GAME_INITED, () => {
                 legacyCC.director._lateUpdate = performance.now();
             }, legacyCC.director);
@@ -353,10 +357,20 @@ export class SplashScreen {
 
     private frame () {
         const { device, swapchain } = this;
+
+        if (!sys.isXR || xr.XrEntrance.getInstance().BeginRenderFrame()) {
+            let renderSize = sys.isXR ? 2 : 1;
+            for (let xrEye = 0; xrEye < renderSize; xrEye++) {
+                let swapchain = sys.isXR ? device.getSwapchains()[xrEye] : this.swapchain;
+                if (sys.isXR) {
+                    xr.XrEntrance.getInstance().renderLoopStart(xrEye);
+                    xr.XrEntrance.getInstance().ByBeforeRenderFrame(xrEye);
+                }
+
         device.acquire([swapchain]);
         // record command
         const cmdBuff = this.cmdBuff;
-        const framebuffer = this.framebuffer;
+        const framebuffer = sys.isXR ? this.windows[xrEye].framebuffer : this.framebuffer;
         const renderArea = this.renderArea;
 
         renderArea.width = swapchain.width;
@@ -388,6 +402,18 @@ export class SplashScreen {
         device.flushCommands([cmdBuff]);
         device.queue.submit([cmdBuff]);
         device.present();
+
+                if (sys.isXR) {
+                    xr.XrEntrance.getInstance().renderLoopEnd(xrEye);
+                    xr.XrEntrance.getInstance().ByAfterRenderFrame(xrEye);
+                }
+            }
+        }
+
+        if (sys.isXR) {
+            xr.XrEntrance.getInstance().frameEnd();
+            xr.XrEntrance.getInstance().EndRenderFrame();
+        }
     }
 
     private destroy () {
@@ -398,6 +424,7 @@ export class SplashScreen {
         if ((this.logoImage as any).destroy) (this.logoImage as any).destroy();
         this.logoImage = null!;
         this.framebuffer = null!;
+        this.windows = null!;
         this.renderArea = null!;
         this.cmdBuff = null!;
         this.shader = null!;

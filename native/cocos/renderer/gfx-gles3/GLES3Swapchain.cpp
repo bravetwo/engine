@@ -107,7 +107,7 @@ void GLES3Swapchain::doInit(const SwapchainInfo &info) {
     EGL_CHECK(_gpuSwapchain->eglSurface = eglCreateWindowSurface(context->eglDisplay, context->eglConfig, window, nullptr));
 #endif
 #else
-    EGL_CHECK(_gpuSwapchain->eglSurface = context->eglDefaultSurface);    
+    EGL_CHECK(_gpuSwapchain->eglSurface = context->eglDefaultSurface);
 #endif
     if (_gpuSwapchain->eglSurface == EGL_NO_SURFACE) {
         CC_LOG_ERROR("Create window surface failed.");

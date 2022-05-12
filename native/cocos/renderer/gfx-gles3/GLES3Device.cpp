@@ -244,7 +244,6 @@ bool GLES3Device::doInit(const DeviceInfo & /*info*/) {
 
 #if ENABLE_MSAA
     _xrFBOMSAAEnabled = true;
-#endif
 
     /* Initialize multisampling extension function pointers. */
     if (!glFramebufferTexture2DMultisampleEXT)
@@ -259,6 +258,7 @@ bool GLES3Device::doInit(const DeviceInfo & /*info*/) {
         _xrFBOMSAAEnabled = false;
     }
     CC_LOG_INFO("GL MAX_SAMPLES = %d, MSAA Enabled = %d/%d.", maxSamples, _xrFBOMSAAEnabled, MSAA_SAMPLES);
+#endif
 
     xr::XrEntrance::getInstance()->SetOpenGLESConfig(GLES3Device::getInstance()->context()->eglDisplay,
         GLES3Device::getInstance()->context()->eglConfig, GLES3Device::getInstance()->context()->eglDefaultContext);
