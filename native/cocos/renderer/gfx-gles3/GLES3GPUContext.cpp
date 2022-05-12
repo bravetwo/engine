@@ -318,7 +318,11 @@ void GLES3GPUContext::present(const GLES3GPUSwapchain *swapchain) {
 
         _eglCurrentInterval = swapchain->eglSwapInterval;
     }
+#if !XR_OEM_HUAWEIVR
     EGL_CHECK(eglSwapBuffers(eglDisplay, swapchain->eglSurface));
+#else
+    eglSwapBuffers(eglDisplay, swapchain->eglSurface);
+#endif
 }
 
 EGLContext GLES3GPUContext::getSharedContext() {

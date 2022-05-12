@@ -42,7 +42,6 @@
 #endif
 
 #if CC_DEBUG > 0
-#if !USE_XR
     #define GL_CHECK(x)                                              \
         do {                                                         \
             x;                                                       \
@@ -52,16 +51,6 @@
                 CC_ASSERT(false);                                    \
             }                                                        \
         } while (0)
-#else
-    #define GL_CHECK(x)                                              \
-        do {                                                         \
-            x;                                                       \
-            GLenum err = glGetError();                               \
-            if (err != GL_NO_ERROR) {                                \
-                CC_LOG_ERROR("%s returned GL error: 0x%x", #x, err); \
-            }                                                        \
-        } while (0)
-#endif
     #define EGL_CHECK(x)                                              \
         do {                                                          \
             x;                                                        \
