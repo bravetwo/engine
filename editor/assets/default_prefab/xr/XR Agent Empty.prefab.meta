@@ -2,12 +2,12 @@
   "ver": "1.1.38",
   "importer": "prefab",
   "imported": true,
-  "uuid": "0b1ffabd-e112-493b-aabc-c4c0bf6b0635",
+  "uuid": "3d065b3c-566f-4c97-9cdc-d8d543209c72",
   "files": [
     ".json"
   ],
   "subMetas": {},
   "userData": {
-    "syncNodeName": "XR Controller Right"
+    "syncNodeName": "XR Agent Empty"
   }
 }

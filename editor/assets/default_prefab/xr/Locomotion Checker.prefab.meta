@@ -2,12 +2,12 @@
   "ver": "1.1.38",
   "importer": "prefab",
   "imported": true,
-  "uuid": "25907361-1db1-413e-b15c-460c74a9d09f",
+  "uuid": "7db4ad17-fae5-4837-8e86-07acd7114c41",
   "files": [
     ".json"
   ],
   "subMetas": {},
   "userData": {
-    "syncNodeName": "XR Controller Left"
+    "syncNodeName": "Locomotion Checker"
   }
 }

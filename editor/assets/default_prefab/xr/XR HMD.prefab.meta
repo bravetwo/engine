@@ -2,12 +2,12 @@
   "ver": "1.1.38",
   "importer": "prefab",
   "imported": true,
-  "uuid": "ca02645a-3a73-4839-980a-4336f4c05a69",
+  "uuid": "a6548d6f-656a-4965-94ed-7879954afaa3",
   "files": [
     ".json"
   ],
   "subMetas": {},
   "userData": {
-    "syncNodeName": "TrackingSpace"
+    "syncNodeName": "XR HMD"
   }
 }
