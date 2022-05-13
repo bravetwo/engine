@@ -1,15 +1,78 @@
-import { ccclass, help, menu, displayOrder, type, serializable, executeInEditMode, visible, displayName} from 'cc.decorator';
-import { Component } from '../core/components';
-import { XrControlEventType, XrEventHandle } from './xr-event-handle';
-import { xrEvent, XrEventTypeLeft, XrEventTypeRight, XrInputDeviceType } from './xr-event';
-import { Node } from '../core/scene-graph/node';
-import { Input, input } from '../input';
-import { EventHandle } from '../input/types';
-import { XrInteractor } from './xr-interactor';
+/*
+ Copyright (c) 2022-2022 Xiamen Yaji Software Co., Ltd.
 
+ https://www.cocos.com
+
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated engine source code (the "Software"), a limited,
+  worldwide, royalty-free, non-assignable, revocable and non-exclusive license
+ to use Cocos Creator solely to develop games on your target platforms. You shall
+  not use Cocos Creator software for developing other software or tools that's
+  used for developing games. You are not granted to publish, distribute,
+  sublicense, and/or sell copies of Cocos Creator.
+
+ The software or tools in this License Agreement are licensed, not sold.
+ Xiamen Yaji Software Co., Ltd. reserves all rights not expressly granted to you.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ */
+
+/**
+ * @packageDocumentation
+ * @module component/xr
+ */
+
+import { ccclass, help, menu, displayOrder, type, serializable, executeInEditMode, visible, displayName} from 'cc.decorator';
+import { Component } from '../../core/components';
+import { XrControlEventType, XrEventHandle } from '../event/xr-event-handle';
+import { Node } from '../../core/scene-graph/node';
+import { Input, input } from '../../input';
+import { EventHandle } from '../../input/types';
+import { XrInteractor } from '../interaction/xr-interactor';
+import { ccenum } from '../../core';
+
+export enum XrEventTypeLeft {
+    BUTTON_X = 0,
+    BUTTON_Y = 2,
+    TRIGGER_LEFT = 4,
+    GRIP_LEFT = 6,
+    THUMBSTICK_LEFT = 8,
+    THUMBSTICK_MOVE_LEFT = 10
+};
+
+export enum XrEventTypeRight {
+    BUTTON_A = 1,
+    BUTTON_B = 3,
+    TRIGGER_RIGHT = 5,
+    GRIP_RIGHT = 7,
+    THUMBSTICK_RIGHT = 9,
+    THUMBSTICK_MOVE_RIGHT = 11
+};
+
+export enum XrInputDeviceType {
+    Left_Hand,
+    Right_Hand
+};
+
+ccenum(XrEventTypeLeft);
+ccenum(XrEventTypeRight);
+ccenum(XrInputDeviceType);
+
+/**
+ * @en
+ *                      <br>
+ * @zh
+ *                      <br>
+ */
 @ccclass('cc.XRController')
 @help('i18n:cc.XRController')
-@menu('XR/XRController')
+@menu('XR/Device/XRController')
 @executeInEditMode
 export class XRController extends Component {
     @serializable
@@ -317,13 +380,13 @@ export class XRController extends Component {
         }
         this._xrEventHandle.eventHandle = event;
         this._xrInteractor?.selectStart(this._xrEventHandle);
-        xrEvent.selectStart(this._xrEventHandle);
+        // xrEvent.selectStart(this._xrEventHandle);
     }
 
     protected _selectEnd(event: EventHandle) {
         this._xrEventHandle.eventHandle = event;
         this._xrInteractor?.selectEnd(this._xrEventHandle);
-        xrEvent.selectEnd(this._xrEventHandle);
+        // xrEvent.selectEnd(this._xrEventHandle);
     }
 
     protected _activateStart(event: EventHandle) {
@@ -332,13 +395,13 @@ export class XRController extends Component {
         }
         this._xrEventHandle.eventHandle = event;
         this._xrInteractor?.activateStart();
-        xrEvent.activateStart(this._xrEventHandle);
+        // xrEvent.activateStart(this._xrEventHandle);
     }
 
     protected _activateEnd(event: EventHandle) {
         this._xrEventHandle.eventHandle = event;
         this._xrInteractor?.activateEnd();
-        xrEvent.activateEnd();
+        // xrEvent.activateEnd();
     }
 
     protected _uiPressStart(event: EventHandle) {
@@ -346,21 +409,21 @@ export class XRController extends Component {
             return;
         }
         this._xrInteractor?.uiPressStart();
-        xrEvent.uiPressStart(this._xrEventHandle);
+        // xrEvent.uiPressStart(this._xrEventHandle);
     }
 
     protected _uiPressEnd(event: EventHandle) {
         this._xrInteractor?.uiPressEnd();
-        xrEvent.uiPressEnd();
+        // xrEvent.uiPressEnd();
     }
 
     protected _turnerEntered(event: EventHandle) {
         this._xrEventHandle.eventHandle = event;
-        xrEvent.turnerEntered(this._xrEventHandle);
+        // xrEvent.turnerEntered(this._xrEventHandle);
     }
 
     protected _turnerExited(event: EventHandle) {
         this._xrEventHandle.eventHandle = event;
-        xrEvent.turnerExited(this._xrEventHandle);
+        // xrEvent.turnerExited(this._xrEventHandle);
     }
 }

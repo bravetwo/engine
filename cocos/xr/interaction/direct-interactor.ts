@@ -1,13 +1,40 @@
+/*
+ Copyright (c) 2022-2022 Xiamen Yaji Software Co., Ltd.
+
+ https://www.cocos.com
+
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated engine source code (the "Software"), a limited,
+  worldwide, royalty-free, non-assignable, revocable and non-exclusive license
+ to use Cocos Creator solely to develop games on your target platforms. You shall
+  not use Cocos Creator software for developing other software or tools that's
+  used for developing games. You are not granted to publish, distribute,
+  sublicense, and/or sell copies of Cocos Creator.
+
+ The software or tools in this License Agreement are licensed, not sold.
+ Xiamen Yaji Software Co., Ltd. reserves all rights not expressly granted to you.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ */
+
+/**
+ * @packageDocumentation
+ * @module component/xr
+ */
+
 import { ccclass, help, menu, displayOrder, type, serializable } from 'cc.decorator';
-import { BoxColliderComponent, CapsuleColliderComponent, CylinderColliderComponent, MeshColliderComponent } from '../physics/framework/deprecated';
-import { ccenum } from '../core';
-import { Component } from '../core/components';
-import { Node } from '../core/scene-graph/node';
-import { ICollisionEvent, ITriggerEvent } from '../physics/framework/physics-interface';
-import { XrControlEventType, XrEventHandle } from './xr-event-handle';
-import { xrEvent } from './xr-event';
-import { InteractorEvents } from './interactor-events';
-import { Collider } from '../physics/framework/components/colliders/collider';
+import { ccenum } from '../../core';
+import { Node } from '../../core/scene-graph/node';
+import { ICollisionEvent, ITriggerEvent } from '../../physics/framework/physics-interface';
+import { XrControlEventType } from '../event/xr-event-handle';
+import { InteractorEvents } from '../event/interactor-events';
+import { Collider } from '../../physics/framework/components/colliders/collider';
 import { XrInteractor } from './xr-interactor';
 import { XrInteractable } from './xr-interactable';
 
@@ -20,41 +47,21 @@ enum SelectActionTrigger_Type {
 
 ccenum(SelectActionTrigger_Type)
 
+/**
+ * @en
+ *                      <br>
+ * @zh
+ *                      <br>
+ */
 @ccclass('cc.DirectInteractor')
 @help('i18n:cc.DirectInteractor')
-@menu('XR/DirectInteractor')
+@menu('XR/Interaction/DirectInteractor')
 export class DirectInteractor extends XrInteractor {
-    // @serializable
-    // protected _keepSelectedTargetValid: boolean = false;
-    // @serializable
-    // protected _hideControllerOnSelect: boolean = false;
     @serializable
     protected _startingSelectedInteractable: Node | null = null;
 
     private _colliderCom: any = null;
     private _directHitCollider: Collider | null = null;
-
-    // @displayOrder(3)
-    // set keepSelectedTargetValid(val) {
-    //     if (val === this._keepSelectedTargetValid) {
-    //         return;
-    //     }
-    //     this._keepSelectedTargetValid = val;
-    // }
-    // get keepSelectedTargetValid() {
-    //     return this._keepSelectedTargetValid;
-    // }
-
-    // @displayOrder(4)
-    // set hideControllerOnSelect(val) {
-    //     if (val === this._hideControllerOnSelect) {
-    //         return;
-    //     }
-    //     this._hideControllerOnSelect = val;
-    // }
-    // get hideControllerOnSelect() {
-    //     return this._hideControllerOnSelect;
-    // }
 
     @type(Node)
     @displayOrder(5)
@@ -77,6 +84,7 @@ export class DirectInteractor extends XrInteractor {
 
     onEnable() {
         this._interactorEvents = this.getComponent(InteractorEvents);
+        this._setAttachNode();
         if (this._colliderCom.isTrigger) {
             this._colliderCom.on('onTriggerEnter', this._onTriggerEnterCb, this);
             this._colliderCom.on('onTriggerStay', this._onTriggerEnterCb, this);
@@ -86,6 +94,7 @@ export class DirectInteractor extends XrInteractor {
             this._colliderCom.on('onCollisionStay', this._onCollisionEnterCb, this);
             this._colliderCom.on('onCollisionExit', this._onCollisionEnterCb, this);
         }
+
     }
 
     onDisable() {
@@ -98,11 +107,19 @@ export class DirectInteractor extends XrInteractor {
         }
     }
 
+    protected _setAttachNode() {
+        if (this._attachTransform) {
+            this._event.attachNode = this._attachTransform;
+        } else {
+            this._event.attachNode = this.node;
+        }
+    }
+
     protected _judgeHit() {
         if (this._directHitCollider) {
             return false;
         }
-        // 判断碰撞盒是否存在interactable
+        // Check whether interacTable exists in the collision box
         const xrInteractable = this._collider?.getComponent(XrInteractable);
         if (xrInteractable) {
             this._beTriggerNode = xrInteractable;
@@ -148,12 +165,12 @@ export class DirectInteractor extends XrInteractor {
     }
 
     update(deltaTime: number) {
-        // SelectActionType为STATE时，每次都触发
+        // Raised each time when SelectActionType is STATE
         if (this._directHitCollider && this._selectActionTrigger === SelectActionTrigger_Type.State && this._stateState) {
-            // 判断碰撞盒是否存在interactable
+            // Check whether the collision box has an XrInteractable
             const xrInteractable = this._directHitCollider?.getComponent(XrInteractable);
             if (xrInteractable) {
-                // 判断是否已经触发物体
+                // Determines if the object has been triggered
                 if (!this._judgeTrigger()) {
                     this._beTriggerNode = xrInteractable;
                     this._event.triggerId = this.uuid;

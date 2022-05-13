@@ -1,9 +1,38 @@
+/*
+ Copyright (c) 2022-2022 Xiamen Yaji Software Co., Ltd.
+
+ https://www.cocos.com
+
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated engine source code (the "Software"), a limited,
+  worldwide, royalty-free, non-assignable, revocable and non-exclusive license
+ to use Cocos Creator solely to develop games on your target platforms. You shall
+  not use Cocos Creator software for developing other software or tools that's
+  used for developing games. You are not granted to publish, distribute,
+  sublicense, and/or sell copies of Cocos Creator.
+
+ The software or tools in this License Agreement are licensed, not sold.
+ Xiamen Yaji Software Co., Ltd. reserves all rights not expressly granted to you.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ */
+
+/**
+ * @packageDocumentation
+ * @module component/xr
+ */
 
 import { ccclass, help, menu, displayOrder, type, serializable, tooltip, visible } from 'cc.decorator';
-import { ccenum, Mat4, Vec3 } from '../core';
-import { Node } from '../core/scene-graph/node';
-import { Collider, ERigidBodyType, RigidBody } from '../physics/framework';
-import { XrControlEventType, XrEventHandle } from './xr-event-handle';
+import { ccenum, Mat4, Quat, Vec3 } from '../../core';
+import { Node } from '../../core/scene-graph/node';
+import { Collider, ERigidBodyType, RigidBody } from '../../physics/framework';
+import { XrControlEventType, XrEventHandle } from '../event/xr-event-handle';
 import { XrInteractable } from './xr-interactable';
 
 enum GrabTrigger_Type {
@@ -26,9 +55,15 @@ ccenum(GrabTrigger_Type);
 ccenum(SelectMode_Type);
 ccenum(Movement_Type);
 
+/**
+ * @en
+ *                      <br>
+ * @zh
+ *                      <br>
+ */
 @ccclass('cc.GrabInteractable')
 @help('i18n:cc.GrabInteractable')
-@menu('XR/GrabInteractable')
+@menu('XR/Interaction/GrabInteractable')
 export class GrabInteractable extends XrInteractable {
     @serializable
     protected _attachTransform: Node | null = null;
@@ -58,6 +93,18 @@ export class GrabInteractable extends XrInteractable {
     protected _throwAngularVelocityScale = 1;
 
     private _model: Node | null = null;
+    // Force fetch or not
+    private _forceGrab = false;
+    // Whether it is grab
+    private _isGrab = false;
+    // Attach the node
+    private _attachNode: Node | null = null;
+    // Capture the elapsed time of the process
+    private _curGrabTime = 0;
+    // Real-time node position
+    private _curWorldPosition = new Vec3;
+    // Real-time node Angle
+    private _curWorldRotation = new Quat;
 
     @type(Node)
     @displayOrder(1)
@@ -271,7 +318,7 @@ export class GrabInteractable extends XrInteractable {
             } else {
                 const out = this.node.getWorldPosition();
                 this.node.parent = event.attachNode;
-                this.node.setWorldPosition(out);    
+                this.node.setWorldPosition(out);
             }
             if (this._hideController && this._model) {
                 this._model.active = true;
@@ -283,14 +330,93 @@ export class GrabInteractable extends XrInteractable {
         }
     }
 
+    private _getAttachWorldPosition() {
+        if (!this._attachNode) {
+            return null;
+        }
+        var out = new Vec3;
+        if (this._attachTransform) {
+            this.convertToNodeSpace(this._attachTransform.getWorldPosition(), out);
+            out = out.negative().multiply(this.node.getScale());
+            out.add(this._attachNode.getWorldPosition());
+        } else {
+            out = this._attachNode.getWorldPosition();
+        }
+        return out;
+    }
+
+    private _getAttachWorldRotation() {
+        if (!this._attachNode) {
+            return null;
+        }
+        var out = new Quat;
+        if (this._attachTransform) {
+            Quat.invert(out, this.node.getWorldRotation());
+            Quat.multiply(out, out, this._attachTransform.getWorldRotation());
+            Quat.invert(out, out);
+
+            Quat.multiply(out, this._attachNode.getWorldRotation(), out);
+        } else {
+            out = this._attachNode.getWorldRotation();
+        }
+        return out;
+    }
+
+    update(dt: number) {
+        if (!this._isGrab) {
+            return;
+        }
+
+        if (!this._forceGrab) {
+            if (this._attachNode) {
+                this.node.setWorldPosition(this._attachNode.worldPosition);
+            }
+        } else {
+            const attachWorldPosition = this._getAttachWorldPosition();
+            const attachWorldRotation = this._getAttachWorldRotation();
+            if (!attachWorldPosition || !attachWorldRotation) {
+                return;
+            }
+
+            if (this._attachEaseInTime > 0 && this._curGrabTime <= this._attachEaseInTime) {
+                const easePercent = this._curGrabTime / this._attachEaseInTime;
+                Vec3.lerp(this._curWorldPosition, this.node.worldPosition, attachWorldPosition, easePercent);
+                Quat.slerp(this._curWorldRotation, this.node.worldRotation, attachWorldRotation, easePercent);
+                this.node.setWorldPosition(this._curWorldPosition);
+                this.node.setWorldRotation(this._curWorldRotation);
+                this._curGrabTime += dt;
+            } else {
+                this.node.setWorldPosition(attachWorldPosition);
+                this.node.setWorldRotation(attachWorldRotation);
+            }
+        }
+    }
+
     private _grabEntered(event?: XrEventHandle) {
         if (!event || !this._colliderCom) {
             return;
         }
-        
+        this._isGrab = true;
         this._triggerId = event.triggerId;
+        this._attachNode = event.attachNode;
+        this._curGrabTime = 0;
+        this._forceGrab = event.forceGrab;
+        if (!this._forceGrab) {
+            this._attachNode?.setWorldPosition(this.node.worldPosition);
+        }
+        // Hide the controller
+        if (this._hideController && this._model) {
+            this._model.active = true;
+        }
+        if (this._hideController && event.model) {
+            this._model = event.model;
+            this._model.active = false;
+        }
 
-        this._attachToModel(event)
+        const rigidBody = this.node.getComponent(RigidBody);
+        if (rigidBody) {
+            rigidBody.useGravity = false;
+        }
     }
 
     private _grabEnd(event?: XrEventHandle) {
@@ -298,19 +424,17 @@ export class GrabInteractable extends XrInteractable {
             return;
         }
 
-        const worldPosition = this.node.getWorldPosition();
-        const sence = this.node.scene;
-        this.node.removeFromParent();
-        this.node.setWorldPosition(worldPosition);
-        sence.addChild(this.node);
+        this._isGrab = false;
         this._triggerId = "";
+        this._attachNode = null;
+        // Show the controller
+        if (this._hideController && this._model) {
+            this._model.active = true;
+        }
+
         const rigidBody = this.node.getComponent(RigidBody);
         if (rigidBody) {
             rigidBody.useGravity = true;
-            rigidBody.type = ERigidBodyType.DYNAMIC;
-            if (this._hideController && this._model) {
-                this._model.active = true;
-            }
         }
     }
 }

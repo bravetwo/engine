@@ -1,11 +1,41 @@
+/*
+ Copyright (c) 2022-2022 Xiamen Yaji Software Co., Ltd.
+
+ https://www.cocos.com
+
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated engine source code (the "Software"), a limited,
+  worldwide, royalty-free, non-assignable, revocable and non-exclusive license
+ to use Cocos Creator solely to develop games on your target platforms. You shall
+  not use Cocos Creator software for developing other software or tools that's
+  used for developing games. You are not granted to publish, distribute,
+  sublicense, and/or sell copies of Cocos Creator.
+
+ The software or tools in this License Agreement are licensed, not sold.
+ Xiamen Yaji Software Co., Ltd. reserves all rights not expressly granted to you.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ */
+
+/**
+ * @packageDocumentation
+ * @module component/xr
+ */
+
 import { ccclass, help, menu, displayOrder, type, serializable, tooltip, visible} from 'cc.decorator';
-import { ccenum} from '../core';
-import { EventHandler as ComponentEventHandler } from '../core/components';
-import { Node } from '../core/scene-graph/node';
-import { Collider } from '../physics/framework/components/colliders/collider';
-import { XrControlEventType, XrEventHandle } from './xr-event-handle';
+import { ccenum} from '../../core';
+import { EventHandler as ComponentEventHandler } from '../../core/components';
+import { Node } from '../../core/scene-graph/node';
+import { Collider } from '../../physics/framework/components/colliders/collider';
+import { XrControlEventType, XrEventHandle } from '../event/xr-event-handle';
 import { XrInteractable } from './xr-interactable';
-import { Teleporter } from './teleporter';
+import { Teleporter } from '../locomotion/teleporter';
 
 enum Teleportable_Type {
     Area = 0,
@@ -22,9 +52,15 @@ enum TeleportTrigger_Type {
 ccenum(Teleportable_Type);
 ccenum(TeleportTrigger_Type);
 
+/**
+ * @en
+ *                      <br>
+ * @zh
+ *                      <br>
+ */
 @ccclass('cc.Teleportable')
 @help('i18n:cc.Teleportable')
-@menu('XR/Teleportable')
+@menu('XR/Interaction/Teleportable')
 export class Teleportable extends XrInteractable {
     @serializable
     protected _teleportableType: Teleportable_Type = Teleportable_Type.Area;
@@ -107,7 +143,7 @@ export class Teleportable extends XrInteractable {
             case TeleportTrigger_Type.OnActivited:
             case TeleportTrigger_Type.OnDeactivited:
                 this._colliderCom.on(XrControlEventType.ACTIVATED, this._teleportAction, this);
-                this._colliderCom.on(XrControlEventType.ACTIVATE_END, this._teleportAction, this);
+                this._colliderCom.on(XrControlEventType.DEACTIVITED, this._teleportAction, this);
                 break;
             default:
                 break;
@@ -131,7 +167,7 @@ export class Teleportable extends XrInteractable {
             case TeleportTrigger_Type.OnActivited:
             case TeleportTrigger_Type.OnDeactivited:
                 this._colliderCom.off(XrControlEventType.ACTIVATED, this._teleportAction, this);
-                this._colliderCom.off(XrControlEventType.ACTIVATE_END, this._teleportAction, this);
+                this._colliderCom.off(XrControlEventType.DEACTIVITED, this._teleportAction, this);
                 break;
             default:
                 break;
@@ -195,16 +231,16 @@ export class Teleportable extends XrInteractable {
         }
 
         if (this._teleportableType === Teleportable_Type.Anchor) {
-            if (this._teleporter?.checker?.XRSession) {
+            if (this._teleporter?.checker?.XR_Agent) {
                 if (this._teleportAnchorNode) {
-                    this._teleporter.checker.XRSession.node.setWorldPosition(this._teleportAnchorNode.getWorldPosition());
+                    this._teleporter.checker.XR_Agent.node.setWorldPosition(this._teleportAnchorNode.getWorldPosition());
                 } else if (event.attachNode) {
-                    this._teleporter.checker.XRSession.node.setWorldPosition(this.node.getWorldPosition());
+                    this._teleporter.checker.XR_Agent.node.setWorldPosition(this.node.getWorldPosition());
                 }
             }
         } else {
-            if (this._teleporter?.checker?.XRSession && event.hitPoint) {
-                this._teleporter.checker.XRSession.node.setWorldPosition(event.hitPoint);
+            if (this._teleporter?.checker?.XR_Agent && event.hitPoint) {
+                this._teleporter.checker.XR_Agent.node.setWorldPosition(event.hitPoint);
             }
         }        
     }

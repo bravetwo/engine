@@ -1,10 +1,40 @@
+/*
+ Copyright (c) 2022-2022 Xiamen Yaji Software Co., Ltd.
+
+ https://www.cocos.com
+
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated engine source code (the "Software"), a limited,
+  worldwide, royalty-free, non-assignable, revocable and non-exclusive license
+ to use Cocos Creator solely to develop games on your target platforms. You shall
+  not use Cocos Creator software for developing other software or tools that's
+  used for developing games. You are not granted to publish, distribute,
+  sublicense, and/or sell copies of Cocos Creator.
+
+ The software or tools in this License Agreement are licensed, not sold.
+ Xiamen Yaji Software Co., Ltd. reserves all rights not expressly granted to you.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ */
+
+/**
+ * @packageDocumentation
+ * @module component/xr
+ */
+
 import { displayOrder, type, serializable } from 'cc.decorator';
-import { ccenum } from '../core';
-import { Component } from '../core/components';
-import { Node } from '../core/scene-graph/node';
-import { XrControlEventType, XrEventHandle } from './xr-event-handle';
-import { InteractorEvents } from './interactor-events';
-import { Collider } from '../physics/framework/components/colliders/collider';
+import { ccenum } from '../../core';
+import { Component } from '../../core/components';
+import { Node } from '../../core/scene-graph/node';
+import { XrControlEventType, XrEventHandle } from '../event/xr-event-handle';
+import { InteractorEvents } from '../event/interactor-events';
+import { Collider } from '../../physics/framework/components/colliders/collider';
 import { IXrInteractable } from './xr-interactable';
 
 export enum SelectActionTrigger_Type {
@@ -61,23 +91,15 @@ export class XrInteractor extends Component {
     }
 
     protected _judgeTrigger() {
-        // 判断是否已抓取到物体
+        // Determine if the object is captured
         if (!this._beTriggerNode) {
             return false;
         }
-        // 已抓取到物体，判断被抓取到的物体，其抓取者是否是自身
+        // Has captured the object, judge the captured object, its grasp is its own
         if (this._beTriggerNode.triggerId === this.uuid) {
             return true;
         }
         return false;
-    }
-
-    protected _setTriggerTarget() {
-        if (this._attachTransform) {
-            this._event.attachNode = this._attachTransform;
-        } else {
-            this._event.attachNode = this.node;
-        }
     }
 
     protected _emitSelectEntered() {
@@ -104,13 +126,8 @@ export class XrInteractor extends Component {
                 this._stateState = true;
                 break;
             case SelectActionTrigger_Type.State_Change:
-                if (this._judgeTrigger()) {
-                    // 之前已有被触发物(此情况应该不存在)
-                    console.log("cocosxr selectStart in error state");
-                } else {
-                    // 之前没有被触发物,进行碰撞检测
+                if (!this._judgeTrigger()) {
                     if (this._judgeHit()) {
-                        // 碰撞到触发物，触发Entered，触发状态为true
                         this._triggerState = true;
                         this._emitSelectEntered();
                     }
@@ -118,12 +135,9 @@ export class XrInteractor extends Component {
                 break;
             case SelectActionTrigger_Type.Toggle:
                 if (this._triggerState && this._judgeTrigger()) {
-                    // 之前已有被触发物
                     this._emitSelectEnd();
                 } else {
-                    // 之前没有被触发物,进行碰撞检测
                     if (this._judgeHit()) {
-                        // 碰撞到触发物，触发Entered，触发状态为true
                         this._triggerState = true;
                         this._emitSelectEntered();
                     }
@@ -131,12 +145,9 @@ export class XrInteractor extends Component {
                 break;
             case SelectActionTrigger_Type.Sticky:
                 if (this._judgeTrigger()) {
-                    // 之前已有被触发物, 触发状态为true
                     this._triggerState = true;
                 } else {
-                    // 之前没有被触发物,进行碰撞检测
                     if (this._judgeHit()) {
-                        // 碰撞到触发物，触发Entered
                         this._emitSelectEntered();
                     }
                 }

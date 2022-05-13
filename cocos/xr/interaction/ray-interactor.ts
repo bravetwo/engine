@@ -1,19 +1,43 @@
-/**
- * @packageDocumentation
- * @module xr
+/*
+ Copyright (c) 2022-2022 Xiamen Yaji Software Co., Ltd.
+
+ https://www.cocos.com
+
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated engine source code (the "Software"), a limited,
+  worldwide, royalty-free, non-assignable, revocable and non-exclusive license
+ to use Cocos Creator solely to develop games on your target platforms. You shall
+  not use Cocos Creator software for developing other software or tools that's
+  used for developing games. You are not granted to publish, distribute,
+  sublicense, and/or sell copies of Cocos Creator.
+
+ The software or tools in this License Agreement are licensed, not sold.
+ Xiamen Yaji Software Co., Ltd. reserves all rights not expressly granted to you.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
  */
 
-// import { ccclass, help, menu, type} from '../core/data/decorators';
+/**
+ * @packageDocumentation
+ * @module component/xr
+ */
+
 import { ccclass, help, menu, type, displayOrder, serializable } from 'cc.decorator';
-import { ccenum } from '../core/value-types/enum';
-import { Node } from '../core/scene-graph/node';
-import { Color, Mat4, Vec3 } from '../core/math';
-import { Ray } from '../core/geometry/ray';
-import { PhysicsSystem } from '../physics/framework/physics-system';
-import { XrControlEventType, XrEventHandle } from './xr-event-handle';
-import { Collider } from '../physics/framework/components/colliders/collider';
-import { Line } from '../particle/line';
-import { InteractorEvents } from './interactor-events';
+import { ccenum } from '../../core/value-types/enum';
+import { Node } from '../../core/scene-graph/node';
+import { Color, Mat4, Vec3 } from '../../core/math';
+import { Ray } from '../../core/geometry/ray';
+import { PhysicsSystem } from '../../physics/framework/physics-system';
+import { XrControlEventType } from '../event/xr-event-handle';
+import { Collider } from '../../physics/framework/components/colliders/collider';
+import { Line } from '../../particle/line';
+import { InteractorEvents } from '../event/interactor-events';
 import { XrInteractor, SelectActionTrigger_Type } from './xr-interactor';
 import { IXrInteractable, XrInteractable } from './xr-interactable';
 
@@ -53,9 +77,15 @@ ccenum(RaycastTrigger_Type);
 ccenum(HitDirection_Type);
 ccenum(SelectActionTrigger_Type);
 
+/**
+ * @en
+ *                      <br>
+ * @zh
+ *                      <br>
+ */
 @ccclass('cc.RayInteractor')
 @help('i18n:cc.RayInteractor')
-@menu('XR/RayInteractor')
+@menu('XR/Interaction/RayInteractor')
 export class RayInteractor extends XrInteractor {
     @serializable
     protected _interactionWithUINode: boolean = true;
@@ -77,12 +107,6 @@ export class RayInteractor extends XrInteractor {
     protected _hitDirectionType: HitDirection_Type = HitDirection_Type.RAY_CAST;
     @serializable
     protected _hitClosestOnly: boolean = true;
-    // @serializable
-    // protected _keepSelectedTargetValid = true;
-    // @serializable
-    // protected _hideControllerOnSelect = false;
-    // @serializable
-    // protected _startingSelectedInteractable: Node | null = null;
 
     private _rayHitCollider: Collider | null = null;
     private _line: Line | null = null;
@@ -207,42 +231,6 @@ export class RayInteractor extends XrInteractor {
         return this._hitClosestOnly;
     }
 
-    // @type(Boolean)
-    // @displayOrder(13)
-    // set keepSelectedTargetValid(val) {
-    //     if (val === this._keepSelectedTargetValid) {
-    //         return;
-    //     }
-    //     this._keepSelectedTargetValid = val;
-    // }
-    // get keepSelectedTargetValid() {
-    //     return this._keepSelectedTargetValid;
-    // }
-
-    // @type(Boolean)
-    // @displayOrder(14)
-    // set hideControllerOnSelect(val) {
-    //     if (val === this._hideControllerOnSelect) {
-    //         return;
-    //     }
-    //     this._hideControllerOnSelect = val;
-    // }
-    // get hideControllerOnSelect() {
-    //     return this._hideControllerOnSelect;
-    // }
-
-    // @type(Node)
-    // @displayOrder(15)
-    // set startingSelectedInteractable(val) {
-    //     if (val === this._startingSelectedInteractable) {
-    //         return;
-    //     }
-    //     this._startingSelectedInteractable = val;
-    // }
-    // get startingSelectedInteractable() {
-    //     return this._startingSelectedInteractable;
-    // }
-
     set selectState(val) {
         if (val === this._triggerState) {
             return;
@@ -254,7 +242,7 @@ export class RayInteractor extends XrInteractor {
     }
 
     onEnable() {
-        this._setTriggerTarget();
+        this._setAttachNode();
         this._line = this.getComponent(Line);
         if (this._rayOriginTransform && this._line) {
             var line = this._rayOriginTransform.addComponent(Line);
@@ -269,6 +257,20 @@ export class RayInteractor extends XrInteractor {
     }
 
     onDisable() {
+    }
+
+    protected _setAttachNode() {
+        if (!this.forceGrab) {
+            var attachNode = new Node;
+            attachNode.parent = this.node;
+            this._event.attachNode = attachNode;
+        } else {
+            if (this._attachTransform) {
+                this._event.attachNode = this._attachTransform;
+            } else {
+                this._event.attachNode = this.node;
+            }
+        }
     }
 
     private _copyLine(outLine: Line, inLine: Line) {
@@ -296,22 +298,22 @@ export class RayInteractor extends XrInteractor {
     }
 
     protected _judgeHit() {
-        // 射线不存在，返回
+        // Ray does not exist, return
         if (!this._line || !this._line.node.active) {
             return false;
         }
 
-        // 获取射线Ray
+        // Get Ray
         const ray: Ray = new Ray();
         const dir = this._getRayDir();
         const start = this.convertToWorldSpace(new Vec3(this._linePositions[0].x, this._linePositions[0].y, this._linePositions[0].z));
         Ray.set(ray, start.x, start.y, start.z, dir.x, dir.y, dir.z);
-        // 射线碰撞
+        // Ray collision
         const hit = PhysicsSystem.instance.raycastClosest(ray, 0xffffffff, this.maxRayDistance, this.raycastTiggerInteraction === RaycastTrigger_Type.IGNORE);
         if (hit) {
-            // 获取碰撞盒
+            // Get collision box
             const closestResult = PhysicsSystem.instance.raycastClosestResult;
-            // 判断碰撞盒是否存在interactable
+            // Check whether the collision box has an InteracTable
             const xrInteractable = closestResult.collider?.getComponent(XrInteractable);
             if (xrInteractable) {
                 this._beTriggerNode = xrInteractable;
@@ -329,44 +331,44 @@ export class RayInteractor extends XrInteractor {
         if (!this._line || !this._line.node.active) {
             return;
         }
-        // 获取射线Ray
+        // Get Ray
         const ray: Ray = new Ray();
         const dir = this._getRayDir();
         const start = this.convertToWorldSpace(new Vec3(this._linePositions[0].x, this._linePositions[0].y, this._linePositions[0].z));
         Ray.set(ray, start.x, start.y, start.z, dir.x, dir.y, dir.z);
-        // 射线碰撞
+        // Ray collision
         const hit = PhysicsSystem.instance.raycastClosest(ray, 0xffffffff, this.maxRayDistance, this.raycastTiggerInteraction === RaycastTrigger_Type.IGNORE);
         if (hit) {
-            // 获取碰撞点坐标
+            // Get the coordinates of the collision point
             const closestResult = PhysicsSystem.instance.raycastClosestResult;
             this._event.hitPoint.set(closestResult.hitPoint);
-            // 设置射线坐标
+            // Set ray coordinates
             this._setLinePosition(true);
-            // 判断碰撞盒是否存在IXrInteractable
+            // Check whether the collision box holds IXrInteractable
             const xrInteractable = closestResult.collider?.getComponent(IXrInteractable);
             if (xrInteractable) {
                 this._setLinehover(true);
-                // 判断上一次是否有击中物
+                // Determine if there was a hit last time
                 if (this._rayHitCollider) {
                     if (this._rayHitCollider !== closestResult.collider) {
-                        // 不一致，且上一次有击中物体，则触发HOVER_EXITED
+                        // Inconsistent, and an object was hit last time, HOVER_EXITED is fired
                         this._interactorEvents?.hoverExited(this._event);
                         this._rayHitCollider.emit(XrControlEventType.HOVER_EXITED, this._event);
-                        // 替换击中物，触发HOVER_ENTERED
+                        // Replace hit object, triggering HOVER_ENTERED
                         this._rayHitCollider = closestResult.collider;
                         this._interactorEvents?.hoverEntered(this._event);
                         this._rayHitCollider.emit(XrControlEventType.HOVER_ENTERED, this._event);
                     }
                 } else {
-                    // 替换击中物，触发HOVER_ENTERED
+                    // Replace hit object, triggering HOVER_ENTERED
                     this._rayHitCollider = closestResult.collider;
                     this._interactorEvents?.hoverEntered(this._event);
                     this._rayHitCollider.emit(XrControlEventType.HOVER_ENTERED, this._event);
                 }
 
-                // SelectActionType为STATE时，每次都触发
+                // Raised each time when SelectActionType is STATE
                 if (this._selectActionTrigger === SelectActionTrigger_Type.State && this._stateState) {
-                    // 判断是否已经触发物体
+                    // Determines if the object has been triggered
                     if (!this._judgeTrigger()) {
                         this._beTriggerNode = xrInteractable;
                         this._collider = closestResult.collider;
@@ -376,13 +378,13 @@ export class RayInteractor extends XrInteractor {
                         this._emitSelectEntered();
                     }
                 }
-                // 发送stay，中间状态,传送位置点
+                // Send stay, intermediate state, send position point
                 this._rayHitCollider.emit(XrControlEventType.HOVER_STAY, this._event);
             } else {
                 this._setLinehover(false);
-                // 判断上一次是否有击中物
+                // Determine if there was a hit last time
                 if (this._rayHitCollider) {
-                     // 有击中物体，则触发HOVER_EXITED
+                     // HOVER_EXITED is triggered if an object is hit
                      this._interactorEvents?.hoverExited(this._event);
                      this._rayHitCollider.emit(XrControlEventType.HOVER_EXITED, this._event);
                 }
@@ -391,11 +393,10 @@ export class RayInteractor extends XrInteractor {
             }
         } else {
             this._setLinehover(false);
-            // 设置射线坐标
+            // Set ray coordinates
             this._setLinePosition(false);
             if (this._rayHitCollider) {
                 this._rayHitCollider.emit(XrControlEventType.HOVER_EXITED, this);
-                // 射线悬停结束事件
                 this._interactorEvents?.hoverExited(this._event);
                 this._rayHitCollider = null;
             }
@@ -416,7 +417,7 @@ export class RayInteractor extends XrInteractor {
             return;
         }
 
-        // 射线颜色变化
+        // Ray color change
         if (isHover) {
             this._line.color.color = Color.GREEN.clone();
         } else {
@@ -462,14 +463,3 @@ export class RayInteractor extends XrInteractor {
         this._rayHitCollider?.emit(XrControlEventType.UIPRESS_EXITED, this._event);
     }
 }
-
-/**
- * [1] Class member could be defined like this.
- * [2] Use `property` decorator if your want the member to be serializable.
- * [3] Your initialization goes here.
- * [4] Your update function goes here.
- *
- * Learn more about scripting: https://docs.cocos.com/creator/3.4/manual/zh/scripting/
- * Learn more about CCClass: https://docs.cocos.com/creator/3.4/manual/zh/scripting/ccclass.html
- * Learn more about life-cycle callbacks: https://docs.cocos.com/creator/3.4/manual/zh/scripting/life-cycle-callbacks.html
- */

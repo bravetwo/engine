@@ -1,8 +1,7 @@
 /*
- Copyright (c) 2013-2016 Chukong Technologies Inc.
- Copyright (c) 2017-2020 Xiamen Yaji Software Co., Ltd.
+ Copyright (c) 2022-2022 Xiamen Yaji Software Co., Ltd.
 
- http://www.cocos.com
+ https://www.cocos.com
 
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated engine source code (the "Software"), a limited,
@@ -22,18 +21,18 @@
  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
-*/
+ */
 
 /**
  * @packageDocumentation
- * @module ui
+ * @module component/xr
  */
 
 import { ccclass, help, menu, tooltip, displayOrder, type, serializable, executeInEditMode } from 'cc.decorator';
-import { Component, EventHandler as ComponentEventHandler } from '../core/components';
-import { EventHandle } from '../input/types';
-import { input, Input } from '../input/input';
-import { Enum } from '../core/value-types/enum';
+import { Component, EventHandler as ComponentEventHandler } from '../../core/components';
+import { EventHandle } from '../../input/types';
+import { input, Input } from '../../input/input';
+import { Enum } from '../../core/value-types/enum';
 
 const XrEventType = Enum({
     BUTTON_A_DOWN: 0,
@@ -60,6 +59,12 @@ const XrEventType = Enum({
     HAND_POSE_ACTIVE_RIGHT: 21
 });
 
+/**
+ * @en
+ *                      <br>
+ * @zh
+ *                      <br>
+ */
 @ccclass('cc.EventHandlerType')
 export class EventHandlerType {
     /**
@@ -84,9 +89,6 @@ export class EventHandlerType {
     public events: ComponentEventHandler[] = [];
 }
 
-@ccclass('cc.XRHandler')
-@help('i18n:cc.XRHandler')
-@menu('XR/XRHandler')
 @executeInEditMode
 export class XRHandler extends Component {
     @type([EventHandlerType])
@@ -117,21 +119,12 @@ export class XRHandler extends Component {
     protected handPoseActiveLeft: ComponentEventHandler[] = [];
     protected handPoseActiveRight: ComponentEventHandler[] = [];
 
-
-    public __preload() {
-
-    }
-
     public onEnable() {
         this._registerNodeEvent();
     }
 
     public onDisable() {
         this._unregisterNodeEvent();
-    }
-
-    public onDestroy() {
-
     }
 
     protected _registerNodeEvent() {

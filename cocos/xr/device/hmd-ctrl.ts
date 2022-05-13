@@ -1,27 +1,40 @@
+/*
+ Copyright (c) 2022-2022 Xiamen Yaji Software Co., Ltd.
+
+ https://www.cocos.com
+
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated engine source code (the "Software"), a limited,
+  worldwide, royalty-free, non-assignable, revocable and non-exclusive license
+ to use Cocos Creator solely to develop games on your target platforms. You shall
+  not use Cocos Creator software for developing other software or tools that's
+  used for developing games. You are not granted to publish, distribute,
+  sublicense, and/or sell copies of Cocos Creator.
+
+ The software or tools in this License Agreement are licensed, not sold.
+ Xiamen Yaji Software Co., Ltd. reserves all rights not expressly granted to you.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ */
+
 /**
  * @packageDocumentation
- * @module xr
+ * @module component/xr
  */
 
 import { ccclass, help, menu, type, visible, displayOrder, serializable } from 'cc.decorator';
-import { ccenum } from '../core/value-types/enum';
-import { Component } from '../core/components/component';
-import { Vec2 } from '../core/math';
-import { CameraComponent } from '../core/components';
+import { ccenum } from '../../core/value-types/enum';
+import { Component } from '../../core/components/component';
+import { Vec2 } from '../../core/math';
+import { CameraComponent } from '../../core/components';
 import { TargetEye, TargetEye_Type } from './target-eye';
 import { PoseTracker } from './pose-tracker';
-
-/**
- * Predefined variables
- * Name = NewComponent
- * DateTime = Fri Feb 11 2022 10:29:16 GMT+0800 (中国标准时间)
- * Author = linyuanyi
- * FileBasename = NewComponent.ts
- * FileBasenameNoExtension = NewComponent
- * URL = db://assets/resources/prefab/ui/home/HMDCtrl.ts
- * ManualUrl = https://docs.cocos.com/creator/3.4/manual/zh/
- *
- */
 
 enum StereoRendering_Type {
     SINGLE_PASS = 0,
@@ -59,9 +72,15 @@ ccenum(FoveationRendering_Type);
 ccenum(IPDOffset_Type);
 ccenum(AspectRatio_Type);
 
+/**
+ * @en
+ *                      <br>
+ * @zh
+ *                      <br>
+ */
 @ccclass('cc.HMDCtrl')
 @help('i18n:cc.HMDCtrl')
-@menu('XR/HMDCtrl')
+@menu('XR/Device/HMDCtrl')
 export class HMDCtrl extends Component {
     @serializable
     protected _stereoRendering: StereoRendering_Type = StereoRendering_Type.SINGLE_PASS;
@@ -105,7 +124,10 @@ export class HMDCtrl extends Component {
         this._perEyeCamera = val;
         this._getCameras();
         this._copyCameras(Camera_Type.BOTH);
-        this._setMainOffset(this._offsetValue / 2);
+        
+        if (this._IPDOffset === IPDOffset_Type.Manual) {
+            this._setMainOffset(this._offsetValue / 2);
+        }
         if (this._perEyeCamera) {
             if (this._mainCamera) {
                 this._mainCamera.enabled = false;
@@ -166,10 +188,10 @@ export class HMDCtrl extends Component {
         if (val === this._IPDOffset) {
             return;
         }
-        // 如果原来是Manual，把左右改回去
+        // If it was Manual, change left and right back
         this._setIpdOffset(0);
         this._IPDOffset = val;
-        // 如果现在是Manual
+        // If it's Manual now
         this._setIpdOffset(this._offsetValue / 2);
     }
     get IPDOffset() {
@@ -295,7 +317,7 @@ export class HMDCtrl extends Component {
 
     private _setMainOffset(value) {
         if (this._mainCamera) {
-            // 如果perEyeCamera此时处于关闭状态(即左右未启用),此时将offset用于maincamera
+            // If perEyeCamera is turned off (that is, left and right are not enabled), offset is used for the MainCamera
             if (!this._perEyeCamera) {
                 var poseTracker = this._mainCamera.getComponent(PoseTracker);
                 if (poseTracker) {
@@ -330,13 +352,3 @@ export class HMDCtrl extends Component {
     }
 
 }
-/**
- * [1] Class member could be defined like this.
- * [2] Use `property` decorator if your want the member to be serializable.
- * [3] Your initialization goes here.
- * [4] Your update function goes here.
- *
- * Learn more about scripting: https://docs.cocos.com/creator/3.4/manual/zh/scripting/
- * Learn more about CCClass: https://docs.cocos.com/creator/3.4/manual/zh/scripting/ccclass.html
- * Learn more about life-cycle callbacks: https://docs.cocos.com/creator/3.4/manual/zh/scripting/life-cycle-callbacks.html
- */
