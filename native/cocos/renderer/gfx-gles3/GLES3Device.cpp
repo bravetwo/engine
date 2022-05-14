@@ -83,7 +83,7 @@ GLES3Device::~GLES3Device() {
 
 bool GLES3Device::doInit(const DeviceInfo & /*info*/) {
 #if USE_XR && !XR_OEM_PICO
-    xr::XrEntrance::getInstance()->createXrInstance("OpenGLES", JniHelper::getJavaVM(), JniHelper::getActivity());
+    xr::XrEntry::getInstance()->createXrInstance("OpenGLES", JniHelper::getJavaVM(), JniHelper::getActivity());
 #endif
     _gpuContext = ccnew GLES3GPUContext;
     _gpuStateCache = ccnew GLES3GPUStateCache;
@@ -260,9 +260,9 @@ bool GLES3Device::doInit(const DeviceInfo & /*info*/) {
     CC_LOG_INFO("GL MAX_SAMPLES = %d, MSAA Enabled = %d/%d.", maxSamples, _xrFBOMSAAEnabled, MSAA_SAMPLES);
 #endif
 
-    xr::XrEntrance::getInstance()->SetOpenGLESConfig(GLES3Device::getInstance()->context()->eglDisplay,
+    xr::XrEntry::getInstance()->SetOpenGLESConfig(GLES3Device::getInstance()->context()->eglDisplay,
         GLES3Device::getInstance()->context()->eglConfig, GLES3Device::getInstance()->context()->eglDefaultContext);
-    xr::XrEntrance::getInstance()->initXrSession();
+    xr::XrEntry::getInstance()->initXrSession();
 #endif
 
     return true;
@@ -355,7 +355,7 @@ void GLES3Device::acquire(Swapchain *const *swapchains, uint32_t count) {
     for (uint32_t i = 0; i < count; ++i) {
 #if USE_XR
     #if !XR_OEM_HUAWEIVR
-        uint32_t index = xr::XrEntrance::getInstance()->GetSwapchainImageIndexsByHandle(swapchains[i]->getWindowHandle());
+        uint32_t index = xr::XrEntry::getInstance()->GetSwapchainImageIndexsByHandle(swapchains[i]->getWindowHandle());
         const uint32_t depthTexture = GetDepthTexture(index, _xrFBOMSAAEnabled);
         if(_xrFBOMSAAEnabled)
         {

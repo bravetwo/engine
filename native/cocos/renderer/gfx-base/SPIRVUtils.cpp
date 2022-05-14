@@ -218,7 +218,7 @@ void SPIRVUtils::compressInputLocations(gfx::AttributeList &attributes) {
             }
 
             // Missing attribute declarations?
-            CC_ASSERT(found);
+     //       CC_ASSERT(found);
         }
     }
 

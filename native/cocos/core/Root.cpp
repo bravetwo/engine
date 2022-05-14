@@ -283,7 +283,7 @@ void Root::frameMove(float deltaTime, int32_t totalFrames) {
     }
 
 #if USE_XR
-    if (xr::XrEntrance::getInstance()->BeginRenderFrame()) {
+    if (xr::XrEntry::getInstance()->BeginRenderFrame()) {
         for (auto *camera : _allCameraList) {
             if (camera->isHMD()) {
                 camera->getOriginMatrix();
@@ -291,7 +291,7 @@ void Root::frameMove(float deltaTime, int32_t totalFrames) {
         }
         auto swapchains = gfx::Device::getInstance()->getSwapchains();
         for (int xrEye = 0; xrEye < 2; xrEye++) {
-            xr::XrEntrance::getInstance()->renderLoopStart(xrEye);
+            xr::XrEntry::getInstance()->renderLoopStart(xrEye);
 #endif
     for (const auto &scene : _scenes) {
         scene->removeBatches();
@@ -312,7 +312,7 @@ void Root::frameMove(float deltaTime, int32_t totalFrames) {
     }
 #else
             _windows[xrEye]->extractRenderCameras(_cameraList, xrEye);
-            xr::XrEntrance::getInstance()->ByBeforeRenderFrame(xrEye);
+            xr::XrEntry::getInstance()->BeforeRenderFrame(xrEye);
 #endif
 
     if (_pipelineRuntime != nullptr && !_cameraList.empty()) {
@@ -349,8 +349,8 @@ void Root::frameMove(float deltaTime, int32_t totalFrames) {
     _eventProcessor->emit(EventTypesToJS::ROOT_BATCH2D_RESET, this);
     // cjh TODO:    if (this._batcher) this._batcher.reset();
 #if USE_XR
-            xr::XrEntrance::getInstance()->renderLoopEnd(xrEye);
-            xr::XrEntrance::getInstance()->ByAfterRenderFrame(xrEye);
+            xr::XrEntry::getInstance()->renderLoopEnd(xrEye);
+            xr::XrEntry::getInstance()->AfterRenderFrame(xrEye);
         }
         for (auto *camera : _allCameraList) {
             if (camera->isHMD()) {
@@ -358,8 +358,8 @@ void Root::frameMove(float deltaTime, int32_t totalFrames) {
             }
         }
     }
-    xr::XrEntrance::getInstance()->frameEnd();
-    xr::XrEntrance::getInstance()->EndRenderFrame();
+    xr::XrEntry::getInstance()->frameEnd();
+    xr::XrEntry::getInstance()->EndRenderFrame();
 #endif
 }
 
