@@ -436,6 +436,11 @@ export class GrabInteractable extends XrInteractable {
         const rigidBody = this.node.getComponent(RigidBody);
         if (rigidBody) {
             rigidBody.type = ERigidBodyType.DYNAMIC;
+            var out = new Vec3;
+            rigidBody.getLinearVelocity(out);
+            rigidBody.setLinearVelocity(out.multiplyScalar(this._throwVelocityScale));
+            rigidBody.getAngularVelocity(out);
+            rigidBody.setAngularVelocity(out.multiplyScalar(this._throwAngularVelocityScale));
             rigidBody.useGravity = true;
         }
     }
