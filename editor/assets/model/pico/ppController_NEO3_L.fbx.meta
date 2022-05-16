@@ -5,23 +5,6 @@
   "uuid": "c92f1623-d68c-4641-8c66-3541691e9017",
   "files": [],
   "subMetas": {
-    "fd73d": {
-      "importer": "gltf-embeded-image",
-      "uuid": "c92f1623-d68c-4641-8c66-3541691e9017@fd73d",
-      "displayName": "",
-      "id": "fd73d",
-      "name": "DiffuseColor_Texture.image",
-      "userData": {
-        "gltfIndex": 0
-      },
-      "ver": "1.0.3",
-      "imported": true,
-      "files": [
-        ".png",
-        ".json"
-      ],
-      "subMetas": {}
-    },
     "a62fe": {
       "importer": "gltf-mesh",
       "uuid": "c92f1623-d68c-4641-8c66-3541691e9017@a62fe",

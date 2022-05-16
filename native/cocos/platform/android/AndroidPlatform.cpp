@@ -418,7 +418,7 @@ AndroidPlatform::~AndroidPlatform() {
 
 int AndroidPlatform::init() {
 #if USE_XR
-    xr::XrEntrance::getInstance()->setEventsCallback(&EventDispatcher::dispatchHandleEvent);
+    xr::XrEntry::getInstance()->setEventsCallback(&EventDispatcher::dispatchHandleEvent);
 #if XR_OEM_PICO
     // Prevent OEM from not calling AttachCurrentThread before using env.
     JniHelper::getEnv();
@@ -426,7 +426,7 @@ int AndroidPlatform::init() {
 #if CC_USE_VULKAN
     graphicsApiName = "Vulkan1";
 #endif
-    xr::XrEntrance::getInstance()->createXrInstance(graphicsApiName.c_str(), JniHelper::getJavaVM(), JniHelper::getActivity());
+    xr::XrEntry::getInstance()->createXrInstance(graphicsApiName.c_str(), JniHelper::getJavaVM(), JniHelper::getActivity());
 #endif
 #endif
     _inputProxy = new GameInputProxy(this);
@@ -478,21 +478,21 @@ int32_t AndroidPlatform::loop() {
             }
         }
 #if USE_XR
-        if(!xr::XrEntrance::getInstance()->isCreatedXRinstance())
+        if(!xr::XrEntry::getInstance()->isCreatedXRinstance())
         {
             continue;
         }
 
-        if (xr::XrEntrance::getInstance()->PollEvents()) {
+        if (xr::XrEntry::getInstance()->PollEvents()) {
             // TODO XR exitRenderLoop
             continue;
         }
 
-        if (!xr::XrEntrance::getInstance()->IsSessionRunning()) {
+        if (!xr::XrEntry::getInstance()->IsSessionRunning()) {
             continue;
         }
 
-        xr::XrEntrance::getInstance()->PollActions();
+        xr::XrEntry::getInstance()->PollActions();
 #endif
         _inputProxy->handleInput();
         runTask();

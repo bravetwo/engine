@@ -182,7 +182,7 @@ void Camera::update(bool forceUpdate /*false*/, int xrEye /*0*/) {
             Mat4::createPerspective(_fov, _aspect, _nearClip, _farClip,
                                     _fovAxis == CameraFOVAxis::VERTICAL, _device->getCapabilities().clipSpaceMinZ, projectionSignY, static_cast<int>(orientation), &_matProj);
 #else
-            const auto &projFloat = xr::XrEntrance::getInstance()->ComputeViewProjection(xrEye, _nearClip, _farClip, 1.f);
+            const auto &projFloat = xr::XrEntry::getInstance()->ComputeViewProjection(xrEye, _nearClip, _farClip, 1.f);
             int i = 0;
             for (auto value : projFloat) {
                 _matProj.m[i] = value;

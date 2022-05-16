@@ -274,7 +274,7 @@ bool CCVKSwapchain::checkSwapchainStatus(uint32_t width, uint32_t height) {
 
     ccstd::vector<VkImage> vkImages;
     uint32_t imageCount;
-    xr::XrEntrance::getInstance()->GetSwapchainImages(vkImages, _windowHandle, imageCount);
+    xr::XrEntry::getInstance()->GetSwapchainImages(vkImages, _windowHandle, imageCount);
     _gpuSwapchain->swapchainImages.resize(imageCount);
     for (uint32_t i = 0; i < imageCount; ++i) {
         _gpuSwapchain->swapchainImages[i] = vkImages[i];
