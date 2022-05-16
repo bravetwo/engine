@@ -29,6 +29,9 @@
 #include "cocos/bindings/jswrapper/SeApi.h"
 #include "cocos/bindings/manual/jsb_global_init.h"
 #include "cocos/platform/interfaces/modules/ISystemWindow.h"
+#if XR_OEM_ROKID
+#include "java/jni/JniHelper.h"
+#endif
 
 namespace {
 se::Value tickVal;
@@ -397,6 +400,27 @@ void EventDispatcher::dispatchHandleEvent(const xr::HandleEvent &handleEvent) {
                 EventDispatcher::doDispatchEvent(nullptr, xr::HandleEvent::TypeNames[(int)handleEvent.type], args);
             }
             break;
+#if XR_OEM_ROKID
+        case xr::HandleEvent::Type::HOME_DOWN:
+            break;
+        case xr::HandleEvent::Type::HOME_UP:
+            {
+                 std::string className = "android/app/Activity";
+                 std::string methodName = "moveTaskToBack";
+                 std::string signature = "(Z)Z";
+                 cc::JniMethodInfo jniMethodInfo;
+                 if (cc::JniHelper::getMethodInfo(jniMethodInfo, className.c_str(), methodName.c_str(), signature.c_str())) {
+                     jniMethodInfo.env->CallBooleanMethod(JniHelper::getActivity(), jniMethodInfo.methodID, false);
+             #ifndef __OHOS__
+                     ccDeleteLocalRef(jniMethodInfo.env, jniMethodInfo.classID);
+             #endif
+                     CLEAR_EXCEPTON(jniMethodInfo.env);
+                 } else {
+                     CC_LOG_ERROR("Failed to find java method. Class name: %s, method name: %s, signature: %s ", className.c_str(), methodName.c_str(), signature.c_str());
+                 }
+            }
+            break;
+#endif
         case xr::HandleEvent::Type::UNKNOWN:
             // unknown type, do nothing
             break;
