@@ -337,7 +337,7 @@ export class GrabInteractable extends XrInteractable {
         var out = new Vec3;
         if (this._attachTransform) {
             this.convertToNodeSpace(this._attachTransform.getWorldPosition(), out);
-            out = out.negative().multiply(this.node.getScale());
+            out.negative().multiply(this.node.getScale());
             out.add(this._attachNode.getWorldPosition());
         } else {
             out = this._attachNode.getWorldPosition();
@@ -415,6 +415,7 @@ export class GrabInteractable extends XrInteractable {
 
         const rigidBody = this.node.getComponent(RigidBody);
         if (rigidBody) {
+            rigidBody.type = ERigidBodyType.KINEMATIC;
             rigidBody.useGravity = false;
         }
     }
@@ -434,6 +435,7 @@ export class GrabInteractable extends XrInteractable {
 
         const rigidBody = this.node.getComponent(RigidBody);
         if (rigidBody) {
+            rigidBody.type = ERigidBodyType.DYNAMIC;
             rigidBody.useGravity = true;
         }
     }

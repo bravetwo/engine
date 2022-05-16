@@ -59,7 +59,6 @@ export class Teleporter extends Component {
         return this._checker;
     }
 
-    // 此处理放onload好，现阶段onload在编辑器中不加载，暂时放onEnable
     public onEnable() {
         if (!this._checker) {
             const scene = director.getScene() as any;
