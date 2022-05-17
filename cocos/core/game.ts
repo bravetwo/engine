@@ -847,7 +847,7 @@ export class Game extends EventTarget {
         if (typeof config.frameRate !== 'number') {
             config.frameRate = 60;
         } else if (sys.isXR) {
-            config.frameRate = 72;
+            config.frameRate = 90;
         }
         const renderMode = config.renderMode;
         if (typeof renderMode !== 'number' || renderMode > 3 || renderMode < 0) {
