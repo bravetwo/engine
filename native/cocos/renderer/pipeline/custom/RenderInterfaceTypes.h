@@ -98,6 +98,9 @@ public:
     virtual void setValue(const ccstd::string& name, bool value) = 0;
 
     virtual bool isOcclusionQueryEnabled() const = 0;
+
+	virtual void resetRenderQueue(bool reset) {}
+    virtual bool isResetRenderQueue() { return true; }
 };
 
 inline PipelineRuntime::~PipelineRuntime() noexcept = default;

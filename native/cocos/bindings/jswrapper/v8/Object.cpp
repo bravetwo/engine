@@ -349,8 +349,8 @@ bool Object::init(Class *cls, v8::Local<v8::Object> obj) {
     _obj.setFinalizeCallback(nativeObjectFinalizeHook);
 
     if (__objectMap) {
-        CC_ASSERT(__objectMap->find(this) == __objectMap->end());
-        __objectMap->emplace(this, nullptr);
+        //CC_ASSERT(__objectMap->find(this) == __objectMap->end());
+        //__objectMap->emplace(this, nullptr);
     }
 
     #if CC_DEBUG && CC_DEBUG_JS_OBJECT_ID

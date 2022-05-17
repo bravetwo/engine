@@ -336,6 +336,8 @@ public:
     inline bool isHMD() const { return _isHMD; }
     inline void setHMD(bool val) { _isHMD = val; }
 
+	inline bool isCullingEnable() const { return _isCullingEnabled; }
+    inline void setCullingEnable(bool val) { _isCullingEnabled = val; }
 protected:
     void setExposure(float ev100);
 
@@ -350,6 +352,7 @@ private:
     IntrusivePtr<Node> _node;
     ccstd::string _name;
     bool _enabled{false};
+	bool _isCullingEnabled{false};
     CameraProjection _proj{CameraProjection::UNKNOWN};
     float _aspect{0.F};
     float _orthoHeight{10.0F};
