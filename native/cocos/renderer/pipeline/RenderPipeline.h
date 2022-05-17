@@ -120,6 +120,8 @@ public:
     inline bool isBloomEnabled() const { return _bloomEnabled; }
     inline void setBloomEnabled(bool enable) { _bloomEnabled = enable; }
 
+    inline void resetRenderQueue(bool reset) { _resetRenderQueue = reset; }
+    inline bool isResetRenderQueue() { return _resetRenderQueue; }
 protected:
     static RenderPipeline *instance;
 
@@ -158,6 +160,8 @@ protected:
     bool _clusterEnabled{false};
     bool _bloomEnabled{false};
     bool _occlusionQueryEnabled{false};
+
+    bool _resetRenderQueue{true};
 };
 
 } // namespace pipeline

@@ -331,9 +331,21 @@ void Root::frameMove(float deltaTime, int32_t totalFrames) {
         //                    _batcher->uploadBuffers();
         //                }
 
-        for (const auto &scene : _scenes) {
-            scene->update(stamp);
-        }
+#if USE_XR
+		if (xrEye == 0) {
+#endif
+			for (const auto &scene: _scenes) {
+				scene->update(stamp);
+			}
+#if USE_XR
+			_cameraList[0]->setCullingEnable(true);
+			_pipelineRuntime->resetRenderQueue(true);
+		}
+		else {
+			_cameraList[0]->setCullingEnable(false);
+			_pipelineRuntime->resetRenderQueue(false);
+		}
+#endif
 
         CC_PROFILER_UPDATE;
 
