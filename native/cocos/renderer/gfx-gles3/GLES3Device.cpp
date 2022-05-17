@@ -284,11 +284,16 @@ void GLES3Device::doDestroy() {
 }
 
 #if USE_XR && !XR_OEM_HUAWEIVR
-std::map<uint32_t, uint32_t> m_colorToDepthMap;
-uint32_t GetDepthTexture(uint32_t colorTexture, bool fboMSAAEnabled) {
+std::map<void*, uint32_t> m_wndToDepthMap;
+///
+/// param wndHandle
+/// param colorTexture
+/// param fboMSAAEnabled
+/// return
+uint32_t GetDepthTexture(void* wndHandle, uint32_t colorTexture, bool fboMSAAEnabled) {
     // If a depth-stencil view has already been created for this back-buffer, use it.
-    auto depthBufferIt = m_colorToDepthMap.find(colorTexture);
-    if (depthBufferIt != m_colorToDepthMap.end()) {
+    auto depthBufferIt = m_wndToDepthMap.find(wndHandle);
+    if (depthBufferIt != m_wndToDepthMap.end()) {
         return depthBufferIt->second;
     }
 
@@ -325,7 +330,7 @@ uint32_t GetDepthTexture(uint32_t colorTexture, bool fboMSAAEnabled) {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, width, height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, nullptr);
     }
 
-    m_colorToDepthMap.insert(std::make_pair(colorTexture, depthTexture));
+	m_wndToDepthMap.insert(std::make_pair(wndHandle, depthTexture));
     CC_LOG_INFO("[CXR] create depth texture/buffer %dX%d", width, height);
 
     return depthTexture;
@@ -356,7 +361,9 @@ void GLES3Device::acquire(Swapchain *const *swapchains, uint32_t count) {
 #if USE_XR
     #if !XR_OEM_HUAWEIVR
         uint32_t index = xr::XrEntry::getInstance()->GetSwapchainImageIndexsByHandle(swapchains[i]->getWindowHandle());
-        const uint32_t depthTexture = GetDepthTexture(index, _xrFBOMSAAEnabled);
+        if(index == 0)
+            continue;
+        const uint32_t depthTexture = GetDepthTexture(swapchains[i]->getWindowHandle(), index, _xrFBOMSAAEnabled);
         if(_xrFBOMSAAEnabled)
         {
             glFramebufferTexture2DMultisampleEXT(
