@@ -699,6 +699,12 @@ nodeProto.setScale = function (val: Readonly<Vec3> | number, y?: number, z?: num
 
 nodeProto.getWorldPosition = function (out?: Vec3): Vec3 {
     const r = oldGetWorldPosition.call(this);
+    if(r.batch !== undefined && r.batch) {
+        let splitArray = r.xyz.split(",");
+        r.x = splitArray[0] as number;
+        r.y = splitArray[1] as number;
+        r.z = splitArray[2] as number;
+    }
     if (out) {
         return Vec3.copy(out, r);
     }
@@ -707,6 +713,14 @@ nodeProto.getWorldPosition = function (out?: Vec3): Vec3 {
 
 nodeProto.getWorldRotation = function (out?: Quat): Quat {
     const r = oldGetWorldRotation.call(this);
+    if(r.batch !== undefined && r.batch) {
+        let splitArray = r.xyzw.split(",");
+        r.x = splitArray[0] as number;
+        r.y = splitArray[1] as number;
+        r.z = splitArray[2] as number;
+        r.w = splitArray[3] as number;
+    }
+
     if (out) {
         return Quat.copy(out, r);
     }
@@ -715,6 +729,12 @@ nodeProto.getWorldRotation = function (out?: Quat): Quat {
 
 nodeProto.getWorldScale = function (out?: Vec3): Vec3 {
     const r = oldGetWorldScale.call(this);
+    if(r.batch !== undefined && r.batch) {
+        let splitArray = r.xyz.split(",");
+        r.x = splitArray[0] as number;
+        r.y = splitArray[1] as number;
+        r.z = splitArray[2] as number;
+    }
     if (out) {
         return Vec3.copy(out, r);
     }

@@ -24,6 +24,7 @@
 ****************************************************************************/
 
 #include "jsb_scene_manual.h"
+#include "base/StringUtil.h"
 #include "bindings/auto/jsb_scene_auto.h"
 #include "core/Root.h"
 #include "core/event/EventTypesToJS.h"
@@ -379,32 +380,46 @@ static bool js_scene_Node_registerOnSiblingOrderChanged(se::State &s) // NOLINT(
 }
 SE_BIND_FUNC(js_scene_Node_registerOnSiblingOrderChanged) // NOLINT(readability-identifier-naming)
 
-static bool scene_Vec3_to_seval(const cc::Vec3 &v, se::Value *ret) { // NOLINT(readability-identifier-naming)
+static bool scene_Vec3_to_seval(const cc::Vec3 &v, se::Value *ret, bool batchMode = false) { // NOLINT(readability-identifier-naming)
     CC_ASSERT(ret != nullptr);
     if (!nodeVec3CacheObj) {
         nodeVec3CacheObj = se::Object::createPlainObject();
         nodeVec3CacheObj->root();
     }
     se::Object *obj(nodeVec3CacheObj);
-    obj->setProperty("x", se::Value(v.x));
-    obj->setProperty("y", se::Value(v.y));
-    obj->setProperty("z", se::Value(v.z));
+    if (batchMode) {
+        std::string res = cc::StringUtil::format("%f,%f,%f", v.x, v.y, v.z);
+        obj->setProperty("xyz", se::Value(res.c_str()));
+        obj->setProperty("batch", se::Value(true));
+    } else {
+        obj->setProperty("x", se::Value(v.x));
+        obj->setProperty("y", se::Value(v.y));
+        obj->setProperty("z", se::Value(v.z));
+        obj->setProperty("batch", se::Value(false));
+    }
     ret->setObject(obj);
 
     return true;
 }
 
-static bool scene_Quaternion_to_seval(const cc::Quaternion &v, se::Value *ret) { // NOLINT(readability-identifier-naming)
+static bool scene_Quaternion_to_seval(const cc::Quaternion &v, se::Value *ret, bool batchMode = false) { // NOLINT(readability-identifier-naming)
     CC_ASSERT(ret != nullptr);
     if (!nodeQuatCacheObj) {
         nodeQuatCacheObj = se::Object::createPlainObject();
         nodeQuatCacheObj->root();
     }
     se::Object *obj(nodeQuatCacheObj);
-    obj->setProperty("x", se::Value(v.x));
-    obj->setProperty("y", se::Value(v.y));
-    obj->setProperty("z", se::Value(v.z));
-    obj->setProperty("w", se::Value(v.w));
+    if (batchMode) {
+        std::string res = cc::StringUtil::format("%f,%f,%f,%f", v.x, v.y, v.z, v.w);
+        obj->setProperty("xyzw", se::Value(res.c_str()));
+        obj->setProperty("batch", se::Value(true));
+    } else {
+        obj->setProperty("x", se::Value(v.x));
+        obj->setProperty("y", se::Value(v.y));
+        obj->setProperty("z", se::Value(v.z));
+        obj->setProperty("w", se::Value(v.w));
+        obj->setProperty("batch", se::Value(false));
+    }
     ret->setObject(obj);
 
     return true;
@@ -686,7 +701,7 @@ static bool js_scene_Node_getWorldPosition(se::State &s) // NOLINT(readability-i
     CC_UNUSED bool ok = true;
     if (argc == 0) {
         const cc::Vec3 &result = cobj->getWorldPosition();
-        ok &= scene_Vec3_to_seval(result, &s.rval());
+        ok &= scene_Vec3_to_seval(result, &s.rval(), true);
         SE_PRECONDITION2(ok, false, "js_scene_Node_getWorldPosition : Error processing arguments");
         SE_HOLD_RETURN_VALUE(result, s.thisObject(), s.rval());
         return true;
@@ -743,7 +758,7 @@ static bool js_scene_Node_getWorldRotation(se::State &s) // NOLINT(readability-i
     CC_UNUSED bool ok = true;
     if (argc == 0) {
         const cc::Quaternion &result = cobj->getWorldRotation();
-        ok &= scene_Quaternion_to_seval(result, &s.rval());
+        ok &= scene_Quaternion_to_seval(result, &s.rval(), true);
         SE_PRECONDITION2(ok, false, "js_scene_Node_getWorldRotation : Error processing arguments");
         SE_HOLD_RETURN_VALUE(result, s.thisObject(), s.rval());
         return true;
@@ -762,7 +777,7 @@ static bool js_scene_Node_getWorldScale(se::State &s) // NOLINT(readability-iden
     CC_UNUSED bool ok = true;
     if (argc == 0) {
         const cc::Vec3 &result = cobj->getWorldScale();
-        ok &= scene_Vec3_to_seval(result, &s.rval());
+        ok &= scene_Vec3_to_seval(result, &s.rval(), true);
         SE_PRECONDITION2(ok, false, "js_scene_Node_getWorldScale : Error processing arguments");
         SE_HOLD_RETURN_VALUE(result, s.thisObject(), s.rval());
         return true;
