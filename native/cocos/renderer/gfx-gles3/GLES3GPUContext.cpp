@@ -311,6 +311,8 @@ void GLES3GPUContext::present(const GLES3GPUSwapchain *swapchain) {
         }
     }
 #endif
+
+#if !USE_XR
     if (_eglCurrentInterval != swapchain->eglSwapInterval) {
         if (!eglSwapInterval(eglDisplay, swapchain->eglSwapInterval)) {
             CC_LOG_ERROR("eglSwapInterval() - FAILED.");
@@ -318,10 +320,9 @@ void GLES3GPUContext::present(const GLES3GPUSwapchain *swapchain) {
 
         _eglCurrentInterval = swapchain->eglSwapInterval;
     }
-#if !XR_OEM_HUAWEIVR
     EGL_CHECK(eglSwapBuffers(eglDisplay, swapchain->eglSurface));
-#else
-    eglSwapBuffers(eglDisplay, swapchain->eglSurface);
+#elif XR_OEM_HUAWEIVR
+	eglSwapBuffers(eglDisplay, swapchain->eglSurface);
 #endif
 }
 

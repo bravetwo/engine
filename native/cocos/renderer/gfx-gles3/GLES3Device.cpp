@@ -331,7 +331,7 @@ uint32_t GetDepthTexture(void* wndHandle, uint32_t colorTexture, bool fboMSAAEna
     }
 
 	m_wndToDepthMap.insert(std::make_pair(wndHandle, depthTexture));
-    CC_LOG_INFO("[CXR] create depth texture/buffer %dX%d", width, height);
+    CC_LOG_INFO("[CXR] create depth texture/buffer [%p,%d] %dX%d", wndHandle, colorTexture, width, height);
 
     return depthTexture;
 }
