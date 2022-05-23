@@ -405,7 +405,8 @@ void EventDispatcher::dispatchHandleEvent(const xr::HandleEvent &handleEvent) {
             break;
         case xr::HandleEvent::Type::HOME_UP:
             {
-                cc::JniHelper::callObjectVoidMethod(JniHelper::getActivity(), "android/app/Activity", "finish");
+                exit(0);
+                /*cc::JniHelper::callObjectVoidMethod(JniHelper::getActivity(), "android/app/Activity", "finish");*/
                 /*std::string className = "android/app/Activity";
                 std::string methodName = "moveTaskToBack";
                 std::string signature = "(Z)Z";
