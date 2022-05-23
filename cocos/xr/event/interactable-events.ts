@@ -28,7 +28,7 @@
  * @module component/xr
  */
 
-import { ccclass, help, menu, displayOrder, type, serializable} from 'cc.decorator';
+import { ccclass, help, menu, displayOrder, type, serializable, tooltip} from 'cc.decorator';
 import { EventHandler as ComponentEventHandler } from '../../core/components';
 import { XrControlEventType, XrEventHandle } from './xr-event-handle';
 import { Collider } from '../../physics/framework/components/colliders/collider';
@@ -47,31 +47,37 @@ export class InteractableEvents extends IXrInteractable {
     @type([ComponentEventHandler])
     @serializable
     @displayOrder(1)
+    @tooltip('i18n:xr.interactable_events.hoverEnterEvents')
     public hoverEnterEvents: ComponentEventHandler[] = [];
 
     @type([ComponentEventHandler])
     @serializable
     @displayOrder(2)
+    @tooltip('i18n:xr.interactable_events.hoverExitEvents')
     public hoverExitEvents: ComponentEventHandler[] = [];
 
     @type([ComponentEventHandler])
     @serializable
     @displayOrder(3)
+    @tooltip('i18n:xr.interactable_events.selectEnterEvents')
     public selectEnterEvents: ComponentEventHandler[] = [];
 
     @type([ComponentEventHandler])
     @serializable
     @displayOrder(4)
+    @tooltip('i18n:xr.interactable_events.selectExitEvents')
     public selectExitEvents: ComponentEventHandler[] = [];
 
     @type([ComponentEventHandler])
     @serializable
     @displayOrder(5)
+    @tooltip('i18n:xr.interactable_events.activeEnterEvents')
     public activeEnterEvents: ComponentEventHandler[] = [];
 
     @type([ComponentEventHandler])
     @serializable
     @displayOrder(6)
+    @tooltip('i18n:xr.interactable_events.activeExitEvents')
     public activeExitEvents: ComponentEventHandler[] = [];
 
     private _hover = false;

@@ -62,6 +62,7 @@ class AudioEvents {
 
     @type(Boolean)
     @displayOrder(1)
+    @tooltip('i18n:xr.interactor_events.audio_events.onSelectEntered')
     set onSelectEntered (val) {
         if (val === this._onSelectEntered) {
             return;
@@ -78,6 +79,7 @@ class AudioEvents {
     })
     @displayName("AudioClip")
     @displayOrder(2)
+    @tooltip('i18n:xr.interactor_events.audio_events.onSelectEnteredAudioClip')
     set onSelectEnteredAudioClip(val) {
         if (val === this._onSelectEnteredAudioClip) {
             return;
@@ -90,6 +92,7 @@ class AudioEvents {
 
     @type(Boolean)
     @displayOrder(3)
+    @tooltip('i18n:xr.interactor_events.audio_events.onSelectExited')
     set onSelectExited (val) {
         if (val === this._onSelectExited) {
             return;
@@ -106,6 +109,7 @@ class AudioEvents {
     })
     @displayName("AudioClip")
     @displayOrder(4)
+    @tooltip('i18n:xr.interactor_events.audio_events.onSelectExitedAudioClip')
     set onSelectExitedAudioClip(val) {
         if (val === this._onSelectExitedAudioClip) {
             return;
@@ -118,6 +122,7 @@ class AudioEvents {
 
     @type(Boolean)
     @displayOrder(5)
+    @tooltip('i18n:xr.interactor_events.audio_events.onSelectCanceled')
     set onSelectCanceled (val) {
         if (val === this._onSelectCanceled) {
             return;
@@ -134,6 +139,7 @@ class AudioEvents {
     })
     @displayName("AudioClip")
     @displayOrder(6)
+    @tooltip('i18n:xr.interactor_events.audio_events.onSelectCanceledAudioClip')
     set onSelectCanceledAudioClip(val) {
         if (val === this._onSelectCanceledAudioClip) {
             return;
@@ -146,6 +152,7 @@ class AudioEvents {
 
     @type(Boolean)
     @displayOrder(7)
+    @tooltip('i18n:xr.interactor_events.audio_events.onHoverEntered')
     set onHoverEntered (val) {
         if (val === this._onHoverEntered) {
             return;
@@ -162,6 +169,7 @@ class AudioEvents {
     })
     @displayName("AudioClip")
     @displayOrder(8)
+    @tooltip('i18n:xr.interactor_events.audio_events.onHoverEnteredAudioClip')
     set onHoverEnteredAudioClip(val) {
         if (val === this._onHoverEnteredAudioClip) {
             return;
@@ -174,6 +182,7 @@ class AudioEvents {
 
     @type(Boolean)
     @displayOrder(9)
+    @tooltip('i18n:xr.interactor_events.audio_events.onHoverExited')
     set onHoverExited (val) {
         if (val === this._onHoverExited) {
             return;
@@ -190,6 +199,7 @@ class AudioEvents {
     })
     @displayName("AudioClip")
     @displayOrder(10)
+    @tooltip('i18n:xr.interactor_events.audio_events.onHoverExitedAudioClip')
     set onHoverExitedAudioClip(val) {
         if (val === this._onHoverExitedAudioClip) {
             return;
@@ -202,6 +212,7 @@ class AudioEvents {
 
     @type(Boolean)
     @displayOrder(11)
+    @tooltip('i18n:xr.interactor_events.audio_events.onHoverCanceled')
     set onHoverCanceled (val) {
         if (val === this._onHoverCanceled) {
             return;
@@ -218,6 +229,7 @@ class AudioEvents {
     })
     @displayName("AudioClip")
     @displayOrder(12)
+    @tooltip('i18n:xr.interactor_events.audio_events.onHoverCanceledAudioClip')
     set onHoverCanceledAudioClip(val) {
         if (val === this._onHoverCanceledAudioClip) {
             return;
@@ -276,7 +288,7 @@ class HapticEvents {
     */
     @type(Boolean)
     @displayOrder(1)
-    @tooltip('i18n:HapticEvents.onSelectEntered')
+    @tooltip('i18n:xr.interactor_events.haptic_events.onSelectEntered')
     set onSelectEntered (val) {
         if (val === this._onSelectEntered) {
             return;
@@ -298,8 +310,8 @@ class HapticEvents {
     @range([0, 1, 0.1])
     @slide
     @displayName("Haptic Intensity")
-    @tooltip('i18n:HapticEvents.onSelectEnteredHaptic')
     @displayOrder(2)
+    @tooltip('i18n:xr.interactor_events.haptic_events.onSelectEnteredHaptic')
     set onSelectEnteredHaptic(val) {
         if (this._onSelectEnteredHaptic === val) {
             return;
@@ -316,6 +328,7 @@ class HapticEvents {
     })
     @displayName("Duration")
     @displayOrder(3)
+    @tooltip('i18n:xr.interactor_events.haptic_events.onSelectEnteredDuration')
     set onSelectEnteredDuration(val) {
         if (val === this._onSelectEnteredDuration) {
             return;
@@ -328,6 +341,7 @@ class HapticEvents {
 
     @type(Boolean)
     @displayOrder(4)
+    @tooltip('i18n:xr.interactor_events.haptic_events.onSelectExited')
     set onSelectExited (val) {
         if (val === this._onSelectExited) {
             return;
@@ -348,8 +362,8 @@ class HapticEvents {
     @range([0, 1, 0.1])
     @slide
     @displayName("Haptic Intensity")
-    @tooltip('i18n:HapticEvents.onSelectExitedHaptic')
     @displayOrder(5)
+    @tooltip('i18n:xr.interactor_events.haptic_events.onSelectExitedHaptic')
     set onSelectExitedHaptic(value) {
         if (this._onSelectExitedHaptic === value) {
             return;
@@ -366,6 +380,7 @@ class HapticEvents {
     })
     @displayName("Duration")
     @displayOrder(6)
+    @tooltip('i18n:xr.interactor_events.haptic_events.onSelectExitedDuration')
     set onSelectExitedDuration(val) {
         if (val === this._onSelectExitedDuration) {
             return;
@@ -378,6 +393,7 @@ class HapticEvents {
 
     @type(Boolean)
     @displayOrder(7)
+    @tooltip('i18n:xr.interactor_events.haptic_events.onSelectCanceled')
     set onSelectCanceled (val) {
         if (val === this._onSelectCanceled) {
             return;
@@ -399,8 +415,8 @@ class HapticEvents {
     @range([0, 1, 0.1])
     @slide
     @displayName("Haptic Intensity")
-    @tooltip('i18n:HapticEvents.onSelectCanceledHaptic')
     @displayOrder(8)
+    @tooltip('i18n:xr.interactor_events.haptic_events.onSelectCanceledHaptic')
     set onSelectCanceledHaptic(value) {
         if (this._onSelectCanceledHaptic === value) {
             return;
@@ -417,6 +433,7 @@ class HapticEvents {
     })
     @displayName("Duration")
     @displayOrder(9)
+    @tooltip('i18n:xr.interactor_events.haptic_events.onSelectCanceledDuration')
     set onSelectCanceledDuration(val) {
         if (val === this._onSelectCanceledDuration) {
             return;
@@ -429,6 +446,7 @@ class HapticEvents {
 
     @type(Boolean)
     @displayOrder(10)
+    @tooltip('i18n:xr.interactor_events.haptic_events.onHoverEntered')
     set onHoverEntered (val) {
         if (val === this._onHoverEntered) {
             return;
@@ -451,8 +469,8 @@ class HapticEvents {
     @range([0, 1, 0.1])
     @slide
     @displayName("Haptic Intensity")
-    @tooltip('i18n:HapticEvents.onHoverEnteredHaptic')
     @displayOrder(11)
+    @tooltip('i18n:xr.interactor_events.haptic_events.onHoverEnteredHaptic')
     set onHoverEnteredHaptic(value) {
         if (this._onHoverEnteredHaptic === value) {
             return;
@@ -469,6 +487,7 @@ class HapticEvents {
     })
     @displayName("Duration")
     @displayOrder(12)
+    @tooltip('i18n:xr.interactor_events.haptic_events.onHoverEnteredDuration')
     set onHoverEnteredDuration(val) {
         if (val === this._onHoverEnteredDuration) {
             return;
@@ -481,6 +500,7 @@ class HapticEvents {
 
     @type(Boolean)
     @displayOrder(13)
+    @tooltip('i18n:xr.interactor_events.haptic_events.onHoverExited')
     set onHoverExited (val) {
         if (val === this._onHoverExited) {
             return;
@@ -502,8 +522,8 @@ class HapticEvents {
     @range([0, 1, 0.1])
     @slide
     @displayName("Haptic Intensity")
-    @tooltip('i18n:HapticEvents.hapticIntensity')
     @displayOrder(14)
+    @tooltip('i18n:xr.interactor_events.haptic_events.onHoverExitedHaptic')
     set onHoverExitedHaptic(value) {
         if (this._onHoverExitedHaptic === value) {
             return;
@@ -520,6 +540,7 @@ class HapticEvents {
     })
     @displayName("Duration")
     @displayOrder(15)
+    @tooltip('i18n:xr.interactor_events.haptic_events.onHoverExitedDuration')
     set onHoverExitedDuration(val) {
         if (val === this._onHoverExitedDuration) {
             return;
@@ -532,6 +553,7 @@ class HapticEvents {
 
     @type(Boolean)
     @displayOrder(16)
+    @tooltip('i18n:xr.interactor_events.haptic_events.onHoverCanceled')
     set onHoverCanceled (val) {
         if (val === this._onHoverCanceled) {
             return;
@@ -553,8 +575,8 @@ class HapticEvents {
     @range([0, 1, 0.1])
     @slide
     @displayName("Haptic Intensity")
-    @tooltip('i18n:HapticEvents.onHoverCanceledHaptic')
     @displayOrder(17)
+    @tooltip('i18n:xr.interactor_events.haptic_events.onHoverCanceledHaptic')
     set onHoverCanceledHaptic(value) {
         if (this._onHoverCanceledHaptic === value) {
             return;
@@ -571,6 +593,7 @@ class HapticEvents {
     })
     @displayName("Duration")
     @displayOrder(18)
+    @tooltip('i18n:xr.interactor_events.haptic_events.onHoverCanceledDuration')
     set onHoverCanceledDuration(val) {
         if (val === this._onHoverCanceledDuration) {
             return;
@@ -587,21 +610,25 @@ class SubInteractorEvents {
     @type([ComponentEventHandler])
     @serializable
     @displayOrder(1)
+    @tooltip('i18n:xr.interactor_events.sub_interactor_events.hoverEnterEvents')
     public hoverEnterEvents: ComponentEventHandler[] = [];
 
     @type([ComponentEventHandler])
     @serializable
     @displayOrder(2)
+    @tooltip('i18n:xr.interactor_events.sub_interactor_events.hoverExitEvents')
     public hoverExitEvents: ComponentEventHandler[] = [];
 
     @type([ComponentEventHandler])
     @serializable
     @displayOrder(3)
+    @tooltip('i18n:xr.interactor_events.sub_interactor_events.selectEnterEvents')
     public selectEnterEvents: ComponentEventHandler[] = [];
 
     @type([ComponentEventHandler])
     @serializable
     @displayOrder(4)
+    @tooltip('i18n:xr.interactor_events.sub_interactor_events.selectExitEvents')
     public selectExitEvents: ComponentEventHandler[] = [];
 
     public selectEntered(event: XrEventHandle) {
@@ -635,16 +662,19 @@ export class InteractorEvents extends Component {
     @type(AudioEvents)
     @serializable
     @displayOrder(1)
+    @tooltip('i18n:xr.interactor_events.audioEvents')
     public audioEvents: AudioEvents = new AudioEvents;
 
     @type(HapticEvents)
     @serializable
     @displayOrder(2)
+    @tooltip('i18n:xr.interactor_events.hapticEvents')
     public hapticEvents: HapticEvents = new HapticEvents;
 
     @type(SubInteractorEvents)
     @serializable
     @displayOrder(3)
+    @tooltip('i18n:xr.interactor_events.interactorEvents')
     public interactorEvents: SubInteractorEvents = new SubInteractorEvents;
 
     public selectEntered(event: XrEventHandle) {

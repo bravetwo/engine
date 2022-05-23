@@ -28,7 +28,7 @@
  * @module component/xr
  */
 
-import { ccclass, help, menu, type, displayOrder, serializable, executeInEditMode } from 'cc.decorator';
+import { ccclass, help, menu, type, displayOrder, serializable, executeInEditMode, tooltip } from 'cc.decorator';
 import { ccenum } from '../../core/value-types/enum';
 import { Component } from '../../core/components/component';
 import { Input, input } from '../../input';
@@ -45,8 +45,9 @@ enum TrackingSource_Type {
 }
 
 enum TrackingType_Type {
-    UP_TO_3DOF = 0,
-    UP_TO_6DOF = 1,
+    POSITION_AND_ROTATION = 1,
+    POSITION = 2,
+    ROTATION = 3
 }
 
 enum UpdateType_Type {
@@ -73,12 +74,13 @@ export class PoseTracker extends Component {
     @serializable
     protected _trackingSource : TrackingSource_Type = TrackingSource_Type.HAND_POSE_ACTIVE_LEFT;
     @serializable
-    protected _trackingType : TrackingType_Type = TrackingType_Type.UP_TO_6DOF;
+    protected _trackingType : TrackingType_Type = TrackingType_Type.POSITION_AND_ROTATION;
     @serializable
-    protected _updateType : UpdateType_Type = UpdateType_Type.UPDATE_AND_BEFORE_RENDER;
+    protected _additionalXRotation = 0;
 
     @type(TrackingSource_Type)
     @displayOrder(1)
+    @tooltip('i18n:xr.pose_tracker.trackingSource')
     set trackingSource (val) {
         if (val === this._trackingSource) {
             return;
@@ -98,6 +100,7 @@ export class PoseTracker extends Component {
 
     @type(TrackingType_Type)
     @displayOrder(2)
+    @tooltip('i18n:xr.pose_tracker.trackingType')
     set trackingType (val) {
         if (val === this._trackingType) {
             return;
@@ -108,16 +111,16 @@ export class PoseTracker extends Component {
         return this._trackingType;
     }
 
-    @type(UpdateType_Type)
     @displayOrder(3)
-    set updateType (val) {
-        if (val === this._updateType) {
+    @tooltip('i18n:xr.pose_tracker.additionalXRotation')
+    set additionalXRotation (val) {
+        if (val === this._additionalXRotation) {
             return;
         }
-        this._updateType = val;
+        this._additionalXRotation = val;
     }
-    get updateType () {
-        return this._updateType;
+    get additionalXRotation () {
+        return this._additionalXRotation;
     }
 
     private _quatPose: Quat = new Quat();
@@ -180,14 +183,9 @@ export class PoseTracker extends Component {
 
     private _dispatchEventPose(eventHandle: EventHandle) {
         this._quatPose.set(eventHandle.quaternionX, eventHandle.quaternionY, eventHandle.quaternionZ, eventHandle.quaternionW);
-        // if (eventHandle.getType() === Input.EventType.HAND_POSE_ACTIVE_LEFT || eventHandle.getType() === Input.EventType.HAND_POSE_ACTIVE_RIGHT) {
-        //     var vec3 = new Vec3;
-        //     Quat.toEuler(vec3, this._quatPose);
-        //     vec3.add3f(-45, 0, 0);
-        //     Quat.fromEuler(this._quatPose, vec3.x, vec3.y, vec3.z);
-        // }
+        this._amendXRotation();
 
-        if (this._trackingType === TrackingType_Type.UP_TO_6DOF) {
+        if (this._trackingType === TrackingType_Type.POSITION_AND_ROTATION) {
             if (eventHandle.getType() === Input.EventType.VIEW_POSE_ACTIVE_LEFT) {
                 this._positionPose.set(eventHandle.x - this._ipdOffset, eventHandle.y, eventHandle.z);
             } else if (eventHandle.getType() === Input.EventType.VIEW_POSE_ACTIVE_RIGHT) {
@@ -207,5 +205,16 @@ export class PoseTracker extends Component {
 
         this.node.setRTS(this._quatPose, this._positionPose, Vec3.ONE);
         this.node.updateWorldTransform();
+    }
+
+    private _amendXRotation() {
+        if (this._additionalXRotation === 0) {
+            return;
+        }
+
+        var vec3 = new Vec3;
+        Quat.toEuler(vec3, this._quatPose);
+        vec3.add3f(this._additionalXRotation, 0, 0);
+        Quat.fromEuler(this._quatPose, vec3.x, vec3.y, vec3.z);
     }
 }

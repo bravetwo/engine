@@ -28,7 +28,7 @@
  * @module component/xr
  */
 
-import { ccclass, help, menu, type, visible, displayOrder, serializable} from 'cc.decorator';
+import { ccclass, help, menu, type, visible, displayOrder, serializable, tooltip} from 'cc.decorator';
 import { ccenum } from '../../core/value-types/enum';
 import { Component } from '../../core/components/component';
 import { Node } from '../../core/scene-graph/node';
@@ -60,6 +60,7 @@ export class TrackingOrigin extends Component {
 
     @type(Node)
     @displayOrder(1)
+    @tooltip('i18n:xr.tracking_origin.offsetObject')
     set offsetObject(val) {
         if (val === this._offsetObject) {
             return;
@@ -74,6 +75,7 @@ export class TrackingOrigin extends Component {
 
     @type(TrackingOriginMode_Type)
     @displayOrder(2)
+    @tooltip('i18n:xr.tracking_origin.trackingOriginMode')
     set trackingOriginMode (val) {
         if (val === this._trackingOriginMode) {
             return;
@@ -93,6 +95,7 @@ export class TrackingOrigin extends Component {
     @visible(function (this: TrackingOrigin) {
         return this._trackingOriginMode !== TrackingOriginMode_Type.Floor;
     })
+    @tooltip('i18n:xr.tracking_origin.yOffsetValue')
     set yOffsetValue (val) {
         if (val === this._yOffsetValue) {
             return;

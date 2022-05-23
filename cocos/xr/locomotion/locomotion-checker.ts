@@ -28,7 +28,7 @@
  * @module component/xr
  */
 
-import { ccclass, help, menu, displayOrder, type, serializable, executeInEditMode} from 'cc.decorator';
+import { ccclass, help, menu, displayOrder, type, serializable, executeInEditMode, tooltip} from 'cc.decorator';
 import { Component } from '../../core/components';
 import { director } from '../../core/director';
 import { TrackingOrigin } from '../device/tracking-origin';
@@ -53,6 +53,7 @@ export class LocomotionChecker extends Component {
     private _time = 0;
    
     @displayOrder(1)
+    @tooltip('i18n:xr.locomotion_checker.timeout')
     set timeout (val) {
         if (val === this._timeout) {
             return;
@@ -65,6 +66,7 @@ export class LocomotionChecker extends Component {
 
     @type(TrackingOrigin)
     @displayOrder(2)
+    @tooltip('i18n:xr.locomotion_checker.xrAgent')
     set XR_Agent (val) {
         if (val === this._xrAgent) {
             return;

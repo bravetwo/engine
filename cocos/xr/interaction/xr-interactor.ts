@@ -28,7 +28,7 @@
  * @module component/xr
  */
 
-import { displayOrder, type, serializable } from 'cc.decorator';
+import { displayOrder, type, serializable, tooltip } from 'cc.decorator';
 import { ccenum } from '../../core';
 import { Component } from '../../core/components';
 import { Node } from '../../core/scene-graph/node';
@@ -64,6 +64,7 @@ export class XrInteractor extends Component {
 
     @type(Node)
     @displayOrder(1)
+    @tooltip('i18n:xr.xr_interactor.attachTransform')
     set attachTransform(val) {
         if (val === this._attachTransform) {
             return;
@@ -76,6 +77,7 @@ export class XrInteractor extends Component {
 
     @type(SelectActionTrigger_Type)
     @displayOrder(12)
+    @tooltip('i18n:xr.xr_interactor.selectActionTrigger')
     set selectActionTrigger(val) {
         if (val === this._selectActionTrigger) {
             return;

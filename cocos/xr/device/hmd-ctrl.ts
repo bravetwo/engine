@@ -28,7 +28,7 @@
  * @module component/xr
  */
 
-import { ccclass, help, menu, type, visible, displayOrder, serializable } from 'cc.decorator';
+import { ccclass, help, menu, type, visible, displayOrder, serializable, tooltip } from 'cc.decorator';
 import { ccenum } from '../../core/value-types/enum';
 import { Component } from '../../core/components/component';
 import { Vec2 } from '../../core/math';
@@ -105,6 +105,7 @@ export class HMDCtrl extends Component {
 
     @type(StereoRendering_Type)
     @displayOrder(1)
+    @tooltip('i18n:xr.hmd_ctrl.stereoRendering')
     set stereoRendering(val) {
         if (val === this._stereoRendering) {
             return;
@@ -117,6 +118,7 @@ export class HMDCtrl extends Component {
 
     @type(Boolean)
     @displayOrder(2)
+    @tooltip('i18n:xr.hmd_ctrl.perEyeCamera')
     set perEyeCamera(val) {
         if (val === this._perEyeCamera) {
             return;
@@ -156,6 +158,7 @@ export class HMDCtrl extends Component {
 
     @type(Boolean)
     @displayOrder(3)
+    @tooltip('i18n:xr.hmd_ctrl.syncWithMainCamera')
     @visible(function (this: HMDCtrl) {
         return this._perEyeCamera;
     })
@@ -172,6 +175,7 @@ export class HMDCtrl extends Component {
 
     @type(FoveationRendering_Type)
     @displayOrder(4)
+    @tooltip('i18n:xr.hmd_ctrl.foveationRendering')
     set foveationRendering(val) {
         if (val === this._foveationRendering) {
             return;
@@ -184,6 +188,7 @@ export class HMDCtrl extends Component {
 
     @type(IPDOffset_Type)
     @displayOrder(5)
+    @tooltip('i18n:xr.hmd_ctrl.IPDOffset')
     set IPDOffset(val) {
         if (val === this._IPDOffset) {
             return;
@@ -202,6 +207,7 @@ export class HMDCtrl extends Component {
         return this._IPDOffset === IPDOffset_Type.Manual;
     })
     @displayOrder(6)
+    @tooltip('i18n:xr.hmd_ctrl.offsetValue')
     set offsetValue(val) {
         if (val === this._offsetValue) {
             return;
@@ -216,6 +222,7 @@ export class HMDCtrl extends Component {
 
     @type(AspectRatio_Type)
     @displayOrder(7)
+    @tooltip('i18n:xr.hmd_ctrl.aspectRatio')
     set aspectRatio(val) {
         if (val === this._aspectRatio) {
             return;
@@ -231,6 +238,7 @@ export class HMDCtrl extends Component {
         return this._aspectRatio === AspectRatio_Type.Manual;
     })
     @displayOrder(8)
+    @tooltip('i18n:xr.hmd_ctrl.ratio')
     set ratio(val) {
         if (val === this._ratio) {
             return;

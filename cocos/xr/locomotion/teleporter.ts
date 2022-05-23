@@ -28,7 +28,7 @@
  * @module component/xr
  */
 
-import { ccclass, help, menu, displayOrder, type, serializable, executeInEditMode} from 'cc.decorator';
+import { ccclass, help, menu, displayOrder, type, serializable, executeInEditMode, tooltip} from 'cc.decorator';
 import { Component } from '../../core/components';
 import { director } from '../../core/director';
 import { LocomotionChecker } from './locomotion-checker';
@@ -49,6 +49,7 @@ export class Teleporter extends Component {
    
     @type(LocomotionChecker)
     @displayOrder(1)
+    @tooltip('i18n:xr.teleporter.checker')
     set checker (val) {
         if (val === this._checker) {
             return;

@@ -28,7 +28,7 @@
  * @module component/xr
  */
 
-import { displayOrder, type, serializable} from 'cc.decorator';
+import { displayOrder, type, serializable, tooltip} from 'cc.decorator';
 import { Component, EventHandler as ComponentEventHandler } from '../../core/components';
 import { Node } from '../../core/scene-graph/node';
 import { Collider } from '../../physics/framework/components/colliders/collider';
@@ -56,6 +56,7 @@ export class XrInteractable extends IXrInteractable {
 
     @type(Node)
     @displayOrder(5)
+    @tooltip('i18n:xr.xr_interactable.rayReticle')
     set rayReticle (val) {
         if (val === this._rayReticle) {
             return;

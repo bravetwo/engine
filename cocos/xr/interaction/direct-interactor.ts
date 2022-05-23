@@ -28,7 +28,7 @@
  * @module component/xr
  */
 
-import { ccclass, help, menu, displayOrder, type, serializable } from 'cc.decorator';
+import { ccclass, help, menu, displayOrder, type, serializable, tooltip } from 'cc.decorator';
 import { ccenum } from '../../core';
 import { Node } from '../../core/scene-graph/node';
 import { ICollisionEvent, ITriggerEvent } from '../../physics/framework/physics-interface';
@@ -62,18 +62,6 @@ export class DirectInteractor extends XrInteractor {
 
     private _colliderCom: any = null;
     private _directHitCollider: Collider | null = null;
-
-    @type(Node)
-    @displayOrder(5)
-    set startingSelectedInteractable(val) {
-        if (val === this._startingSelectedInteractable) {
-            return;
-        }
-        this._startingSelectedInteractable = val;
-    }
-    get startingSelectedInteractable() {
-        return this._startingSelectedInteractable;
-    }
 
     onLoad() {
         this._colliderCom = this.node.getComponent(Collider);

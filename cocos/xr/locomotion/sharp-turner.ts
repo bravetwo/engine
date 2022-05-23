@@ -28,10 +28,10 @@
  * @module component/xr
  */
 
-import { ccclass, help, menu, displayOrder, type, serializable} from 'cc.decorator';
+import { ccclass, help, menu, displayOrder, type, serializable, tooltip, executeInEditMode} from 'cc.decorator';
 import { Component } from '../../core/components';
 import { Node } from '../../core/scene-graph/node';
-import { ccenum, Quat, Vec3 } from '../../core';
+import { ccenum, director, Quat, Vec3 } from '../../core';
 import { XRController, XrInputDeviceType } from '../device/xr-controller';
 import { Input, input } from '../../input';
 import { EventHandle } from '../../input/types/event/event-handle';
@@ -65,6 +65,7 @@ ccenum(Trigger_Type);
 @ccclass('cc.SharpTurner')
 @help('i18n:cc.SharpTurner')
 @menu('XR/Locomotion/SharpTurner')
+@executeInEditMode
 export class SharpTurner extends Component {
     @serializable
     protected _checker: LocomotionChecker | null = null;
@@ -84,6 +85,7 @@ export class SharpTurner extends Component {
 
     @type(LocomotionChecker)
     @displayOrder(1)
+    @tooltip('i18n:xr.sharp_turner.checker')
     set checker (val) {
         if (val === this._checker) {
             return;
@@ -96,6 +98,7 @@ export class SharpTurner extends Component {
 
     @type(XRController)
     @displayOrder(2)
+    @tooltip('i18n:xr.sharp_turner.inputDevice')
     set inputDevice (val) {
         if (val === this._inputDevice) {
             return;
@@ -108,6 +111,7 @@ export class SharpTurner extends Component {
 
     @type(InputControl_Type)
     @displayOrder(3)
+    @tooltip('i18n:xr.sharp_turner.inputControl')
     set inputControl (val) {
         if (val === this._inputControl) {
             return;
@@ -119,6 +123,7 @@ export class SharpTurner extends Component {
     }
 
     @displayOrder(4)
+    @tooltip('i18n:xr.sharp_turner.turnAngle')
     set turnAngle (val) {
         if (val === this._turnAngle) {
             return;
@@ -131,6 +136,7 @@ export class SharpTurner extends Component {
 
     @type(EnableTurnAround_Type)
     @displayOrder(5)
+    @tooltip('i18n:xr.sharp_turner.enableTurnAround')
     set enableTurnAround (val) {
         if (val === this._enableTurnAround) {
             return;
@@ -142,6 +148,7 @@ export class SharpTurner extends Component {
     }
 
     @displayOrder(6)
+    @tooltip('i18n:xr.sharp_turner.activationTimeout')
     set activationTimeout (val) {
         if (val === this._activationTimeout) {
             return;
@@ -153,6 +160,15 @@ export class SharpTurner extends Component {
     }
 
     onEnable() {
+        if (!this._checker) {
+            const scene = director.getScene() as any;
+            if (scene) {
+                const checker = scene.getComponentInChildren(LocomotionChecker);
+                if (checker) {
+                    this._checker = checker;
+                }
+            } 
+        }
         if (this._inputControl === InputControl_Type.PRIMARY_2D_AXIS) {
             if (this.inputDevice?.inputDevice == XrInputDeviceType.Left_Hand) {
                 input.on(Input.EventType.THUMBSTICK_MOVE_LEFT, this._turnMove, this);

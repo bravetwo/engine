@@ -28,7 +28,7 @@
  * @module component/xr
  */
 
-import { ccclass, help, menu, type, displayOrder, serializable } from 'cc.decorator';
+import { ccclass, help, menu, type, displayOrder, serializable, tooltip } from 'cc.decorator';
 import { ccenum } from '../../core/value-types/enum';
 import { Node } from '../../core/scene-graph/node';
 import { Color, Mat4, Vec3 } from '../../core/math';
@@ -115,6 +115,7 @@ export class RayInteractor extends XrInteractor {
 
     @type(Boolean)
     @displayOrder(1)
+    @tooltip('i18n:xr.ray_interactor.interactionWithUINode')
     set interactionWithUINode(val) {
         if (val === this._interactionWithUINode) {
             return;
@@ -127,6 +128,7 @@ export class RayInteractor extends XrInteractor {
 
     @type(Boolean)
     @displayOrder(2)
+    @tooltip('i18n:xr.ray_interactor.forceGrab')
     set forceGrab(val) {
         if (val === this._forceGrab) {
             return;
@@ -139,6 +141,7 @@ export class RayInteractor extends XrInteractor {
 
     @type(Node)
     @displayOrder(4)
+    @tooltip('i18n:xr.ray_interactor.rayOriginTransform')
     set rayOriginTransform(val) {
         if (val === this._rayOriginTransform) {
             return;
@@ -151,6 +154,7 @@ export class RayInteractor extends XrInteractor {
 
     @type(Line_Type)
     @displayOrder(5)
+    @tooltip('i18n:xr.ray_interactor.lineType')
     set lineType(val) {
         if (val === this._lineType) {
             return;
@@ -162,6 +166,7 @@ export class RayInteractor extends XrInteractor {
     }
 
     @displayOrder(6)
+    @tooltip('i18n:xr.ray_interactor.maxRayDistance')
     set maxRayDistance(val) {
         if (val === this._maxRayDistance) {
             return;
@@ -174,6 +179,7 @@ export class RayInteractor extends XrInteractor {
 
     @type(Node)
     @displayOrder(7)
+    @tooltip('i18n:xr.ray_interactor.reticle')
     set reticle(val) {
         if (val === this._reticle) {
             return;
@@ -186,6 +192,7 @@ export class RayInteractor extends XrInteractor {
 
     @type(Layer_Type)
     @displayOrder(8)
+    @tooltip('i18n:xr.ray_interactor.raycastMask')
     set raycastMask(val) {
         if (val === this._raycastMask) {
             return;
@@ -198,6 +205,7 @@ export class RayInteractor extends XrInteractor {
 
     @type(RaycastTrigger_Type)
     @displayOrder(9)
+    @tooltip('i18n:xr.ray_interactor.raycastTiggerInteraction')
     set raycastTiggerInteraction(val) {
         if (val === this._raycastTriggerInteraction) {
             return;
@@ -210,6 +218,7 @@ export class RayInteractor extends XrInteractor {
 
     @type(HitDirection_Type)
     @displayOrder(10)
+    @tooltip('i18n:xr.ray_interactor.hitDectionType')
     set hitDectionType(val) {
         if (val === this._hitDirectionType) {
             return;
@@ -221,6 +230,7 @@ export class RayInteractor extends XrInteractor {
     }
 
     @displayOrder(11)
+    @tooltip('i18n:xr.ray_interactor.hitClosestOnly')
     set hitClosestOnly(val) {
         if (val === this._hitClosestOnly) {
             return;

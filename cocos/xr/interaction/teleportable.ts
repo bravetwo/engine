@@ -30,7 +30,6 @@
 
 import { ccclass, help, menu, displayOrder, type, serializable, tooltip, visible} from 'cc.decorator';
 import { ccenum} from '../../core';
-import { EventHandler as ComponentEventHandler } from '../../core/components';
 import { Node } from '../../core/scene-graph/node';
 import { Collider } from '../../physics/framework/components/colliders/collider';
 import { XrControlEventType, XrEventHandle } from '../event/xr-event-handle';
@@ -66,21 +65,18 @@ export class Teleportable extends XrInteractable {
     protected _teleportableType: Teleportable_Type = Teleportable_Type.Area;
     @serializable
     protected _teleportAnchorNode: Node | null = null;
-    @type([Collider])
-    @serializable
-    @displayOrder(3)
-    public _colliders: Collider[] = [];
+    // @type([Collider])
+    // @serializable
+    // @displayOrder(3)
+    // public _colliders: Collider[] = [];
     @serializable
     protected _teleportTrigger: TeleportTrigger_Type = TeleportTrigger_Type.OnSelectExited;
     @serializable
     protected _teleporter: Teleporter | null = null;
-    @type([ComponentEventHandler])
-    @serializable
-    @displayOrder(7)
-    public teleportingEvent: ComponentEventHandler[] = [];
     
     @type(Teleportable_Type)
     @displayOrder(1)
+    @tooltip('i18n:xr.teleportable.teleportableType')
     set teleportableType (val) {
         if (val === this._teleportableType) {
             return;
@@ -96,6 +92,7 @@ export class Teleportable extends XrInteractable {
         return this._teleportableType === Teleportable_Type.Anchor;
     })
     @displayOrder(2)
+    @tooltip('i18n:xr.teleportable.teleportAnchorNode')
     set teleportAnchorNode (val) {
         if (val === this._teleportAnchorNode) {
             return;
@@ -108,6 +105,7 @@ export class Teleportable extends XrInteractable {
 
     @type(TeleportTrigger_Type)
     @displayOrder(5)
+    @tooltip('i18n:xr.teleportable.teleportTrigger')
     set teleportTrigger (val) {
         if (val === this._teleportTrigger) {
             return;
@@ -120,6 +118,7 @@ export class Teleportable extends XrInteractable {
 
     @type(Teleporter)
     @displayOrder(6)
+    @tooltip('i18n:xr.teleportable.teleporter')
     set teleporter (val) {
         if (val === this._teleporter) {
             return;

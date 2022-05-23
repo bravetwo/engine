@@ -28,7 +28,7 @@
  * @module component/xr
  */
 
-import { ccclass, help, menu, displayOrder, type, serializable, executeInEditMode, visible, displayName} from 'cc.decorator';
+import { ccclass, help, menu, displayOrder, type, serializable, executeInEditMode, visible, displayName, tooltip} from 'cc.decorator';
 import { Component } from '../../core/components';
 import { XrControlEventType, XrEventHandle } from '../event/xr-event-handle';
 import { Node } from '../../core/scene-graph/node';
@@ -104,6 +104,7 @@ export class XRController extends Component {
 
     @type(XrInputDeviceType)
     @displayOrder(1)
+    @tooltip('i18n:xr.xr_controller.inputDevice')
     set inputDevice(val) {
         if (val === this._inputDevice) {
             return;
@@ -119,6 +120,7 @@ export class XRController extends Component {
     @visible(function (this: XRController) {
         return this._inputDevice === XrInputDeviceType.Left_Hand;
     })
+    @tooltip('i18n:xr.xr_controller.selectActionLeft')
     @displayOrder(2)
     set selectActionLeft(val) {
         if (val === this._selectActionLeft) {
@@ -136,6 +138,7 @@ export class XRController extends Component {
         return this._inputDevice === XrInputDeviceType.Left_Hand;
     })
     @displayOrder(3)
+    @tooltip('i18n:xr.xr_controller.activateActionLeft')
     set activateActionLeft(val) {
         if (val === this._activateActionLeft) {
             return;
@@ -152,6 +155,7 @@ export class XRController extends Component {
         return this._inputDevice === XrInputDeviceType.Left_Hand;
     })
     @displayOrder(4)
+    @tooltip('i18n:xr.xr_controller.UIPressActionLeft')
     set UIPressActionLeft(val) {
         if (val === this._UIPressActionLeft) {
             return;
@@ -168,6 +172,7 @@ export class XRController extends Component {
         return this._inputDevice === XrInputDeviceType.Right_Hand;
     })
     @displayOrder(2)
+    @tooltip('i18n:xr.xr_controller.selectActionRight')
     set selectActionRight(val) {
         if (val === this._selectActionRight) {
             return;
@@ -184,6 +189,7 @@ export class XRController extends Component {
         return this._inputDevice === XrInputDeviceType.Right_Hand;
     })
     @displayOrder(3)
+    @tooltip('i18n:xr.xr_controller.activateActionRight')
     set activateActionRight(val) {
         if (val === this._activateActionRight) {
             return;
@@ -200,6 +206,7 @@ export class XRController extends Component {
         return this._inputDevice === XrInputDeviceType.Right_Hand;
     })
     @displayOrder(4)
+    @tooltip('i18n:xr.xr_controller.UIPressActionRight')
     set UIPressActionRight(val) {
         if (val === this._UIPressActionRight) {
             return;
@@ -212,6 +219,7 @@ export class XRController extends Component {
 
     @type(Number)
     @displayOrder(5)
+    @tooltip('i18n:xr.xr_controller.axisToPressThreshold')
     set axisToPressThreshold(val) {
         if (val === this._axisToPressThreshold) {
             return;
@@ -224,6 +232,7 @@ export class XRController extends Component {
 
     @type(Node)
     @displayOrder(6)
+    @tooltip('i18n:xr.xr_controller.model')
     set model(val) {
         if (val === this._model) {
             return;

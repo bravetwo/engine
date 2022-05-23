@@ -28,9 +28,10 @@
  * @module component/xr
  */
 
-import { ccclass, help, menu, displayOrder, type, serializable, tooltip, visible } from 'cc.decorator';
-import { ccenum, Mat4, Quat, Vec3 } from '../../core';
+import { ccclass, help, menu, displayOrder, type, serializable, tooltip, visible, range } from 'cc.decorator';
+import { ccenum, clamp, Mat4, math, Quat, sys, System, toRadian, Vec3 } from '../../core';
 import { Node } from '../../core/scene-graph/node';
+import CurveRange, { Mode } from '../../particle/animator/curve-range';
 import { Collider, ERigidBodyType, RigidBody } from '../../physics/framework';
 import { XrControlEventType, XrEventHandle } from '../event/xr-event-handle';
 import { XrInteractable } from './xr-interactable';
@@ -51,9 +52,15 @@ enum Movement_Type {
     Velocity = 2
 }
 
+enum ThrowSimulationMode_Type {
+    InheritRigidbody = 0,
+    CurveComputation = 1
+}
+
 ccenum(GrabTrigger_Type);
 ccenum(SelectMode_Type);
 ccenum(Movement_Type);
+ccenum(ThrowSimulationMode_Type);
 
 /**
  * @en
@@ -69,10 +76,10 @@ export class GrabInteractable extends XrInteractable {
     protected _attachTransform: Node | null = null;
     @serializable
     protected _attachEaseInTime = 0.15;
-    @type([Collider])
-    @serializable
-    @displayOrder(3)
-    public _colliders: Collider[] = [];
+    // @type([Collider])
+    // @serializable
+    // @displayOrder(3)
+    // public _colliders: Collider[] = [];
     @serializable
     protected _grabTrigger: GrabTrigger_Type = GrabTrigger_Type.OnSelectEntered;
     @serializable
@@ -84,9 +91,11 @@ export class GrabInteractable extends XrInteractable {
     @serializable
     protected _throwOnDetach = true;
     @serializable
+    protected _throwSimulationMode: ThrowSimulationMode_Type = ThrowSimulationMode_Type.InheritRigidbody;
+    @serializable
     protected _throwSmoothingDuration = 0.25;
     @serializable
-    protected _throwSmoothingCurve = 0;
+    protected _throwSmoothingCurve = new CurveRange();
     @serializable
     protected _throwVelocityScale = 1.5;
     @serializable
@@ -105,9 +114,18 @@ export class GrabInteractable extends XrInteractable {
     private _curWorldPosition = new Vec3;
     // Real-time node Angle
     private _curWorldRotation = new Quat;
+    // Frame number of curves used to weight throw velocity smoothing
+    private _throwFrameCount = 20;
+    private _throwCurrentFrame = 0;
+    private _throwFrameTimes = new Array<number>(this._throwFrameCount).fill(0);
+    private _throwVelocityFrames = new Array<Vec3>(this._throwFrameCount).fill(new Vec3);
+    private _throwAngularVelocityFrames = new Array<Vec3>(this._throwFrameCount).fill(new Vec3);
+    private _lastPosition = new Vec3;
+    private _lastRotation = new Quat;
 
     @type(Node)
     @displayOrder(1)
+    @tooltip('i18n:xr.grab_interactable.attachTransform')
     set attachTransform(val) {
         if (val === this._attachTransform) {
             return;
@@ -119,6 +137,7 @@ export class GrabInteractable extends XrInteractable {
     }
 
     @displayOrder(2)
+    @tooltip('i18n:xr.grab_interactable.attachEaseInTime')
     set attachEaseInTime(val) {
         if (val === this._attachEaseInTime) {
             return;
@@ -131,6 +150,7 @@ export class GrabInteractable extends XrInteractable {
 
     @type(GrabTrigger_Type)
     @displayOrder(4)
+    @tooltip('i18n:xr.grab_interactable.grabTrigger')
     set grabTrigger(val) {
         if (val === this._grabTrigger) {
             return;
@@ -143,6 +163,7 @@ export class GrabInteractable extends XrInteractable {
 
     @type(Boolean)
     @displayOrder(7)
+    @tooltip('i18n:xr.grab_interactable.hideController')
     set hideController(val) {
         if (val === this._hideController) {
             return;
@@ -155,6 +176,7 @@ export class GrabInteractable extends XrInteractable {
 
     @type(SelectMode_Type)
     @displayOrder(8)
+    @tooltip('i18n:xr.grab_interactable.selectMode')
     set selectMode(val) {
         if (val === this._selectMode) {
             return;
@@ -167,6 +189,7 @@ export class GrabInteractable extends XrInteractable {
 
     @type(Movement_Type)
     @displayOrder(9)
+    @tooltip('i18n:xr.grab_interactable.movementType')
     set movementType(val) {
         if (val === this._movementType) {
             return;
@@ -179,6 +202,7 @@ export class GrabInteractable extends XrInteractable {
 
     @type(Boolean)
     @displayOrder(10)
+    @tooltip('i18n:xr.grab_interactable.throwOnDetach')
     set throwOnDetach(val) {
         if (val === this._throwOnDetach) {
             return;
@@ -189,10 +213,27 @@ export class GrabInteractable extends XrInteractable {
         return this._throwOnDetach;
     }
 
+    @type(ThrowSimulationMode_Type)
     @displayOrder(11)
     @visible(function (this: GrabInteractable) {
         return this._throwOnDetach;
     })
+    @tooltip('i18n:xr.grab_interactable.throwSimulationMode')
+    set throwSimulationMode(val) {
+        if (val === this._throwSimulationMode) {
+            return;
+        }
+        this._throwSimulationMode = val;
+    }
+    get throwSimulationMode() {
+        return this._throwSimulationMode;
+    }
+
+    @displayOrder(12)
+    @visible(function (this: GrabInteractable) {
+        return this._throwSimulationMode === ThrowSimulationMode_Type.CurveComputation;
+    })
+    @tooltip('i18n:xr.grab_interactable.throwSmoothingDuration')
     set throwSmoothingDuration(val) {
         if (val === this._throwSmoothingDuration) {
             return;
@@ -203,10 +244,13 @@ export class GrabInteractable extends XrInteractable {
         return this._throwSmoothingDuration;
     }
 
-    @displayOrder(12)
+    @type(CurveRange)
+    @range([0, 1])
+    @displayOrder(13)
     @visible(function (this: GrabInteractable) {
-        return this._throwOnDetach;
+        return this._throwSimulationMode === ThrowSimulationMode_Type.CurveComputation;
     })
+    @tooltip('i18n:xr.grab_interactable.throwSmoothingCurve')
     set throwSmoothingCurve(val) {
         if (val === this._throwSmoothingCurve) {
             return;
@@ -214,13 +258,15 @@ export class GrabInteractable extends XrInteractable {
         this._throwSmoothingCurve = val;
     }
     get throwSmoothingCurve() {
+        this._throwSmoothingCurve.mode = Mode.Curve;
         return this._throwSmoothingCurve;
     }
 
-    @displayOrder(13)
+    @displayOrder(14)
     @visible(function (this: GrabInteractable) {
         return this._throwOnDetach;
     })
+    @tooltip('i18n:xr.grab_interactable.throwVelocityScale')
     set throwVelocityScale(val) {
         if (val === this._throwVelocityScale) {
             return;
@@ -231,10 +277,11 @@ export class GrabInteractable extends XrInteractable {
         return this._throwVelocityScale;
     }
 
-    @displayOrder(14)
+    @displayOrder(15)
     @visible(function (this: GrabInteractable) {
         return this._throwOnDetach;
     })
+    @tooltip('i18n:xr.grab_interactable.throwAngularVelocityScale')
     set throwAngularVelocityScale(val) {
         if (val === this._throwAngularVelocityScale) {
             return;
@@ -289,45 +336,6 @@ export class GrabInteractable extends XrInteractable {
         }
 
         return Vec3.transformMat4(out, nodePoint, _worldMatrix);
-    }
-
-    private _attachToModel(event?: XrEventHandle) {
-        const rigidBody = this.node.getComponent(RigidBody);
-        if (rigidBody) {
-            rigidBody.useGravity = false;
-            rigidBody.type = ERigidBodyType.KINEMATIC;
-        }
-
-        if (this._rayReticle) {
-            this._rayReticle.active = false;
-        }
-
-        if (event) {
-            if (event.forceGrab) {
-                this.node.parent = event.attachNode;
-                if (this._attachTransform) {
-                    var out = new Vec3();
-                    // this.node._uiProps.uiTransformComp?.convertToNodeSpaceAR(out, this._attachTransform.getWorldPosition());
-                    this.convertToNodeSpace(this._attachTransform.getWorldPosition(), out);
-                    // this.node.inverseTransformPoint(out, this._attachTransform.getWorldPosition());
-                    
-                    this.node.setPosition(out.negative().multiply(this.node.getScale()));
-                } else {
-                    this.node.setPosition(new Vec3(0, 0, 0));
-                }
-            } else {
-                const out = this.node.getWorldPosition();
-                this.node.parent = event.attachNode;
-                this.node.setWorldPosition(out);
-            }
-            if (this._hideController && this._model) {
-                this._model.active = true;
-            }
-            if (this._hideController && event.model) {
-                this._model = event.model;
-                this._model.active = false;
-            }
-        }
     }
 
     private _getAttachWorldPosition() {
@@ -390,6 +398,29 @@ export class GrabInteractable extends XrInteractable {
                 this.node.setWorldRotation(attachWorldRotation);
             }
         }
+
+        // If throwOnDetach and throwSimulationMode is enabled, store the speed of the pre-SmoothingFramecount frame for later weighted throw speed estimation
+        if (this._throwOnDetach && this._throwSimulationMode) {
+            var position = this.node.getWorldPosition();
+            var rotation = this.node.getWorldRotation();
+            // FrameTime
+            this._throwFrameTimes[this._throwCurrentFrame] = sys.now() / 1000.0;
+            // FramePosition
+            var outVec3 = new Vec3;
+            this._throwVelocityFrames[this._throwCurrentFrame] = Vec3.subtract(outVec3, position, this._lastPosition).divide3f(dt, dt, dt);
+            // FrameRotation
+            var outQuat = new Quat;
+            Quat.invert(outQuat, this._lastRotation);
+            Quat.multiply(outQuat, rotation, outQuat);
+            Quat.toEuler(this._throwAngularVelocityFrames[this._throwCurrentFrame], outQuat);
+            const angular = this._throwAngularVelocityFrames[this._throwCurrentFrame];
+            angular.divide3f(dt, dt, dt);
+            this._throwAngularVelocityFrames[this._throwCurrentFrame].set(toRadian(angular.x), toRadian(angular.y), toRadian(angular.z));
+            
+            this._throwCurrentFrame = (this._throwCurrentFrame + 1) % this._throwFrameCount;
+            this._lastPosition.set(position);
+            this._lastRotation.set(rotation);
+        }
     }
 
     private _grabEntered(event?: XrEventHandle) {
@@ -404,6 +435,8 @@ export class GrabInteractable extends XrInteractable {
         if (!this._forceGrab) {
             this._attachNode?.setWorldPosition(this.node.worldPosition);
         }
+        this._lastPosition.set(this.node.worldPosition);
+        this._lastRotation.set(this.node.worldRotation);
         // Hide the controller
         if (this._hideController && this._model) {
             this._model.active = true;
@@ -435,14 +468,47 @@ export class GrabInteractable extends XrInteractable {
 
         const rigidBody = this.node.getComponent(RigidBody);
         if (rigidBody) {
+            if (this._throwOnDetach) {
+                if (this._throwSimulationMode === ThrowSimulationMode_Type.CurveComputation) {
+                    rigidBody.setLinearVelocity(this.GetSmoothedVelocityValue(this._throwVelocityFrames).multiplyScalar(this._throwVelocityScale));
+                    rigidBody.setAngularVelocity(this.GetSmoothedVelocityValue(this._throwAngularVelocityFrames).multiplyScalar(this._throwAngularVelocityScale));
+                } else {
+                    var out = new Vec3;
+                    rigidBody.getLinearVelocity(out);
+                    rigidBody.setLinearVelocity(out.multiplyScalar(this._throwVelocityScale));
+                    rigidBody.getAngularVelocity(out);
+                    rigidBody.setAngularVelocity(out.multiplyScalar(this._throwAngularVelocityScale));
+                }
+            } else {
+                rigidBody.setLinearVelocity(Vec3.ZERO);
+                rigidBody.setAngularVelocity(Vec3.ZERO);
+            }
             rigidBody.type = ERigidBodyType.DYNAMIC;
-            var out = new Vec3;
-            rigidBody.getLinearVelocity(out);
-            rigidBody.setLinearVelocity(out.multiplyScalar(this._throwVelocityScale));
-            rigidBody.getAngularVelocity(out);
-            rigidBody.setAngularVelocity(out.multiplyScalar(this._throwAngularVelocityScale));
             rigidBody.useGravity = true;
         }
+    }
+
+    private GetSmoothedVelocityValue(velocityFrames: Vec3[]) {
+        var calcVelocity = new Vec3;
+        var totalWeights = 0;
+        for (var frameCounter = 0; frameCounter < this._throwFrameCount; ++frameCounter) {
+            var frameIdx = (((this._throwCurrentFrame - frameCounter - 1) % this._throwFrameCount) + this._throwFrameCount) % this._throwFrameCount;
+            if (this._throwFrameTimes[frameIdx] === 0) {
+                break;
+            }
+
+            var timeAlpha = (sys.now() / 1000.0 - this._throwFrameTimes[frameIdx]) / this._throwSmoothingDuration;
+            var velocityWeight = this._throwSmoothingCurve.evaluate(clamp(1 - timeAlpha, 0, 1), 0);
+            calcVelocity.add(velocityFrames[frameIdx].multiplyScalar(velocityWeight));
+            totalWeights += velocityWeight;
+            if (sys.now() / 1000.0 - this._throwFrameTimes[frameIdx] > this._throwSmoothingDuration) {
+                break;
+            }
+        }
+        if (totalWeights > 0) {
+            return calcVelocity.divide3f(totalWeights, totalWeights, totalWeights);
+        }
+        return Vec3.ZERO;
     }
 }
 

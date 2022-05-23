@@ -73,7 +73,7 @@ export class MRSight extends Component {
 
     @type(Layer_Type)
     @displayOrder(1)
-    @tooltip('i18n:xr.mrsight.layer')
+    @tooltip('i18n:xr.mr_sight.layer')
     set layer (val) {
         if (val === this._layer) {
             return;
@@ -86,6 +86,7 @@ export class MRSight extends Component {
 
     @type(VideoPlayer)
     @displayOrder(2)
+    @tooltip('i18n:xr.mr_sight.streamSource')
     set streamSource (val) {
         if (val === this._streamSource) {
             return;
@@ -98,6 +99,7 @@ export class MRSight extends Component {
 
     @type(Node)
     @displayOrder(3)
+    @tooltip('i18n:xr.mr_sight.targetCamera')
     set targetCamera(val) {
         if (val === this._targetCamera) {
             return;
@@ -110,6 +112,7 @@ export class MRSight extends Component {
 
     @type(GateFit_Type)
     @displayOrder(4)
+    @tooltip('i18n:xr.mr_sight.perEyeCamera')
     set perEyeCamera (val) {
         if (val === this._perEyeCamera) {
             return;
@@ -124,6 +127,7 @@ export class MRSight extends Component {
         return this._perEyeCamera === GateFit_Type.MANUAL;
     })
     @displayOrder(5)
+    @tooltip('i18n:xr.mr_sight.scaling')
     set scaling (val) {
         if (val === this._scaling) {
             return;

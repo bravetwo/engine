@@ -28,7 +28,7 @@
  * @module component/xr
  */
 
-import { ccclass, help, menu, type, executeInEditMode, displayOrder, serializable} from 'cc.decorator';
+import { ccclass, help, menu, type, executeInEditMode, displayOrder, serializable, tooltip} from 'cc.decorator';
 import { ccenum } from '../../core/value-types/enum';
 import { Component } from '../../core/components/component';
 import { CameraComponent } from '../../core';
@@ -59,6 +59,7 @@ export class TargetEye extends Component {
 
     @type(TargetEye_Type)
     @displayOrder(1)
+    @tooltip('i18n:xr.target_eye.targetEye')
     set targetEye (val) {
         if (val === this._targetEye) {
             return;
