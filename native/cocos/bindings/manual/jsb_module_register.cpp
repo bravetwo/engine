@@ -104,12 +104,6 @@
 
 #endif // CC_USE_MIDDLEWARE
 
-// ARModule ADD
-#if USE_AR_MODULE
-    se->addRegisterCallback(register_all_ar);
-    se->addRegisterCallback(register_all_ar_manual);
-#endif
-
 #if CC_USE_PHYSICS_PHYSX
     #include "cocos/bindings/auto/jsb_physics_auto.h"
 #endif
@@ -184,6 +178,12 @@ bool jsb_register_all_modules() {
 #if CC_USE_PHYSICS_PHYSX
     se->addRegisterCallback(register_all_physics);
 #endif
+
+// ARModule ADD
+#if USE_AR_MODULE
+    se->addRegisterCallback(register_all_ar);
+    se->addRegisterCallback(register_all_ar_manual);
+#endif // USE_AR_MODULE
 
 #if (CC_PLATFORM == CC_PLATFORM_MAC_IOS || CC_PLATFORM == CC_PLATFORM_ANDROID || CC_PLATFORM == CC_PLATFORM_OHOS)
 

@@ -27,6 +27,10 @@ cc_set_if_undefined(USE_JOB_SYSTEM_TBB       OFF)
 cc_set_if_undefined(USE_PHYSICS_PHYSX        OFF)
 cc_set_if_undefined(USE_MODULES              OFF)
 cc_set_if_undefined(USE_SERVER_MODE          OFF)
+cc_set_if_undefined(USE_AR_MODULE            OFF)
+cc_set_if_undefined(USE_AR_AUTO              OFF)
+cc_set_if_undefined(USE_AR_CORE              OFF)
+cc_set_if_undefined(USE_AR_ENGINE            OFF)
 
 add_definitions()
 
@@ -123,6 +127,10 @@ cc_inspect_values(
     USE_JOB_SYSTEM_TBB
     USE_JOB_SYSTEM_TASKFLOW
     USE_SERVER_MODE
+    USE_AR_MODULE
+    USE_AR_AUTO
+    USE_AR_CORE
+    USE_AR_ENGINE
 )
 
 ################################# external source code ################################
@@ -2267,6 +2275,13 @@ if(USE_MIDDLEWARE)
     endif()
 endif()
 
+if(USE_AR_MODULE)
+    cocos_source_files(
+        cocos/bindings/auto/jsb_ar_auto.cpp
+        cocos/bindings/auto/jsb_ar_auto.h
+    )
+endif()
+
 ######## manual
 cocos_source_files(
             cocos/bindings/manual/jsb_classtype.cpp
@@ -2342,6 +2357,13 @@ elseif(WIN32)
 elseif(LINUX)
     cocos_source_files(
         NO_WERROR    cocos/bindings/manual/jsb_platfrom_linux.cpp
+    )
+endif()
+
+if(USE_AR_MODULE)
+    cocos_source_files(
+        cocos/bindings/manual/jsb_ar_manual.cpp
+        cocos/bindings/manual/jsb_ar_manual.h
     )
 endif()
 
@@ -2546,6 +2568,19 @@ elseif(LINUX OR QNX)
             NO_WERROR    cocos/ui/edit-box/EditBox-linux.cpp
         )
     endif()
+endif()
+
+##### ar module
+if(USE_AR_MODULE)
+    cocos_source_files(
+        cocos/ar/ARModule.cpp
+        cocos/ar/ARModule.h
+        cocos/ar/IARAPI.h
+        cocos/renderer/pipeline/ar/ARStage.cpp
+        cocos/renderer/pipeline/ar/ARStage.h
+        cocos/renderer/pipeline/ar/ARBackground.cpp
+        cocos/renderer/pipeline/ar/ARBackground.h
+    )
 endif()
 
 ##### extensions
@@ -2793,6 +2828,10 @@ function(cc_apply_definations target)
         $<IF:$<BOOL:${USE_JOB_SYSTEM_TBB}>,CC_USE_JOB_SYSTEM_TBB=1,CC_USE_JOB_SYSTEM_TBB=0>
         $<IF:$<BOOL:${USE_JOB_SYSTEM_TASKFLOW}>,CC_USE_JOB_SYSTEM_TASKFLOW=1,CC_USE_JOB_SYSTEM_TASKFLOW=0>
         $<IF:$<BOOL:${USE_PHYSICS_PHYSX}>,CC_USE_PHYSICS_PHYSX=1,CC_USE_PHYSICS_PHYSX=0>
+        $<IF:$<BOOL:${USE_AR_MODULE}>,USE_AR_MODULE=1,USE_AR_MODULE=0>
+        $<IF:$<BOOL:${USE_AR_AUTO}>,USE_AR_AUTO=1,USE_AR_AUTO=0>
+        $<IF:$<BOOL:${USE_AR_CORE}>,USE_AR_CORE=1,USE_AR_CORE=0>
+        $<IF:$<BOOL:${USE_AR_ENGINE}>,USE_AR_ENGINE=1,USE_AR_ENGINE=0>
         $<IF:$<BOOL:${CC_EDITOR}>,CC_EDITOR=1,CC_EDITOR=0>
         $<$<BOOL:${USE_SE_SM}>:SCRIPT_ENGINE_TYPE=1>
         $<$<CONFIG:Debug>:CC_DEBUG=1>
