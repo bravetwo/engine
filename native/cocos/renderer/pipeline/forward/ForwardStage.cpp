@@ -165,6 +165,12 @@ void ForwardStage::render(scene::Camera *camera) {
         }
         _clearColors[0].w = camera->getClearColor().w;
         // color
+        // for inserting ar background before forward stage
+        #if USE_AR_MODULE
+        data.outputTex = framegraph::TextureHandle(builder.readFromBlackboard(RenderPipeline::fgStrHandleOutColorTexture));
+        if(!data.outputTex.isValid()) {
+        #endif
+
         framegraph::Texture::Descriptor colorTexInfo;
         colorTexInfo.format = sceneData->isHDR() ? gfx::Format::RGBA16F : gfx::Format::RGBA8;
         colorTexInfo.usage = gfx::TextureUsageBit::COLOR_ATTACHMENT;
@@ -174,11 +180,21 @@ void ForwardStage::render(scene::Camera *camera) {
             colorTexInfo.usage |= gfx::TextureUsageBit::TRANSFER_SRC;
         }
         data.outputTex = builder.create(RenderPipeline::fgStrHandleOutColorTexture, colorTexInfo);
+
+        #if USE_AR_MODULE
+        }
+        #endif
+
         framegraph::RenderTargetAttachment::Descriptor colorAttachmentInfo;
         colorAttachmentInfo.usage = framegraph::RenderTargetAttachment::Usage::COLOR;
         colorAttachmentInfo.clearColor = _clearColors[0];
         colorAttachmentInfo.loadOp = gfx::LoadOp::CLEAR;
         auto clearFlags = static_cast<gfx::ClearFlagBit>(camera->getClearFlag());
+        
+        #if USE_AR_MODULE
+        if(!data.outputTex.isValid()) {
+        #endif
+
         if (!hasFlag(clearFlags, gfx::ClearFlagBit::COLOR)) {
             if (hasFlag(clearFlags, static_cast<gfx::ClearFlagBit>(skyboxFlag))) {
                 colorAttachmentInfo.loadOp = gfx::LoadOp::DISCARD;
@@ -186,6 +202,13 @@ void ForwardStage::render(scene::Camera *camera) {
                 colorAttachmentInfo.loadOp = gfx::LoadOp::LOAD;
             }
         }
+
+        #if USE_AR_MODULE
+        } else {
+            colorAttachmentInfo.loadOp = gfx::LoadOp::LOAD;
+        }
+        #endif
+
         colorAttachmentInfo.beginAccesses = colorAttachmentInfo.endAccesses = gfx::AccessFlagBit::COLOR_ATTACHMENT_WRITE;
 
         data.outputTex = builder.write(data.outputTex, colorAttachmentInfo);
