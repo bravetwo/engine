@@ -35,7 +35,8 @@
             "intrinsicFlags": {
                 "MARIONETTE": true
             }
-        }
+        },
+        "ar": { "modules": [ "ar" ] }
     },
     "moduleOverrides": [
         {

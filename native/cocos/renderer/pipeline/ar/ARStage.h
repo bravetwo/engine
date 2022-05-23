@@ -1,5 +1,5 @@
 /****************************************************************************
- Copyright (c) 2020-2022 Xiamen Yaji Software Co., Ltd.
+ Copyright (c) 2021 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos.com
 
@@ -23,53 +23,41 @@
  THE SOFTWARE.
 ****************************************************************************/
 
-#include "ForwardFlow.h"
-#include "../SceneCulling.h"
-#include "ForwardPipeline.h"
-#include "ForwardStage.h"
-#include "profiler/Profiler.h"
+#pragma once
+
+#include "../ar/ARBackground.h"
 
 namespace cc {
 namespace pipeline {
-RenderFlowInfo ForwardFlow::initInfo = {
-    "ForwardFlow",
-    static_cast<uint>(ForwardFlowPriority::FORWARD),
-    static_cast<uint>(RenderFlowTag::SCENE),
-    {},
+
+class RenderFlow;
+class RenderBatchedQueue;
+class RenderInstancedQueue;
+class RenderAdditiveLightQueue;
+class PlanarShadowQueue;
+class ForwardPipeline;
+class UIPhase;
+// ARModule ADD, need remove after modify
+class ARBackground;
+
+class CC_DLL ARStage : public RenderStage {
+public:
+    static const RenderStageInfo &getInitializeInfo();
+
+    ARStage();
+    ~ARStage() override;
+
+    bool initialize(const RenderStageInfo &info) override;
+    void activate(RenderPipeline *pipeline, RenderFlow *flow) override;
+    void destroy() override;
+    void render(scene::Camera *camera) override;
+
+private:
+    void                      dispenseRenderObject2Queues();
+    static RenderStageInfo    initInfo;
+
+    ARBackground * _arBackground = nullptr;
 };
-const RenderFlowInfo &ForwardFlow::getInitializeInfo() { return ForwardFlow::initInfo; }
-
-ForwardFlow::~ForwardFlow() = default;
-
-bool ForwardFlow::initialize(const RenderFlowInfo &info) {
-    RenderFlow::initialize(info);
-
-    if (_stages.empty()) {
-        #if USE_AR_MODULE
-            auto *arStage = CC_NEW(ARStage);
-            arStage->initialize(ARStage::getInitializeInfo());
-            _stages.emplace_back(arStage);
-        #endif
-        auto *forwardStage = ccnew ForwardStage;
-        forwardStage->initialize(ForwardStage::getInitializeInfo());
-        _stages.emplace_back(forwardStage);
-    }
-
-    return true;
-}
-
-void ForwardFlow::activate(RenderPipeline *pipeline) {
-    RenderFlow::activate(pipeline);
-}
-
-void ForwardFlow::render(scene::Camera *camera) {
-    CC_PROFILE(ForwardFlowRender);
-    RenderFlow::render(camera);
-}
-
-void ForwardFlow::destroy() {
-    RenderFlow::destroy();
-}
 
 } // namespace pipeline
 } // namespace cc
