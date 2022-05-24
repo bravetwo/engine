@@ -332,19 +332,26 @@ void Root::frameMove(float deltaTime, int32_t totalFrames) {
         //                }
 
 #if USE_XR
-		if (xrEye == 0) {
+        if (xrEye == 0) {
 #endif
-			for (const auto &scene: _scenes) {
-				scene->update(stamp);
-			}
+            for (const auto &scene : _scenes) {
+                scene->update(stamp);
+            }
 #if USE_XR
-			_cameraList[0]->setCullingEnable(true);
-			_pipelineRuntime->resetRenderQueue(true);
-		}
-		else {
-			_cameraList[0]->setCullingEnable(false);
-			_pipelineRuntime->resetRenderQueue(false);
-		}
+            // only left eye enable culling
+            for (scene::Camera *cam : _cameraList) {
+                if (cam && cam->isHMD())
+                    cam->setCullingEnable(true);
+            }
+            _pipelineRuntime->resetRenderQueue(true);
+        } else {
+            // right eye disable culling
+            for (scene::Camera *cam : _cameraList) {
+                if (cam && cam->isHMD())
+                    cam->setCullingEnable(false);
+            }
+            _pipelineRuntime->resetRenderQueue(false);
+        }
 #endif
 
         CC_PROFILER_UPDATE;
