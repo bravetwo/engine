@@ -27,14 +27,11 @@ cc_set_if_undefined(USE_JOB_SYSTEM_TBB       OFF)
 cc_set_if_undefined(USE_PHYSICS_PHYSX        OFF)
 cc_set_if_undefined(USE_MODULES              OFF)
 cc_set_if_undefined(USE_SERVER_MODE          OFF)
-<<<<<<< HEAD
 cc_set_if_undefined(USE_AR_MODULE            OFF)
 cc_set_if_undefined(USE_AR_AUTO              OFF)
 cc_set_if_undefined(USE_AR_CORE              OFF)
 cc_set_if_undefined(USE_AR_ENGINE            OFF)
-=======
 cc_set_if_undefined(USE_CCACHE               OFF)
->>>>>>> b3bf4b61483fcc8e31fadfd5f03cfd97bbbffd32
 
 add_definitions()
 
@@ -138,15 +135,12 @@ cc_inspect_values(
     USE_JOB_SYSTEM_TBB
     USE_JOB_SYSTEM_TASKFLOW
     USE_SERVER_MODE
-<<<<<<< HEAD
     USE_AR_MODULE
     USE_AR_AUTO
     USE_AR_CORE
     USE_AR_ENGINE
-=======
     USE_CCACHE
     CCACHE_EXECUTABLE
->>>>>>> b3bf4b61483fcc8e31fadfd5f03cfd97bbbffd32
 )
 
 ################################# external source code ################################
