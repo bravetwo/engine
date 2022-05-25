@@ -28,10 +28,10 @@
 #include "ar/ARModule.h"
 
 #if CC_PLATFORM == CC_PLATFORM_ANDROID
-#include "ar/android/ARAndroidAPIImpl.h"
-using ARAPIImpl = cc::ar::ARAndroidAPIImpl;
-//#include "ar/ARAndroidLib.h"
-//using ARAPIImpl = cc::ar::ARAndroidLib;
+//#include "ar/android/ARAndroidAPIImpl.h"
+//using ARAPIImpl = cc::ar::ARAndroidAPIImpl;
+#include "ar/ARAndroidLib.h"
+using ARAPIImpl = cc::ar::ARAndroidLib;
 
 #elif CC_PLATFORM == CC_PLATFORM_MAC_IOS
 //#include "ar/ios/ARKitAPIImpl.h"

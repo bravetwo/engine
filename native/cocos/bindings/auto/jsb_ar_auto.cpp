@@ -114,22 +114,21 @@ static bool js_ar_ARModule_constructor(se::State& s) // NOLINT(readability-ident
 {
     cc::ar::ARModule* cobj = JSB_ALLOC(cc::ar::ARModule);
     s.thisObject()->setPrivateData(cobj);
-    se::NonRefNativePtrCreatedByCtorMap::emplace(cobj);
+    //se::NonRefNativePtrCreatedByCtorMap::emplace(cobj);
     return true;
 }
 SE_BIND_CTOR(js_ar_ARModule_constructor, __jsb_cc_ar_ARModule_class, js_cc_ar_ARModule_finalize)
 
-
-
 static bool js_cc_ar_ARModule_finalize(se::State& s) // NOLINT(readability-identifier-naming)
 {
+    /*
     auto iter = se::NonRefNativePtrCreatedByCtorMap::find(SE_THIS_OBJECT<cc::ar::ARModule>(s));
     if (iter != se::NonRefNativePtrCreatedByCtorMap::end())
     {
         se::NonRefNativePtrCreatedByCtorMap::erase(iter);
         auto* cobj = SE_THIS_OBJECT<cc::ar::ARModule>(s);
         JSB_FREE(cobj);
-    }
+    }*/
     return true;
 }
 SE_BIND_FINALIZE_FUNC(js_cc_ar_ARModule_finalize)

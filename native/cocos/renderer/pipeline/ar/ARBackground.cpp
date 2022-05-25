@@ -32,9 +32,9 @@
 #include "pipeline/Define.h"
 #include "pipeline/PipelineStateManager.h"
 
-
 #include "ar/ARModule.h"
 #include "gfx-base/GFXDevice.h"
+#include "scene/Camera.h"
 
 namespace cc {
 namespace pipeline {
@@ -286,10 +286,6 @@ void ARBackground::activate(RenderPipeline *pipeline, gfx::Device *dev) {
     _textures.resize(2);
 #endif
 
-    //_descriptorSet->bindSampler(1, sampler);
-    //_descriptorSet->bindTexture(1, backgroundTex);
-    //_descriptorSet->update();
-    //*/
     _pipelineLayout = _device->createPipelineLayout({{pipeline->getDescriptorSetLayout(), _descriptorSetLayout}});
 
 #if CC_PLATFORM == CC_PLATFORM_ANDROID
@@ -302,16 +298,7 @@ void ARBackground::activate(RenderPipeline *pipeline, gfx::Device *dev) {
 #endif
 }
 
-void ARBackground::render(scene::Camera *camera, gfx::RenderPass *renderPass, gfx::CommandBuffer *cmdBuffer) {
-    //auto *_device = gfx::DeviceAgent::getInstance();
-    //if (!_device) { return; }
-    /*
-    const scene::Node *camNode = camera->node;
-    const int flag = (static_cast<int>(camNode->getLayer())) & 0x00800000;
-    if(flag == 0) return;
-    //*/
-
-    //*
+void ARBackground::render(cc::scene::Camera *camera, gfx::RenderPass *renderPass, gfx::CommandBuffer *cmdBuffer) {
     auto *const armodule = cc::ar::ARModule::get();
     if (!armodule) return;
     int apiState = armodule->getAPIState();
@@ -327,8 +314,8 @@ void ARBackground::render(scene::Camera *camera, gfx::RenderPass *renderPass, gf
         textureInfo.usage           = gfx::TextureUsage::SAMPLED | gfx::TextureUsage::TRANSFER_SRC;
         textureInfo.format          = gfx::Format::RGBA16F;
         //textureInfo.format          = gfx::Format::RGBA8;
-        textureInfo.width           = camera->width;
-        textureInfo.height          = camera->height;
+        textureInfo.width           = camera->getWidth();
+        textureInfo.height          = camera->getHeight();
         textureInfo.externalRes     = reinterpret_cast<void *>(_glTex);
         gfx::Texture *backgroundTex = _device->createTexture(textureInfo);
 

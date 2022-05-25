@@ -22,30 +22,29 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
 ****************************************************************************/
-
+#include "ARBackground.h"
 #include "ARStage.h"
-#include "../BatchedBuffer.h"
+#include "ar/ARModule.h"
+//#include "../BatchedBuffer.h"
 #include "../Enum.h"
-#include "../InstancedBuffer.h"
-#include "../PlanarShadowQueue.h"
-#include "../RenderAdditiveLightQueue.h"
-#include "../RenderBatchedQueue.h"
-#include "../RenderInstancedQueue.h"
-#include "../RenderQueue.h"
+//#include "../InstancedBuffer.h"
+#include "../PipelineSceneData.h"
+#include "../PipelineUBO.h"
+//#include "../PlanarShadowQueue.h"
+//#include "../RenderAdditiveLightQueue.h"
+//#include "../RenderBatchedQueue.h"
+//#include "../RenderInstancedQueue.h"
+//#include "../RenderQueue.h"
 #include "../forward/ForwardPipeline.h"
-#include "../helper/Utils.h"
+//#include "../helper/Utils.h"
 #include "gfx-base/GFXCommandBuffer.h"
 #include "gfx-base/GFXDef-common.h"
 #include "gfx-base/GFXFramebuffer.h"
 #include "gfx-base/GFXTexture.h"
 #include "pipeline/RenderPipeline.h"
-
-
-// ARModule ADD, need remove after modify
-//#include "../ar/ARBackground.h"
-
-#include "ar/ARModule.h"
-#include "gfx-agent/DeviceAgent.h"
+#include "core/scene-graph/Node.h"
+#include "scene/Camera.h"
+#include "scene/RenderWindow.h"
 
 namespace cc {
 namespace pipeline {
@@ -57,7 +56,7 @@ RenderStageInfo ARStage::initInfo = {
 const RenderStageInfo &ARStage::getInitializeInfo() { return ARStage::initInfo; }
 
 ARStage::ARStage() {
-    _arBackground = CC_NEW(ARBackground);
+    _arBackground = ccnew ARBackground;
 }
 
 ARStage::~ARStage() = default;
@@ -69,7 +68,7 @@ bool ARStage::initialize(const RenderStageInfo &info) {
 
 void ARStage::activate(RenderPipeline *pipeline, RenderFlow *flow) {
     RenderStage::activate(pipeline, flow);
-    
+
     _arBackground->activate(pipeline, _device);
 }
 
@@ -81,8 +80,8 @@ void ARStage::destroy() {
 }
 
 void ARStage::render(scene::Camera *camera) {
-    // UI_3D: 8388608 0x00800000 (1 << 23)
-    const scene::Node *camNode = camera->node;
+    // UI_3D: 8388608 0x00800000 (1 << 23), ar camera node currently use UI_3D layer
+    const Node *camNode = camera->getNode();
     const int flag = (static_cast<int>(camNode->getLayer())) & 0x00800000;
     if(flag == 0) return;
     //return;
@@ -91,16 +90,17 @@ void ARStage::render(scene::Camera *camera) {
         framegraph::TextureHandle outputTex;
         framegraph::TextureHandle depth;
     };
+    auto *const sceneData = _pipeline->getPipelineSceneData();
 
-    float shadingScale{_pipeline->getPipelineSceneData()->getSharedData()->shadingScale};
+    float shadingScale{sceneData->getShadingScale()};
 
     auto arSetup = [&](framegraph::PassNodeBuilder &builder, RenderData &data) {
         gfx::TextureInfo colorTexInfo = {
             gfx::TextureType::TEX2D,
             gfx::TextureUsageBit::COLOR_ATTACHMENT | gfx::TextureUsageBit::SAMPLED,
             gfx::Format::RGBA16F,
-            static_cast<uint>(camera->window->getWidth() * shadingScale),
-            static_cast<uint>(camera->window->getHeight() * shadingScale),
+            static_cast<uint>(camera->getWindow()->getWidth() * shadingScale),
+            static_cast<uint>(camera->getWindow()->getHeight() * shadingScale),
         };
         data.outputTex = builder.create(RenderPipeline::fgStrHandleOutColorTexture, colorTexInfo);
         /*
@@ -125,7 +125,7 @@ void ARStage::render(scene::Camera *camera) {
             }
         }
         */
-        colorAttachmentInfo.endAccesses = {gfx::AccessType::COLOR_ATTACHMENT_WRITE};
+        colorAttachmentInfo.endAccesses = {gfx::AccessFlagBit::COLOR_ATTACHMENT_WRITE};
 
         data.outputTex   = builder.write(data.outputTex, colorAttachmentInfo);
 
@@ -140,13 +140,13 @@ void ARStage::render(scene::Camera *camera) {
         framegraph::RenderTargetAttachment::Descriptor depthAttachmentInfo;
         depthAttachmentInfo.usage        = framegraph::RenderTargetAttachment::Usage::DEPTH_STENCIL;
         depthAttachmentInfo.loadOp       = gfx::LoadOp::CLEAR;
-        depthAttachmentInfo.clearDepth   = camera->clearDepth;
-        depthAttachmentInfo.clearStencil = camera->clearStencil;
-        depthAttachmentInfo.endAccesses  = {gfx::AccessType::DEPTH_STENCIL_ATTACHMENT_WRITE};
+        depthAttachmentInfo.clearDepth   = camera->getClearDepth();
+        depthAttachmentInfo.clearStencil = camera->getClearStencil();
+        depthAttachmentInfo.endAccesses  = {gfx::AccessFlagBit::DEPTH_STENCIL_ATTACHMENT_WRITE};
 
         data.depth = builder.create(RenderPipeline::fgStrHandleOutDepthTexture, depthTexInfo);
         data.depth = builder.write(data.depth, depthAttachmentInfo);
-        
+
         builder.writeToBlackboard(RenderPipeline::fgStrHandleOutColorTexture, data.outputTex);
         builder.writeToBlackboard(RenderPipeline::fgStrHandleOutDepthTexture, data.depth);
         builder.setViewport(_pipeline->getViewport(camera), _pipeline->getScissor(camera));

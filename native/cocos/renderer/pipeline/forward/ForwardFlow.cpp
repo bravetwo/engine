@@ -29,6 +29,10 @@
 #include "ForwardStage.h"
 #include "profiler/Profiler.h"
 
+#if USE_AR_MODULE
+#include "../ar/ARStage.h"
+#endif
+
 namespace cc {
 namespace pipeline {
 RenderFlowInfo ForwardFlow::initInfo = {
@@ -46,7 +50,7 @@ bool ForwardFlow::initialize(const RenderFlowInfo &info) {
 
     if (_stages.empty()) {
         #if USE_AR_MODULE
-            auto *arStage = CC_NEW(ARStage);
+            auto *arStage = ccnew ARStage;
             arStage->initialize(ARStage::getInitializeInfo());
             _stages.emplace_back(arStage);
         #endif

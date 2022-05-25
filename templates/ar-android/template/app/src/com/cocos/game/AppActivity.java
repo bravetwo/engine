@@ -35,7 +35,9 @@ import com.cocos.service.SDKWrapper;
 import com.cocos.lib.CocosActivity;
 
 public class AppActivity extends CocosActivity {
-
+    private static final int CAMERA_PERMISSION_CODE = 0;
+    private static final String CAMERA_PERMISSION = Manifest.permission.CAMERA;
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

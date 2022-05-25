@@ -25,18 +25,11 @@
 
 #pragma once
 
-#include "../ar/ARBackground.h"
+#include "../RenderStage.h"
 
 namespace cc {
 namespace pipeline {
 
-class RenderFlow;
-class RenderBatchedQueue;
-class RenderInstancedQueue;
-class RenderAdditiveLightQueue;
-class PlanarShadowQueue;
-class ForwardPipeline;
-class UIPhase;
 // ARModule ADD, need remove after modify
 class ARBackground;
 
@@ -53,7 +46,6 @@ public:
     void render(scene::Camera *camera) override;
 
 private:
-    void                      dispenseRenderObject2Queues();
     static RenderStageInfo    initInfo;
 
     ARBackground * _arBackground = nullptr;

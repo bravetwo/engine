@@ -89,10 +89,12 @@ android {
 }
 
 dependencies {
+    implementation 'com.google.ar:core:1.26.0'
+    implementation 'com.huawei.hms:arenginesdk:3.5.0.4'
     implementation fileTree(dir: '../libs', include: ['*.jar','*.aar'])
     implementation fileTree(dir: 'libs', include: ['*.jar','*.aar'])
     implementation fileTree(dir: "${COCOS_ENGINE_PATH}/cocos/platform/android/java/libs", include: ['*.jar'])
-    implementation fileTree(dir: "${COCOS_ENGINE_PATH}/external/xr/ar/libs", include: ['*.jar'])
+    implementation fileTree(dir: "${COCOS_ENGINE_PATH}/external/android/libs/ar", include: ['*.jar'])
     implementation project(':libservice')
     implementation project(':libcocos')
 }
