@@ -56,6 +56,14 @@ class ARModuleNative extends ARModule {
         return this._native.getCameraProjectionMatrix();
     }
 
+    getMainLightIntensity () {
+        return this._native.getMainLightIntensity();
+    }
+
+    getMainLightColor () {
+        return this._native.getMainLightColor();
+    }
+
     enablePlane (enable) {
         this._native.enablePlane(enable);
     }

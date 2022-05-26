@@ -165,6 +165,12 @@ void ForwardStage::render(scene::Camera *camera) {
         }
         _clearColors[0].w = camera->getClearColor().w;
         // color
+        framegraph::RenderTargetAttachment::Descriptor colorAttachmentInfo;
+        colorAttachmentInfo.usage = framegraph::RenderTargetAttachment::Usage::COLOR;
+        colorAttachmentInfo.clearColor = _clearColors[0];
+        colorAttachmentInfo.loadOp = gfx::LoadOp::CLEAR;
+        auto clearFlags = static_cast<gfx::ClearFlagBit>(camera->getClearFlag());
+
         // for inserting ar background before forward stage
         #if USE_AR_MODULE
         data.outputTex = framegraph::TextureHandle(builder.readFromBlackboard(RenderPipeline::fgStrHandleOutColorTexture));
@@ -180,20 +186,6 @@ void ForwardStage::render(scene::Camera *camera) {
             colorTexInfo.usage |= gfx::TextureUsageBit::TRANSFER_SRC;
         }
         data.outputTex = builder.create(RenderPipeline::fgStrHandleOutColorTexture, colorTexInfo);
-
-        #if USE_AR_MODULE
-        }
-        #endif
-
-        framegraph::RenderTargetAttachment::Descriptor colorAttachmentInfo;
-        colorAttachmentInfo.usage = framegraph::RenderTargetAttachment::Usage::COLOR;
-        colorAttachmentInfo.clearColor = _clearColors[0];
-        colorAttachmentInfo.loadOp = gfx::LoadOp::CLEAR;
-        auto clearFlags = static_cast<gfx::ClearFlagBit>(camera->getClearFlag());
-        
-        #if USE_AR_MODULE
-        if(!data.outputTex.isValid()) {
-        #endif
 
         if (!hasFlag(clearFlags, gfx::ClearFlagBit::COLOR)) {
             if (hasFlag(clearFlags, static_cast<gfx::ClearFlagBit>(skyboxFlag))) {
@@ -229,9 +221,11 @@ void ForwardStage::render(scene::Camera *camera) {
         depthAttachmentInfo.clearStencil = camera->getClearStencil();
         depthAttachmentInfo.beginAccesses = gfx::AccessFlagBit::DEPTH_STENCIL_ATTACHMENT_WRITE;
         depthAttachmentInfo.endAccesses = gfx::AccessFlagBit::DEPTH_STENCIL_ATTACHMENT_WRITE;
+        #if !USE_AR_MODULE
         if (static_cast<gfx::ClearFlagBit>(clearFlags & gfx::ClearFlagBit::DEPTH_STENCIL) != gfx::ClearFlagBit::DEPTH_STENCIL && (!hasFlag(clearFlags, gfx::ClearFlagBit::DEPTH) || !hasFlag(clearFlags, gfx::ClearFlagBit::STENCIL))) {
             depthAttachmentInfo.loadOp = gfx::LoadOp::LOAD;
         }
+        #endif
         data.depth = builder.create(RenderPipeline::fgStrHandleOutDepthTexture, depthTexInfo);
         data.depth = builder.write(data.depth, depthAttachmentInfo);
         builder.writeToBlackboard(RenderPipeline::fgStrHandleOutDepthTexture, data.depth);

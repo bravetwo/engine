@@ -88,7 +88,7 @@ void ARStage::render(scene::Camera *camera) {
 
     struct RenderData {
         framegraph::TextureHandle outputTex;
-        framegraph::TextureHandle depth;
+        //framegraph::TextureHandle depth;
     };
     auto *const sceneData = _pipeline->getPipelineSceneData();
 
@@ -103,33 +103,16 @@ void ARStage::render(scene::Camera *camera) {
             static_cast<uint>(camera->getWindow()->getHeight() * shadingScale),
         };
         data.outputTex = builder.create(RenderPipeline::fgStrHandleOutColorTexture, colorTexInfo);
-        /*
-        //if (hasFlag(static_cast<gfx::ClearFlags>(camera->clearFlag), gfx::ClearFlagBit::COLOR)) {
-            _clearColors[0].x = camera->clearColor.x;
-            _clearColors[0].y = camera->clearColor.y;
-            _clearColors[0].z = camera->clearColor.z;
-        //}
-        _clearColors[0].w = camera->clearColor.w;
-        //*/
+
         framegraph::RenderTargetAttachment::Descriptor colorAttachmentInfo;
         colorAttachmentInfo.usage      = framegraph::RenderTargetAttachment::Usage::COLOR;
-        //colorAttachmentInfo.clearColor = _clearColors[0];
         colorAttachmentInfo.loadOp     = gfx::LoadOp::CLEAR;
-        /*
-        auto clearFlags = static_cast<gfx::ClearFlagBit>(camera->clearFlag);
-        if (!hasFlag(clearFlags, gfx::ClearFlagBit::COLOR)) {
-            if (hasFlag(clearFlags, static_cast<gfx::ClearFlagBit>(skyboxFlag))) {
-                colorAttachmentInfo.loadOp = gfx::LoadOp::DISCARD;
-            } else {
-                colorAttachmentInfo.loadOp = gfx::LoadOp::LOAD;
-            }
-        }
-        */
+
         colorAttachmentInfo.endAccesses = {gfx::AccessFlagBit::COLOR_ATTACHMENT_WRITE};
 
         data.outputTex   = builder.write(data.outputTex, colorAttachmentInfo);
 
-        // depth
+        /*/ depth
         gfx::TextureInfo depthTexInfo{
             gfx::TextureType::TEX2D,
             gfx::TextureUsageBit::DEPTH_STENCIL_ATTACHMENT,
@@ -146,9 +129,9 @@ void ARStage::render(scene::Camera *camera) {
 
         data.depth = builder.create(RenderPipeline::fgStrHandleOutDepthTexture, depthTexInfo);
         data.depth = builder.write(data.depth, depthAttachmentInfo);
-
+        //*/
         builder.writeToBlackboard(RenderPipeline::fgStrHandleOutColorTexture, data.outputTex);
-        builder.writeToBlackboard(RenderPipeline::fgStrHandleOutDepthTexture, data.depth);
+        //builder.writeToBlackboard(RenderPipeline::fgStrHandleOutDepthTexture, data.depth);
         builder.setViewport(_pipeline->getViewport(camera), _pipeline->getScissor(camera));
 
     };
