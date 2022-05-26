@@ -25,25 +25,6 @@ SE_BIND_PROP_GET(js_xr_getter_return_true)
 se::Object* __jsb_cc_xr_XrEntry_proto = nullptr; // NOLINT
 se::Class* __jsb_cc_xr_XrEntry_class = nullptr;  // NOLINT
 
-static bool js_xr_XrEntry_BeginRenderFrame(se::State& s) // NOLINT(readability-identifier-naming)
-{
-    auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntry>(s);
-    SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_BeginRenderFrame : Invalid Native Object");
-    const auto& args = s.args();
-    size_t argc = args.size();
-    CC_UNUSED bool ok = true;
-    if (argc == 0) {
-        bool result = cobj->BeginRenderFrame();
-        ok &= nativevalue_to_se(result, s.rval(), nullptr /*ctx*/);
-        SE_PRECONDITION2(ok, false, "js_xr_XrEntry_BeginRenderFrame : Error processing arguments");
-        SE_HOLD_RETURN_VALUE(result, s.thisObject(), s.rval());
-        return true;
-    }
-    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 0);
-    return false;
-}
-SE_BIND_FUNC(js_xr_XrEntry_BeginRenderFrame)
-
 static bool js_xr_XrEntry_AfterRenderFrame(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntry>(s);
@@ -81,6 +62,25 @@ static bool js_xr_XrEntry_BeforeRenderFrame(se::State& s) // NOLINT(readability-
     return false;
 }
 SE_BIND_FUNC(js_xr_XrEntry_BeforeRenderFrame)
+
+static bool js_xr_XrEntry_BeginRenderFrame(se::State& s) // NOLINT(readability-identifier-naming)
+{
+    auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntry>(s);
+    SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_BeginRenderFrame : Invalid Native Object");
+    const auto& args = s.args();
+    size_t argc = args.size();
+    CC_UNUSED bool ok = true;
+    if (argc == 0) {
+        bool result = cobj->BeginRenderFrame();
+        ok &= nativevalue_to_se(result, s.rval(), nullptr /*ctx*/);
+        SE_PRECONDITION2(ok, false, "js_xr_XrEntry_BeginRenderFrame : Error processing arguments");
+        SE_HOLD_RETURN_VALUE(result, s.thisObject(), s.rval());
+        return true;
+    }
+    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 0);
+    return false;
+}
+SE_BIND_FUNC(js_xr_XrEntry_BeginRenderFrame)
 
 static bool js_xr_XrEntry_ComputeViewProjection(se::State& s) // NOLINT(readability-identifier-naming)
 {
@@ -290,6 +290,25 @@ static bool js_xr_XrEntry_frameStart(se::State& s) // NOLINT(readability-identif
 }
 SE_BIND_FUNC(js_xr_XrEntry_frameStart)
 
+static bool js_xr_XrEntry_getMultisamplesRTT(se::State& s) // NOLINT(readability-identifier-naming)
+{
+    auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntry>(s);
+    SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_getMultisamplesRTT : Invalid Native Object");
+    const auto& args = s.args();
+    size_t argc = args.size();
+    CC_UNUSED bool ok = true;
+    if (argc == 0) {
+        int result = cobj->getMultisamplesRTT();
+        ok &= nativevalue_to_se(result, s.rval(), nullptr /*ctx*/);
+        SE_PRECONDITION2(ok, false, "js_xr_XrEntry_getMultisamplesRTT : Error processing arguments");
+        SE_HOLD_RETURN_VALUE(result, s.thisObject(), s.rval());
+        return true;
+    }
+    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 0);
+    return false;
+}
+SE_BIND_FUNC(js_xr_XrEntry_getMultisamplesRTT)
+
 static bool js_xr_XrEntry_initXrSession(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntry>(s);
@@ -392,6 +411,44 @@ static bool js_xr_XrEntry_resumeXrInstance(se::State& s) // NOLINT(readability-i
 }
 SE_BIND_FUNC(js_xr_XrEntry_resumeXrInstance)
 
+static bool js_xr_XrEntry_setMultisamplesRTT(se::State& s) // NOLINT(readability-identifier-naming)
+{
+    auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntry>(s);
+    SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_setMultisamplesRTT : Invalid Native Object");
+    const auto& args = s.args();
+    size_t argc = args.size();
+    CC_UNUSED bool ok = true;
+    if (argc == 1) {
+        HolderType<int, false> arg0 = {};
+        ok &= sevalue_to_native(args[0], &arg0, s.thisObject());
+        SE_PRECONDITION2(ok, false, "js_xr_XrEntry_setMultisamplesRTT : Error processing arguments");
+        cobj->setMultisamplesRTT(arg0.value());
+        return true;
+    }
+    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 1);
+    return false;
+}
+SE_BIND_FUNC(js_xr_XrEntry_setMultisamplesRTT)
+
+static bool js_xr_XrEntry_setRenderingScale(se::State& s) // NOLINT(readability-identifier-naming)
+{
+    auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntry>(s);
+    SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_setRenderingScale : Invalid Native Object");
+    const auto& args = s.args();
+    size_t argc = args.size();
+    CC_UNUSED bool ok = true;
+    if (argc == 1) {
+        HolderType<float, false> arg0 = {};
+        ok &= sevalue_to_native(args[0], &arg0, s.thisObject());
+        SE_PRECONDITION2(ok, false, "js_xr_XrEntry_setRenderingScale : Error processing arguments");
+        cobj->setRenderingScale(arg0.value());
+        return true;
+    }
+    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 1);
+    return false;
+}
+SE_BIND_FUNC(js_xr_XrEntry_setRenderingScale)
+
 static bool js_xr_XrEntry_getInstance_static(se::State& s) // NOLINT(readability-identifier-naming)
 {
     const auto& args = s.args();
@@ -416,9 +473,9 @@ bool js_register_xr_XrEntry(se::Object* obj) // NOLINT(readability-identifier-na
 #if CC_DEBUG
     cls->defineStaticProperty("isJSBClass", _SE(js_xr_getter_return_true), nullptr);
 #endif
-    cls->defineFunction("BeginRenderFrame", _SE(js_xr_XrEntry_BeginRenderFrame));
     cls->defineFunction("AfterRenderFrame", _SE(js_xr_XrEntry_AfterRenderFrame));
     cls->defineFunction("BeforeRenderFrame", _SE(js_xr_XrEntry_BeforeRenderFrame));
+    cls->defineFunction("BeginRenderFrame", _SE(js_xr_XrEntry_BeginRenderFrame));
     cls->defineFunction("ComputeViewProjection", _SE(js_xr_XrEntry_ComputeViewProjection));
     cls->defineFunction("EndRenderFrame", _SE(js_xr_XrEntry_EndRenderFrame));
     cls->defineFunction("GetFov", _SE(js_xr_XrEntry_GetFov));
@@ -430,12 +487,15 @@ bool js_register_xr_XrEntry(se::Object* obj) // NOLINT(readability-identifier-na
     cls->defineFunction("destroyXrInstance", _SE(js_xr_XrEntry_destroyXrInstance));
     cls->defineFunction("frameEnd", _SE(js_xr_XrEntry_frameEnd));
     cls->defineFunction("frameStart", _SE(js_xr_XrEntry_frameStart));
+    cls->defineFunction("getMultisamplesRTT", _SE(js_xr_XrEntry_getMultisamplesRTT));
     cls->defineFunction("initXrSession", _SE(js_xr_XrEntry_initXrSession));
     cls->defineFunction("isCreatedXRinstance", _SE(js_xr_XrEntry_isCreatedXRinstance));
     cls->defineFunction("pauseXrInstance", _SE(js_xr_XrEntry_pauseXrInstance));
     cls->defineFunction("renderLoopEnd", _SE(js_xr_XrEntry_renderLoopEnd));
     cls->defineFunction("renderLoopStart", _SE(js_xr_XrEntry_renderLoopStart));
     cls->defineFunction("resumeXrInstance", _SE(js_xr_XrEntry_resumeXrInstance));
+    cls->defineFunction("setMultisamplesRTT", _SE(js_xr_XrEntry_setMultisamplesRTT));
+    cls->defineFunction("setRenderingScale", _SE(js_xr_XrEntry_setRenderingScale));
     cls->defineStaticFunction("getInstance", _SE(js_xr_XrEntry_getInstance_static));
     cls->install();
     JSBClassType::registerClass<cc::xr::XrEntry>(cls);

@@ -184,6 +184,22 @@ export interface IGameConfig {
      * Now it only works on Web platform.
      */
     exactFitScreen: boolean,
+
+    /**
+     * @zh
+     * 离屏渲染多重采样数。
+     * @en
+     * Render to Texture Multisamples Num.
+     */
+    multisamplesRTT?: number;
+
+    /**
+     * @zh
+     * XR设备推荐渲染分辨率的缩放值。
+     * @en
+     * XR RecommendedImageRect Scale.
+     */
+    renderingScale?: number;
 }
 
 /**
@@ -856,6 +872,15 @@ export class Game extends EventTarget {
         config.showFPS = !!config.showFPS;
 
         debug._resetDebugSetting(config.debugMode);
+
+        if (sys.isXR) {
+            if (typeof config.multisamplesRTT === 'number') {
+                xr.XrEntry.getInstance().setMultisamplesRTT(config.multisamplesRTT);
+            }
+            if (typeof config.renderingScale === 'number') {
+                xr.XrEntry.getInstance().setRenderingScale(config.renderingScale);
+            }
+        }
 
         this.config = config as NormalizedGameConfig;
         this._configLoaded = true;
