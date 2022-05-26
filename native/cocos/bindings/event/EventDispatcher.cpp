@@ -336,8 +336,10 @@ void EventDispatcher::dispatchHandleEvent(const xr::HandleEvent &handleEvent) {
     switch (handleEvent.type) {
         case xr::HandleEvent::Type::VIEW_POSE_ACTIVE_LEFT:
         case xr::HandleEvent::Type::HAND_POSE_ACTIVE_LEFT:
+        case xr::HandleEvent::Type::AIM_POSE_ACTIVE_LEFT:
         case xr::HandleEvent::Type::VIEW_POSE_ACTIVE_RIGHT:
         case xr::HandleEvent::Type::HAND_POSE_ACTIVE_RIGHT:
+        case xr::HandleEvent::Type::AIM_POSE_ACTIVE_RIGHT:
             {
                 se::AutoHandleScope scope;
                 if (!jsHandleEventObj) {
