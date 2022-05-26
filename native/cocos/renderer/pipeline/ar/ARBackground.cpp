@@ -312,8 +312,8 @@ void ARBackground::render(cc::scene::Camera *camera, gfx::RenderPass *renderPass
 
         gfx::TextureInfo textureInfo;
         textureInfo.usage           = gfx::TextureUsage::SAMPLED | gfx::TextureUsage::TRANSFER_SRC;
-        textureInfo.format          = gfx::Format::RGBA16F;
-        //textureInfo.format          = gfx::Format::RGBA8;
+        //textureInfo.format          = gfx::Format::RGBA16F;
+        textureInfo.format          = gfx::Format::RGBA8;
         textureInfo.width           = camera->getWidth();
         textureInfo.height          = camera->getHeight();
         textureInfo.externalRes     = reinterpret_cast<void *>(_glTex);
@@ -377,7 +377,7 @@ void ARBackground::render(cc::scene::Camera *camera, gfx::RenderPass *renderPass
                         1, 1, data[4], data[5]};
     _vertexBuffer->update(vertices, sizeof(vertices));
 #endif
-    
+
     gfx::PipelineStateInfo pipelineInfo;
     pipelineInfo.shader         = _shader;
     pipelineInfo.pipelineLayout = _pipelineLayout;
