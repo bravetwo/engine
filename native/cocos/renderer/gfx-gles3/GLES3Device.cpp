@@ -56,11 +56,6 @@
 // renderdoc doesn't support this extension during replay
 #define ALLOW_MULTISAMPLED_RENDER_TO_TEXTURE_ON_DESKTOP 0
 
-#if USE_XR
-#define ENABLE_MSAA 1
-#define MSAA_SAMPLES 4
-#endif
-
 namespace cc {
 namespace gfx {
 
@@ -242,23 +237,23 @@ bool GLES3Device::doInit(const DeviceInfo & /*info*/) {
     GLint maxSamples = 0;
     glGetIntegerv(GL_MAX_SAMPLES, &maxSamples);
 
-#if ENABLE_MSAA
-    _xrFBOMSAAEnabled = true;
+    if(xr::XrEntry::getInstance()->getMultisamplesRTT() > 1) {
+        _xrFBOMSAAEnabled = true;
 
-    /* Initialize multisampling extension function pointers. */
-    if (!glFramebufferTexture2DMultisampleEXT)
-    {
-        CC_LOG_ERROR("Couldn't get function pointer to glFramebufferTexture2DMultisampleEXT()!");
-        _xrFBOMSAAEnabled = false;
-    }
+        /* Initialize multisampling extension function pointers. */
+        if (!glFramebufferTexture2DMultisampleEXT)
+        {
+            CC_LOG_ERROR("Couldn't get function pointer to glFramebufferTexture2DMultisampleEXT()!");
+            _xrFBOMSAAEnabled = false;
+        }
 
-    if (!glRenderbufferStorageMultisampleEXT)
-    {
-        CC_LOG_ERROR("Couldn't get function pointer to glRenderbufferStorageMultisampleEXT()!");
-        _xrFBOMSAAEnabled = false;
+        if (!glRenderbufferStorageMultisampleEXT)
+        {
+            CC_LOG_ERROR("Couldn't get function pointer to glRenderbufferStorageMultisampleEXT()!");
+            _xrFBOMSAAEnabled = false;
+        }
+        CC_LOG_INFO("GL MAX_SAMPLES = %d, MSAA Enabled = %d/%d.", maxSamples, _xrFBOMSAAEnabled, xr::XrEntry::getInstance()->getMultisamplesRTT());
     }
-    CC_LOG_INFO("GL MAX_SAMPLES = %d, MSAA Enabled = %d/%d.", maxSamples, _xrFBOMSAAEnabled, MSAA_SAMPLES);
-#endif
 
     xr::XrEntry::getInstance()->SetOpenGLESConfig(GLES3Device::getInstance()->context()->eglDisplay,
         GLES3Device::getInstance()->context()->eglConfig, GLES3Device::getInstance()->context()->eglDefaultContext);
@@ -316,7 +311,7 @@ uint32_t GetDepthTexture(void* wndHandle, uint32_t colorTexture, bool fboMSAAEna
         glGenRenderbuffers(1, &depthTexture);
         glBindRenderbuffer(GL_RENDERBUFFER, depthTexture);
         glRenderbufferStorageMultisampleEXT(
-                GL_RENDERBUFFER, MSAA_SAMPLES, GL_DEPTH_COMPONENT24, width, height);
+                GL_RENDERBUFFER, xr::XrEntry::getInstance()->getMultisamplesRTT(), GL_DEPTH_COMPONENT24, width, height);
         glBindRenderbuffer(GL_RENDERBUFFER, 0);
     }
     else
@@ -372,7 +367,7 @@ void GLES3Device::acquire(Swapchain *const *swapchains, uint32_t count) {
                         GL_TEXTURE_2D,
                         index,
                         0,
-                        MSAA_SAMPLES);
+                        xr::XrEntry::getInstance()->getMultisamplesRTT());
             glFramebufferRenderbuffer(
                         GL_FRAMEBUFFER,
                         GL_DEPTH_ATTACHMENT,
