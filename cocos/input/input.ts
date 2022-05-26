@@ -90,6 +90,7 @@ interface InputEventMap {
     [Input.EventType.DEVICEMOTION]: (event: EventAcceleration) => void,
     [Input.EventType.VIEW_POSE_ACTIVE_LEFT]: (event: EventHandle) => void,
     [Input.EventType.HAND_POSE_ACTIVE_LEFT]: (event: EventHandle) => void,
+    [Input.EventType.AIM_POSE_ACTIVE_LEFT]: (event: EventHandle) => void,
     [Input.EventType.TRIGGER_START_LEFT]: (event: EventHandle) => void,
     [Input.EventType.TRIGGER_END_LEFT]: (event: EventHandle) => void,
     [Input.EventType.TRIGGER_DOWN_LEFT]: (event: EventHandle) => void,
@@ -108,6 +109,7 @@ interface InputEventMap {
     [Input.EventType.MENU_UP]: (event: EventHandle) => void,
     [Input.EventType.VIEW_POSE_ACTIVE_RIGHT]: (event: EventHandle) => void,
     [Input.EventType.HAND_POSE_ACTIVE_RIGHT]: (event: EventHandle) => void,
+    [Input.EventType.AIM_POSE_ACTIVE_RIGHT]: (event: EventHandle) => void,
     [Input.EventType.TRIGGER_START_RIGHT]: (event: EventHandle) => void,
     [Input.EventType.TRIGGER_END_RIGHT]: (event: EventHandle) => void,
     [Input.EventType.TRIGGER_DOWN_RIGHT]: (event: EventHandle) => void,
@@ -357,6 +359,7 @@ export class Input {
             const eventHandleList = this._eventHandleList;
             this._handleInput.on(InputEventType.VIEW_POSE_ACTIVE_LEFT, (event) => { this._emitEvent(event); });
             this._handleInput.on(InputEventType.HAND_POSE_ACTIVE_LEFT, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
+            this._handleInput.on(InputEventType.AIM_POSE_ACTIVE_LEFT, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
             this._handleInput.on(InputEventType.TRIGGER_START_LEFT, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
             this._handleInput.on(InputEventType.TRIGGER_END_LEFT, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
             this._handleInput.on(InputEventType.TRIGGER_DOWN_LEFT, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
@@ -375,6 +378,7 @@ export class Input {
             this._handleInput.on(InputEventType.MENU_UP, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
             this._handleInput.on(InputEventType.VIEW_POSE_ACTIVE_RIGHT, (event) => { this._emitEvent(event); });
             this._handleInput.on(InputEventType.HAND_POSE_ACTIVE_RIGHT, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
+            this._handleInput.on(InputEventType.AIM_POSE_ACTIVE_RIGHT, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
             this._handleInput.on(InputEventType.TRIGGER_START_RIGHT, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
             this._handleInput.on(InputEventType.TRIGGER_END_RIGHT, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
             this._handleInput.on(InputEventType.TRIGGER_DOWN_RIGHT, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });

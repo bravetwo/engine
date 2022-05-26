@@ -398,6 +398,15 @@ export enum InputEventType {
 
     /**
      * @en
+     * The event type for the left aim pose active event
+     *
+     * @zh
+     * 左射线姿态激活事件
+     */
+    AIM_POSE_ACTIVE_LEFT = 'aim-pose-active-left',
+
+    /**
+     * @en
      * The event type for the left trigger start event
      *
      * @zh
@@ -557,6 +566,15 @@ export enum InputEventType {
      * 右手柄姿态激活事件
      */
     HAND_POSE_ACTIVE_RIGHT = 'hand-pose-active-right',
+
+    /**
+     * @en
+     * The event type for the right aim pose active event
+     *
+     * @zh
+     * 右射线姿态激活事件
+     */
+    AIM_POSE_ACTIVE_RIGHT = 'aim-pose-active-right',
 
     /**
      * @en

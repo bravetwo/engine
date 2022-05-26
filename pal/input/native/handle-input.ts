@@ -14,6 +14,7 @@ export class HandleInputSource {
     private _registerEvent () {
         jsb.onViewPoseActiveLeft = this._createCallbackPoseEvent(InputEventType.VIEW_POSE_ACTIVE_LEFT);
         jsb.onHandPoseActiveLeft = this._createCallbackPoseEvent(InputEventType.HAND_POSE_ACTIVE_LEFT);
+        jsb.onAimPoseActiveLeft = this._createCallbackPoseEvent(InputEventType.AIM_POSE_ACTIVE_LEFT);
         jsb.onTriggerStartLeft = this._createCallback(InputEventType.TRIGGER_START_LEFT);
         jsb.onTriggerEndLeft = this._createCallback(InputEventType.TRIGGER_END_LEFT);
         jsb.onTriggerDownLeft = this._createCallback(InputEventType.TRIGGER_DOWN_LEFT);
@@ -32,6 +33,7 @@ export class HandleInputSource {
         jsb.onMenuUp = this._createCallback(InputEventType.MENU_UP);
         jsb.onViewPoseActiveRight = this._createCallbackPoseEvent(InputEventType.VIEW_POSE_ACTIVE_RIGHT);
         jsb.onHandPoseActiveRight = this._createCallbackPoseEvent(InputEventType.HAND_POSE_ACTIVE_RIGHT);
+        jsb.onAimPoseActiveRight = this._createCallbackPoseEvent(InputEventType.AIM_POSE_ACTIVE_RIGHT);
         jsb.onTriggerStartRight = this._createCallback(InputEventType.TRIGGER_START_RIGHT);
         jsb.onTriggerEndRight = this._createCallback(InputEventType.TRIGGER_END_RIGHT);
         jsb.onTriggerDownRight = this._createCallback(InputEventType.TRIGGER_DOWN_RIGHT);

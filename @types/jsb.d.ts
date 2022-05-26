@@ -82,6 +82,7 @@ declare namespace jsb {
     type HandleEventCallback = (handleEvent: HandleEvent) => void;
     export let onViewPoseActiveLeft: HandleEventCallback | undefined;
     export let onHandPoseActiveLeft: HandleEventCallback | undefined;
+    export let onAimPoseActiveLeft: HandleEventCallback | undefined;
     export let onTriggerStartLeft: HandleEventCallback | undefined;
     export let onTriggerEndLeft: () => void | undefined;
     export let onTriggerDownLeft: () => void | undefined;
@@ -100,6 +101,7 @@ declare namespace jsb {
     export let onMenuUp: () => void | undefined;
     export let onViewPoseActiveRight: HandleEventCallback | undefined;
     export let onHandPoseActiveRight: HandleEventCallback | undefined;
+    export let onAimPoseActiveRight: HandleEventCallback | undefined;
     export let onTriggerStartRight: HandleEventCallback | undefined;
     export let onTriggerEndRight: () => void | undefined;
     export let onTriggerDownRight: () => void | undefined;
