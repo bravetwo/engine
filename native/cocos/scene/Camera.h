@@ -352,7 +352,7 @@ private:
     IntrusivePtr<Node> _node;
     ccstd::string _name;
     bool _enabled{false};
-	bool _isCullingEnabled{false};
+	bool _isCullingEnabled{true};
     CameraProjection _proj{CameraProjection::UNKNOWN};
     float _aspect{0.F};
     float _orthoHeight{10.0F};
