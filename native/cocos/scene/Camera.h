@@ -160,7 +160,7 @@ public:
     void resize(uint32_t width, uint32_t height);
     void setFixedSize(uint32_t width, uint32_t height);
     void syncCameraEditor(const Camera &camera);
-    void update(bool forceUpdate = false, int xrEye = 0); // for lazy eval situations like the in-editor preview
+    void update(bool forceUpdate = false, int xrEye = -1); // for lazy eval situations like the in-editor preview
     void changeTargetWindow(RenderWindow *window);
     void attachCamera(RenderWindow *window);
 #if USE_XR

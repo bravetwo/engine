@@ -136,7 +136,7 @@ void RenderWindow::resize(uint32_t width, uint32_t height) {
     }
 }
 
-void RenderWindow::extractRenderCameras(ccstd::vector<Camera *> &cameras, int xrEye /*0*/) {
+void RenderWindow::extractRenderCameras(ccstd::vector<Camera *> &cameras, int xrEye /*-1*/) {
     for (Camera *camera : _cameras) {
         if (camera->isEnabled()) {
 #if USE_XR

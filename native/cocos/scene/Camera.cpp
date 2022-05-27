@@ -154,7 +154,7 @@ void Camera::syncCameraEditor(const Camera &camera) {
 #endif
 }
 
-void Camera::update(bool forceUpdate /*false*/, int xrEye /*0*/) {
+void Camera::update(bool forceUpdate /*false*/, int xrEye /*-1*/) {
     if (!_node) {
         return;
     }
@@ -178,16 +178,22 @@ void Camera::update(bool forceUpdate /*false*/, int xrEye /*0*/) {
         const float projectionSignY = _device->getCapabilities().clipSpaceSignY;
         // Only for rendertexture processing
         if (_proj == CameraProjection::PERSPECTIVE) {
-#if !USE_XR
+#if USE_XR
+            if (xrEye < 0) {
+                Mat4::createPerspective(_fov, _aspect, _nearClip, _farClip,
+                                        _fovAxis == CameraFOVAxis::VERTICAL, _device->getCapabilities().clipSpaceMinZ, projectionSignY, static_cast<int>(orientation), &_matProj);
+            } else {
+                // xr flow
+                const auto &projFloat = xr::XrEntry::getInstance()->ComputeViewProjection(xrEye, _nearClip, _farClip, 1.f);
+                int i = 0;
+                for (auto value : projFloat) {
+                    _matProj.m[i] = value;
+                    i++;
+                }
+            }
+#else
             Mat4::createPerspective(_fov, _aspect, _nearClip, _farClip,
                                     _fovAxis == CameraFOVAxis::VERTICAL, _device->getCapabilities().clipSpaceMinZ, projectionSignY, static_cast<int>(orientation), &_matProj);
-#else
-            const auto &projFloat = xr::XrEntry::getInstance()->ComputeViewProjection(xrEye, _nearClip, _farClip, 1.f);
-            int i = 0;
-            for (auto value : projFloat) {
-                _matProj.m[i] = value;
-                i++;
-            }
 #endif
         } else {
             const float x = _orthoHeight * _aspect;
@@ -219,10 +225,22 @@ void Camera::changeTargetWindow(RenderWindow *window) {
 #else
     if (_cameraType == CameraType::MAIN) {
         auto windows = Root::getInstance()->getWindows();
-        for (const auto &win : windows) {
-            attachCamera(win);
+        if (window) {
+            // detach camera from other window
+            for (const auto &win : windows) {
+                win->detachCamera(this);
+            }
+            // add camera to rt window
+            attachCamera(window);
+        } else {
+            // add ui camera(without rt) or hmd camera or other camera(without rt) to xr window
+            for (int i = 0, size = windows.size(); i < size; i++) {
+                // 0,1 is left+right eye xr window
+                if (i <= 1) attachCamera(windows[i]);
+            }
         }
     } else {
+        // hmd/left/right camera to xr window
         if (_cameraType < Root::getInstance()->getWindows().size()) {
             const auto &win = Root::getInstance()->getWindows().at(_cameraType);
             attachCamera(win);
@@ -249,6 +267,7 @@ void Camera::attachCamera(RenderWindow *win) {
 
 #if USE_XR
  void Camera::changeTargetWindowByXrEye(int xrEye) {
+     if (xrEye < 0) return;
      if (_proj == CameraProjection::PERSPECTIVE) {
          _isProjDirty = true;
      }

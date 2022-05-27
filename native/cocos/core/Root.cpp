@@ -311,8 +311,12 @@ void Root::frameMove(float deltaTime, int32_t totalFrames) {
         window->extractRenderCameras(_cameraList);
     }
 #else
-            _windows[xrEye]->extractRenderCameras(_cameraList, xrEye);
-            xr::XrEntry::getInstance()->BeforeRenderFrame(xrEye);
+    for (int i = 2; i < _windows.size(); i++) {
+        // other window not xr window
+        _windows[i]->extractRenderCameras(_cameraList, -1);
+    }
+    _windows[xrEye]->extractRenderCameras(_cameraList, xrEye);
+    xr::XrEntry::getInstance()->BeforeRenderFrame(xrEye);
 #endif
 
     if (_pipelineRuntime != nullptr && !_cameraList.empty()) {
