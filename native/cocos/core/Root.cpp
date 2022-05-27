@@ -339,17 +339,17 @@ void Root::frameMove(float deltaTime, int32_t totalFrames) {
             }
 #if USE_XR
             // only left eye enable culling
-            for (scene::Camera *cam : _cameraList) {
+            /*for (scene::Camera *cam : _cameraList) {
                 if (cam && cam->isHMD())
                     cam->setCullingEnable(true);
-            }
+            }*/
             _pipelineRuntime->resetRenderQueue(true);
         } else {
             // right eye disable culling
-            for (scene::Camera *cam : _cameraList) {
+            /*for (scene::Camera *cam : _cameraList) {
                 if (cam && cam->isHMD())
                     cam->setCullingEnable(false);
-            }
+            }*/
             _pipelineRuntime->resetRenderQueue(false);
         }
 #endif
