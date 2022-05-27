@@ -36,6 +36,7 @@ public class InstantActivity extends CocosActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getSurfaceView().setZOrderOnTop(true);
         // DO OTHER INITIALIZATION BELOW
         SDKWrapper.shared().init(this);
 

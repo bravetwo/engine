@@ -47,7 +47,6 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
-import com.cocos.lib.BuildConfig;
 import com.google.androidgamesdk.gametextinput.InputConnection;
 import com.google.androidgamesdk.gametextinput.GameTextInput;
 import com.google.androidgamesdk.gametextinput.Listener;
@@ -367,9 +366,6 @@ public class GameActivity
     if (!mDestroyed) {
       mCurSurfaceHolder = holder;
       onSurfaceChangedNative(mNativeHandle, holder.getSurface(), format, width, height);
-      if (BuildConfig.XR_OEM_PICO) {
-          mSurfaceView.setVisibility(View.INVISIBLE);
-      }
     }
   }
 
@@ -381,11 +377,9 @@ public class GameActivity
   }
 
   public void surfaceDestroyed(SurfaceHolder holder) {
-    if (!BuildConfig.XR_OEM_PICO) {
     mCurSurfaceHolder = null;
     if (!mDestroyed) {
       onSurfaceDestroyedNative(mNativeHandle);
-    }
     }
   }
 
