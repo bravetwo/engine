@@ -42,6 +42,8 @@
 
 static se::Object *nodeVec3CacheObj{nullptr};
 static se::Object *nodeQuatCacheObj{nullptr};
+static se::Object *nodeVec3BatchCacheObj{nullptr};
+static se::Object *nodeQuatBatchCacheObj{nullptr};
 static se::Object *nodeMat4CacheObj{nullptr};
 static float *tempFloatArray{nullptr};
 
@@ -386,16 +388,20 @@ static bool scene_Vec3_to_seval(const cc::Vec3 &v, se::Value *ret, bool batchMod
         nodeVec3CacheObj = se::Object::createPlainObject();
         nodeVec3CacheObj->root();
     }
-    se::Object *obj(nodeVec3CacheObj);
+
+    if (batchMode && !nodeVec3BatchCacheObj) {
+        nodeVec3BatchCacheObj = se::Object::createPlainObject();
+        nodeVec3BatchCacheObj->root();
+    }
+
+    se::Object *obj(batchMode ? nodeVec3BatchCacheObj : nodeVec3CacheObj);
     if (batchMode) {
         std::string res = cc::StringUtil::format("%f,%f,%f", v.x, v.y, v.z);
         obj->setProperty("xyz", se::Value(res.c_str()));
-        obj->setProperty("batch", se::Value(true));
     } else {
         obj->setProperty("x", se::Value(v.x));
         obj->setProperty("y", se::Value(v.y));
         obj->setProperty("z", se::Value(v.z));
-        obj->setProperty("batch", se::Value(false));
     }
     ret->setObject(obj);
 
@@ -408,17 +414,21 @@ static bool scene_Quaternion_to_seval(const cc::Quaternion &v, se::Value *ret, b
         nodeQuatCacheObj = se::Object::createPlainObject();
         nodeQuatCacheObj->root();
     }
-    se::Object *obj(nodeQuatCacheObj);
+
+    if (batchMode && !nodeQuatBatchCacheObj) {
+        nodeQuatBatchCacheObj = se::Object::createPlainObject();
+        nodeQuatBatchCacheObj->root();
+    }
+
+    se::Object *obj(batchMode ? nodeQuatBatchCacheObj : nodeQuatCacheObj);
     if (batchMode) {
         std::string res = cc::StringUtil::format("%f,%f,%f,%f", v.x, v.y, v.z, v.w);
         obj->setProperty("xyzw", se::Value(res.c_str()));
-        obj->setProperty("batch", se::Value(true));
     } else {
         obj->setProperty("x", se::Value(v.x));
         obj->setProperty("y", se::Value(v.y));
         obj->setProperty("z", se::Value(v.z));
         obj->setProperty("w", se::Value(v.w));
-        obj->setProperty("batch", se::Value(false));
     }
     ret->setObject(obj);
 

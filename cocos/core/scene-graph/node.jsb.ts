@@ -699,11 +699,15 @@ nodeProto.setScale = function (val: Readonly<Vec3> | number, y?: number, z?: num
 
 nodeProto.getWorldPosition = function (out?: Vec3): Vec3 {
     const r = oldGetWorldPosition.call(this);
-    if(r.batch !== undefined && r.batch) {
+    if(r.xyz !== undefined && r.xyz) {
         let splitArray = r.xyz.split(",");
-        r.x = splitArray[0] as number;
-        r.y = splitArray[1] as number;
-        r.z = splitArray[2] as number;
+        this._worldPositionCache.x = Number(splitArray[0]);
+        this._worldPositionCache.y = Number(splitArray[1]);
+        this._worldPositionCache.z = Number(splitArray[2]);
+        if (out) {
+            return Vec3.copy(out, this._worldPositionCache);
+        }
+        return this._worldPositionCache;
     }
     if (out) {
         return Vec3.copy(out, r);
@@ -713,12 +717,16 @@ nodeProto.getWorldPosition = function (out?: Vec3): Vec3 {
 
 nodeProto.getWorldRotation = function (out?: Quat): Quat {
     const r = oldGetWorldRotation.call(this);
-    if(r.batch !== undefined && r.batch) {
+    if(r.xyzw !== undefined && r.xyzw) {
         let splitArray = r.xyzw.split(",");
-        r.x = splitArray[0] as number;
-        r.y = splitArray[1] as number;
-        r.z = splitArray[2] as number;
-        r.w = splitArray[3] as number;
+        this._worldRotationCache.x = Number(splitArray[0]);
+        this._worldRotationCache.y = Number(splitArray[1]);
+        this._worldRotationCache.z = Number(splitArray[2]);
+        this._worldRotationCache.w = Number(splitArray[3]);
+        if (out) {
+            return Quat.copy(out, this._worldRotationCache);
+        }
+        return this._worldRotationCache;
     }
 
     if (out) {
@@ -729,11 +737,15 @@ nodeProto.getWorldRotation = function (out?: Quat): Quat {
 
 nodeProto.getWorldScale = function (out?: Vec3): Vec3 {
     const r = oldGetWorldScale.call(this);
-    if(r.batch !== undefined && r.batch) {
+    if(r.xyz !== undefined && r.xyz) {
         let splitArray = r.xyz.split(",");
-        r.x = splitArray[0] as number;
-        r.y = splitArray[1] as number;
-        r.z = splitArray[2] as number;
+        this._worldScaleCache.x = Number(splitArray[0]);
+        this._worldScaleCache.y = Number(splitArray[1]);
+        this._worldScaleCache.z = Number(splitArray[2]);
+        if (out) {
+            return Vec3.copy(out, this._worldScaleCache);
+        }
+        return this._worldScaleCache;
     }
     if (out) {
         return Vec3.copy(out, r);
