@@ -75,8 +75,6 @@ export class PoseTracker extends Component {
     protected _trackingSource : TrackingSource_Type = TrackingSource_Type.HAND_POSE_ACTIVE_LEFT;
     @serializable
     protected _trackingType : TrackingType_Type = TrackingType_Type.POSITION_AND_ROTATION;
-    @serializable
-    protected _additionalXRotation = 0;
 
     @type(TrackingSource_Type)
     @displayOrder(1)
@@ -109,18 +107,6 @@ export class PoseTracker extends Component {
     }
     get trackingType () {
         return this._trackingType;
-    }
-
-    @displayOrder(3)
-    @tooltip('i18n:xr.pose_tracker.additionalXRotation')
-    set additionalXRotation (val) {
-        if (val === this._additionalXRotation) {
-            return;
-        }
-        this._additionalXRotation = val;
-    }
-    get additionalXRotation () {
-        return this._additionalXRotation;
     }
 
     private _quatPose: Quat = new Quat();
@@ -158,10 +144,10 @@ export class PoseTracker extends Component {
             input.on(Input.EventType.VIEW_POSE_ACTIVE_RIGHT, this._dispatchEventPose, this);
         } else if (this.trackingSource === TrackingSource_Type.HAND_POSE_ACTIVE_LEFT) {
             this.setCameraHMD(false);
-            input.on(Input.EventType.HAND_POSE_ACTIVE_LEFT, this._dispatchEventPose, this);
+            input.on(Input.EventType.AIM_POSE_ACTIVE_LEFT, this._dispatchEventPose, this);
         } else if (this.trackingSource === TrackingSource_Type.HAND_POSE_ACTIVE_RIGHT) {
             this.setCameraHMD(false);
-            input.on(Input.EventType.HAND_POSE_ACTIVE_RIGHT, this._dispatchEventPose, this);
+            input.on(Input.EventType.AIM_POSE_ACTIVE_RIGHT, this._dispatchEventPose, this);
         }
     }
 
@@ -175,15 +161,14 @@ export class PoseTracker extends Component {
             input.off(Input.EventType.VIEW_POSE_ACTIVE_LEFT, this._dispatchEventPose, this);
             input.off(Input.EventType.VIEW_POSE_ACTIVE_RIGHT, this._dispatchEventPose, this);
         } else if (this.trackingSource === TrackingSource_Type.HAND_POSE_ACTIVE_LEFT) {
-            input.off(Input.EventType.HAND_POSE_ACTIVE_LEFT, this._dispatchEventPose, this);
+            input.off(Input.EventType.AIM_POSE_ACTIVE_LEFT, this._dispatchEventPose, this);
         } else if (this.trackingSource === TrackingSource_Type.HAND_POSE_ACTIVE_RIGHT) {
-            input.off(Input.EventType.HAND_POSE_ACTIVE_RIGHT, this._dispatchEventPose, this);
+            input.off(Input.EventType.AIM_POSE_ACTIVE_RIGHT, this._dispatchEventPose, this);
         }
     }
 
     private _dispatchEventPose(eventHandle: EventHandle) {
         this._quatPose.set(eventHandle.quaternionX, eventHandle.quaternionY, eventHandle.quaternionZ, eventHandle.quaternionW);
-        this._amendXRotation();
 
         if (this._trackingType === TrackingType_Type.POSITION_AND_ROTATION) {
             if (eventHandle.getType() === Input.EventType.VIEW_POSE_ACTIVE_LEFT) {
@@ -205,16 +190,5 @@ export class PoseTracker extends Component {
 
         this.node.setRTS(this._quatPose, this._positionPose, Vec3.ONE);
         this.node.updateWorldTransform();
-    }
-
-    private _amendXRotation() {
-        if (this._additionalXRotation === 0) {
-            return;
-        }
-
-        var vec3 = new Vec3;
-        Quat.toEuler(vec3, this._quatPose);
-        vec3.add3f(this._additionalXRotation, 0, 0);
-        Quat.fromEuler(this._quatPose, vec3.x, vec3.y, vec3.z);
     }
 }
