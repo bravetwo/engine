@@ -65,8 +65,9 @@ Root::Root(gfx::Device *device)
 }
 
 Root::~Root() {
-    instance = nullptr;
+    destroy();
     CC_SAFE_DELETE(_eventProcessor);
+    instance = nullptr;
 }
 
 void Root::initialize(gfx::Swapchain *swapchain) {
@@ -271,6 +272,9 @@ void Root::frameMove(float deltaTime, int32_t totalFrames) {
     if (!cc::gfx::Device::getInstance()->isRendererAvailable()) {
         return;
     }
+
+    CCObject::deferredDestroy();
+
     _frameTime = deltaTime;
 
     ++_frameCount;

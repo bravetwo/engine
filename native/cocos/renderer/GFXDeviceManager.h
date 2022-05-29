@@ -58,6 +58,7 @@
 #endif
 
 #include "gfx-empty/EmptyDevice.h"
+#include "renderer/pipeline/Define.h"
 
 namespace cc {
 namespace gfx {
@@ -72,6 +73,11 @@ class CC_DLL DeviceManager final {
     static constexpr bool FORCE_ENABLE_VALIDATION{false};
 
 public:
+    static Device *create() {
+        DeviceInfo deviceInfo{pipeline::bindingMappingInfo};
+        return DeviceManager::create(deviceInfo);
+    }
+
     static Device *create(const DeviceInfo &info) {
         if (Device::instance) return Device::instance;
 
@@ -100,10 +106,6 @@ public:
         if (tryCreate<EmptyDevice>(info, &device)) return device;
 
         return nullptr;
-    }
-
-    static void destroy() {
-        CC_SAFE_DESTROY_AND_DELETE(Device::instance);
     }
 
     static void addSurfaceEventListener() {

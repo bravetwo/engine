@@ -62,7 +62,6 @@ ccstd::unordered_map<ccstd::string, unsigned> jsbFunctionInvokedRecords;
 namespace se {
 
 namespace {
-ScriptEngine *gSriptEngineInstance = nullptr;
 
 void seLogCallback(const v8::FunctionCallbackInfo<v8::Value> &info) {
     if (info[0]->IsString()) {
@@ -233,6 +232,8 @@ public:
 ScriptEngineV8Context *gSharedV8 = nullptr;
     #endif // CC_EDITOR
 } // namespace
+
+ScriptEngine* ScriptEngine::instance = nullptr;
 
 void ScriptEngine::callExceptionCallback(const char *location, const char *message, const char *stack) {
     if (_nativeExceptionCallback) {
@@ -458,32 +459,11 @@ void ScriptEngine::onPromiseRejectCallback(v8::PromiseRejectMessage msg) {
     }
 }
 
-void ScriptEngine::privateDataFinalize(PrivateObjectBase *privateObj) {
-    auto *p = static_cast<internal::PrivateData *>(privateObj->getRaw());
-
-    Object::nativeObjectFinalizeHook(p->seObj);
-
-    CC_ASSERT(p->seObj->getRefCount() == 1);
-
-    p->seObj->decRef();
-
-    free(p);
-}
-
 ScriptEngine *ScriptEngine::getInstance() {
-    if (gSriptEngineInstance == nullptr) {
-        gSriptEngineInstance = ccnew ScriptEngine();
-    }
-
-    return gSriptEngineInstance;
+    return ScriptEngine::instance;
 }
 
 void ScriptEngine::destroyInstance() {
-    if (gSriptEngineInstance) {
-        gSriptEngineInstance->cleanup();
-        delete gSriptEngineInstance;
-        gSriptEngineInstance = nullptr;
-    }
 }
 
 ScriptEngine::ScriptEngine()
@@ -507,16 +487,32 @@ ScriptEngine::ScriptEngine()
         gSharedV8 = ccnew ScriptEngineV8Context();
     }
     #endif
+    
+    ScriptEngine::instance = this;
 }
 
+#if CC_PLATFORM == CC_PLATFORM_ANDROID
+/**
+ * v8::V8::Initialize() can only be called once for a process.
+ * After calling onDestroy on Android platform, the process will be maintained for a period of time.
+ * So gSharedV8 variable should not be released and it will be re-used when ScriptEngine is constructed next time.
+ */
+ScriptEngine::~ScriptEngine() { //NOLINT(bugprone-exception-escape)
+    cleanup();
+    ScriptEngine::instance = nullptr;
+}
+#else
 ScriptEngine::~ScriptEngine() {
-    #if !CC_EDITOR
+    cleanup();
+#if !CC_EDITOR
     if (gSharedV8) {
         delete gSharedV8;
         gSharedV8 = nullptr;
     }
-    #endif
+#endif
+    ScriptEngine::instance = nullptr;
 }
+#endif
 
 bool ScriptEngine::postInit() {
     v8::HandleScope hs(_isolate);
@@ -930,13 +926,27 @@ bool ScriptEngine::saveByteCodeToFile(const ccstd::string &path, const ccstd::st
                                                 .ToLocalChecked();
     // create CachedData
     v8::ScriptCompiler::CachedData *cd = v8::ScriptCompiler::CreateCodeCache(v8Script);
-    // save to file
-    cc::Data writeData;
-    writeData.copy(cd->data, cd->length);
-    success = fu->writeDataToFile(writeData, pathBc);
-    if (!success) {
-        SE_LOGE("ScriptEngine::generateByteCode write %s\n", pathBc.c_str());
+
+    if (cd != nullptr) {
+        // save to file
+        cc::Data writeData;
+        writeData.copy(cd->data, cd->length);
+        success = fu->writeDataToFile(writeData, pathBc);
+        if (!success) {
+            SE_LOGE("ScriptEngine::generateByteCode write %s\n", pathBc.c_str());
+        }
+
+        // TODO(PatriceJiang): v8 on windows is built with dynamic library (dll),
+        // Invoking `delete` for the memory allocated in v8.dll will cause crash.
+        // Need to modify v8 source code and add v8::ScriptCompiler::DestroyCodeCache(v8::ScriptCompiler::CachedData *cd).
+#if CC_PLATFORM != CC_PLATFORM_WINDOWS
+        delete cd;
+#endif
     }
+    else {
+        success = false;
+    }
+
     return success;
 }
 
@@ -958,7 +968,13 @@ bool ScriptEngine::runByteCodeFile(const ccstd::string &pathBc, Value *ret /* = 
         v8::Local<v8::UnboundScript> dummyFunction = v8::ScriptCompiler::CompileUnboundScript(_isolate, &dummySource, v8::ScriptCompiler::kEagerCompile).ToLocalChecked();
         v8::ScriptCompiler::CachedData *dummyData = v8::ScriptCompiler::CreateCodeCache(dummyFunction);
         memcpy(p + 4, dummyData->data + 12, 4);
-        // delete dummyData; //NOTE: managed by v8
+
+        // TODO(PatriceJiang): v8 on windows is built with dynamic library (dll),
+        // Invoking `delete` for the memory allocated in v8.dll will cause crash.
+        // Need to modify v8 source code and add v8::ScriptCompiler::DestroyCodeCache(v8::ScriptCompiler::CachedData *cd).
+#if CC_PLATFORM != CC_PLATFORM_WINDOWS
+        delete dummyData;
+#endif
     }
 
     // setup ScriptOrigin

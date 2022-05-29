@@ -28,6 +28,7 @@ cc_set_if_undefined(USE_PHYSICS_PHYSX        OFF)
 cc_set_if_undefined(USE_MODULES              OFF)
 cc_set_if_undefined(USE_XR                   OFF)
 cc_set_if_undefined(USE_SERVER_MODE          OFF)
+cc_set_if_undefined(USE_CCACHE               OFF)
 
 add_definitions()
 
@@ -100,6 +101,13 @@ if(USE_JOB_SYSTEM_TASKFLOW)
     endif()
 endif()
 
+if(ANDROID)
+    if(CCACHE_EXECUTABLE AND USE_CCACHE)
+        set(CMAKE_C_COMPILER_LAUNCHER   "${CCACHE_EXECUTABLE}")
+        set(CMAKE_CXX_COMPILER_LAUNCHER "${CCACHE_EXECUTABLE}")
+    endif()
+endif()
+
 ################################# list all option values ##############################
 
 cc_inspect_values(
@@ -125,6 +133,8 @@ cc_inspect_values(
     USE_JOB_SYSTEM_TASKFLOW
     USE_XR
     USE_SERVER_MODE
+    USE_CCACHE
+    CCACHE_EXECUTABLE
 )
 
 ################################# external source code ################################
@@ -291,7 +301,6 @@ endif()
 ##### base
 cocos_source_files(
     cocos/base/Agent.h
-    cocos/base/Any.h
     cocos/base/astc.cpp
     cocos/base/astc.h
     cocos/base/base64.cpp
@@ -310,7 +319,6 @@ cocos_source_files(
     cocos/base/Locked.h
     cocos/base/Macros.h
     cocos/base/Object.h
-    cocos/base/Optional.h
     cocos/base/Ptr.h
     cocos/base/Random.h
     cocos/base/RefCounted.cpp
@@ -327,7 +335,9 @@ cocos_source_files(
     cocos/base/ThreadPool.cpp
     cocos/base/ThreadPool.h
     cocos/base/TypeDef.h
-    cocos/base/Variant.h
+    cocos/base/std/any.h
+    cocos/base/std/optional.h
+    cocos/base/std/variant.h
     cocos/base/std/container/array.h
     cocos/base/std/container/deque.h
     cocos/base/std/container/list.h
@@ -348,6 +358,7 @@ cocos_source_files(
     cocos/application/ApplicationManager.h
     cocos/application/ApplicationManager.cpp
     cocos/application/BaseGame.h
+    cocos/application/BaseGame.cpp
 )
 
 ############ engine
@@ -2355,8 +2366,17 @@ elseif(LINUX)
 endif()
 
 ############# module bindings
+cocos_source_files(MODULE ccbindings
+    cocos/bindings/sebind/intl/common.h
+    cocos/bindings/sebind/intl/common.cpp
+    cocos/bindings/sebind/class.inl
+    cocos/bindings/sebind/sebind.h
+)
+
 if(USE_SE_V8)
     cocos_source_files(MODULE ccbindings
+                     cocos/bindings/sebind/class_v8.h
+                     cocos/bindings/sebind/class_v8.cpp
                      cocos/bindings/jswrapper/v8/Base.h
                      cocos/bindings/jswrapper/v8/Class.cpp
                      cocos/bindings/jswrapper/v8/Class.h
@@ -2943,14 +2963,11 @@ if(ANDROID)
     )
 
     find_library(LIB_EGL NAMES EGL)
-    find_library(LIB_GLESv2 NAMES GLESv2)
     target_link_libraries(${ENGINE_NAME} PUBLIC
         android
         paddleboat_static
         OpenSLES
         ${LIB_EGL}
-        ${LIB_GLESv2}
-        GLESv2
         jnigraphics
         ${CC_EXTERNAL_LIBS}
     )
