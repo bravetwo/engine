@@ -283,7 +283,7 @@ export class Camera {
         }
     }
 
-    public update (forceUpdate = false, xrEye = 0) { // for lazy eval situations like the in-editor preview
+    public update (forceUpdate = false) { // for lazy eval situations like the in-editor preview
         if (!this._node) return;
 
         let viewProjDirty = false;
