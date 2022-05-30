@@ -457,7 +457,7 @@ int AndroidPlatform::init() {
 #if CC_USE_VULKAN
     graphicsApiName = "Vulkan1";
 #endif
-    xr::XrEntry::getInstance()->createXrInstance(graphicsApiName.c_str(), JniHelper::getJavaVM(), JniHelper::getActivity());
+    xr::XrEntry::getInstance()->createXrInstance(graphicsApiName.c_str(), JniHelper::getJavaVM(), getActivity());
 #endif
 #endif
     cc::FileUtilsAndroid::setassetmanager(_app->activity->assetManager);

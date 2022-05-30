@@ -50,6 +50,7 @@
 #if USE_XR
 #include "Xr.h"
 #include "platform/java/jni/JniHelper.h"
+#include "platform/android/AndroidPlatform.h"
 #endif
 
 // when capturing GLES commands (RENDERDOC_HOOK_EGL=1, default value)
@@ -78,7 +79,8 @@ GLES3Device::~GLES3Device() {
 
 bool GLES3Device::doInit(const DeviceInfo & /*info*/) {
 #if USE_XR && !XR_OEM_PICO
-    xr::XrEntry::getInstance()->createXrInstance("OpenGLES", JniHelper::getJavaVM(), JniHelper::getActivity());
+    auto *androidPlatform = static_cast<AndroidPlatform *>(BasePlatform::getPlatform());
+    xr::XrEntry::getInstance()->createXrInstance("OpenGLES", JniHelper::getJavaVM(), androidPlatform->getActivity());
 #endif
     _gpuContext = ccnew GLES3GPUContext;
     _gpuStateCache = ccnew GLES3GPUStateCache;

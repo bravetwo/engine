@@ -380,7 +380,7 @@ void EventDispatcher::dispatchHandleEvent(const xr::HandleEvent &handleEvent) {
                 jsHandleEventObj->setProperty("quaternionW", quaternionWVal);
                 se::ValueArray args;
                 args.emplace_back(se::Value(jsHandleEventObj));
-                EventDispatcher::doDispatchEvent(nullptr, xr::HandleEvent::TypeNames[(int)handleEvent.type], args);
+                EventDispatcher::doDispatchJsEvent(xr::HandleEvent::TypeNames[(int)handleEvent.type], args);
             }
             break;
         case xr::HandleEvent::Type::THUMBSTICK_MOVE_LEFT:
@@ -398,7 +398,7 @@ void EventDispatcher::dispatchHandleEvent(const xr::HandleEvent &handleEvent) {
                 jsHandleEventObj->setProperty("y", yVal);
                 se::ValueArray args;
                 args.emplace_back(se::Value(jsHandleEventObj));
-                EventDispatcher::doDispatchEvent(nullptr, xr::HandleEvent::TypeNames[(int)handleEvent.type], args);
+                EventDispatcher::doDispatchJsEvent(xr::HandleEvent::TypeNames[(int)handleEvent.type], args);
             }
             break;
         case xr::HandleEvent::Type::TRIGGER_START_LEFT:
@@ -416,7 +416,7 @@ void EventDispatcher::dispatchHandleEvent(const xr::HandleEvent &handleEvent) {
                 jsHandleEventObj->setProperty("value", val);
                 se::ValueArray args;
                 args.emplace_back(se::Value(jsHandleEventObj));
-                EventDispatcher::doDispatchEvent(nullptr, xr::HandleEvent::TypeNames[(int)handleEvent.type], args);
+                EventDispatcher::doDispatchJsEvent(xr::HandleEvent::TypeNames[(int)handleEvent.type], args);
             }
             break;
 #if XR_OEM_ROKID
@@ -446,7 +446,7 @@ void EventDispatcher::dispatchHandleEvent(const xr::HandleEvent &handleEvent) {
             // unknown type, do nothing
             break;
         default:
-            EventDispatcher::doDispatchEvent(nullptr, xr::HandleEvent::TypeNames[(int)handleEvent.type], se::EmptyValueArray);
+            EventDispatcher::doDispatchJsEvent(xr::HandleEvent::TypeNames[(int)handleEvent.type], se::EmptyValueArray);
             break;
     }
 }
