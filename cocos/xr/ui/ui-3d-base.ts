@@ -52,15 +52,12 @@ export class UI3DBase extends Component {
     }
 
     private _hoverEnter() {
-        console.log("xr0206 UI3DBase ++++  _hoverEnter");
     }
 
     private _hoverExit() {
-        console.log("xr0206 UI3DBase ++++  _hoverExit");
     }
 
     public Test() {
         ComponentEventHandler.emitEvents(this.events, this);
-        console.log("xr0206 UI3DBase -----  this._collider.node : " + this._collider?.node);
     }
 }
