@@ -67,7 +67,7 @@ export class MRSight extends Component {
     @serializable
     protected _targetCamera : Node | null = null;
     @serializable
-    protected _perEyeCamera : GateFit_Type = GateFit_Type.FILL;
+    protected _gateFit : GateFit_Type = GateFit_Type.FILL;
     @serializable
     protected _scaling = 1.00;
 
@@ -112,19 +112,19 @@ export class MRSight extends Component {
 
     @type(GateFit_Type)
     @displayOrder(4)
-    @tooltip('i18n:xr.mr_sight.perEyeCamera')
-    set perEyeCamera (val) {
-        if (val === this._perEyeCamera) {
+    @tooltip('i18n:xr.mr_sight.gateFit')
+    set gateFit (val) {
+        if (val === this._gateFit) {
             return;
         }
-        this._perEyeCamera = val;
+        this._gateFit = val;
     }
-    get perEyeCamera () {
-        return this._perEyeCamera;
+    get gateFit () {
+        return this._gateFit;
     }
 
     @visible(function (this: MRSight) {
-        return this._perEyeCamera === GateFit_Type.MANUAL;
+        return this._gateFit === GateFit_Type.MANUAL;
     })
     @displayOrder(5)
     @tooltip('i18n:xr.mr_sight.scaling')

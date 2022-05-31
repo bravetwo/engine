@@ -976,19 +976,19 @@ module.exports = {
     xr: {
         hmd_ctrl: {
             stereoRendering: 'Render mode, off when rendering the middle image copy to the binocular output',
-            perEyeCamera: 'Whether to open left and right eyes',
-            syncWithMainCamera: 'Whether the left and right eyes synchronize with the main camera',
-            foveationRendering: 'Concave rendering (requires device support for eye tracking)',
-            IPDOffset: 'IPD Offset',
-            offsetValue: 'IPD offset value',
+            perEyeCamera: 'Whether to open separate left and right eye nodes',
+            syncWithMainCamera: 'Left and right eye nodes set whether to synchronize the main camera',
+            foveationRendering: 'Foveation rendering (the device needs to support eye tracking)',
+            IPDOffset: 'Whether to open to set Interpupillary distance',
+            offsetValue: 'Value of interpupillary distance',
             aspectRatio: 'Aspect ratio',
             ratio: 'Aspect ratio value'
         },
         mr_sight: {
             layer: 'Layer used for display',
-            streamSource: 'Video resources',
+            streamSource: 'Video source',
             targetCamera: 'You can only choose one camera with video',
-            perEyeCamera: 'Resolution adaptor film gate',
+            gateFit: 'Method of filling Video image',
             scaling: 'Manually scale image multiples'
         },
         pose_tracker: {
@@ -999,9 +999,9 @@ module.exports = {
             targetEye: 'Target camera for rendering'
         },
         tracking_origin: {
-            offsetObject: 'Specify the TrackingSpace to offset',
+            offsetObject: 'The node which need to offset',
             trackingOriginMode: 'Tracing migration mode',
-            yOffsetValue: 'The offset of the Y axis of the TrackingSpace'
+            yOffsetValue: 'The offsetObject offset in the Y axis'
         },
         xr_controller: {
             inputDevice: 'Binding of physical input devices',
@@ -1080,7 +1080,7 @@ module.exports = {
             reticle: 'Ray cursor',
             raycastMask: 'X-ray detection layer',
             raycastTiggerInteraction: 'X-ray detects whether the trigger is triggered. IGNORE also detects the trigger',
-            hitDectionType: 'Hit detection type',
+            hitDetectionType: 'Hit detection type',
             hitClosestOnly: 'When enabled, only the nearest target is detected'
         },
         xr_interactable: {
@@ -1119,7 +1119,7 @@ module.exports = {
         },
         sharp_turner: {
             turnAngle: 'Fixed steering Angle each time',
-            enableTurnAround: 'Controls whether to enable 180° sharp turns',
+            enableTurnAround: 'This allows XR Agent to rotate 180 degrees when the joystick is pressed',
             activationTimeout: 'The time required to wait while performing a continuous turn'
         },
         locomotion_checker: {

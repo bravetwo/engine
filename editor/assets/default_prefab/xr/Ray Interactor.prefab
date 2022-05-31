@@ -80,7 +80,6 @@
     },
     "_trackingSource": 4,
     "_trackingType": 1,
-    "_additionalXRotation": 0,
     "_ipdOffset": 0,
     "_id": ""
   },
@@ -201,13 +200,13 @@
     "_reticle": null,
     "_raycastMask": 0,
     "_raycastTriggerInteraction": 1,
-    "_hitDirectionType": 0,
+    "_hitDetectionType": 0,
     "_hitClosestOnly": true,
     "_id": ""
   },
   {
     "__type__": "cc.CompPrefabInfo",
-    "fileId": "aaLre6QvtD4aNryu82bWID"
+    "fileId": "20LRLmhH5EQJYmbFmyHYC9"
   },
   {
     "__type__": "cc.InteractorEvents",

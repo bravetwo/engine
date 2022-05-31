@@ -44,7 +44,7 @@ enum Teleportable_Type {
 enum TeleportTrigger_Type {
     OnSelectExited = 0,
     OnSelectEntered = 1,
-    OnActivited = 2,
+    OnActivated = 2,
     OnDeactivited = 3
 }
 
@@ -139,7 +139,7 @@ export class Teleportable extends XrInteractable {
                 this._colliderCom.on(XrControlEventType.SELECT_ENTERED, this._selectEntered, this);
                 this._colliderCom.on(XrControlEventType.SELECT_EXITED, this._selectExited, this);
                 break;
-            case TeleportTrigger_Type.OnActivited:
+            case TeleportTrigger_Type.OnActivated:
             case TeleportTrigger_Type.OnDeactivited:
                 this._colliderCom.on(XrControlEventType.ACTIVATED, this._teleportAction, this);
                 this._colliderCom.on(XrControlEventType.DEACTIVITED, this._teleportAction, this);
@@ -163,7 +163,7 @@ export class Teleportable extends XrInteractable {
                 this._colliderCom.off(XrControlEventType.SELECT_ENTERED, this._selectEntered, this);
                 this._colliderCom.off(XrControlEventType.SELECT_EXITED, this._selectExited, this);
                 break;
-            case TeleportTrigger_Type.OnActivited:
+            case TeleportTrigger_Type.OnActivated:
             case TeleportTrigger_Type.OnDeactivited:
                 this._colliderCom.off(XrControlEventType.ACTIVATED, this._teleportAction, this);
                 this._colliderCom.off(XrControlEventType.DEACTIVITED, this._teleportAction, this);
@@ -193,7 +193,7 @@ export class Teleportable extends XrInteractable {
 
     protected _activited(event: XrEventHandle) {
         this._triggerId = event.triggerId;
-        if (this._teleportTrigger === TeleportTrigger_Type.OnActivited) {
+        if (this._teleportTrigger === TeleportTrigger_Type.OnActivated) {
             this._teleportAction(event);
         }
     }

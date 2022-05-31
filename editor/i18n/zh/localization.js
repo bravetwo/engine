@@ -965,7 +965,7 @@ module.exports = {
             layer: '图层',
             streamSource: '视频源',
             targetCamera: '能看到视频的相机，只能选一个',
-            GateFit: '视频图像填充方式',
+            gateFit: '视频图像填充方式',
             scaling: '手动缩放图像倍数'
         },
         pose_tracker: {
@@ -1057,7 +1057,7 @@ module.exports = {
             reticle: '射线光标',
             raycastMask: '射线检测的图层',
             raycastTiggerInteraction: '射线检测是否触发触发器，IGNORE时触发器也检测',
-            hitDectionType: '命中检测类型',
+            hitDetectionType: '命中检测类型',
             hitClosestOnly: '开启时，只检测最近的目标'
         },
         xr_interactable: {
@@ -1096,7 +1096,7 @@ module.exports = {
         },
         sharp_turner: {
             turnAngle: '每次固定的转向角度',
-            enableTurnAround: '控制是否启用180°急转弯',
+            enableTurnAround: '开启后允许按下摇杆时XR Agent旋转180度',
             activationTimeout: '执行连续的转弯时需要等待的时间'
         },
         locomotion_checker: {

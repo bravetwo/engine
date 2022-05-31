@@ -106,7 +106,7 @@ export class RayInteractor extends XrInteractor {
     @serializable
     protected _raycastTriggerInteraction: RaycastTrigger_Type = RaycastTrigger_Type.IGNORE;
     @serializable
-    protected _hitDirectionType: HitDirection_Type = HitDirection_Type.RAY_CAST;
+    protected _hitDetectionType: HitDirection_Type = HitDirection_Type.RAY_CAST;
     @serializable
     protected _hitClosestOnly: boolean = true;
 
@@ -223,15 +223,15 @@ export class RayInteractor extends XrInteractor {
 
     @type(HitDirection_Type)
     @displayOrder(10)
-    @tooltip('i18n:xr.ray_interactor.hitDectionType')
-    set hitDectionType(val) {
-        if (val === this._hitDirectionType) {
+    @tooltip('i18n:xr.ray_interactor.hitDetectionType')
+    set hitDetectionType(val) {
+        if (val === this._hitDetectionType) {
             return;
         }
-        this._hitDirectionType = val;
+        this._hitDetectionType = val;
     }
-    get hitDectionType() {
-        return this._hitDirectionType;
+    get hitDetectionType() {
+        return this._hitDetectionType;
     }
 
     @displayOrder(11)

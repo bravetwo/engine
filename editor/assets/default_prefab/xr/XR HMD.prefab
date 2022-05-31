@@ -440,13 +440,13 @@
     "_layer": 0,
     "_streamSource": null,
     "_targetCamera": null,
-    "_perEyeCamera": 0,
+    "_gateFit": 0,
     "_scaling": 1,
     "_id": ""
   },
   {
     "__type__": "cc.CompPrefabInfo",
-    "fileId": "58lblcj95Bq4QaeUGia44q"
+    "fileId": "a56+UWVI1OMbvcE0veEWR4"
   },
   {
     "__type__": "cc.PoseTracker",
@@ -461,7 +461,6 @@
     },
     "_trackingSource": 2,
     "_trackingType": 1,
-    "_additionalXRotation": 0,
     "_ipdOffset": 0,
     "_id": ""
   },
