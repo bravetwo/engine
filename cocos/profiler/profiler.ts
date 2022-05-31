@@ -39,6 +39,7 @@ import { preTransforms } from '../core/math/mat4';
 import { JSB } from '../core/default-constants';
 import { Root } from '../core/root';
 import { PipelineRuntime } from '../core/pipeline/custom/pipeline';
+import { sys } from '../core';
 
 const _characters = '0123456789. ';
 
@@ -414,7 +415,10 @@ export class Profiler {
             const clipSpaceSignY = this._device!.capabilities.clipSpaceSignY;
             if (surfaceTransform !== this.offsetData[3]) {
                 const preTransform = preTransforms[surfaceTransform];
-                const x = -0.9; const y = -0.9 * clipSpaceSignY;
+                let x = -0.9; let y = -0.9 * clipSpaceSignY;
+                if (sys.isXR) {
+                    x = -0.1; y = -0.1 * clipSpaceSignY;
+                }
                 this.offsetData[0] = x * preTransform[0] + y * preTransform[2];
                 this.offsetData[1] = x * preTransform[1] + y * preTransform[3];
                 this.offsetData[2] = this._eachNumWidth;
