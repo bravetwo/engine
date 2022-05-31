@@ -27,11 +27,11 @@
         "__id__": 4
       },
       {
-        "__id__": 6
+        "__id__": 8
       }
     ],
     "_prefab": {
-      "__id__": 8
+      "__id__": 10
     },
     "_lpos": {
       "__type__": "cc.Vec3",
@@ -111,21 +111,63 @@
     "_rayReticle": null,
     "_attachTransform": null,
     "_attachEaseInTime": 0.15,
-    "_colliders": [],
     "_grabTrigger": 0,
     "_hideController": false,
     "_selectMode": 0,
-    "_movementType": 0,
     "_throwOnDetach": true,
+    "_throwSimulationMode": 0,
     "_throwSmoothingDuration": 0.25,
-    "_throwSmoothingCurve": 0,
+    "_throwSmoothingCurve": {
+      "__id__": 6
+    },
     "_throwVelocityScale": 1.5,
     "_throwAngularVelocityScale": 1,
     "_id": ""
   },
   {
     "__type__": "cc.CompPrefabInfo",
-    "fileId": "e3Wb8Cjn5ObqgLfuzatHqw"
+    "fileId": "8bBOVkDLlNE7OTMZpWFp3e"
+  },
+  {
+    "__type__": "cc.CurveRange",
+    "mode": 1,
+    "spline": {
+      "__id__": 7
+    },
+    "multiplier": 1
+  },
+  {
+    "__type__": "cc.RealCurve",
+    "_times": [
+      0,
+      1
+    ],
+    "_values": [
+      {
+        "__type__": "cc.RealKeyframeValue",
+        "interpolationMode": 2,
+        "tangentWeightMode": 0,
+        "value": 1,
+        "rightTangent": 0,
+        "rightTangentWeight": 0,
+        "leftTangent": 0,
+        "leftTangentWeight": 0,
+        "easingMethod": 0
+      },
+      {
+        "__type__": "cc.RealKeyframeValue",
+        "interpolationMode": 2,
+        "tangentWeightMode": 0,
+        "value": 1,
+        "rightTangent": 0,
+        "rightTangentWeight": 0,
+        "leftTangent": 0,
+        "leftTangentWeight": 0,
+        "easingMethod": 0
+      }
+    ],
+    "preExtrapolation": 1,
+    "postExtrapolation": 1
   },
   {
     "__type__": "cc.InteractableEvents",
@@ -136,7 +178,7 @@
     },
     "_enabled": true,
     "__prefab": {
-      "__id__": 7
+      "__id__": 9
     },
     "hoverEnterEvents": [],
     "hoverExitEvents": [],

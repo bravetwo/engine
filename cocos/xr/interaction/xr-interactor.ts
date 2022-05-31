@@ -50,7 +50,7 @@ export class XrInteractor extends Component {
     @serializable
     protected _attachTransform: Node | null = null;
     @serializable
-    protected _selectActionTrigger: SelectActionTrigger_Type = SelectActionTrigger_Type.State_Change;
+    protected _selectActionTrigger: SelectActionTrigger_Type = SelectActionTrigger_Type.State;
 
     protected _triggerState: boolean = false;
     protected _stateState: boolean = false;
@@ -59,7 +59,7 @@ export class XrInteractor extends Component {
     protected _collider: Collider | null = null;
     protected _accupyLine: boolean = false;
 
-    // 被触发的物体Interactable
+    // The triggered object Interactable
     protected _beTriggerNode: IXrInteractable | null = null;
 
     @type(Node)

@@ -70,17 +70,15 @@
       "__id__": 3
     },
     "_rayReticle": null,
-    "_colliders": [],
     "_teleportableType": 0,
     "_teleportAnchorNode": null,
     "_teleportTrigger": 0,
     "_teleporter": null,
-    "teleportingEvent": [],
     "_id": ""
   },
   {
     "__type__": "cc.CompPrefabInfo",
-    "fileId": "4ehrG61/1Jsrp08xLeWrmn"
+    "fileId": "54HfqYrB9A55KPopKjhuW9"
   },
   {
     "__type__": "cc.InteractableEvents",

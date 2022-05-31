@@ -28,15 +28,14 @@
  * @module component/xr
  */
 
-import { ccclass, help, menu, displayOrder, type, serializable, tooltip, executeInEditMode} from 'cc.decorator';
-import { Component } from '../../core/components';
+import { ccclass, help, menu, displayOrder, serializable, tooltip, executeInEditMode} from 'cc.decorator';
 import { Node } from '../../core/scene-graph/node';
-import { ccenum, director, Quat, Vec3 } from '../../core';
-import { XRController, XrInputDeviceType } from '../device/xr-controller';
-import { LocomotionChecker } from './locomotion-checker';
+import { Quat, Vec3 } from '../../core';
+import { XrInputDeviceType } from '../device/xr-controller';
 import { input, Input } from '../../input/input';
 import { EventHandle } from '../../input/types/event/event-handle';
 import { degreesToRadians } from '../../core/utils/misc';
+import { InputControl_Type, LocomotionBase } from './locomotion-base';
 
 enum TurnDir {
     OFF = 0,
@@ -44,76 +43,23 @@ enum TurnDir {
     Right = 2
 }
 
-enum InputControl_Type {
-    PRIMARY_2D_AXIS = 0,
-    SECONDARY_2D_AXIS = 1,
-}
-ccenum(InputControl_Type);
-
 /**
- * @en
- *                      <br>
- * @zh
- *                      <br>
+ * @en 连续转弯控制
+ * @zh Continuous turn control
  */
-@ccclass('cc.ContinousTurner')
-@help('i18n:cc.ContinousTurner')
-@menu('XR/Locomotion/ContinousTurner')
+@ccclass('cc.ContinuousTurner')
+@help('i18n:cc.ContinuousTurner')
+@menu('XR/Locomotion/ContinuousTurner')
 @executeInEditMode
-export class ContinousTurner extends Component {
-    @serializable
-    protected _checker: LocomotionChecker | null = null;
-    @serializable
-    protected _inputDevice: XRController | null = null;
-    @serializable
-    protected _inputControl: InputControl_Type = InputControl_Type.PRIMARY_2D_AXIS;
+export class ContinuousTurner extends LocomotionBase {
     @serializable
     protected _turnSpeed = 60;
 
     private _isTurn: TurnDir = TurnDir.OFF;
     private _xrSessionNode: Node | undefined = undefined;
 
-    @type(LocomotionChecker)
-    @displayOrder(1)
-    @tooltip('i18n:xr.continous_turner.checker')
-    set checker (val) {
-        if (val === this._checker) {
-            return;
-        }
-        this._checker = val;
-    }
-    get checker () {
-        return this._checker;
-    }
-
-    @type(XRController)
-    @displayOrder(2)
-    @tooltip('i18n:xr.continous_turner.inputDevice')
-    set inputDevice (val) {
-        if (val === this._inputDevice) {
-            return;
-        }
-        this._inputDevice = val;
-    }
-    get inputDevice () {
-        return this._inputDevice;
-    }
-
-    @type(InputControl_Type)
-    @displayOrder(3)
-    @tooltip('i18n:xr.continous_turner.inputControl')
-    set inputControl (val) {
-        if (val === this._inputControl) {
-            return;
-        }
-        this._inputControl = val;
-    }
-    get inputControl () {
-        return this._inputControl;
-    }
-
     @displayOrder(4)
-    @tooltip('i18n:xr.continous_turner.turnSpeed')
+    @tooltip('i18n:xr.continuous_turner.turnSpeed')
     set turnSpeed (val) {
         if (val === this._turnSpeed) {
             return;
@@ -126,15 +72,7 @@ export class ContinousTurner extends Component {
 
 
     onEnable() {
-        if (!this._checker) {
-            const scene = director.getScene() as any;
-            if (scene) {
-                const checker = scene.getComponentInChildren(LocomotionChecker);
-                if (checker) {
-                    this._checker = checker;
-                }
-            } 
-        }
+        this._findChecker();
         if (this._inputControl === InputControl_Type.PRIMARY_2D_AXIS) {
             if (this.inputDevice?.inputDevice == XrInputDeviceType.Left_Hand) {
                 input.on(Input.EventType.THUMBSTICK_MOVE_LEFT, this._turnOn, this);

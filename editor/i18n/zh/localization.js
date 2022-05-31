@@ -970,11 +970,10 @@ module.exports = {
         },
         pose_tracker: {
             trackingSource: '指定需要追踪的物理设备',
-            trackingType: '设备追踪方式，生效的追踪变量',
-            additionalXRotation: '额外的X轴旋转角度'
+            trackingType: '设备追踪方式，生效的追踪变量'
         },
         target_eye: {
-            targetEye: '渲染目标'
+            targetEye: '渲染目标相机'
         },
         tracking_origin: {
             offsetObject: '指定需要偏移的TrackingSpace',
@@ -1070,13 +1069,12 @@ module.exports = {
             grabTrigger: '触发抓取的事件',
             hideController: '是否隐藏XR Controller对象模型,开启后隐藏XR Controller对象模型',
             selectMode: '',
-            movementType: '',
-            throwOnDetach: '开启后，按照加权投掷速度平滑的曲线，计算初始速度',
+            throwOnDetach: '开启后，物体具有模拟抛出行为的物理属性',
             throwSimulationMode: '抛出时物体速度的计算方式',
             throwSmoothingDuration: '用于计算平均投掷速度的时间段',
             throwSmoothingCurve: '用于加权投掷速度平滑的曲线(右侧最近的帧)',
-            throwVelocityScale: '在释放时从交互器继承的速度的倍率',
-            throwAngularVelocityScale: '在释放时从交互器继承的角速度的倍率'
+            throwVelocityScale: '在投掷时从交互器继承的速度的倍率',
+            throwAngularVelocityScale: '在投掷时从交互器继承的角速度的倍率'
         },
         teleportable: {
             teleportableType: '传送地的传送类型，有传送点和传送区域两种形式',
@@ -1084,30 +1082,26 @@ module.exports = {
             teleportTrigger: '触发传送的事件',
             teleporter: '能够传送至此的传送对象'
         },
-        continous_mover: {
+        locomotion_base: {
             checker: '选择参与此运动行为检查的LocomotionChecker，如果用户没有指定，则默认绑定遍历当前Object组得到的第一个Locomotion Checker',
             inputDevice: '绑定需要读取信号的输入设备',
-            inputControl: '绑定输入控件',
-            moveSpeed: '移动的速度',
-            forwardSource: '指定为朝前的方向的对象',
+            inputControl: '绑定输入控件'
         },
-        continous_turner: {
-            checker: '选择参与此运动行为检查的LocomotionChecker，如果用户没有指定，则默认绑定遍历当前Object组得到的第一个Locomotion Checker',
-            inputDevice: '绑定需要读取信号的输入设备',
-            inputControl: '绑定输入控件',
+        continuous_mover: {
+            moveSpeed: '移动的速度',
+            forwardSource: '指定为正向方向的对象',
+        },
+        continuous_turner: {
             turnSpeed: '转向的速度'
         },
         sharp_turner: {
-            checker: '选择参与此运动行为检查的LocomotionChecker，如果用户没有指定，则默认绑定遍历当前Object组得到的第一个Locomotion Checker',
-            inputDevice: '绑定需要读取信号的输入设备',
-            inputControl: '绑定输入控件',
             turnAngle: '每次固定的转向角度',
-            enableTurnAround: '开启后允许AxisDown时转180度',
+            enableTurnAround: '控制是否启用180°急转弯',
             activationTimeout: '执行连续的转弯时需要等待的时间'
         },
         locomotion_checker: {
             timeout: '独占访问XR Agent的超时时间(以秒为单位)',
-            xrAgent: '绑定XR Agent,默认绑定遍历当前Object组得到的第一个XR Agent'
+            xrAgent: '绑定XR Agent,默认绑定遍历当前场景得到的第一个XR Agent'
         },
         teleporter: {
             checker: '选择特定Locomotion Checker,如果用户没有指定，则默认绑定遍历当前Object组得到的第一个Locomotion Checker'

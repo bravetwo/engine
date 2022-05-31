@@ -47,5 +47,8 @@ export * from './event/interactor-events';
 export * from './locomotion/locomotion-checker';
 export * from './locomotion/teleporter';
 export * from './locomotion/sharp-turner';
-export * from './locomotion/continous-turner';
-export * from './locomotion/continous-mover';
+export * from './locomotion/continuous-turner';
+export * from './locomotion/continuous-mover';
+export * from './locomotion/locomotion-base';
+
+export * from './ui/ui-3d-base';

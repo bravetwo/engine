@@ -85,7 +85,6 @@ export class EventHandlerType {
     @type([ComponentEventHandler])
     @serializable
     @displayOrder(2)
-    @tooltip('i18n:button.event')
     public events: ComponentEventHandler[] = [];
 }
 

@@ -78,15 +78,15 @@
     "__prefab": {
       "__id__": 3
     },
-    "_trackingSource": 4,
+    "_trackingSource": 3,
     "_trackingType": 1,
-    "_updateType": 0,
+    "_additionalXRotation": 0,
     "_ipdOffset": 0,
     "_id": ""
   },
   {
     "__type__": "cc.CompPrefabInfo",
-    "fileId": "0fRcRctMBGdp2TW/P9bNvj"
+    "fileId": "b3+zhXYyBP0pJdx1dmvpew"
   },
   {
     "__type__": "cc.XRController",
@@ -99,7 +99,7 @@
     "__prefab": {
       "__id__": 5
     },
-    "_inputDevice": 1,
+    "_inputDevice": 0,
     "_selectActionLeft": 6,
     "_selectActionRight": 7,
     "_activateActionLeft": 4,
@@ -112,7 +112,7 @@
   },
   {
     "__type__": "cc.CompPrefabInfo",
-    "fileId": "bfQZQZkEZKOpgHm6B/O5cK"
+    "fileId": "e20Uvpu1pEwZ4DOieixwAM"
   },
   {
     "__type__": "cc.SphereCollider",
@@ -138,7 +138,7 @@
   },
   {
     "__type__": "cc.CompPrefabInfo",
-    "fileId": "41Y9FGnUBITa66ij4DSJk9"
+    "fileId": "39O73jnhpB7KkdF6XC3wTq"
   },
   {
     "__type__": "cc.DirectInteractor",
@@ -158,7 +158,7 @@
   },
   {
     "__type__": "cc.CompPrefabInfo",
-    "fileId": "6d+aT5NnxOVKRKl4pPL4Ev"
+    "fileId": "4b4WEhShpK7JCXCXuyWOzV"
   },
   {
     "__type__": "cc.InteractorEvents",
@@ -184,7 +184,7 @@
   },
   {
     "__type__": "cc.CompPrefabInfo",
-    "fileId": "28/8hHYO5KpY0waj471cSl"
+    "fileId": "8bco/QZ9dBmLkuRc2zMfED"
   },
   {
     "__type__": "cc.AudioEvents",

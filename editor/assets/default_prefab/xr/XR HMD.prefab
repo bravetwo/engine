@@ -424,7 +424,7 @@
   },
   {
     "__type__": "cc.CompPrefabInfo",
-    "fileId": "013DVgaX1OG5WpYjWwdnXU"
+    "fileId": "25mxdTF2BB6qiO4W7i8z8P"
   },
   {
     "__type__": "cc.MRSight",
@@ -461,13 +461,13 @@
     },
     "_trackingSource": 2,
     "_trackingType": 1,
-    "_updateType": 0,
+    "_additionalXRotation": 0,
     "_ipdOffset": 0,
     "_id": ""
   },
   {
     "__type__": "cc.CompPrefabInfo",
-    "fileId": "8cSvGC8W1DjYqaXVcZUnRT"
+    "fileId": "74MuHbpilNVaR3LkEpSMve"
   },
   {
     "__type__": "cc.TargetEye",

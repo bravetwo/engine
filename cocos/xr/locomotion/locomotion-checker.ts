@@ -45,7 +45,7 @@ import { TrackingOrigin } from '../device/tracking-origin';
 @executeInEditMode
 export class LocomotionChecker extends Component {
     @serializable
-    protected _timeout = 6;
+    protected _timeout = 10;
     @serializable
     protected _xrAgent: TrackingOrigin | null = null;
 

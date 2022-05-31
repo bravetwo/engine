@@ -29,37 +29,22 @@
  */
 
 import { ccclass, help, menu, displayOrder, type, serializable, tooltip, executeInEditMode} from 'cc.decorator';
-import { Component } from '../../core/components';
 import { Node } from '../../core/scene-graph/node';
-import { ccenum, director, Vec2, Vec3 } from '../../core';
-import { XRController, XrInputDeviceType } from '../device/xr-controller';
-import { LocomotionChecker } from './locomotion-checker';
+import { Vec2, Vec3 } from '../../core';
+import { XrInputDeviceType } from '../device/xr-controller';
 import { input, Input } from '../../input/input';
 import { EventHandle } from '../../input/types/event/event-handle';
-
-enum InputControl_Type {
-    PRIMARY_2D_AXIS = 0,
-    SECONDARY_2D_AXIS = 1,
-}
-ccenum(InputControl_Type);
+import { InputControl_Type, LocomotionBase } from './locomotion-base';
 
 /**
- * @en
- *                      <br>
- * @zh
- *                      <br>
+ * @en 连续移动控制 
+ * @zh Continuous movement control
  */
-@ccclass('cc.ContinousMover')
-@help('i18n:cc.ContinousMover')
-@menu('XR/Locomotion/ContinousMover')
+@ccclass('cc.ContinuousMover')
+@help('i18n:cc.ContinuousMover')
+@menu('XR/Locomotion/ContinuousMover')
 @executeInEditMode
-export class ContinousMover extends Component {
-    @serializable
-    protected _checker: LocomotionChecker | null = null;
-    @serializable
-    protected _inputDevice: XRController | null = null;
-    @serializable
-    protected _inputControl: InputControl_Type = InputControl_Type.PRIMARY_2D_AXIS;
+export class ContinuousMover extends LocomotionBase {
     @serializable
     protected _moveSpeed = 1;
     @serializable
@@ -69,47 +54,8 @@ export class ContinousMover extends Component {
     private _xrSessionNode: Node | undefined = undefined;
     private _move: Vec2 = new Vec2(0, 0);
 
-    @type(LocomotionChecker)
-    @displayOrder(1)
-    @tooltip('i18n:xr.continous_mover.checker')
-    set checker (val) {
-        if (val === this._checker) {
-            return;
-        }
-        this._checker = val;
-    }
-    get checker () {
-        return this._checker;
-    }
-
-    @type(XRController)
-    @displayOrder(2)
-    @tooltip('i18n:xr.continous_mover.inputDevice')
-    set inputDevice (val) {
-        if (val === this._inputDevice) {
-            return;
-        }
-        this._inputDevice = val;
-    }
-    get inputDevice () {
-        return this._inputDevice;
-    }
-
-    @type(InputControl_Type)
-    @displayOrder(3)
-    @tooltip('i18n:xr.continous_mover.inputControl')
-    set inputControl (val) {
-        if (val === this._inputControl) {
-            return;
-        }
-        this._inputControl = val;
-    }
-    get inputControl () {
-        return this._inputControl;
-    }
-
     @displayOrder(4)
-    @tooltip('i18n:xr.continous_mover.moveSpeed')
+    @tooltip('i18n:xr.continuous_mover.moveSpeed')
     set moveSpeed (val) {
         if (val === this._moveSpeed) {
             return;
@@ -122,7 +68,7 @@ export class ContinousMover extends Component {
 
     @type(Node)
     @displayOrder(5)
-    @tooltip('i18n:xr.continous_mover.forwardSource')
+    @tooltip('i18n:xr.continuous_mover.forwardSource')
     set forwardSource (val) {
         if (val === this._forwardSource) {
             return;
@@ -134,15 +80,7 @@ export class ContinousMover extends Component {
     }
 
     onEnable() {
-        if (!this._checker) {
-            const scene = director.getScene() as any;
-            if (scene) {
-                const checker = scene.getComponentInChildren(LocomotionChecker);
-                if (checker) {
-                    this._checker = checker;
-                }
-            } 
-        }
+        this._findChecker();
         if (this._inputControl === InputControl_Type.PRIMARY_2D_AXIS) {
             if (this.inputDevice?.inputDevice == XrInputDeviceType.Left_Hand) {
                 input.on(Input.EventType.THUMBSTICK_MOVE_LEFT, this._MoveOn, this);
@@ -178,7 +116,11 @@ export class ContinousMover extends Component {
 
     private _getDirection (x: number, y: number, z: number) {
         const result = new Vec3(x, y, z);
-        Vec3.transformQuat(result, result, this.node.getRotation());
+        if (this._forwardSource) {
+            Vec3.transformQuat(result, result, this._forwardSource.getRotation());
+        } else {
+            Vec3.transformQuat(result, result, this.node.getRotation());
+        }
         return result;
     }
 

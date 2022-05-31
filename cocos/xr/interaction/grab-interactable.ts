@@ -46,11 +46,11 @@ enum SelectMode_Type {
     Multiple = 1
 }
 
-enum Movement_Type {
-    Instantaneous = 0,
-    Kinematic = 1,
-    Velocity = 2
-}
+// enum Movement_Type {
+//     Instantaneous = 0,
+//     Kinematic = 1,
+//     Velocity = 2
+// }
 
 enum ThrowSimulationMode_Type {
     InheritRigidbody = 0,
@@ -59,7 +59,7 @@ enum ThrowSimulationMode_Type {
 
 ccenum(GrabTrigger_Type);
 ccenum(SelectMode_Type);
-ccenum(Movement_Type);
+// ccenum(Movement_Type);
 ccenum(ThrowSimulationMode_Type);
 
 /**
@@ -86,8 +86,8 @@ export class GrabInteractable extends XrInteractable {
     protected _hideController = false;
     @serializable
     protected _selectMode: SelectMode_Type = SelectMode_Type.Single
-    @serializable
-    protected _movementType: Movement_Type = Movement_Type.Instantaneous;
+    // @serializable
+    // protected _movementType: Movement_Type = Movement_Type.Instantaneous;
     @serializable
     protected _throwOnDetach = true;
     @serializable
@@ -187,18 +187,18 @@ export class GrabInteractable extends XrInteractable {
         return this._selectMode;
     }
 
-    @type(Movement_Type)
-    @displayOrder(9)
-    @tooltip('i18n:xr.grab_interactable.movementType')
-    set movementType(val) {
-        if (val === this._movementType) {
-            return;
-        }
-        this._movementType = val;
-    }
-    get movementType() {
-        return this._movementType;
-    }
+    // @type(Movement_Type)
+    // @displayOrder(9)
+    // @tooltip('i18n:xr.grab_interactable.movementType')
+    // set movementType(val) {
+    //     if (val === this._movementType) {
+    //         return;
+    //     }
+    //     this._movementType = val;
+    // }
+    // get movementType() {
+    //     return this._movementType;
+    // }
 
     @type(Boolean)
     @displayOrder(10)

@@ -66,13 +66,13 @@
     "__prefab": {
       "__id__": 3
     },
-    "_timeout": 0,
-    "_xrSession": null,
+    "_timeout": 10,
+    "_xrAgent": null,
     "_id": ""
   },
   {
     "__type__": "cc.CompPrefabInfo",
-    "fileId": "5fd+gBHOhMoI416SDMb/p2"
+    "fileId": "84YgTQmAdMApj1iS+fTgMO"
   },
   {
     "__type__": "cc.PrefabInfo",

@@ -518,7 +518,7 @@
   },
   {
     "__type__": "cc.CompPrefabInfo",
-    "fileId": "14x4FPyfZOSK9yhkg7IwhK"
+    "fileId": "8cT5jfVVVC57C+3yxZ2Our"
   },
   {
     "__type__": "cc.MRSight",
@@ -555,13 +555,13 @@
     },
     "_trackingSource": 2,
     "_trackingType": 1,
-    "_updateType": 0,
+    "_additionalXRotation": 0,
     "_ipdOffset": 0,
     "_id": ""
   },
   {
     "__type__": "cc.CompPrefabInfo",
-    "fileId": "a1dRdK5R9H9IJXk9NmaWGv"
+    "fileId": "1aD9MuGNpJjYUbAB4vouOb"
   },
   {
     "__type__": "cc.TargetEye",

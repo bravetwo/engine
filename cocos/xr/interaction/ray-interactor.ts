@@ -31,7 +31,7 @@
 import { ccclass, help, menu, type, displayOrder, serializable, tooltip } from 'cc.decorator';
 import { ccenum } from '../../core/value-types/enum';
 import { Node } from '../../core/scene-graph/node';
-import { Color, Mat4, Vec3 } from '../../core/math';
+import { Color, Mat4, Quat, Vec3 } from '../../core/math';
 import { Ray } from '../../core/geometry/ray';
 import { PhysicsSystem } from '../../physics/framework/physics-system';
 import { XrControlEventType } from '../event/xr-event-handle';
@@ -40,6 +40,8 @@ import { Line } from '../../particle/line';
 import { InteractorEvents } from '../event/interactor-events';
 import { XrInteractor, SelectActionTrigger_Type } from './xr-interactor';
 import { IXrInteractable, XrInteractable } from './xr-interactable';
+import { UI3DBase } from '../ui/ui-3d-base';
+import { PhysicsRayResult } from '../../physics/framework';
 
 enum Line_Type {
     Straight_Line = 0,
@@ -112,6 +114,9 @@ export class RayInteractor extends XrInteractor {
     private _line: Line | null = null;
     private _linePositions: any = [];
     private _lineOriColor: Color | undefined = undefined;
+
+    private _oriPoint: Vec3 = new Vec3;
+    private _oriRotation: Quat = new Quat;
 
     @type(Boolean)
     @displayOrder(1)
@@ -251,6 +256,17 @@ export class RayInteractor extends XrInteractor {
         return this._triggerState;
     }
 
+    private _orginalScale: Vec3 = new Vec3;
+
+    onLoad() {
+        if (this.reticle) {
+            this._orginalScale.set(this.reticle.worldScale);
+        }
+
+        this._oriPoint.set(this.node.worldPosition);
+        this._oriRotation.set(this.node.worldRotation);
+    }
+
     onEnable() {
         this._setAttachNode();
         this._line = this.getComponent(Line);
@@ -307,18 +323,20 @@ export class RayInteractor extends XrInteractor {
         return Vec3.transformMat4(out, nodePoint, _worldMatrix);
     }
 
-    protected _judgeHit() {
-        // Ray does not exist, return
-        if (!this._line || !this._line.node.active) {
-            return false;
-        }
-
-        // Get Ray
+    private _getRay() {
         const ray: Ray = new Ray();
         const dir = this._getRayDir();
         const start = this.convertToWorldSpace(new Vec3(this._linePositions[0].x, this._linePositions[0].y, this._linePositions[0].z));
         Ray.set(ray, start.x, start.y, start.z, dir.x, dir.y, dir.z);
-        // Ray collision
+        return ray;
+    }
+
+    protected _judgeHit() {
+        if (!this._line || !this._line.node.active) {
+            return false;
+        }
+
+        const ray = this._getRay();
         const hit = PhysicsSystem.instance.raycastClosest(ray, 0xffffffff, this.maxRayDistance, this.raycastTiggerInteraction === RaycastTrigger_Type.IGNORE);
         if (hit) {
             // Get collision box
@@ -337,78 +355,20 @@ export class RayInteractor extends XrInteractor {
         return false;
     }
 
-    update(deltaTime: number) {
+    protected _judgeUIHit() {
         if (!this._line || !this._line.node.active) {
-            return;
+            return false;
         }
-        // Get Ray
-        const ray: Ray = new Ray();
-        const dir = this._getRayDir();
-        const start = this.convertToWorldSpace(new Vec3(this._linePositions[0].x, this._linePositions[0].y, this._linePositions[0].z));
-        Ray.set(ray, start.x, start.y, start.z, dir.x, dir.y, dir.z);
-        // Ray collision
+
+        const ray = this._getRay();
         const hit = PhysicsSystem.instance.raycastClosest(ray, 0xffffffff, this.maxRayDistance, this.raycastTiggerInteraction === RaycastTrigger_Type.IGNORE);
         if (hit) {
-            // Get the coordinates of the collision point
+            // Get collision box
             const closestResult = PhysicsSystem.instance.raycastClosestResult;
-            this._event.hitPoint.set(closestResult.hitPoint);
-            // Set ray coordinates
-            this._setLinePosition(true);
-            // Check whether the collision box holds IXrInteractable
-            const xrInteractable = closestResult.collider?.getComponent(IXrInteractable);
-            if (xrInteractable) {
-                this._setLinehover(true);
-                // Determine if there was a hit last time
-                if (this._rayHitCollider) {
-                    if (this._rayHitCollider !== closestResult.collider) {
-                        // Inconsistent, and an object was hit last time, HOVER_EXITED is fired
-                        this._interactorEvents?.hoverExited(this._event);
-                        this._rayHitCollider.emit(XrControlEventType.HOVER_EXITED, this._event);
-                        // Replace hit object, triggering HOVER_ENTERED
-                        this._rayHitCollider = closestResult.collider;
-                        this._interactorEvents?.hoverEntered(this._event);
-                        this._rayHitCollider.emit(XrControlEventType.HOVER_ENTERED, this._event);
-                    }
-                } else {
-                    // Replace hit object, triggering HOVER_ENTERED
-                    this._rayHitCollider = closestResult.collider;
-                    this._interactorEvents?.hoverEntered(this._event);
-                    this._rayHitCollider.emit(XrControlEventType.HOVER_ENTERED, this._event);
-                }
-
-                // Raised each time when SelectActionType is STATE
-                if (this._selectActionTrigger === SelectActionTrigger_Type.State && this._stateState) {
-                    // Determines if the object has been triggered
-                    if (!this._judgeTrigger()) {
-                        this._beTriggerNode = xrInteractable;
-                        this._collider = closestResult.collider;
-                        this._event.hitPoint = closestResult.hitPoint;
-                        this._event.triggerId = this.uuid;
-                        this._triggerState = true;
-                        this._emitSelectEntered();
-                    }
-                }
-                // Send stay, intermediate state, send position point
-                this._rayHitCollider.emit(XrControlEventType.HOVER_STAY, this._event);
-            } else {
-                this._setLinehover(false);
-                // Determine if there was a hit last time
-                if (this._rayHitCollider) {
-                     // HOVER_EXITED is triggered if an object is hit
-                     this._interactorEvents?.hoverExited(this._event);
-                     this._rayHitCollider.emit(XrControlEventType.HOVER_EXITED, this._event);
-                }
-
-                this._rayHitCollider = null;
-            }
-        } else {
-            this._setLinehover(false);
-            // Set ray coordinates
-            this._setLinePosition(false);
-            if (this._rayHitCollider) {
-                this._rayHitCollider.emit(XrControlEventType.HOVER_EXITED, this);
-                this._interactorEvents?.hoverExited(this._event);
-                this._rayHitCollider = null;
+            // Check whether the collision box has an UI3DBase
+            const ui3DBase = closestResult.collider?.getComponent(UI3DBase);
+            if (ui3DBase) {
+                ui3DBase.Test();
             }
         }
     }
@@ -420,6 +380,92 @@ export class RayInteractor extends XrInteractor {
             Vec3.transformQuat(dir, vec3Like, this._line.node.getWorldRotation());
         }
         return dir;
+    }
+
+    private _handleHoverEnter(closestResult: PhysicsRayResult) {
+        this._setLinehover(true);
+        // Determine if there was a hit last time
+        if (this._rayHitCollider) {
+            if (this._rayHitCollider !== closestResult.collider) {
+                // Inconsistent, and an object was hit last time, HOVER_EXITED is fired
+                this._interactorEvents?.hoverExited(this._event);
+                this._rayHitCollider.emit(XrControlEventType.HOVER_EXITED, this._event);
+                // Replace hit object, triggering HOVER_ENTERED
+                this._rayHitCollider = closestResult.collider;
+                this._interactorEvents?.hoverEntered(this._event);
+                this._rayHitCollider.emit(XrControlEventType.HOVER_ENTERED, this._event);
+            }
+        } else {
+            // Replace hit object, triggering HOVER_ENTERED
+            this._rayHitCollider = closestResult.collider;
+            this._interactorEvents?.hoverEntered(this._event);
+            this._rayHitCollider.emit(XrControlEventType.HOVER_ENTERED, this._event);
+        }
+
+        // Send stay, intermediate state, send position point
+        this._rayHitCollider.emit(XrControlEventType.HOVER_STAY, this._event);
+    }
+
+    private _handleHoverExit() {
+        this._setLinehover(false);
+        // Set ray coordinates
+        this._setLinePosition(false);
+        // Determine if there was a hit last time
+        if (this._rayHitCollider) {
+            // HOVER_EXITED is triggered if an object is hit
+            this._interactorEvents?.hoverExited(this._event);
+            this._rayHitCollider.emit(XrControlEventType.HOVER_EXITED, this._event);
+            this._rayHitCollider = null;
+        }
+    }
+
+    private _interactionHit(closestResult: PhysicsRayResult, xrInteractable: IXrInteractable) {
+        this._handleHoverEnter(closestResult);
+        // Raised each time when SelectActionType is STATE
+        if (this._selectActionTrigger === SelectActionTrigger_Type.State && this._stateState) {
+            // Determines if the object has been triggered
+            if (!this._judgeTrigger()) {
+                this._beTriggerNode = xrInteractable;
+                this._collider = closestResult.collider;
+                this._event.hitPoint = closestResult.hitPoint;
+                this._event.triggerId = this.uuid;
+                this._triggerState = true;
+                this._emitSelectEntered();
+            }
+        }
+    }
+
+    private _ui3dHit(closestResult: PhysicsRayResult, ui3DBase: UI3DBase) {
+        this._handleHoverEnter(closestResult);
+    }
+
+    update() {
+        if (!this._line || !this._line.node.active) {
+            return;
+        }
+
+        const ray = this._getRay();
+        const hit = PhysicsSystem.instance.raycastClosest(ray, 0xffffffff, this.maxRayDistance, this.raycastTiggerInteraction === RaycastTrigger_Type.IGNORE);
+        if (hit) {
+            // Get the coordinates of the collision point
+            const closestResult = PhysicsSystem.instance.raycastClosestResult;
+            this._event.hitPoint.set(closestResult.hitPoint);
+            // Set ray coordinates
+            this._setLinePosition(true);
+            const xrInteractable = closestResult.collider?.getComponent(IXrInteractable);
+            if (xrInteractable) {
+                this._interactionHit(closestResult, xrInteractable);
+            } else {
+                const ui3DBase = closestResult.collider?.getComponent(UI3DBase);
+                if (ui3DBase) {
+                    this._ui3dHit(closestResult, ui3DBase);
+                } else {
+                    this._handleHoverExit();
+                }
+            }
+        } else {
+            this._handleHoverExit();
+        }
     }
 
     private _setLinehover(isHover: boolean) {
@@ -447,12 +493,18 @@ export class RayInteractor extends XrInteractor {
             pos.push(this._event.hitPoint);
             this._line.worldSpace = true;
             this._line.positions = pos;
+
+            this.reticle?.setWorldPosition(this._line.positions[1]);
         } else {
             if (this._line.positions !== this._linePositions) {
                 this._line.worldSpace = false;
                 this._line.positions = this._linePositions;
             }
+
+            this.reticle?.setWorldPosition(this.convertToWorldSpace(this._line.positions[1]));
         }
+
+        this.reticle?.setWorldScale(new Vec3(this._orginalScale).multiplyScalar(Vec3.distance(this._line.positions[0], this._line.positions[1])));
     }
 
 
@@ -461,11 +513,11 @@ export class RayInteractor extends XrInteractor {
     }
 
     public activateEnd() {
-      
         this._rayHitCollider?.emit(XrControlEventType.DEACTIVITED, this._event);
     }
 
     public uiPressStart() {
+        this._judgeUIHit();
         this._rayHitCollider?.emit(XrControlEventType.UIPRESS_ENTERED, this._event);
     }
 
