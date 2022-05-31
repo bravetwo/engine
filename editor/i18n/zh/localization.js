@@ -953,19 +953,19 @@ module.exports = {
     xr: {
         hmd_ctrl: {
             stereoRendering: '渲染方式，off的时候渲染中间画面复制到双目输出',
-            perEyeCamera: '是否开启左右眼',
-            syncWithMainCamera: '左右眼是否同步主相机',
-            foveationRendering: '中心凹形渲染(需设备支持眼动追踪)',
-            IPDOffset: 'IPD偏移',
-            offsetValue: 'IPD偏移值',
+            perEyeCamera: '是否开启单独的左右眼节点',
+            syncWithMainCamera: '左右眼节点设置是否同步主相机',
+            foveationRendering: '注视点渲染(需设备支持眼动追踪)',
+            IPDOffset: '左右眼瞳距设置',
+            offsetValue: '瞳距值',
             aspectRatio: '纵横比',
             ratio: '纵横比值'
         },
         mr_sight: {
             layer: '图层',
-            streamSource: '视频资源',
+            streamSource: '视频源',
             targetCamera: '能看到视频的相机，只能选一个',
-            perEyeCamera: '分辨率适配胶片门',
+            GateFit: '视频图像填充方式',
             scaling: '手动缩放图像倍数'
         },
         pose_tracker: {
@@ -976,9 +976,9 @@ module.exports = {
             targetEye: '渲染目标相机'
         },
         tracking_origin: {
-            offsetObject: '指定需要偏移的TrackingSpace',
+            offsetObject: '指定需要偏移的节点',
             trackingOriginMode: '追踪偏移方式',
-            yOffsetValue: 'TrackingSpace的Y轴方向的偏移量'
+            yOffsetValue: '节点Y轴方向的偏移量'
         },
         xr_controller: {
             inputDevice: '物理输入设备的绑定',
