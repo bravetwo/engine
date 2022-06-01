@@ -53,6 +53,7 @@ export interface ARPose {
 }
 
 export interface IFeature {
+    name : string;
     enable : boolean;
     init();
     start();
@@ -60,6 +61,7 @@ export interface IFeature {
 }
 
 export interface IFeatureData {
+    type : FeatureType;
     enable : boolean;
 }
 
@@ -104,7 +106,7 @@ export abstract class ARFeature implements IFeature {
 
     constructor (session : ARSession, config : IFeatureData);
     constructor (session : ARSession, config : IFeatureData, jsonObject : any);
-    constructor (session : ARSession, config : IFeatureData, jsonObject? : any) {
+    constructor (session : ARSession, config : IFeatureData | IFeature, jsonObject? : any) {
         this._session = session;
         
         if(config) {
@@ -118,6 +120,17 @@ export abstract class ARFeature implements IFeature {
         } else {
             console.log(`constructing feature need use either feature-data or json data`);
         }
+
+        if(this.isJsonConfig(config)) {
+            this._name = (config as IFeature).name;
+        }
+    }
+
+    protected isJsonConfig(config : IFeatureData | IFeature) : boolean {
+        if(typeof(config as IFeature)["name"] != "undefined") {
+            return true;
+        }
+        return false;
     }
 
     init() : void {

@@ -39,7 +39,7 @@ import { Node } from '../core/scene-graph/node';
 import { Layers } from '../core/scene-graph/layers';
 
 import * as features from './ar-features';
-import { ARFeature, FeatureType, IFeature } from './ar-feature-base'
+import { ARFeature, FeatureType, IFeature, IFeatureData } from './ar-feature-base'
 import { Property } from '../tiledmap/tiled-types';
 import { DirectionalLight, Light, LightComponent } from '../3d';
 
@@ -79,9 +79,15 @@ export class ARSession extends Component {
     @property(DirectionalLight)
     mainlight : DirectionalLight | null = null;
 
+    @property
+    useJsonConfig = false;
+
     // features config
     @property(JsonAsset)
     featuresConfigs : JsonAsset | null = null;
+
+    featuresData : IFeatureData[] = [];
+
     private featuresMap = new Map<string, IFeature>();
 
     //@property
@@ -111,7 +117,11 @@ export class ARSession extends Component {
 
         // create features from json
         // assembly feature config mask
-        this.createFeatures();
+        if(this.useJsonConfig)
+            this.createFeaturesWithJson();
+        else
+            this.createFeatures();
+
         armodule.config(this._configMask);
 
         // init native features setting feature configs
@@ -261,6 +271,15 @@ export class ARSession extends Component {
     }
 
     private createFeatures() {
+        this.featuresData.forEach(configData => {
+            if(configData != null) {
+                let featureClass = ARSession.FEATURE_PREFIX + configData.type.toString();
+
+            }
+        });
+    }
+
+    private createFeaturesWithJson() {
         let feaData : FeaturesConfigs = <FeaturesConfigs>this.featuresConfigs?.json;
         if(feaData == null) {
             console.log("Error! Need check feature configs json file");
@@ -289,6 +308,26 @@ export class ARSession extends Component {
                 }
             }
         });
+    }
+
+    private instantiateFeature(featureClass : string, config : ARFeature | IFeatureData) {
+        // check constructor
+        if((<any>features)[featureClass]) {
+            if(config as ARFeature)
+            var featureInstance = new (<any>features)[featureClass](this, config, config);
+
+
+            console.log(featureInstance instanceof ARFeature);
+
+            if(!this.featuresMap.has(featureClass)) {
+                this._configMask |= featureInstance.featureId;
+                this.featuresMap.set(featureClass, featureInstance);
+            } else {
+                //console.log("Error! Duplicate Feature:", config.name);
+            }
+        } else {
+            //console.log("Feature name error:", config.name);
+        }
     }
 
     private initFeatures() {
