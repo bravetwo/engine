@@ -59,6 +59,10 @@ export interface IFeature {
     update();
 }
 
+export interface IFeatureData {
+    enable : boolean;
+}
+
 export enum FeatureType {
     None = 0,
     PlaneDetection = 1 << 0, 
@@ -92,18 +96,28 @@ export abstract class ARFeature implements IFeature {
 
     public abstract get featureId() : FeatureType;
 
-    protected _name: string;
+    protected _name: string = "";
     protected _enable : boolean = true;
     //protected _support : boolean = false;
 
     protected _session: ARSession;
 
-    constructor (jsonObject : any, session : ARSession) {
+    constructor (session : ARSession, config : IFeatureData);
+    constructor (session : ARSession, config : IFeatureData, jsonObject : any);
+    constructor (session : ARSession, config : IFeatureData, jsonObject? : any) {
         this._session = session;
-        this._name = jsonObject.name;
         
-        if(jsonObject.enable)
-            this._enable = jsonObject.enable;
+        if(config) {
+            //this._name = ;
+            this._enable = config.enable;
+
+        } else if(jsonObject) {
+            this._name = jsonObject.name;
+            if(jsonObject.enable) this._enable = jsonObject.enable;
+
+        } else {
+            console.log(`constructing feature need use either feature-data or json data`);
+        }
     }
 
     init() : void {

@@ -28,7 +28,7 @@ import { Prefab, instantiate, Vec3, resources } from '../../core';
 //import { Vec3 } from 'cocos/core';
 //import { resources } from 'cocos/core';
 import { ccclass, menu, property, disallowMultiple, type } from '../../core/data/class-decorator'
-import { ARFeature, FeatureType } from '../ar-feature-base';
+import { ARFeature, FeatureType, IFeatureData } from '../ar-feature-base';
 import { ARSession } from '../ar-session-component';
 import { Node } from 'cocos/core/scene-graph'
 import load from 'cocos/core/asset-manager/load';
@@ -40,6 +40,13 @@ enum ARPlaneDetectionMode {
     Horizontal = 1 << 0, 
     Vertical = 1 << 1,
     All = Horizontal | Vertical
+}
+
+export interface PlaneDetectionConfig extends IFeatureData {
+    direction:ARPlaneDetectionMode;
+    maxPlaneNumber:number;
+    showPlane:boolean;
+    planePrefab:Prefab | null;
 }
 
 @ccclass('cc.ARFeaturePlane')
@@ -59,28 +66,49 @@ export class ARFeaturePlaneDetection extends ARFeature {
     removedPlanesInfo : number[];
     updatedPlanesInfo : number[];
 
-    constructor(jsonObject : any, session : ARSession) {
-        super(jsonObject, session);
+    constructor (session : ARSession, config : IFeatureData);
+    //constructor (session : ARSession, jsonObject : any);
+    constructor (session : ARSession, config : IFeatureData, jsonObject? : any) {
+    //constructor(jsonObject : any, session : ARSession) {
+        super(session, config, jsonObject);
 
-        //this.mode = ARPlaneDetectionMode.None;
-        if(jsonObject.mode) {
-            this.mode = ARPlaneDetectionMode[jsonObject.mode as keyof typeof ARPlaneDetectionMode];
-        } else {
-            this.mode = ARPlaneDetectionMode.Horizontal;
+        // default values
+        this.mode = ARPlaneDetectionMode.Horizontal;
+
+        if(config) {
+            let planeConfig = config as PlaneDetectionConfig;
+            this.mode = planeConfig.direction;
+            this.planesMaxSize = planeConfig.maxPlaneNumber;
+
+            if(planeConfig.planePrefab) {
+                this.planePrefab = planeConfig.planePrefab;
+            } else {
+                // load default
+            }
+
+        } else if (jsonObject) {
+            if(jsonObject.mode) {
+                this.mode = ARPlaneDetectionMode[jsonObject.mode as keyof typeof ARPlaneDetectionMode];
+            }
+            
+            this.planesMaxSize = jsonObject.planesMaxSize;
+
+            if(jsonObject.planePrefabPath) {
+                var self = this;
+                resources.load(jsonObject.planePrefabPath, Prefab, function (err, prefab) {
+                    self.planePrefab = prefab;
+                });
+            } else {
+                // load default
+            }
         }
-        console.log("plane detection mode:", this.mode);
 
-        this.planesMaxSize = jsonObject.planesMaxSize;
         this.planesInfo = new Array();
-
         this.addedPlanesInfo = new Array();
         this.removedPlanesInfo = new Array();
         this.updatedPlanesInfo = new Array();
 
-        var self = this;
-        resources.load(jsonObject.planePrefabPath, Prefab, function (err, prefab) {
-            self.planePrefab = prefab;
-        });
+        console.log("plane detection mode:", this.mode);
     }
 
     isReady() : boolean {

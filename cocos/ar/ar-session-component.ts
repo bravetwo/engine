@@ -274,7 +274,8 @@ export class ARSession extends Component {
 
                 // check constructor
                 if((<any>features)[featureClass]) {
-                    var featureInstance = new (<any>features)[featureClass](element, this);
+                    //var featureInstance = new (<any>features)[featureClass](element, this);
+                    var featureInstance = new (<any>features)[featureClass](this, null, element);
                     console.log(featureInstance instanceof ARFeature);
 
                     if(!this.featuresMap.has(featureClass)) {
