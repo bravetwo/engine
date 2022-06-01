@@ -295,6 +295,7 @@ void Root::frameMove(float deltaTime, int32_t totalFrames) {
             }
         }
         auto swapchains = gfx::Device::getInstance()->getSwapchains();
+        bool isSceneUpdated = false;
         for (int xrEye = 0; xrEye < 2; xrEye++) {
             xr::XrEntry::getInstance()->renderLoopStart(xrEye);
 #endif
@@ -341,11 +342,13 @@ void Root::frameMove(float deltaTime, int32_t totalFrames) {
         //                }
 
 #if USE_XR
-        if (xrEye == 0) {
+        bool sceneNeedUpdate = xrEye == 0 || (xrEye == 1 && !isSceneUpdated);
+        if (sceneNeedUpdate) {
 #endif
             for (const auto &scene : _scenes) {
                 scene->update(stamp);
             }
+            isSceneUpdated = true;
 #if USE_XR
             // only left eye enable culling
             /*for (scene::Camera *cam : _cameraList) {
