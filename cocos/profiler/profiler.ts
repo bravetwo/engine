@@ -417,7 +417,7 @@ export class Profiler {
                 const preTransform = preTransforms[surfaceTransform];
                 let x = -0.9; let y = -0.9 * clipSpaceSignY;
                 if (sys.isXR) {
-                    x = -0.1; y = -0.1 * clipSpaceSignY;
+                    x = -0.5; y = -0.5 * clipSpaceSignY;
                 }
                 this.offsetData[0] = x * preTransform[0] + y * preTransform[2];
                 this.offsetData[1] = x * preTransform[1] + y * preTransform[3];
