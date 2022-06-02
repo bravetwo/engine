@@ -101,9 +101,8 @@ void Root::initialize(gfx::Swapchain *swapchain) {
     _mainWindow = createWindow(info);
 
     _curWindow = _mainWindow;
-
-    _mainWindow->setXREyeType(i);
 #if USE_XR
+    _mainWindow->setXREyeType(i);
     }
 #endif
     // TODO(minggo):
