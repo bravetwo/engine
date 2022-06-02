@@ -340,6 +340,9 @@ EGLContext GLES3GPUContext::getSharedContext() {
 }
 
 bool GLES3GPUContext::makeCurrent(EGLSurface drawSurface, EGLSurface readSurface, EGLContext context, bool updateCache) {
+#if USE_XR
+    if (_eglCurrentDrawSurface == drawSurface && _eglCurrentReadSurface == readSurface) return true;
+#endif
     bool succeeded;
     EGL_CHECK(succeeded = eglMakeCurrent(eglDisplay, drawSurface, readSurface, context));
     if (succeeded && updateCache) {
