@@ -78,7 +78,8 @@ void Root::initialize(gfx::Swapchain *swapchain) {
     // Xr: _mainWindow, _curWindow, _swapchain invalid.
     // Xr: splash screen use _mainWindow->_swapchain width, height, surfaceTransform. The left and right eyes must be the same.
     auto swapchains = gfx::Device::getInstance()->getSwapchains();
-    for (const auto &swapchain : swapchains) {
+    for (int i = 0, size = swapchains.size(); i < size; i++) {
+        const auto &swapchain = swapchains[i];
 #endif
     gfx::RenderPassInfo renderPassInfo;
 
@@ -100,6 +101,8 @@ void Root::initialize(gfx::Swapchain *swapchain) {
     _mainWindow = createWindow(info);
 
     _curWindow = _mainWindow;
+
+    _mainWindow->setXREyeType(i);
 #if USE_XR
     }
 #endif
@@ -321,11 +324,14 @@ void Root::frameMove(float deltaTime, int32_t totalFrames) {
         window->extractRenderCameras(_cameraList);
     }
 #else
-    for (int i = 2; i < _windows.size(); i++) {
-        // other window not xr window
-        _windows[i]->extractRenderCameras(_cameraList, -1);
+    for (int i = 0, size = _windows.size(); i < size; i++) {
+        // _windows contain : left eye window, right eye window, other rt window
+        if (_windows[i]->isXRWindow() && _windows[i]->getXREyeType() == xrEye) {
+            _windows[i]->extractRenderCameras(_cameraList, xrEye);
+        } else {
+            _windows[i]->extractRenderCameras(_cameraList, -1);
+        }
     }
-    _windows[xrEye]->extractRenderCameras(_cameraList, xrEye);
     xr::XrEntry::getInstance()->BeforeRenderFrame(xrEye);
 #endif
 

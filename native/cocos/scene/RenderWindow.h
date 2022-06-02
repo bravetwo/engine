@@ -115,7 +115,11 @@ public:
     inline gfx::Framebuffer *getFramebuffer() const { return _frameBuffer.get(); }
 
     inline const ccstd::vector<IntrusivePtr<Camera>> &getCameras() const { return _cameras; }
-
+#if USE_XR
+    inline uint32_t getXREyeType() const { return _xrEyeType; }
+    inline void setXREyeType(uint32_t eye) {_xrEyeType = eye; }
+    bool isXRWindow() const { return _xrEyeType == 0 || _xrEyeType == 1; }
+#endif
 private:
     uint32_t _width{1};
     uint32_t _height{1};
@@ -126,6 +130,10 @@ private:
     IntrusivePtr<gfx::Framebuffer> _frameBuffer;
     ccstd::vector<IntrusivePtr<Camera>> _cameras;
     RefVector<gfx::Texture *> _colorTextures;
+#if USE_XR
+    // 0 is left eye, 1 is right eye
+    int32_t _xrEyeType{-1};
+#endif
 
     CC_DISALLOW_COPY_MOVE_ASSIGN(RenderWindow);
 };
