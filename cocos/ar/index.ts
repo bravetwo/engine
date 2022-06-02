@@ -32,3 +32,4 @@ export * from './ar-module-helper';
 export * from './ar-session-component';
 export * from './ar-features';
 export * from './ar-feature-base';
+export * from './ar-feature-data';

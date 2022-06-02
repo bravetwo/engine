@@ -40,6 +40,7 @@ import { Layers } from '../core/scene-graph/layers';
 
 import * as features from './ar-features';
 import { ARFeature, FeatureType, IFeature, IFeatureData } from './ar-feature-base'
+import { ARFeatureData } from './ar-feature-data'
 import { Property } from '../tiledmap/tiled-types';
 import { DirectionalLight, Light, LightComponent } from '../3d';
 
@@ -86,7 +87,15 @@ export class ARSession extends Component {
     @property(JsonAsset)
     featuresConfigs : JsonAsset | null = null;
 
-    featuresData : IFeatureData[] = [];
+    @property([ARFeatureData])
+    _featuresData : ARFeatureData[] = [];
+    @property([ARFeatureData])
+    get featuresData () {
+        return this._featuresData;
+    }
+    set featuresData (val) {
+        this._featuresData = val;
+    }
 
     private featuresMap = new Map<string, IFeature>();
 
@@ -117,10 +126,11 @@ export class ARSession extends Component {
 
         // create features from json
         // assembly feature config mask
-        if(this.useJsonConfig)
+        if(this.useJsonConfig) {
             this.createFeaturesWithJson();
-        else
+        } else {
             this.createFeatures();
+        }
 
         armodule.config(this._configMask);
 
@@ -275,6 +285,21 @@ export class ARSession extends Component {
             if(configData != null) {
                 let featureClass = ARSession.FEATURE_PREFIX + configData.type.toString();
 
+                // check constructor
+                if((<any>features)[featureClass]) {
+                    //var featureInstance = new (<any>features)[featureClass](element, this);
+                    var featureInstance = new (<any>features)[featureClass](this, configData);
+                    console.log(featureInstance instanceof ARFeature);
+
+                    if(!this.featuresMap.has(featureClass)) {
+                        this._configMask |= featureInstance.featureId;
+                        this.featuresMap.set(featureClass, featureInstance);
+                    } else {
+                        console.log("Error! Duplicate Feature:", configData.type);
+                    }
+                } else {
+                    console.log("Feature name error:", configData.type);
+                }
             }
         });
     }

@@ -34,19 +34,20 @@ import { Node } from 'cocos/core/scene-graph'
 import load from 'cocos/core/asset-manager/load';
 import { array } from 'cocos/core/utils/js';
 import { ARModuleHelper } from '../ar-module-helper';
+import { ARFeatureData } from '../ar-feature-data';
 
-enum ARPlaneDetectionMode {
+export enum ARPlaneDetectionMode {
     //None, 
     Horizontal = 1 << 0, 
     Vertical = 1 << 1,
     All = Horizontal | Vertical
 }
 
-export interface PlaneDetectionConfig extends IFeatureData {
-    direction:ARPlaneDetectionMode;
-    maxPlaneNumber:number;
-    showPlane:boolean;
-    planePrefab:Prefab | null;
+export class PlaneDetectionConfig extends ARFeatureData {
+    direction:ARPlaneDetectionMode = ARPlaneDetectionMode.Horizontal;
+    maxPlaneNumber:number = 5;
+    showPlane:boolean = true;
+    planePrefab:Prefab | null = null;
 }
 
 @ccclass('cc.ARFeaturePlane')
