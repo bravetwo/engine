@@ -235,28 +235,6 @@ bool GLES3Device::doInit(const DeviceInfo & /*info*/) {
     CC_LOG_INFO("FRAMEBUFFER_FETCH: %s", fbfLevelStr.c_str());
 
 #if USE_XR
-    /* Query maximum number of samples for all formats. */
-    GLint maxSamples = 0;
-    glGetIntegerv(GL_MAX_SAMPLES, &maxSamples);
-
-    if(xr::XrEntry::getInstance()->getMultisamplesRTT() > 1) {
-        _xrFBOMSAAEnabled = true;
-
-        /* Initialize multisampling extension function pointers. */
-        if (!glFramebufferTexture2DMultisampleEXT)
-        {
-            CC_LOG_ERROR("Couldn't get function pointer to glFramebufferTexture2DMultisampleEXT()!");
-            _xrFBOMSAAEnabled = false;
-        }
-
-        if (!glRenderbufferStorageMultisampleEXT)
-        {
-            CC_LOG_ERROR("Couldn't get function pointer to glRenderbufferStorageMultisampleEXT()!");
-            _xrFBOMSAAEnabled = false;
-        }
-        CC_LOG_INFO("GL MAX_SAMPLES = %d, MSAA Enabled = %d/%d.", maxSamples, _xrFBOMSAAEnabled, xr::XrEntry::getInstance()->getMultisamplesRTT());
-    }
-
     xr::XrEntry::getInstance()->SetOpenGLESConfig(GLES3Device::getInstance()->context()->eglDisplay,
         GLES3Device::getInstance()->context()->eglConfig, GLES3Device::getInstance()->context()->eglDefaultContext);
     xr::XrEntry::getInstance()->initXrSession();
@@ -346,6 +324,27 @@ void GLES3Device::acquire(Swapchain *const *swapchains, uint32_t count) {
     #else
         if (_xrFramebuffer == 0) {
             GL_CHECK(glGenFramebuffers(1, &_xrFramebuffer));
+            /* Query maximum number of samples for all formats. */
+            GLint maxSamples = 0;
+            glGetIntegerv(GL_MAX_SAMPLES, &maxSamples);
+
+            if(xr::XrEntry::getInstance()->getMultisamplesRTT() > 1) {
+                _xrFBOMSAAEnabled = true;
+
+                /* Initialize multisampling extension function pointers. */
+                if (!glFramebufferTexture2DMultisampleEXT)
+                {
+                    CC_LOG_ERROR("Couldn't get function pointer to glFramebufferTexture2DMultisampleEXT()!");
+                    _xrFBOMSAAEnabled = false;
+                }
+
+                if (!glRenderbufferStorageMultisampleEXT)
+                {
+                    CC_LOG_ERROR("Couldn't get function pointer to glRenderbufferStorageMultisampleEXT()!");
+                    _xrFBOMSAAEnabled = false;
+                }
+                CC_LOG_INFO("GL MAX_SAMPLES = %d, MSAA Enabled = %d/%d.", maxSamples, _xrFBOMSAAEnabled, xr::XrEntry::getInstance()->getMultisamplesRTT());
+            }
         }
         if (stateCache()->glDrawFramebuffer != _xrFramebuffer) {
             GL_CHECK(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _xrFramebuffer));

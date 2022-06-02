@@ -236,6 +236,7 @@ Swapchain *Device::createSwapchain(const SwapchainInfo &info) {
 
 #if USE_XR
 Swapchain *Device::createSwapchainWithXr(const SwapchainInfo &info) {
+    xr::XrEntry::getInstance()->initXrSwapchains();
     auto cocosXrSwapchains = xr::XrEntry::getInstance()->GetCocosXrSwapchain();
     for (const auto &cocosXrSwapchain : cocosXrSwapchains) {
         Swapchain *res = createSwapchain();
