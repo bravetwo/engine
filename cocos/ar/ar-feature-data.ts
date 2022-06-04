@@ -22,9 +22,13 @@
  THE SOFTWARE.
 */
 
+import { ccclass, property } from '../core/data/class-decorator';
 import { FeatureType, IFeatureData } from './ar-feature-base'
 
+@ccclass('cc.ARFeatureData')
 export abstract class ARFeatureData implements IFeatureData {
+    @property
     type: FeatureType = FeatureType.None;
+    @property
     enable: boolean = true;
 }

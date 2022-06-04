@@ -283,7 +283,8 @@ export class ARSession extends Component {
     private createFeatures() {
         this.featuresData.forEach(configData => {
             if(configData != null) {
-                let featureClass = ARSession.FEATURE_PREFIX + configData.type.toString();
+                let featureClass = ARSession.FEATURE_PREFIX + FeatureType[configData.type];
+                console.log("feature class::", featureClass);
 
                 // check constructor
                 if((<any>features)[featureClass]) {

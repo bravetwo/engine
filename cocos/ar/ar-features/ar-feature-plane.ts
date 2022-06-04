@@ -43,10 +43,15 @@ export enum ARPlaneDetectionMode {
     All = Horizontal | Vertical
 }
 
+@ccclass('cc.PlaneDetectionConfig')
 export class PlaneDetectionConfig extends ARFeatureData {
+    @property
     direction:ARPlaneDetectionMode = ARPlaneDetectionMode.Horizontal;
+    @property
     maxPlaneNumber:number = 5;
+    @property
     showPlane:boolean = true;
+    @property
     planePrefab:Prefab | null = null;
 }
 
