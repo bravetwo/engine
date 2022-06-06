@@ -132,6 +132,11 @@ void Root::destroy() {
 void Root::resize(uint32_t width, uint32_t height) {
     for (const auto &window : _windows) {
         if (window->getSwapchain()) {
+#if USE_XR
+            // xr, window's width and height should not change
+            width = window->getWidth();
+            height = window->getHeight();
+#endif
             window->resize(width, height);
         }
     }
