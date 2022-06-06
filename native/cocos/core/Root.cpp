@@ -357,8 +357,8 @@ void Root::frameMove(float deltaTime, int32_t totalFrames) {
             for (const auto &scene : _scenes) {
                 scene->update(stamp);
             }
-            isSceneUpdated = true;
 #if USE_XR
+            isSceneUpdated = true;
             // only one eye enable culling (without other cameras)
             if (_cameraList.size() == 1 && _cameraList[0]->isHMD()) {
                 _cameraList[0]->setCullingEnable(true);
