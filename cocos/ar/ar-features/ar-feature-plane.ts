@@ -22,7 +22,7 @@
  THE SOFTWARE.
 */
 
-import { Prefab, instantiate, Vec3, resources, Quat } from '../../core';
+import { Prefab, instantiate, Vec3, resources, ccenum, Quat } from '../../core';
 //import { Prefab } from 'cocos/core/assets';
 //import { instantiate } from 'cocos/core/data';
 //import { Vec3 } from 'cocos/core';
@@ -43,6 +43,7 @@ export enum ARPlaneDetectionMode {
     Vertical = 1 << 1,
     All = Horizontal | Vertical
 }
+ccenum(ARPlaneDetectionMode)
 
 export interface ARPlane extends ARTrackable {
     type : ARPlaneDetectionMode;
