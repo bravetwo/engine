@@ -136,7 +136,6 @@ protected:
     ccstd::array<bool, static_cast<size_t>(Format::COUNT)> _textureExclusive;
 #if USE_XR
     GLuint _xrFramebuffer{0};
-    bool _xrFBOMSAAEnabled = false;
 #endif
 };
 

@@ -121,13 +121,7 @@ bool CCVKGPUContext::initialize() {
     }
 
 #if USE_XR && XR_OEM_PICO
-    uint32_t major = VK_VERSION_MAJOR(apiVersion);
-    uint32_t minor = VK_VERSION_MINOR(apiVersion);
-    uint32_t patch = VK_VERSION_PATCH(apiVersion);
-    CC_LOG_DEBUG("Vulkan api version is %d-%d-%d.(V1.0_%d, V1.1_%d)",
-                 major, minor, patch, (apiVersion == VK_API_VERSION_1_0), (apiVersion == VK_API_VERSION_1_1));
-    apiVersion = VK_API_VERSION_1_0;
-    majorVersion = VK_VERSION_MAJOR(apiVersion);
+    apiVersion = xr::XrEntry::getInstance()->getXrVkApiVersion(apiVersion);
 #endif
 
     minorVersion = VK_VERSION_MINOR(apiVersion);

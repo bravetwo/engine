@@ -235,9 +235,10 @@ bool GLES3Device::doInit(const DeviceInfo & /*info*/) {
     CC_LOG_INFO("FRAMEBUFFER_FETCH: %s", fbfLevelStr.c_str());
 
 #if USE_XR
-    xr::XrEntry::getInstance()->SetOpenGLESConfig(GLES3Device::getInstance()->context()->eglDisplay,
-        GLES3Device::getInstance()->context()->eglConfig, GLES3Device::getInstance()->context()->eglDefaultContext);
-    xr::XrEntry::getInstance()->initXrSession();
+    xr::XrEntry::getInstance()->initXrSession(pfnGLES3wLoadProc(),
+                                              GLES3Device::getInstance()->context()->eglDisplay,
+                                              GLES3Device::getInstance()->context()->eglConfig,
+                                              GLES3Device::getInstance()->context()->eglDefaultContext);
 #endif
 
     return true;
@@ -258,60 +259,6 @@ void GLES3Device::doDestroy() {
     CC_SAFE_DESTROY_AND_DELETE(_gpuContext)
 }
 
-#if USE_XR && !XR_OEM_HUAWEIVR
-std::map<void*, uint32_t> m_wndToDepthMap;
-///
-/// param wndHandle
-/// param colorTexture
-/// param fboMSAAEnabled
-/// return
-uint32_t GetDepthTexture(void* wndHandle, uint32_t colorTexture, bool fboMSAAEnabled) {
-    // If a depth-stencil view has already been created for this back-buffer, use it.
-    auto depthBufferIt = m_wndToDepthMap.find(wndHandle);
-    if (depthBufferIt != m_wndToDepthMap.end()) {
-        return depthBufferIt->second;
-    }
-
-    // This back-buffer has no corresponding depth-stencil texture, so create one with matching dimensions.
-
-    GLint width = 0;
-    GLint height = 0;
-    glBindTexture(GL_TEXTURE_2D, colorTexture);
-    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width);
-    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &height);
-    if(width == 0 && height == 0)
-    {
-        CC_LOG_ERROR("[CXR] colorTexture's  [%d] size is zero!", colorTexture);
-    }
-
-    uint32_t depthTexture;
-    if (fboMSAAEnabled)
-    {
-        // Create multisampled depth buffer.
-        glGenRenderbuffers(1, &depthTexture);
-        glBindRenderbuffer(GL_RENDERBUFFER, depthTexture);
-        glRenderbufferStorageMultisampleEXT(
-                GL_RENDERBUFFER, xr::XrEntry::getInstance()->getMultisamplesRTT(), GL_DEPTH_COMPONENT24, width, height);
-        glBindRenderbuffer(GL_RENDERBUFFER, 0);
-    }
-    else
-    {
-        glGenTextures(1, &depthTexture);
-        glBindTexture(GL_TEXTURE_2D, depthTexture);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, width, height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, nullptr);
-    }
-
-	m_wndToDepthMap.insert(std::make_pair(wndHandle, depthTexture));
-    CC_LOG_INFO("[CXR] create depth texture/buffer [%p,%d] %dX%d", wndHandle, colorTexture, width, height);
-
-    return depthTexture;
-}
-#endif
-
 void GLES3Device::acquire(Swapchain *const *swapchains, uint32_t count) {
     if (_onAcquire) _onAcquire->execute();
 
@@ -322,30 +269,7 @@ void GLES3Device::acquire(Swapchain *const *swapchains, uint32_t count) {
         glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, reinterpret_cast<GLint *>(&_xrFramebuffer));
         stateCache()->glDrawFramebuffer = _xrFramebuffer;
     #else
-        if (_xrFramebuffer == 0) {
-            GL_CHECK(glGenFramebuffers(1, &_xrFramebuffer));
-            /* Query maximum number of samples for all formats. */
-            GLint maxSamples = 0;
-            glGetIntegerv(GL_MAX_SAMPLES, &maxSamples);
-
-            if(xr::XrEntry::getInstance()->getMultisamplesRTT() > 1) {
-                _xrFBOMSAAEnabled = true;
-
-                /* Initialize multisampling extension function pointers. */
-                if (!glFramebufferTexture2DMultisampleEXT)
-                {
-                    CC_LOG_ERROR("Couldn't get function pointer to glFramebufferTexture2DMultisampleEXT()!");
-                    _xrFBOMSAAEnabled = false;
-                }
-
-                if (!glRenderbufferStorageMultisampleEXT)
-                {
-                    CC_LOG_ERROR("Couldn't get function pointer to glRenderbufferStorageMultisampleEXT()!");
-                    _xrFBOMSAAEnabled = false;
-                }
-                CC_LOG_INFO("GL MAX_SAMPLES = %d, MSAA Enabled = %d/%d.", maxSamples, _xrFBOMSAAEnabled, xr::XrEntry::getInstance()->getMultisamplesRTT());
-            }
-        }
+        _xrFramebuffer = xr::XrEntry::getInstance()->getXRFrameBuffer();
         if (stateCache()->glDrawFramebuffer != _xrFramebuffer) {
             GL_CHECK(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _xrFramebuffer));
             stateCache()->glDrawFramebuffer = _xrFramebuffer;
@@ -356,30 +280,7 @@ void GLES3Device::acquire(Swapchain *const *swapchains, uint32_t count) {
     for (uint32_t i = 0; i < count; ++i) {
 #if USE_XR
     #if !XR_OEM_HUAWEIVR
-        uint32_t index = xr::XrEntry::getInstance()->GetSwapchainImageIndexsByHandle(swapchains[i]->getWindowHandle());
-        if(index == 0)
-            continue;
-        const uint32_t depthTexture = GetDepthTexture(swapchains[i]->getWindowHandle(), index, _xrFBOMSAAEnabled);
-        if(_xrFBOMSAAEnabled)
-        {
-            glFramebufferTexture2DMultisampleEXT(
-                        GL_FRAMEBUFFER,
-                        GL_COLOR_ATTACHMENT0,
-                        GL_TEXTURE_2D,
-                        index,
-                        0,
-                        xr::XrEntry::getInstance()->getMultisamplesRTT());
-            glFramebufferRenderbuffer(
-                        GL_FRAMEBUFFER,
-                        GL_DEPTH_ATTACHMENT,
-                        GL_RENDERBUFFER,
-                        depthTexture);
-        }
-        else
-        {
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTexture, 0);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, index, 0);
-        }
+        xr::XrEntry::getInstance()->attachXRFramebufferTexture2D(swapchains[i]->getWindowHandle());
     #endif
         static_cast<GLES3Swapchain *>(swapchains[i])->gpuSwapchain()->glFramebuffer = _xrFramebuffer;
 #endif
