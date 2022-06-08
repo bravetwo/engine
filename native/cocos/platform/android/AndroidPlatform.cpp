@@ -449,15 +449,16 @@ AndroidPlatform::~AndroidPlatform() = default;
 
 int AndroidPlatform::init() {
 #if USE_XR
-    xr::XrEntry::getInstance()->setEventsCallback(&EventDispatcher::dispatchHandleEvent);
-#if XR_OEM_PICO
     // Prevent OEM from not calling AttachCurrentThread before using env.
     JniHelper::getEnv();
-    std::string graphicsApiName = "OpenGLES";
+    xr::XrEntry::getInstance()->initPlatformData(JniHelper::getJavaVM(), getActivity());
+    xr::XrEntry::getInstance()->setEventsCallback(&EventDispatcher::dispatchHandleEvent);
+#if XR_OEM_PICO
+    std::string graphicsApiName = GraphicsApiOpenglES;
 #if CC_USE_VULKAN
-    graphicsApiName = "Vulkan1";
+    graphicsApiName = GraphicsApiVulkan_1_0;
 #endif
-    xr::XrEntry::getInstance()->createXrInstance(graphicsApiName.c_str(), JniHelper::getJavaVM(), getActivity());
+    xr::XrEntry::getInstance()->createXrInstance(graphicsApiName.c_str());
 #endif
 #endif
     cc::FileUtilsAndroid::setassetmanager(_app->activity->assetManager);
@@ -533,18 +534,8 @@ int32_t AndroidPlatform::loop() {
             }
         }
 #if USE_XR
-        if (!xr::XrEntry::getInstance()->isCreatedXRinstance())
-        {
+        if (!xr::XrEntry::getInstance()->platformLoopStart()) {
             continue;
-        }
-
-        if (xr::XrEntry::getInstance()->PollEvents()) {
-            // TODO XR exitRenderLoop
-            continue;
-        }
-
-        if (xr::XrEntry::getInstance()->IsSessionRunning()) {
-            xr::XrEntry::getInstance()->PollActions();
         }
 #endif
         _inputProxy->handleInput();
@@ -566,6 +557,9 @@ int32_t AndroidPlatform::loop() {
                 _loopTimeOut = -1;
             }
         }
+#endif
+#if USE_XR
+        xr::XrEntry::getInstance()->platformLoopEnd();
 #endif
     }
 }

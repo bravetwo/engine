@@ -875,11 +875,7 @@ void cmdFuncCCVKCreateDescriptorSetLayout(CCVKDevice *device, CCVKGPUDescriptorS
         createInfo.pDescriptorUpdateEntries = entries.data();
         createInfo.templateType = VK_DESCRIPTOR_UPDATE_TEMPLATE_TYPE_DESCRIPTOR_SET;
         createInfo.descriptorSetLayout = gpuDescriptorSetLayout->vkDescriptorSetLayout;
-#if USE_XR
-        if (gpuDevice->minorVersion > 0 && vkCreateDescriptorUpdateTemplate) {
-#else
         if (gpuDevice->minorVersion > 0) {
-#endif
             VK_CHECK(vkCreateDescriptorUpdateTemplate(gpuDevice->vkDevice, &createInfo, nullptr, &gpuDescriptorSetLayout->vkDescriptorUpdateTemplate));
         } else {
             VK_CHECK(vkCreateDescriptorUpdateTemplateKHR(gpuDevice->vkDevice, &createInfo, nullptr, &gpuDescriptorSetLayout->vkDescriptorUpdateTemplate));

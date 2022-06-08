@@ -819,12 +819,7 @@ public:
     : _device(device) {
         _setsToBeUpdated.resize(device->backBufferCount);
         if (device->minorVersion > 0) {
-#if USE_XR
-             // Vulkan version of XR is inconsistent with Cocos. Temporary Plan
-            _updateFn = vkUpdateDescriptorSetWithTemplateKHR;
-#else
             _updateFn = vkUpdateDescriptorSetWithTemplate;
-#endif
         } else {
             _updateFn = vkUpdateDescriptorSetWithTemplateKHR;
         }

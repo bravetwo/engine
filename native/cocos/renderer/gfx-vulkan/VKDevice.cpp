@@ -56,8 +56,6 @@
 
 #if USE_XR
 #include "Xr.h"
-#include "platform/java/jni/JniHelper.h"
-#include "platform/android/AndroidPlatform.h"
 #endif
 
 CC_DISABLE_WARNINGS()
@@ -102,8 +100,7 @@ CCVKDevice::~CCVKDevice() {
 
 bool CCVKDevice::doInit(const DeviceInfo & /*info*/) {
 #if USE_XR && !XR_OEM_PICO
-    auto *androidPlatform = static_cast<AndroidPlatform *>(BasePlatform::getPlatform());
-    xr::XrEntry::getInstance()->createXrInstance("Vulkan2", JniHelper::getJavaVM(), androidPlatform->getActivity());
+    xr::XrEntry::getInstance()->createXrInstance(GraphicsApiVulkan_1_1);
 #endif
     _gpuContext = ccnew CCVKGPUContext;
     if (!_gpuContext->initialize()) {
@@ -228,14 +225,7 @@ bool CCVKDevice::doInit(const DeviceInfo & /*info*/) {
     }
 
 #if USE_XR
-    for (const VkExtensionProperties &availableExtension : _gpuDevice->extensions) {
-        _extensions.push_back(availableExtension.extensionName);
-    }
-    deviceCreateInfo.enabledExtensionCount   = utils::toUint(_extensions.size());
-    deviceCreateInfo.ppEnabledExtensionNames = _extensions.data();
-
-    VK_CHECK(xr::XrEntry::getInstance()->XrVkCreateDevice(&deviceCreateInfo, vkGetInstanceProcAddr,
-                                                       _gpuContext->physicalDevice, &_gpuDevice->vkDevice));
+    VK_CHECK(xr::XrEntry::getInstance()->XrVkCreateDevice(&deviceCreateInfo, vkGetInstanceProcAddr, _gpuContext->physicalDevice, &_gpuDevice->vkDevice));
 #else
     VK_CHECK(vkCreateDevice(_gpuContext->physicalDevice, &deviceCreateInfo, nullptr, &_gpuDevice->vkDevice));
 #endif
