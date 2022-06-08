@@ -22,19 +22,20 @@
  THE SOFTWARE.
 */
 
-import { Prefab, instantiate, Vec3, resources } from '../../core';
+import { Prefab, instantiate, Vec3, resources, Quat } from '../../core';
 //import { Prefab } from 'cocos/core/assets';
 //import { instantiate } from 'cocos/core/data';
 //import { Vec3 } from 'cocos/core';
 //import { resources } from 'cocos/core';
 import { ccclass, menu, property, disallowMultiple, type } from '../../core/data/class-decorator'
-import { ARFeature, FeatureType, IFeatureData } from '../ar-feature-base';
+import { ARFeature, ARPose, ARTrackable, FeatureEvent, FeatureType, IFeatureData } from '../ar-feature-base';
 import { ARSession } from '../ar-session-component';
 import { Node } from 'cocos/core/scene-graph'
 import load from 'cocos/core/asset-manager/load';
 import { array } from 'cocos/core/utils/js';
 import { ARModuleHelper } from '../ar-module-helper';
 import { ARFeatureData } from '../ar-feature-data';
+import { Vec2 } from '@cocos/box2d';
 
 export enum ARPlaneDetectionMode {
     //None, 
@@ -43,20 +44,28 @@ export enum ARPlaneDetectionMode {
     All = Horizontal | Vertical
 }
 
+export interface ARPlane extends ARTrackable {
+    type : ARPlaneDetectionMode;
+    extent : Vec2;
+    center : ARPose;
+}
+
 @ccclass('cc.PlaneDetectionConfig')
 export class PlaneDetectionConfig extends ARFeatureData {
     @property
-    direction:ARPlaneDetectionMode = ARPlaneDetectionMode.Horizontal;
+    direction : ARPlaneDetectionMode = ARPlaneDetectionMode.Horizontal;
     @property
-    maxPlaneNumber:number = 5;
+    maxPlaneNumber : number = 5;
     @property
-    showPlane:boolean = true;
+    showPlane : boolean = true;
     @property
-    planePrefab:Prefab | null = null;
+    planePrefab : Prefab | null = null;
 }
 
 @ccclass('cc.ARFeaturePlane')
 export class ARFeaturePlaneDetection extends ARFeature {
+    private static readonly PLANE_INFO_SIZE = 12;
+
     public get featureId(): FeatureType {
         return FeatureType.PlaneDetection;
     }
@@ -65,17 +74,22 @@ export class ARFeaturePlaneDetection extends ARFeature {
 
     private planePrefab : Prefab | null = null;
     private planesMaxSize = 0;
-    private planesInfo : number[];
+    //private planesInfo : number[];
 
     private planesNodeMap = new Map<number, Node>();
     addedPlanesInfo : number[];
     removedPlanesInfo : number[];
     updatedPlanesInfo : number[];
 
+    readonly onAddEvent = new FeatureEvent<ARPlane[]>();
+    readonly onUpdateEvent = new FeatureEvent<ARPlane[]>();
+    readonly onRemoveEvent = new FeatureEvent<number[]>();
+    private _addedPlanes : ARPlane[] = [];
+    private _updatedPlanes : ARPlane[] = [];
+    private _removedPlanes : number[] = [];
+
     constructor (session : ARSession, config : IFeatureData);
-    //constructor (session : ARSession, jsonObject : any);
     constructor (session : ARSession, config : IFeatureData, jsonObject? : any) {
-    //constructor(jsonObject : any, session : ARSession) {
         super(session, config, jsonObject);
 
         // default values
@@ -109,10 +123,11 @@ export class ARFeaturePlaneDetection extends ARFeature {
             }
         }
 
-        this.planesInfo = new Array();
+        //this.planesInfo = new Array();
         this.addedPlanesInfo = new Array();
-        this.removedPlanesInfo = new Array();
         this.updatedPlanesInfo = new Array();
+        this.removedPlanesInfo = new Array();
+        
 
         console.log("plane detection mode:", this.mode);
     }
@@ -150,6 +165,12 @@ export class ARFeaturePlaneDetection extends ARFeature {
         let planes = this._session.node;
         //*
         this.removedPlanesInfo = armodule.getRemovedPlanesInfo();
+        this._removedPlanes.length = 0;
+        this._removedPlanes = this.removedPlanesInfo;
+        if(this._removedPlanes.length > 0)
+                this.onRemoveEvent.trigger(this._removedPlanes);
+
+        // TODO: Need Move to Agent Process Logic
         let planesInfo = this.removedPlanesInfo;
         if(planesInfo.length > 0) {
             console.log(`remove planes length: ${planesInfo.length}`);
@@ -169,11 +190,18 @@ export class ARFeaturePlaneDetection extends ARFeature {
         }
         //*/
         this.addedPlanesInfo = armodule.getAddedPlanesInfo();
+        this._addedPlanes.length = 0;
+        this.assembleInfos(this.addedPlanesInfo, this._addedPlanes);
+        if(this._addedPlanes.length > 0)
+                this.onAddEvent.trigger(this._addedPlanes);
+
+        // TODO: Need Move to Agent Process Logic
         planesInfo = this.addedPlanesInfo;
         if(planesInfo.length > 0) {
             console.log(`add planes length: ${planesInfo.length}`);
             console.log(`add planes count: ${armodule.getAddedPlanesCount()}`);
         }
+
         let offset = 0;
         for (let i = 0; i < armodule.getAddedPlanesCount(); i++) {
             offset = i * 12;
@@ -205,6 +233,12 @@ export class ARFeaturePlaneDetection extends ARFeature {
         }
         
         this.updatedPlanesInfo = armodule.getUpdatedPlanesInfo();
+        this._updatedPlanes.length = 0;
+        this.assembleInfos(this.updatedPlanesInfo, this._updatedPlanes);
+        if(this._updatedPlanes.length > 0)
+                this.onUpdateEvent.trigger(this._updatedPlanes);
+
+        // TODO: Need Move to Agent Process Logic
         planesInfo = this.updatedPlanesInfo;
         offset = 0;
         for (let i = 0; i < armodule.getUpdatedPlanesCount(); i++) {
@@ -232,5 +266,36 @@ export class ARFeaturePlaneDetection extends ARFeature {
         }
     }
 
-    public checkUpdatePlanesInfo() {}
+    private assembleInfos(src : number[], dst : ARPlane[]) {
+        if(src) {
+            let count = src.length / ARFeaturePlaneDetection.PLANE_INFO_SIZE;
+            let offset = 0;
+            for (let i = 0; i < count; i++) {
+                offset = i * ARFeaturePlaneDetection.PLANE_INFO_SIZE;
+                
+                let plane : ARPlane = {
+                    id: src[offset],
+                    type: src[offset + 1],
+                    extent: new Vec2(
+                        src[offset + 3],
+                        src[offset + 4]
+                    ),
+                    center: {
+                        position: new Vec3(
+                            src[offset + 5],
+                            src[offset + 6],
+                            src[offset + 7]
+                        ),
+                        rotation: new Quat(
+                            src[offset + 8],
+                            src[offset + 9],
+                            src[offset + 10],
+                            src[offset + 11]
+                        )
+                    },
+                };
+                dst.push(plane);
+            }
+        }
+    }
 }

@@ -52,6 +52,11 @@ export interface ARPose {
     rotation : math.Quat;
 }
 
+export interface ARTrackable {
+    id : number;
+    pose? : ARPose;
+}
+
 export interface IFeature {
     name : string;
     enable : boolean;
