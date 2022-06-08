@@ -22,7 +22,7 @@
  THE SOFTWARE.
 */
 
-import { Prefab, instantiate, Vec3, resources } from '../../core';
+import { Prefab, instantiate, Vec3, resources, ccenum } from '../../core';
 //import { Prefab } from 'cocos/core/assets';
 //import { instantiate } from 'cocos/core/data';
 //import { Vec3 } from 'cocos/core';
@@ -42,6 +42,7 @@ export enum ARPlaneDetectionMode {
     Vertical = 1 << 1,
     All = Horizontal | Vertical
 }
+ccenum(ARPlaneDetectionMode)
 
 @ccclass('cc.PlaneDetectionConfig')
 export class PlaneDetectionConfig extends ARFeatureData {
