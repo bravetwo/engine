@@ -63,6 +63,7 @@ public:
     float* getCameraTexCoords() const;
     void setCameraTextureName(int id);
     void* getCameraTextureRef() const;
+    uint8_t* getCameraDepthBuffer() const;
 
     //void setPlaneFeatureEnable(bool isOn) const;
     void enablePlane(bool enable) const;

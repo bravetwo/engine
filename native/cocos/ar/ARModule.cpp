@@ -124,6 +124,10 @@ float* ARModule::getCameraTexCoords() const {
 void* ARModule::getCameraTextureRef() const {
     return _impl->getCameraTextureRef();
 }
+uint8_t* ARModule::getCameraDepthBuffer() const {
+    return _impl->getCameraDepthBuffer();
+}
+
 
 void ARModule::enablePlane(bool enable) const {
     return _impl->enablePlane(enable);

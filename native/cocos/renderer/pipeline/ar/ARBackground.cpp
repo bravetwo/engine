@@ -326,6 +326,20 @@ void ARBackground::render(cc::scene::Camera *camera, gfx::RenderPass *renderPass
 
         _setTexFlag = true;
     }
+    auto *depthBuffer = armodule->getCameraDepthBuffer();
+    gfx::TextureInfo textureInfo;
+    textureInfo.usage           = gfx::TextureUsage::SAMPLED | gfx::TextureUsage::TRANSFER_SRC;
+    textureInfo.format          = gfx::Format::R8;
+    textureInfo.width           = camera->getWidth();
+    textureInfo.height          = camera->getHeight();
+    gfx::Texture *depthTex = _device->createTexture(textureInfo);
+    gfx::BufferTextureCopy region;
+    region.texExtent.width = camera->getWidth();
+    region.texExtent.height = camera->getHeight();
+
+    const uint8_t *buffers[1]{depthBuffer};
+    _device->copyBuffersToTexture(buffers, depthTex, &region, 1);
+
 #elif CC_PLATFORM == CC_PLATFORM_MAC_IOS
     gfx::SamplerInfo samplerInfo;
     auto *           sampler     = _device->getSampler(samplerInfo);
