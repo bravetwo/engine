@@ -60,7 +60,7 @@ const _temp_quat = new Quat();
 @menu('AR/ARSession')
 @disallowMultiple
 export class ARSession extends Component {
-    private static readonly FEATURE_PREFIX = "ARFeature";
+    public static readonly FEATURE_PREFIX = "ARFeature";
 
     //#region background and pose control
     // for 3d object
