@@ -129,32 +129,4 @@ export class RaycastChecker extends Component {
     private _uiPressExit() {
         this.node.emit("xrUnClick", this);
     }
-
-    public testClick() {
-        console.log("xr0209 testClick");
-    }
-
-    public testOther001() {
-        console.log("xr0209 testOther001");
-    }
-
-    public testOther002() {
-        console.log("xr0209 testOther002");
-    }
-
-    public testOther003() {
-        console.log("xr0209 testOther003");
-    }
-
-    public testOther004(num) {
-        // console.log("xr0209 testOther004 : " + num);
-    }
-
-    public testOther005() {
-        console.log("xr0209 testOther005");
-    }
-
-    public testOther006() {
-        console.log("xr0209 testOther006");
-    }
 }
