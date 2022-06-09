@@ -51,4 +51,4 @@ export * from './locomotion/continuous-turner';
 export * from './locomotion/continuous-mover';
 export * from './locomotion/locomotion-base';
 
-export * from './ui/ui-3d-base';
+export * from './ui/raycast-checker';

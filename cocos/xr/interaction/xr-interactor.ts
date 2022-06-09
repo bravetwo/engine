@@ -55,7 +55,7 @@ export class XrInteractor extends Component {
     protected _triggerState: boolean = false;
     protected _stateState: boolean = false;
     protected _interactorEvents: InteractorEvents | null = null;
-    protected _event = new XrEventHandle;
+    protected _event = new XrEventHandle("XrInteractor");
     protected _collider: Collider | null = null;
     protected _accupyLine: boolean = false;
 
@@ -86,6 +86,16 @@ export class XrInteractor extends Component {
     }
     get selectActionTrigger() {
         return this._selectActionTrigger;
+    }
+
+    set event(val) {
+        if (val === this._event) {
+            return;
+        }
+        this._event = val;
+    }
+    get event() {
+        return this._event;
     }
 
     protected _judgeHit() {
@@ -189,19 +199,25 @@ export class XrInteractor extends Component {
         }
     }
 
-    public activateStart() {
+    public activateStart(event: XrEventHandle) {
+        this._event.model = event.model;
+        this._event.eventHandle = event.eventHandle;
         this._collider?.emit(XrControlEventType.ACTIVATED, this._event);
     }
 
-    public activateEnd() {
+    public activateEnd(event: XrEventHandle) {
+        this._event.model = event.model;
+        this._event.eventHandle = event.eventHandle;
         this._collider?.emit(XrControlEventType.DEACTIVITED, this._event);
     }
 
-    public uiPressStart() {
+    public uiPressEnter(event: XrEventHandle) {
+        this._event.deviceType = event.deviceType;
         this._collider?.emit(XrControlEventType.UIPRESS_ENTERED, this._event);
     }
 
-    public uiPressEnd() {
+    public uiPressExit(event: XrEventHandle) {
+        this._event.deviceType = event.deviceType;
         this._collider?.emit(XrControlEventType.UIPRESS_EXITED, this._event);
     }
 

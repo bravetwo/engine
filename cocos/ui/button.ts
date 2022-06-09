@@ -693,6 +693,12 @@ export class Button extends Component {
 
         this.node.on(NodeEventType.MOUSE_ENTER, this._onMouseMoveIn, this);
         this.node.on(NodeEventType.MOUSE_LEAVE, this._onMouseMoveOut, this);
+
+        this.node.on("xrHoverEnter", this._xrHoverEnter, this);
+        this.node.on("xrHoverExit", this._xrHoverExit, this);
+        this.node.on("xrHoverStay", this._xrHoverStay, this);
+        this.node.on("xrClick", this._xrClick, this);
+        this.node.on("xrUnClick", this._xrUnClick, this);
     }
 
     protected _registerTargetEvent (target) {
@@ -711,6 +717,12 @@ export class Button extends Component {
 
         this.node.off(NodeEventType.MOUSE_ENTER, this._onMouseMoveIn, this);
         this.node.off(NodeEventType.MOUSE_LEAVE, this._onMouseMoveOut, this);
+
+        this.node.off("xrHoverEnter", this._xrHoverEnter, this);
+        this.node.off("xrHoverExit", this._xrHoverExit, this);
+        this.node.off("xrHoverStay", this._xrHoverStay, this);
+        this.node.off("xrClick", this._xrClick, this);
+        this.node.off("xrUnClick", this._xrUnClick, this);
     }
 
     protected _unregisterTargetEvent (target) {
@@ -978,6 +990,42 @@ export class Button extends Component {
         } else if (transition === Transition.SCALE) {
             this._updateScaleTransition(state);
         }
+    }
+
+    protected _xrHoverEnter() {
+        this._onMouseMoveIn();
+        this._updateState();
+    }
+
+    protected _xrHoverExit() {
+        this._onMouseMoveOut();
+        if (this._pressed) {
+            this._pressed = false;
+            this._updateState();
+        }
+    }
+
+    protected _xrHoverStay() {
+
+    }
+
+    protected _xrClick() {
+        if (!this._interactable || !this.enabledInHierarchy) { return; }
+        this._pressed = true;
+        this._updateState();
+    }
+
+    protected _xrUnClick() {
+        if (!this._interactable || !this.enabledInHierarchy) {
+            return;
+        }
+
+        if (this._pressed) {
+            ComponentEventHandler.emitEvents(this.clickEvents, this);
+            this.node.emit(EventType.CLICK, this);
+        }
+        this._pressed = false;
+        this._updateState();
     }
 }
 

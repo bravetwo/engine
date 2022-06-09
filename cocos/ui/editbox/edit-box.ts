@@ -693,11 +693,17 @@ export class EditBox extends Component {
     protected _registerEvent () {
         this.node.on(NodeEventType.TOUCH_START, this._onTouchBegan, this);
         this.node.on(NodeEventType.TOUCH_END, this._onTouchEnded, this);
+
+        this.node.on("xrClick", this._xrClick, this);
+        this.node.on("xrUnClick", this._xrUnClick, this);
     }
 
     protected _unregisterEvent () {
         this.node.off(NodeEventType.TOUCH_START, this._onTouchBegan, this);
         this.node.off(NodeEventType.TOUCH_END, this._onTouchEnded, this);
+
+        this.node.off("xrClick", this._xrClick, this);
+        this.node.off("xrUnClick", this._xrUnClick, this);
     }
 
     private _onBackgroundSpriteFrameChanged () {
@@ -762,6 +768,15 @@ export class EditBox extends Component {
         }
 
         this._syncSize();
+    }
+
+    protected _xrClick() {
+    }
+
+    protected _xrUnClick() {
+        if (this._impl) {
+            this._impl.beginEditing();
+        }
     }
 }
 

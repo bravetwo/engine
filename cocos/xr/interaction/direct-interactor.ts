@@ -179,11 +179,11 @@ export class DirectInteractor extends XrInteractor {
         this._directHitCollider?.emit(XrControlEventType.DEACTIVITED, this._event);
     }
 
-    public uiPressStart() {
+    public uiPressEnter() {
         this._directHitCollider?.emit(XrControlEventType.UIPRESS_ENTERED, this._event);
     }
 
-    public uiPressEnd() {
+    public uiPressExit() {
         this._directHitCollider?.emit(XrControlEventType.UIPRESS_EXITED, this._event);
     }
 }

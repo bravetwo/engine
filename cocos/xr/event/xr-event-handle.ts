@@ -31,12 +31,19 @@
 import { Vec3 } from '../../core/math';
 import { EventHandle } from '../../input/types/event/event-handle';
 import { Node } from '../../core/scene-graph/node';
+import { Event } from '../../input/types';
+
+export enum DeviceType {
+    Other = 0,
+    Left = 1,
+    Right = 2
+}
 
 /**
  * @en The input event type
  * @zh 输入事件类型
  */
- export enum XrControlEventType {
+export enum XrControlEventType {
     SELECT_ENTERED = 'select-entered',
     SELECT_EXITED = 'select-exited',
     SELECT_CANCELED = 'select-canceled',
@@ -52,20 +59,24 @@ import { Node } from '../../core/scene-graph/node';
     HOVER_ENTERED = 'hover-entered',
     HOVER_EXITED = 'hover-exited',
     HOVER_STAY = 'hover-stay',
-    HOVER_CANCELED = 'hover-canceled',
-
-    TURNER_ENTERED = 'turner-entered',
-    TURNER_EXITED = 'turner-exited'
- }
+    HOVER_CANCELED = 'hover-canceled'
+}
 
 /**
  * @en
- * The handle event.
+ * Xr handle event.
  *
  * @zh
  * xr手柄事件。
  */
- export class XrEventHandle {
+export class XrEventHandle extends Event {
+    //  export class XrEventHandle {
+    /**
+     * @en 
+     * @zh 事件触发者（左右手柄等）
+     */
+    public deviceType = DeviceType.Other;
+
     /**
      * @en 
      * @zh 碰撞检测点
@@ -76,7 +87,7 @@ import { Node } from '../../core/scene-graph/node';
      * @en 
      * @zh controller模型
      */
-     public model: Node | null = null;
+    public model: Node | null = null;
 
     /**
      * @en 
@@ -88,17 +99,36 @@ import { Node } from '../../core/scene-graph/node';
      * @en 
      * @zh 触发者Id
      */
-     public triggerId: string | undefined = "";
+    public triggerId: string | undefined = "";
 
     /**
      * @en 
      * @zh 被附着者node
      */
-     public attachNode: Node | null = null;
+    public attachNode: Node | null = null;
 
     /**
      * @en 
      * @zh 是否强制抓取
      */
     public forceGrab: boolean = true;
+}
+
+/**
+ * @en Xr 3DUI event.
+ *
+ * @zh xr的3DUI事件。
+ */
+export class XrUIPressEvent extends Event {
+    /**
+     * @en 
+     * @zh 事件触发者（左右手柄等）
+     */
+    public deviceType = DeviceType.Other;
+
+    /**
+     * @en 
+     * @zh 碰撞检测点
+     */
+    public hitPoint = new Vec3;
 }

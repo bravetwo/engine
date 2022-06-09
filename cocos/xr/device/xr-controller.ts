@@ -28,9 +28,9 @@
  * @module component/xr
  */
 
-import { ccclass, help, menu, displayOrder, type, serializable, executeInEditMode, visible, displayName, tooltip} from 'cc.decorator';
+import { ccclass, help, menu, displayOrder, type, serializable, executeInEditMode, visible, displayName, tooltip } from 'cc.decorator';
 import { Component } from '../../core/components';
-import { XrControlEventType, XrEventHandle } from '../event/xr-event-handle';
+import { DeviceType, XrControlEventType, XrEventHandle } from '../event/xr-event-handle';
 import { Node } from '../../core/scene-graph/node';
 import { Input, input } from '../../input';
 import { EventHandle } from '../../input/types';
@@ -94,12 +94,12 @@ export class XRController extends Component {
     protected _UIPressActionRight: XrEventTypeRight = XrEventTypeRight.TRIGGER_RIGHT;
 
     @serializable
-    protected _axisToPressThreshold = 0.1; 
+    protected _axisToPressThreshold = 0.1;
 
     @serializable
     protected _model: Node | null = null;
 
-    private _xrEventHandle: XrEventHandle = new XrEventHandle();
+    private _xrEventHandle: XrEventHandle = new XrEventHandle("xrEventHandle");
     private _xrInteractor: XrInteractor | null = null;
 
     @type(XrInputDeviceType)
@@ -243,7 +243,7 @@ export class XRController extends Component {
         return this._model;
     }
 
-    onLoad () {
+    onLoad() {
         if (this.model) {
             const position = this.model.position;
             const rotation = this.model.rotation;
@@ -259,14 +259,21 @@ export class XRController extends Component {
     public onEnable() {
         this._xrInteractor = this.getComponent(XrInteractor);
         if (this._inputDevice == XrInputDeviceType.Left_Hand) {
+            if (this._xrInteractor) {
+                this._xrInteractor.event.deviceType = DeviceType.Left;
+            }
             this.registerInputEvent(this._getInputEventType(this.selectActionLeft), XrControlEventType.SELECT_ENTERED);
             this.registerInputEvent(this._getInputEventType(this.activateActionLeft), XrControlEventType.ACTIVATED);
             this.registerInputEvent(this._getInputEventType(this.UIPressActionLeft), XrControlEventType.UIPRESS_ENTERED);
         } else if (this._inputDevice == XrInputDeviceType.Right_Hand) {
+            if (this._xrInteractor) {
+                this._xrInteractor.event.deviceType = DeviceType.Right;
+                console.log("xr0206 onEnable this.deviceType :" + this._xrInteractor.event.deviceType);
+            }
             this.registerInputEvent(this._getInputEventType(this.selectActionRight), XrControlEventType.SELECT_ENTERED);
             this.registerInputEvent(this._getInputEventType(this.activateActionRight), XrControlEventType.ACTIVATED);
             this.registerInputEvent(this._getInputEventType(this.UIPressActionRight), XrControlEventType.UIPRESS_ENTERED);
-        }    
+        }
     }
 
     public onDisable() {
@@ -278,7 +285,7 @@ export class XRController extends Component {
             this.unregisterInputEvent(this._getInputEventType(this.selectActionRight), XrControlEventType.SELECT_ENTERED);
             this.unregisterInputEvent(this._getInputEventType(this.activateActionRight), XrControlEventType.ACTIVATED);
             this.unregisterInputEvent(this._getInputEventType(this.UIPressActionRight), XrControlEventType.UIPRESS_ENTERED);
-        }    
+        }
     }
 
     protected _getInputEventType(type: XrEventTypeLeft | XrEventTypeRight) {
@@ -301,12 +308,12 @@ export class XRController extends Component {
                 eventType[1] = Input.EventType.BUTTON_Y_UP;
                 break;
             case XrEventTypeLeft.TRIGGER_LEFT:
-                eventType[0] = Input.EventType.TRIGGER_DOWN_LEFT;
-                eventType[1] = Input.EventType.TRIGGER_UP_LEFT;
+                eventType[0] = Input.EventType.TRIGGER_START_LEFT;
+                eventType[1] = Input.EventType.TRIGGER_END_LEFT;
                 break;
             case XrEventTypeRight.TRIGGER_RIGHT:
-                eventType[0] = Input.EventType.TRIGGER_DOWN_RIGHT;
-                eventType[1] = Input.EventType.TRIGGER_UP_RIGHT;
+                eventType[0] = Input.EventType.TRIGGER_START_RIGHT;
+                eventType[1] = Input.EventType.TRIGGER_END_RIGHT;
                 break;
             case XrEventTypeLeft.GRIP_LEFT:
                 eventType[0] = Input.EventType.GRIP_START_LEFT;
@@ -348,10 +355,6 @@ export class XRController extends Component {
                 input.on(eventType[0], this._uiPressStart, this);
                 input.on(eventType[1], this._uiPressEnd, this);
                 break;
-            case XrControlEventType.TURNER_ENTERED:
-                input.on(eventType[0], this._turnerEntered, this);
-                input.on(eventType[1], this._turnerExited, this);
-                break;
             default:
                 break;
         }
@@ -374,17 +377,15 @@ export class XRController extends Component {
                 input.off(eventType[0], this._uiPressStart, this);
                 input.off(eventType[1], this._uiPressEnd, this);
                 break;
-            case XrControlEventType.TURNER_ENTERED:
-                input.off(eventType[0], this._turnerEntered, this);
-                input.off(eventType[1], this._turnerExited, this);
-                break;
             default:
                 break;
         }
     }
 
     protected _selectStart(event: EventHandle) {
-        if ((event.type === Input.EventType.GRIP_START_LEFT || event.type === Input.EventType.GRIP_START_RIGHT) && event.value < this._axisToPressThreshold) {
+        if ((event.type === Input.EventType.GRIP_START_LEFT || event.type === Input.EventType.GRIP_START_RIGHT
+            || event.type === Input.EventType.TRIGGER_START_LEFT || event.type === Input.EventType.TRIGGER_START_RIGHT) 
+            && event.value < this._axisToPressThreshold) {
             return;
         }
         this._xrEventHandle.eventHandle = event;
@@ -399,40 +400,36 @@ export class XRController extends Component {
     }
 
     protected _activateStart(event: EventHandle) {
-        if ((event.type === Input.EventType.GRIP_START_LEFT || event.type === Input.EventType.GRIP_START_RIGHT) && event.value < this._axisToPressThreshold) {
+        if ((event.type === Input.EventType.GRIP_START_LEFT || event.type === Input.EventType.GRIP_START_RIGHT
+            || event.type === Input.EventType.TRIGGER_START_LEFT || event.type === Input.EventType.TRIGGER_START_RIGHT) 
+            && event.value < this._axisToPressThreshold) {
             return;
         }
         this._xrEventHandle.eventHandle = event;
-        this._xrInteractor?.activateStart();
+        this._xrInteractor?.activateStart(this._xrEventHandle);
         // xrEvent.activateStart(this._xrEventHandle);
     }
 
     protected _activateEnd(event: EventHandle) {
         this._xrEventHandle.eventHandle = event;
-        this._xrInteractor?.activateEnd();
+        this._xrInteractor?.activateEnd(this._xrEventHandle);
         // xrEvent.activateEnd();
     }
 
     protected _uiPressStart(event: EventHandle) {
-        if ((event.type === Input.EventType.GRIP_START_LEFT || event.type === Input.EventType.GRIP_START_RIGHT) && event.value < this._axisToPressThreshold) {
+        if ((event.type === Input.EventType.GRIP_START_LEFT || event.type === Input.EventType.GRIP_START_RIGHT 
+            || event.type === Input.EventType.TRIGGER_START_LEFT || event.type === Input.EventType.TRIGGER_START_RIGHT) 
+            && event.value < this._axisToPressThreshold) {
             return;
         }
-        this._xrInteractor?.uiPressStart();
+        
+        this._xrInteractor?.uiPressEnter(this._xrEventHandle);
         // xrEvent.uiPressStart(this._xrEventHandle);
     }
 
     protected _uiPressEnd(event: EventHandle) {
-        this._xrInteractor?.uiPressEnd();
+        this._xrInteractor?.uiPressExit(this._xrEventHandle);
         // xrEvent.uiPressEnd();
     }
 
-    protected _turnerEntered(event: EventHandle) {
-        this._xrEventHandle.eventHandle = event;
-        // xrEvent.turnerEntered(this._xrEventHandle);
-    }
-
-    protected _turnerExited(event: EventHandle) {
-        this._xrEventHandle.eventHandle = event;
-        // xrEvent.turnerExited(this._xrEventHandle);
-    }
 }

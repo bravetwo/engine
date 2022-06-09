@@ -40,7 +40,7 @@ import { Line } from '../../particle/line';
 import { InteractorEvents } from '../event/interactor-events';
 import { XrInteractor, SelectActionTrigger_Type } from './xr-interactor';
 import { IXrInteractable, XrInteractable } from './xr-interactable';
-import { UI3DBase } from '../ui/ui-3d-base';
+import { RaycastChecker } from '../ui/raycast-checker';
 import { PhysicsRayResult } from '../../physics/framework';
 
 enum Line_Type {
@@ -117,6 +117,8 @@ export class RayInteractor extends XrInteractor {
 
     private _oriPoint: Vec3 = new Vec3;
     private _oriRotation: Quat = new Quat;
+
+    protected _pressState: boolean = false;
 
     @type(Boolean)
     @displayOrder(1)
@@ -309,7 +311,7 @@ export class RayInteractor extends XrInteractor {
 
         var pos: any = [];
         pos.push(Vec3.ZERO);
-        pos.push(new Vec3(0, 0, -400));
+        pos.push(new Vec3(0, 0, -100));
         outLine.positions = pos;
     }
 
@@ -366,11 +368,20 @@ export class RayInteractor extends XrInteractor {
             // Get collision box
             const closestResult = PhysicsSystem.instance.raycastClosestResult;
             // Check whether the collision box has an UI3DBase
-            const ui3DBase = closestResult.collider?.getComponent(UI3DBase);
+            const ui3DBase = closestResult.collider?.getComponent(RaycastChecker);
             if (ui3DBase) {
-                ui3DBase.Test();
+                this._collider = closestResult.collider;
+                // if (press) {
+                //     ui3DBase.uiPress(closestResult.hitPoint);
+                //     this._collider = closestResult.collider;
+                // } else {
+                //     ui3DBase.uiUnPress();
+                // }
+                return true;
             }
         }
+
+        return false;
     }
 
     private _getRayDir() {
@@ -435,7 +446,7 @@ export class RayInteractor extends XrInteractor {
         }
     }
 
-    private _ui3dHit(closestResult: PhysicsRayResult, ui3DBase: UI3DBase) {
+    private _ui3dHit(closestResult: PhysicsRayResult, ui3DBase: RaycastChecker) {
         this._handleHoverEnter(closestResult);
     }
 
@@ -456,7 +467,7 @@ export class RayInteractor extends XrInteractor {
             if (xrInteractable) {
                 this._interactionHit(closestResult, xrInteractable);
             } else {
-                const ui3DBase = closestResult.collider?.getComponent(UI3DBase);
+                const ui3DBase = closestResult.collider?.getComponent(RaycastChecker);
                 if (ui3DBase) {
                     this._ui3dHit(closestResult, ui3DBase);
                 } else {
@@ -516,12 +527,18 @@ export class RayInteractor extends XrInteractor {
         this._rayHitCollider?.emit(XrControlEventType.DEACTIVITED, this._event);
     }
 
-    public uiPressStart() {
-        this._judgeUIHit();
-        this._rayHitCollider?.emit(XrControlEventType.UIPRESS_ENTERED, this._event);
+    public uiPressEnter() {
+        if(this._judgeUIHit()) {
+            this._collider?.emit(XrControlEventType.UIPRESS_ENTERED, this._event);
+            this._pressState = true;
+        }
     }
 
-    public uiPressEnd() {
-        this._rayHitCollider?.emit(XrControlEventType.UIPRESS_EXITED, this._event);
+    public uiPressExit() {
+        if (this._pressState) {
+            this._collider?.emit(XrControlEventType.UIPRESS_EXITED, this);
+            this._collider = null;
+            this._pressState = false;
+        }
     }
 }

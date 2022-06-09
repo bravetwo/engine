@@ -28,7 +28,7 @@ import { ccclass, help, executionOrder, menu, requireComponent, tooltip, display
 import { EDITOR } from 'internal:constants';
 import { EventHandler as ComponentEventHandler } from '../core/components/component-event-handler';
 import { UITransform } from '../2d/framework';
-import { Event, EventMouse, EventTouch, Touch, SystemEventType } from '../input/types';
+import { Event, EventMouse, EventTouch, Touch, SystemEventType, EventHandle } from '../input/types';
 import { logID } from '../core/platform/debug';
 import { Size, Vec2, Vec3 } from '../core/math';
 import { Layout } from './layout';
@@ -39,6 +39,8 @@ import { director, Director } from '../core/director';
 import { TransformBit } from '../core/scene-graph/node-enum';
 import { legacyCC } from '../core/global-exports';
 import { NodeEventType } from '../core/scene-graph/node-event';
+import { Input, input } from '../input/input';
+import { DeviceType, XrUIPressEvent } from '../xr/event/xr-event-handle';
 
 const NUMBER_OF_GATHERED_TOUCHES_FOR_MOVE_SPEED = 5;
 const OUT_OF_BOUNDARY_BREAKING_FACTOR = 0.05;
@@ -189,6 +191,12 @@ export enum EventType {
      */
     TOUCH_UP = 'touch-up',
 }
+
+enum XrhoverType {
+    NONE = 0,
+    LEFT = 1,
+    RIGHT = 2
+} 
 
 /**
  * @en
@@ -434,6 +442,8 @@ export class ScrollView extends ViewGroup {
     protected _isBouncing = false;
     protected _contentPos = new Vec3();
     protected _deltaPos = new Vec3();
+
+    protected _hoverIn: XrhoverType = XrhoverType.NONE;
 
     /**
      * @en
@@ -999,6 +1009,13 @@ export class ScrollView extends ViewGroup {
         this.node.on(NodeEventType.TOUCH_END, this._onTouchEnded, this, true);
         this.node.on(NodeEventType.TOUCH_CANCEL, this._onTouchCancelled, this, true);
         this.node.on(NodeEventType.MOUSE_WHEEL, this._onMouseWheel, this, true);
+
+        this.node.on("xrHoverEnter", this._xrHoverEnter, this);
+        this.node.on("xrHoverExit", this._xrHoverExit, this);
+        input.on(Input.EventType.THUMBSTICK_MOVE_LEFT, this._xrThumbStickMove, this);
+        input.on(Input.EventType.THUMBSTICK_MOVE_RIGHT, this._xrThumbStickMove, this);
+        input.on(Input.EventType.THUMBSTICK_MOVE_END_LEFT, this._xrThumbStickMoveEnd, this);
+        input.on(Input.EventType.THUMBSTICK_MOVE_END_RIGHT, this._xrThumbStickMoveEnd, this);
     }
 
     protected _unregisterEvent () {
@@ -1007,6 +1024,13 @@ export class ScrollView extends ViewGroup {
         this.node.off(NodeEventType.TOUCH_END, this._onTouchEnded, this, true);
         this.node.off(NodeEventType.TOUCH_CANCEL, this._onTouchCancelled, this, true);
         this.node.off(NodeEventType.MOUSE_WHEEL, this._onMouseWheel, this, true);
+
+        this.node.off("xrHoverEnter", this._xrHoverEnter, this);
+        this.node.off("xrHoverExit", this._xrHoverExit, this);
+        input.off(Input.EventType.THUMBSTICK_MOVE_LEFT, this._xrThumbStickMove, this);
+        input.off(Input.EventType.THUMBSTICK_MOVE_RIGHT, this._xrThumbStickMove, this);
+        input.off(Input.EventType.THUMBSTICK_MOVE_END_LEFT, this._xrThumbStickMoveEnd, this);
+        input.off(Input.EventType.THUMBSTICK_MOVE_END_RIGHT, this._xrThumbStickMoveEnd, this);
     }
 
     protected _onMouseWheel (event: EventMouse, captureListeners?: Node[]) {
@@ -1809,6 +1833,58 @@ export class ScrollView extends ViewGroup {
         if (value === TransformBit.SCALE) {
             this._calculateBoundary();
         }
+    }
+
+    protected _xrHoverEnter(event: XrUIPressEvent) {
+        if (event.deviceType === DeviceType.Left) {
+            this._hoverIn = XrhoverType.LEFT;
+        } else if (event.deviceType === DeviceType.Right) {
+            this._hoverIn = XrhoverType.RIGHT;
+        }
+        this._autoScrolling = false;
+        this._dispatchEvent(EventType.SCROLL_BEGAN);
+
+        console.log("xr0206 _xrHoverEnter: " + this._hoverIn + " event.deviceType:" + event.deviceType);
+    }
+
+    protected _xrHoverExit() {
+        this._hoverIn = XrhoverType.NONE;
+        this._autoScrolling = true;
+        this._dispatchEvent(EventType.SCROLL_ENDED);
+        console.log("xr0206 _xrHoverExit: " + this._hoverIn);
+    }
+
+    protected _xrThumbStickMove(event: EventHandle) {
+        if (!this.enabledInHierarchy) {
+            return;
+        }
+
+        console.log("xr0206 _xrThumbStickMove: " + this._hoverIn + " type : " + event.type);
+        if (this._hoverIn === XrhoverType.NONE) {
+            return;
+        } else if (this._hoverIn === XrhoverType.LEFT && event.type !== Input.EventType.THUMBSTICK_MOVE_LEFT) {
+            return;
+        } else if (this._hoverIn === XrhoverType.RIGHT && event.type !== Input.EventType.THUMBSTICK_MOVE_RIGHT) {
+            return;
+        }
+
+        const deltaMove = new Vec3();
+        const wheelPrecision = -62.5;
+        const scrollY = event.y;
+        if (this.vertical) {
+            deltaMove.set(0, scrollY * wheelPrecision, 0);
+        } else if (this.horizontal) {
+            deltaMove.set(scrollY * wheelPrecision, 0, 0);
+        }
+
+        this._mouseWheelEventElapsedTime = 0;
+        this._processDeltaMove(deltaMove);
+        this._dispatchEvent(EventType.SCROLLING);
+    }
+
+    protected _xrThumbStickMoveEnd() {
+        this._autoScrolling = true;
+        this._dispatchEvent(EventType.TOUCH_UP);
     }
 }
 
