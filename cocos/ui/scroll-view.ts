@@ -40,7 +40,7 @@ import { TransformBit } from '../core/scene-graph/node-enum';
 import { legacyCC } from '../core/global-exports';
 import { NodeEventType } from '../core/scene-graph/node-event';
 import { Input, input } from '../input/input';
-import { DeviceType, XrUIPressEvent } from '../xr/event/xr-event-handle';
+import { DeviceType, XrUIPressEvent, XrUIPressEventType } from '../xr/event/xr-event-handle';
 
 const NUMBER_OF_GATHERED_TOUCHES_FOR_MOVE_SPEED = 5;
 const OUT_OF_BOUNDARY_BREAKING_FACTOR = 0.05;
@@ -1010,8 +1010,8 @@ export class ScrollView extends ViewGroup {
         this.node.on(NodeEventType.TOUCH_CANCEL, this._onTouchCancelled, this, true);
         this.node.on(NodeEventType.MOUSE_WHEEL, this._onMouseWheel, this, true);
 
-        this.node.on("xrHoverEnter", this._xrHoverEnter, this);
-        this.node.on("xrHoverExit", this._xrHoverExit, this);
+        this.node.on(XrUIPressEventType.XRUI_HOVER_ENTERED, this._xrHoverEnter, this);
+        this.node.on(XrUIPressEventType.XRUI_HOVER_EXITED, this._xrHoverExit, this);
         input.on(Input.EventType.THUMBSTICK_MOVE_LEFT, this._xrThumbStickMove, this);
         input.on(Input.EventType.THUMBSTICK_MOVE_RIGHT, this._xrThumbStickMove, this);
         input.on(Input.EventType.THUMBSTICK_MOVE_END_LEFT, this._xrThumbStickMoveEnd, this);
@@ -1025,8 +1025,8 @@ export class ScrollView extends ViewGroup {
         this.node.off(NodeEventType.TOUCH_CANCEL, this._onTouchCancelled, this, true);
         this.node.off(NodeEventType.MOUSE_WHEEL, this._onMouseWheel, this, true);
 
-        this.node.off("xrHoverEnter", this._xrHoverEnter, this);
-        this.node.off("xrHoverExit", this._xrHoverExit, this);
+        this.node.off(XrUIPressEventType.XRUI_HOVER_ENTERED, this._xrHoverEnter, this);
+        this.node.off(XrUIPressEventType.XRUI_HOVER_EXITED, this._xrHoverExit, this);
         input.off(Input.EventType.THUMBSTICK_MOVE_LEFT, this._xrThumbStickMove, this);
         input.off(Input.EventType.THUMBSTICK_MOVE_RIGHT, this._xrThumbStickMove, this);
         input.off(Input.EventType.THUMBSTICK_MOVE_END_LEFT, this._xrThumbStickMoveEnd, this);
@@ -1843,15 +1843,12 @@ export class ScrollView extends ViewGroup {
         }
         this._autoScrolling = false;
         this._dispatchEvent(EventType.SCROLL_BEGAN);
-
-        console.log("xr0206 _xrHoverEnter: " + this._hoverIn + " event.deviceType:" + event.deviceType);
     }
 
     protected _xrHoverExit() {
         this._hoverIn = XrhoverType.NONE;
         this._autoScrolling = true;
         this._dispatchEvent(EventType.SCROLL_ENDED);
-        console.log("xr0206 _xrHoverExit: " + this._hoverIn);
     }
 
     protected _xrThumbStickMove(event: EventHandle) {
@@ -1859,7 +1856,6 @@ export class ScrollView extends ViewGroup {
             return;
         }
 
-        console.log("xr0206 _xrThumbStickMove: " + this._hoverIn + " type : " + event.type);
         if (this._hoverIn === XrhoverType.NONE) {
             return;
         } else if (this._hoverIn === XrhoverType.LEFT && event.type !== Input.EventType.THUMBSTICK_MOVE_LEFT) {

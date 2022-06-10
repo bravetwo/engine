@@ -41,6 +41,7 @@ import { InputFlag, InputMode, KeyboardReturnType } from './types';
 import { sys } from '../../core/platform/sys';
 import { legacyCC } from '../../core/global-exports';
 import { NodeEventType } from '../../core/scene-graph/node-event';
+import { XrUIPressEventType } from '../../xr/event/xr-event-handle';
 
 const LEFT_PADDING = 2;
 
@@ -694,16 +695,16 @@ export class EditBox extends Component {
         this.node.on(NodeEventType.TOUCH_START, this._onTouchBegan, this);
         this.node.on(NodeEventType.TOUCH_END, this._onTouchEnded, this);
 
-        this.node.on("xrClick", this._xrClick, this);
-        this.node.on("xrUnClick", this._xrUnClick, this);
+        this.node.on(XrUIPressEventType.XRUI_CLICK, this._xrClick, this);
+        this.node.on(XrUIPressEventType.XRUI_UNCLICK, this._xrUnClick, this);
     }
 
     protected _unregisterEvent () {
         this.node.off(NodeEventType.TOUCH_START, this._onTouchBegan, this);
         this.node.off(NodeEventType.TOUCH_END, this._onTouchEnded, this);
 
-        this.node.off("xrClick", this._xrClick, this);
-        this.node.off("xrUnClick", this._xrUnClick, this);
+        this.node.off(XrUIPressEventType.XRUI_CLICK, this._xrClick, this);
+        this.node.off(XrUIPressEventType.XRUI_UNCLICK, this._xrUnClick, this);
     }
 
     private _onBackgroundSpriteFrameChanged () {

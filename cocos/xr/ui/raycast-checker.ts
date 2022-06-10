@@ -1,7 +1,7 @@
 import { ccclass, help, menu, displayOrder, serializable, tooltip, executeInEditMode, type} from 'cc.decorator';
 import { ccenum, Component, Vec3, EventHandler as ComponentEventHandler, sys, CameraComponent, Quat } from "../../core";
 import { Collider, ERigidBodyType, RigidBody } from "../../physics/framework";
-import { XrControlEventType, XrEventHandle, XrUIPressEvent } from '../event/xr-event-handle';
+import { XrControlEventType, XrEventHandle, XrUIPressEvent, XrUIPressEventType } from '../event/xr-event-handle';
 import { Node } from '../../core/scene-graph/node';
 import { RenderRoot2D } from '../../2d';
 
@@ -107,26 +107,26 @@ export class RaycastChecker extends Component {
     private _hoverEnter(event: XrEventHandle) {
         this._event.deviceType = event.deviceType;
         this._event.hitPoint.set(event.hitPoint);
-        this.node.emit("xrHoverEnter", this._event);
+        this.node.emit(XrUIPressEventType.XRUI_HOVER_ENTERED, this._event);
     }
 
     private _hoverExit() {
-        this.node.emit("xrHoverExit", this);
+        this.node.emit(XrUIPressEventType.XRUI_HOVER_EXITED, this);
     }
 
     private _hoverStay(event: XrEventHandle) {
         this._event.deviceType = event.deviceType;
         this._event.hitPoint.set(event.hitPoint);
-        this.node.emit("xrHoverStay", this._event);
+        this.node.emit(XrUIPressEventType.XRUI_HOVER_STAY, this._event);
     }
 
     private _uiPressEnter(event: XrEventHandle) {
         this._event.deviceType = event.deviceType;
         this._event.hitPoint.set(event.hitPoint);
-        this.node.emit("xrClick", this._event);
+        this.node.emit(XrUIPressEventType.XRUI_CLICK, this._event);
     }
 
     private _uiPressExit() {
-        this.node.emit("xrUnClick", this);
+        this.node.emit(XrUIPressEventType.XRUI_UNCLICK, this);
     }
 }

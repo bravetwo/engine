@@ -38,6 +38,7 @@ import { Sprite } from '../2d/components/sprite';
 import { legacyCC } from '../core/global-exports';
 import { TransformBit } from '../core/scene-graph/node-enum';
 import { NodeEventType } from '../core/scene-graph/node-event';
+import { XrUIPressEventType } from '../xr/event/xr-event-handle';
 
 const _tempColor = new Color();
 
@@ -694,11 +695,10 @@ export class Button extends Component {
         this.node.on(NodeEventType.MOUSE_ENTER, this._onMouseMoveIn, this);
         this.node.on(NodeEventType.MOUSE_LEAVE, this._onMouseMoveOut, this);
 
-        this.node.on("xrHoverEnter", this._xrHoverEnter, this);
-        this.node.on("xrHoverExit", this._xrHoverExit, this);
-        this.node.on("xrHoverStay", this._xrHoverStay, this);
-        this.node.on("xrClick", this._xrClick, this);
-        this.node.on("xrUnClick", this._xrUnClick, this);
+        this.node.on(XrUIPressEventType.XRUI_HOVER_ENTERED, this._xrHoverEnter, this);
+        this.node.on(XrUIPressEventType.XRUI_HOVER_EXITED, this._xrHoverExit, this);
+        this.node.on(XrUIPressEventType.XRUI_CLICK, this._xrClick, this);
+        this.node.on(XrUIPressEventType.XRUI_UNCLICK, this._xrUnClick, this);
     }
 
     protected _registerTargetEvent (target) {
@@ -718,11 +718,10 @@ export class Button extends Component {
         this.node.off(NodeEventType.MOUSE_ENTER, this._onMouseMoveIn, this);
         this.node.off(NodeEventType.MOUSE_LEAVE, this._onMouseMoveOut, this);
 
-        this.node.off("xrHoverEnter", this._xrHoverEnter, this);
-        this.node.off("xrHoverExit", this._xrHoverExit, this);
-        this.node.off("xrHoverStay", this._xrHoverStay, this);
-        this.node.off("xrClick", this._xrClick, this);
-        this.node.off("xrUnClick", this._xrUnClick, this);
+        this.node.off(XrUIPressEventType.XRUI_HOVER_ENTERED, this._xrHoverEnter, this);
+        this.node.off(XrUIPressEventType.XRUI_HOVER_EXITED, this._xrHoverExit, this);
+        this.node.off(XrUIPressEventType.XRUI_CLICK, this._xrClick, this);
+        this.node.off(XrUIPressEventType.XRUI_UNCLICK, this._xrUnClick, this);
     }
 
     protected _unregisterTargetEvent (target) {
@@ -1003,10 +1002,6 @@ export class Button extends Component {
             this._pressed = false;
             this._updateState();
         }
-    }
-
-    protected _xrHoverStay() {
-
     }
 
     protected _xrClick() {

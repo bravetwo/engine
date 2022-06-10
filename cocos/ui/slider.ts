@@ -36,7 +36,7 @@ import { Sprite } from '../2d/components/sprite';
 import { legacyCC } from '../core/global-exports';
 import { NodeEventType } from '../core/scene-graph/node-event';
 import { input, Input } from '../input/input';
-import { XrUIPressEvent } from '../xr/event/xr-event-handle';
+import { XrUIPressEvent, XrUIPressEventType } from '../xr/event/xr-event-handle';
 
 const _tempPos = new Vec3();
 /**
@@ -189,9 +189,9 @@ export class Slider extends Component {
         this.node.on(NodeEventType.TOUCH_END, this._onTouchEnded, this);
         this.node.on(NodeEventType.TOUCH_CANCEL, this._onTouchCancelled, this);
 
-        this.node.on("xrHoverStay", this._xrHoverStay, this);
-        this.node.on("xrClick", this._xrClick, this);
-        this.node.on("xrUnClick", this._xrUnClick, this);
+        this.node.on(XrUIPressEventType.XRUI_HOVER_STAY, this._xrHoverStay, this);
+        this.node.on(XrUIPressEventType.XRUI_CLICK, this._xrClick, this);
+        this.node.on(XrUIPressEventType.XRUI_UNCLICK, this._xrUnClick, this);
         if (this._handle && this._handle.isValid) {
             this._handle.node.on(NodeEventType.TOUCH_START, this._onHandleDragStart, this);
             this._handle.node.on(NodeEventType.TOUCH_MOVE, this._onTouchMoved, this);
@@ -205,9 +205,9 @@ export class Slider extends Component {
         this.node.off(NodeEventType.TOUCH_END, this._onTouchEnded, this);
         this.node.off(NodeEventType.TOUCH_CANCEL, this._onTouchCancelled, this);
 
-        this.node.off("xrHoverStay", this._xrHoverStay, this);
-        this.node.off("xrClick", this._xrClick, this);
-        this.node.off("xrUnClick", this._xrUnClick, this);
+        this.node.off(XrUIPressEventType.XRUI_HOVER_STAY, this._xrHoverStay, this);
+        this.node.off(XrUIPressEventType.XRUI_CLICK, this._xrClick, this);
+        this.node.off(XrUIPressEventType.XRUI_UNCLICK, this._xrUnClick, this);
         if (this._handle && this._handle.isValid) {
             this._handle.node.off(NodeEventType.TOUCH_START, this._onHandleDragStart, this);
             this._handle.node.off(NodeEventType.TOUCH_MOVE, this._onTouchMoved, this);
