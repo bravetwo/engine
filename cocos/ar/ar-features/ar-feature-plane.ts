@@ -22,7 +22,7 @@
  THE SOFTWARE.
 */
 
-import { Prefab, instantiate, Vec3, resources, ccenum, Quat } from '../../core';
+import { Prefab, instantiate, Vec3, resources, ccenum, Quat, Vec2 } from '../../core';
 //import { Prefab } from 'cocos/core/assets';
 //import { instantiate } from 'cocos/core/data';
 //import { Vec3 } from 'cocos/core';
@@ -35,12 +35,12 @@ import load from 'cocos/core/asset-manager/load';
 import { array } from 'cocos/core/utils/js';
 import { ARModuleHelper } from '../ar-module-helper';
 import { ARFeatureData } from '../ar-feature-data';
-import { Vec2 } from '@cocos/box2d';
 
 export enum ARPlaneDetectionMode {
-    //None, 
-    Horizontal = 1 << 0, 
-    Vertical = 1 << 1,
+    Horizontal_Upward = 1 << 0,
+    Horizontal_Downward = 1 << 1, 
+    Vertical = 1 << 2,
+    Horizontal = Horizontal_Upward | Horizontal_Downward,
     All = Horizontal | Vertical
 }
 ccenum(ARPlaneDetectionMode)
@@ -85,9 +85,9 @@ export class ARFeaturePlaneDetection extends ARFeature {
     readonly onAddEvent = new FeatureEvent<ARPlane[]>();
     readonly onUpdateEvent = new FeatureEvent<ARPlane[]>();
     readonly onRemoveEvent = new FeatureEvent<number[]>();
-    private _addedPlanes : ARPlane[] = [];
-    private _updatedPlanes : ARPlane[] = [];
-    private _removedPlanes : number[] = [];
+    private _addedPlanes : ARPlane[];
+    private _updatedPlanes : ARPlane[];
+    private _removedPlanes : number[];
 
     constructor (session : ARSession, config : IFeatureData);
     constructor (session : ARSession, config : IFeatureData, jsonObject? : any) {
@@ -129,6 +129,9 @@ export class ARFeaturePlaneDetection extends ARFeature {
         this.updatedPlanesInfo = new Array();
         this.removedPlanesInfo = new Array();
         
+        this._addedPlanes = new Array();
+        this._updatedPlanes = new Array();
+        this._removedPlanes = new Array();
 
         console.log("plane detection mode:", this.mode);
     }
@@ -166,7 +169,7 @@ export class ARFeaturePlaneDetection extends ARFeature {
         let planes = this._session.node;
         //*
         this.removedPlanesInfo = armodule.getRemovedPlanesInfo();
-        this._removedPlanes.length = 0;
+        //this._removedPlanes.length = 0;
         this._removedPlanes = this.removedPlanesInfo;
         if(this._removedPlanes.length > 0)
                 this.onRemoveEvent.trigger(this._removedPlanes);
@@ -276,7 +279,8 @@ export class ARFeaturePlaneDetection extends ARFeature {
                 
                 let plane : ARPlane = {
                     id: src[offset],
-                    type: src[offset + 1],
+                    // in native : 0, 1, 2
+                    type: 1 << src[offset + 1],
                     extent: new Vec2(
                         src[offset + 3],
                         src[offset + 4]
