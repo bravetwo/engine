@@ -191,4 +191,8 @@ export class PoseTracker extends Component {
         this.node.setRTS(this._quatPose, this._positionPose, Vec3.ONE);
         this.node.updateWorldTransform();
     }
+
+    update() {
+        this.node.setRTS(this._quatPose, this._positionPose, Vec3.ONE);
+    }
 }
