@@ -288,6 +288,9 @@ public:
                         CC_LOG_ERROR("AndroidPlatform: Launch game failed!");
                     }
                 } else {
+#if XR_OEM_HUAWEIVR
+                    cc::xr::XrEntry::getInstance()->resumeXrInstance();
+#endif
                     cc::CustomEvent event;
                     event.name = EVENT_RECREATE_WINDOW;
                     event.args->ptrVal = reinterpret_cast<void *>(_androidPlatform->getWindowHandler());
@@ -299,6 +302,9 @@ public:
                 _hasWindow = false;
                 // The window is going away -- kill the surface
                 CC_LOG_DEBUG("AndroidPlatform: APP_CMD_TERM_WINDOW");
+#if XR_OEM_HUAWEIVR
+                cc::xr::XrEntry::getInstance()->pauseXrInstance();
+#endif
                 cc::CustomEvent event;
                 event.name = EVENT_DESTROY_WINDOW;
                 event.args->ptrVal = reinterpret_cast<void *>(_androidPlatform->getWindowHandler());
