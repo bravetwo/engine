@@ -27,7 +27,7 @@ import { ccclass, menu, property, disallowMultiple, type } from '../../core/data
 import { ARFeature, FeatureType, IFeatureData } from '../ar-feature-base';
 import { ARSession } from '../ar-session-component';
 import { Node } from '../../core/scene-graph'
-import { createMesh } from '../../3d/misc/';
+import { createMesh, MeshUtils } from '../../3d/misc/';
 import load from 'cocos/core/asset-manager/load';
 import { array } from 'cocos/core/utils/js';
 import { ARModuleHelper } from '../ar-module-helper';
@@ -41,14 +41,15 @@ import { NULL } from '@cocos/physx';
 @ccclass('cc.ARFeatureSceneMesh')
 export class ARFeatureSceneMesh extends ARFeature {
     private static readonly MESH_INFO_SIZE = 8;
+    private static readonly MAX_INDICES = 1024;
 
     public get featureId(): FeatureType {
         return FeatureType.SceneMesh;
     }
 
-    private sceneMaterial : Material | null = null;
+    private _sceneMaterial : Material | null = null;
     private count : number = 0;
-    private meshesNodeMap = new Map<number, Node>();
+    private _meshesNodeMap = new Map<number, Node>();
 
     // close all and destroy all while set false
     //private _enable : boolean = true;
@@ -68,13 +69,13 @@ export class ARFeatureSceneMesh extends ARFeature {
 
         var self = this;
         resources.load(jsonObject.sceneMaterialPath, Material, function (err, mat) {
-            self.sceneMaterial = mat;
+            self._sceneMaterial = mat;
         });
     }
 
     isReady() : boolean {
         
-        return this.sceneMaterial != null;
+        return this._sceneMaterial != null;
     }
 
     init() {
@@ -130,20 +131,21 @@ export class ARFeatureSceneMesh extends ARFeature {
     public processChanges() {
         //if(this.count > 2) return;
         const armodule = ARModuleHelper.getInstance();
+        if(!this._sceneMaterial) {
+            this._sceneMaterial = new Material();
+            this._sceneMaterial.initialize({
+                effectName: 'unlit',
+                states: { primitive: PrimitiveMode.LINE_LIST }
+            });
+            this._sceneMaterial.setProperty('mainColor', new Vec4(0, 1, 1, 1));
+        }
 
         let meshes: number[];
-        const mat = new Material();
-        mat.initialize({
-            effectName: 'unlit',
-            states: { primitive: PrimitiveMode.LINE_LIST }
-        });
-        mat.setProperty('mainColor', new Vec4(0, 1, 1, 1));
-
         meshes = armodule.getRemovedSceneMesh();
         meshes.forEach(meshRef => {
-            if(this.meshesNodeMap.has(meshRef)) {
-                let node = this.meshesNodeMap.get(meshRef)!;
-                this.meshesNodeMap.delete(meshRef);
+            if(this._meshesNodeMap.has(meshRef)) {
+                let node = this._meshesNodeMap.get(meshRef)!;
+                this._meshesNodeMap.delete(meshRef);
                 node.destroy();
                 console.log(`destroy mesh: ${meshRef}`);
             }
@@ -226,12 +228,14 @@ export class ARFeatureSceneMesh extends ARFeature {
 
     private processMeshInfo(meshInfo : number[]) {
         const armodule = ARModuleHelper.getInstance();
+        /*
         const mat = new Material();
         mat.initialize({
             effectName: 'unlit',
             states: { primitive: PrimitiveMode.LINE_LIST }
         });
         mat.setProperty('mainColor', new Vec4(0, 1, 1, 1));
+        */
 
         let count = meshInfo.length / ARFeatureSceneMesh.MESH_INFO_SIZE;
         let offset = 0;
@@ -254,25 +258,9 @@ export class ARFeatureSceneMesh extends ARFeature {
             // create or update node
             let sceneMeshNode : Node | undefined;
             let renderer : MeshRenderer | null;
-            sceneMeshNode = this.meshesNodeMap.get(meshRef);
-            if(!sceneMeshNode) {
-                sceneMeshNode = new Node("scene-mesh");
-                this.session.node.addChild(sceneMeshNode);
-                //this._meshesParent!.addChild(sceneMeshNode);
-                this.meshesNodeMap.set(meshRef, sceneMeshNode);
-                console.log(`add mesh: ${meshRef}`);
-            } else {
-                console.log(`update mesh: ${meshRef}`);
-            }
-            sceneMeshNode.setWorldPosition(pos);
-            sceneMeshNode.setWorldRotation(rot);
-            renderer = sceneMeshNode.getComponent(MeshRenderer);
-            if(!renderer)
-                renderer = sceneMeshNode.addComponent(MeshRenderer);
-
-            // update mesh
-            let vertices: number[];
-            let indices: number[];
+            let vertices: Float32Array;
+            let indices: Uint32Array;
+            sceneMeshNode = this._meshesNodeMap.get(meshRef);
             vertices = armodule.getSceneMeshVertices(meshRef);
             indices = armodule.getSceneMeshTriangleIndices(meshRef);
 
@@ -288,11 +276,49 @@ export class ARFeatureSceneMesh extends ARFeature {
                 console.log(`${indi}`);
             });//*/
 
-            let mesh : Mesh;
-            mesh = createMesh({
+
+            if(!sceneMeshNode) {
+                sceneMeshNode = new Node("scene-mesh");
+                this.session.node.addChild(sceneMeshNode);
+                //this._meshesParent!.addChild(sceneMeshNode);
+                this._meshesNodeMap.set(meshRef, sceneMeshNode);
+                console.log(`add mesh: ${meshRef}`);
+                renderer = sceneMeshNode.addComponent(MeshRenderer);
+                renderer.mesh = new Mesh();
+                renderer.material = this._sceneMaterial;
+
+            } else {
+                console.log(`update mesh: ${meshRef}`);
+                renderer = sceneMeshNode.getComponent(MeshRenderer);
+
+            }
+            sceneMeshNode.setWorldPosition(pos);
+            sceneMeshNode.setWorldRotation(rot);
+
+            /*
+            renderer = sceneMeshNode.getComponent(MeshRenderer);
+            if(!renderer)
+                renderer = sceneMeshNode.addComponent(MeshRenderer);
+            */
+            
+            let subMeshCount = Math.ceil(indices.length / ARFeatureSceneMesh.MAX_INDICES);
+            for(let j = 0; j < subMeshCount; ++j) {
+                MeshUtils.createDynamicMesh(j, {
+                    positions: vertices,
+                    indices32: indices,
+                }, renderer!.mesh!, { 
+                    maxSubMeshes: subMeshCount,
+                    maxSubMeshVertices : vertices.length,
+                    maxSubMeshIndices : indices.length
+                });
+            }
+
+            /*
+            let mesh : Mesh = new Mesh();
+            MeshUtils.createDynamicMesh(0, {
                 positions: vertices,
-                indices: indices,
-            });
+                indices32: indices,
+            }, mesh);
             console.log(`vertices length: ${vertices.length}`);
             console.log(`indices length: ${indices.length}`);
             const meshGeo = mesh.renderingSubMeshes[0].geometricInfo;
@@ -301,7 +327,8 @@ export class ARFeatureSceneMesh extends ARFeature {
                 indices: meshGeo.indices!.slice()
             };
             renderer.mesh = createMesh(primitives.wireframed(geo as any));
-            renderer.material = mat;
+            renderer.material = this._sceneMaterial;
+            */
         }
     }
 }
