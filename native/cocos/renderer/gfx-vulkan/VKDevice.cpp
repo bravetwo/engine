@@ -628,8 +628,7 @@ void CCVKDevice::acquire(Swapchain *const *swapchains, uint32_t count) {
     for (uint32_t i = 0U; i < count; ++i) {
         auto *swapchain = static_cast<CCVKSwapchain *>(swapchains[i]);
 #if USE_XR
-        uint32_t SwapchainImage = xr::XrEntry::getInstance()->GetSwapchainImageIndexsByHandle(swapchains[i]->getWindowHandle());
-        swapchain->gpuSwapchain()->curImageIndex = SwapchainImage;
+        swapchain->gpuSwapchain()->curImageIndex = xr::XrEntry::getInstance()->getSwapchainImageIndex();
 #else
         if (swapchain->gpuSwapchain()->lastPresentResult == VK_NOT_READY) {
             if (!swapchain->checkSwapchainStatus()) continue;

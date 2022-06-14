@@ -235,18 +235,20 @@ Swapchain *Device::createSwapchain(const SwapchainInfo &info) {
 }
 
 #if USE_XR
+struct XrSwapchainInfo : public SwapchainInfo {
+    int xrViewIdx = -1;
+};
+
 Swapchain *Device::createSwapchainWithXr(const SwapchainInfo &info) {
     xr::XrEntry::getInstance()->initXrSwapchains();
-    auto cocosXrSwapchains = xr::XrEntry::getInstance()->GetCocosXrSwapchain();
-    for (const auto &cocosXrSwapchain : cocosXrSwapchains) {
+    auto &cocosXrSwapchains = xr::XrEntry::getInstance()->getCocosXrSwapchains();
+    for (int i = 0; i < cocosXrSwapchains.size(); i++) {
         Swapchain *res = createSwapchain();
-        SwapchainInfo swapchainInfo;
+        XrSwapchainInfo swapchainInfo;
         swapchainInfo.copy(info);
-#if !XR_OEM_HUAWEIVR
-        swapchainInfo.windowHandle = cocosXrSwapchain.handle;
-#endif
-        swapchainInfo.width = cocosXrSwapchain.width;
-        swapchainInfo.height = cocosXrSwapchain.height;
+        swapchainInfo.width = cocosXrSwapchains[i].width;
+        swapchainInfo.height = cocosXrSwapchains[i].height;
+        swapchainInfo.xrViewIdx = i;
         res->initialize(swapchainInfo);
         _swapchains.push_back(res);
     }

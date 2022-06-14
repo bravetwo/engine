@@ -277,7 +277,7 @@ void GLES3Device::acquire(Swapchain *const *swapchains, uint32_t count) {
     for (uint32_t i = 0; i < count; ++i) {
 #if USE_XR
     #if !XR_OEM_HUAWEIVR
-        xr::XrEntry::getInstance()->attachXRFramebufferTexture2D(swapchains[i]->getWindowHandle());
+        xr::XrEntry::getInstance()->attachXRFramebufferTexture2D();
     #endif
         static_cast<GLES3Swapchain *>(swapchains[i])->gpuSwapchain()->glFramebuffer = _xrFramebuffer;
 #endif

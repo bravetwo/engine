@@ -24,6 +24,10 @@
 ****************************************************************************/
 
 #include "GFXSwapchain.h"
+#if USE_XR
+#include "Xr.h"
+#include "GFXDevice.h"
+#endif
 
 namespace cc {
 namespace gfx {
@@ -40,6 +44,11 @@ void Swapchain::initialize(const SwapchainInfo &info) {
     _windowHandle = info.windowHandle;
     _vsyncMode = info.vsyncMode;
 
+#if USE_XR
+    XrSwapchainInfo swapchainInfo = (XrSwapchainInfo &&) info;
+    auto &cocosXrSwapchain = xr::XrEntry::getInstance()->getCocosXrSwapchains().at(swapchainInfo.xrViewIdx);
+    cocosXrSwapchain.ccSwapchainHandle = this;
+#endif
     doInit(info);
 }
 

@@ -328,6 +328,7 @@ void Root::frameMove(float deltaTime, int32_t totalFrames) {
         window->extractRenderCameras(_cameraList);
     }
 #else
+    xr::XrEntry::getInstance()->BeforeRenderFrame(xrEye);
     for (int i = 0, size = _windows.size(); i < size; i++) {
         // _windows contain : left eye window, right eye window, other rt window
         if (_windows[i]->isXRWindow() && _windows[i]->getXREyeType() == xrEye) {
@@ -336,7 +337,6 @@ void Root::frameMove(float deltaTime, int32_t totalFrames) {
             _windows[i]->extractRenderCameras(_cameraList, -1);
         }
     }
-    xr::XrEntry::getInstance()->BeforeRenderFrame(xrEye);
 #endif
 
     if (_pipelineRuntime != nullptr && !_cameraList.empty()) {
