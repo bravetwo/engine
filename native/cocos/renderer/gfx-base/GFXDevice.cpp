@@ -91,21 +91,27 @@ void Device::destroy() {
 
 void Device::destroySurface(void *windowHandle) {
     setRendererAvailable(false);
+#if !USE_XR || XR_OEM_HUAWEIVR
     for (const auto &swapchain : _swapchains) {
         if (swapchain->getWindowHandle() == windowHandle) {
             swapchain->destroySurface();
             break;
         }
     }
+#else
+    bindContext(true);
+#endif
 }
 
 void Device::createSurface(void *windowHandle) {
+#if !USE_XR || XR_OEM_HUAWEIVR
     for (const auto &swapchain : _swapchains) {
         if (!swapchain->getWindowHandle()) {
             swapchain->createSurface(windowHandle);
             break;
         }
     }
+#endif
     setRendererAvailable(true);
 }
 

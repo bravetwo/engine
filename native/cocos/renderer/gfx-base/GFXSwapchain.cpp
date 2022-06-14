@@ -39,9 +39,11 @@ Swapchain::Swapchain()
 Swapchain::~Swapchain() = default;
 
 void Swapchain::initialize(const SwapchainInfo &info) {
+#if !USE_XR || XR_OEM_HUAWEIVR
     CC_ASSERT(info.windowHandle);
 
     _windowHandle = info.windowHandle;
+#endif
     _vsyncMode = info.vsyncMode;
 
 #if USE_XR

@@ -252,7 +252,7 @@ Swapchain *Device::createSwapchainWithXr(const SwapchainInfo &info) {
         res->initialize(swapchainInfo);
         _swapchains.push_back(res);
     }
-#if CC_PLATFORM == CC_PLATFORM_ANDROID || CC_PLATFORM == CC_PLATFORM_OHOS
+#if (CC_PLATFORM == CC_PLATFORM_ANDROID && (!USE_XR || XR_OEM_HUAWEIVR)) || CC_PLATFORM == CC_PLATFORM_OHOS
     if (_swapchains.at(0)->getWindowHandle()) {
         setRendererAvailable(true);
     }

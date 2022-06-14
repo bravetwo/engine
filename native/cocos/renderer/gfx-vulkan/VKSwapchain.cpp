@@ -429,11 +429,13 @@ void CCVKSwapchain::doDestroySurface() {
 
 void CCVKSwapchain::doCreateSurface(void *windowHandle) { // NOLINT
     if (!_gpuSwapchain || _gpuSwapchain->vkSurface != VK_NULL_HANDLE) return;
+#if !USE_XR
     createVkSurface();
     checkSwapchainStatus();
 #if CC_SWAPPY_ENABLED
     auto *gpuDevice = CCVKDevice::getInstance()->gpuDevice();
     SwappyVk_setWindow(gpuDevice->vkDevice, _gpuSwapchain->vkSwapchain, static_cast<ANativeWindow *>(windowHandle));
+#endif
 #endif
 }
 

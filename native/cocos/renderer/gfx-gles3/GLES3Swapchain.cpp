@@ -106,15 +106,13 @@ void GLES3Swapchain::doInit(const SwapchainInfo &info) {
 #else
     EGL_CHECK(_gpuSwapchain->eglSurface = eglCreateWindowSurface(context->eglDisplay, context->eglConfig, window, nullptr));
 #endif
-#else
-    EGL_CHECK(_gpuSwapchain->eglSurface = context->eglDefaultSurface);
-#endif
     if (_gpuSwapchain->eglSurface == EGL_NO_SURFACE) {
         CC_LOG_ERROR("Create window surface failed.");
         return;
     }
+#endif
 
-#if USE_XR && XR_OEM_HUAWEIVR
+#if XR_OEM_HUAWEIVR
     GLES3Device::getInstance()->context()->makeCurrent(_gpuSwapchain, _gpuSwapchain);
 #endif
 
@@ -179,8 +177,8 @@ void GLES3Swapchain::doDestroySurface() {
 }
 
 void GLES3Swapchain::doCreateSurface(void *windowHandle) {
-    auto *context = GLES3Device::getInstance()->context();
 #if !USE_XR || XR_OEM_HUAWEIVR
+    auto *context = GLES3Device::getInstance()->context();
 #if CC_PLATFORM == CC_PLATFORM_LINUX
     auto window = reinterpret_cast<EGLNativeWindowType>(windowHandle);
 #else
@@ -210,7 +208,6 @@ void GLES3Swapchain::doCreateSurface(void *windowHandle) {
     NativeLayerHandle(window, NativeLayerOps::SET_WIDTH_AND_HEIGHT, width, height);
     NativeLayerHandle(window, SET_FORMAT, nFmt);
 #endif
-#endif
 
     if (_gpuSwapchain->eglSurface == EGL_NO_SURFACE) {
 #if !USE_XR
@@ -231,6 +228,7 @@ void GLES3Swapchain::doCreateSurface(void *windowHandle) {
     }
 
     context->makeCurrent(_gpuSwapchain, _gpuSwapchain);
+#endif
 }
 
 } // namespace gfx
