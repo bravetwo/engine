@@ -68,12 +68,6 @@ public:
         return std::find(_extensions.begin(), _extensions.end(), extension) != _extensions.end();
     }
 
-#if USE_XR
-    inline const EGLSurface &getCurrentDrawSurface() const {
-        return _eglCurrentDrawSurface;
-    }
-#endif
-
 private:
     bool makeCurrent(EGLSurface drawSurface, EGLSurface readSurface, EGLContext context, bool updateCache = true);
     EGLContext getSharedContext();

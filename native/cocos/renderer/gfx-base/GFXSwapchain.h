@@ -91,9 +91,7 @@ void Swapchain::destroySurface() {
 }
 
 void Swapchain::createSurface(void *windowHandle) {
-#if !USE_XR || XR_OEM_HUAWEIVR
     _windowHandle = windowHandle;
-#endif
     doCreateSurface(windowHandle);
 }
 
