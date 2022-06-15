@@ -299,7 +299,7 @@ void Root::frameMove(float deltaTime, int32_t totalFrames) {
     }
 
 #if USE_XR
-    if (xr::XrEntry::getInstance()->BeginRenderFrame()) {
+    if (xr::XrEntry::getInstance()->frameStart()) {
         for (auto *camera : _allCameraList) {
             if (camera->isHMD()) {
                 camera->getOriginMatrix();
@@ -328,7 +328,6 @@ void Root::frameMove(float deltaTime, int32_t totalFrames) {
         window->extractRenderCameras(_cameraList);
     }
 #else
-    xr::XrEntry::getInstance()->BeforeRenderFrame(xrEye);
     for (int i = 0, size = _windows.size(); i < size; i++) {
         // _windows contain : left eye window, right eye window, other rt window
         if (_windows[i]->isXRWindow() && _windows[i]->getXREyeType() == xrEye) {
@@ -393,7 +392,6 @@ void Root::frameMove(float deltaTime, int32_t totalFrames) {
     // cjh TODO:    if (this._batcher) this._batcher.reset();
 #if USE_XR
             xr::XrEntry::getInstance()->renderLoopEnd(xrEye);
-            xr::XrEntry::getInstance()->AfterRenderFrame(xrEye);
         }
         for (auto *camera : _allCameraList) {
             if (camera->isHMD()) {
@@ -402,7 +400,6 @@ void Root::frameMove(float deltaTime, int32_t totalFrames) {
         }
     }
     xr::XrEntry::getInstance()->frameEnd();
-    xr::XrEntry::getInstance()->EndRenderFrame();
 #endif
 }
 

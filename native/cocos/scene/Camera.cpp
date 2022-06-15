@@ -184,7 +184,7 @@ void Camera::update(bool forceUpdate /*false*/, int xrEye /*-1*/) {
                                         _fovAxis == CameraFOVAxis::VERTICAL, _device->getCapabilities().clipSpaceMinZ, projectionSignY, static_cast<int>(orientation), &_matProj);
             } else {
                 // xr flow
-                const auto &projFloat = xr::XrEntry::getInstance()->ComputeViewProjection(xrEye, _nearClip, _farClip, 1.f);
+                const auto &projFloat = xr::XrEntry::getInstance()->computeViewProjection(xrEye, _nearClip, _farClip, 1.f);
                 int i = 0;
                 for (auto value : projFloat) {
                     _matProj.m[i] = value;

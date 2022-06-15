@@ -17,26 +17,18 @@ extern se::Class * __jsb_cc_xr_XrEntry_class; // NOLINT
 
 bool js_register_cc_xr_XrEntry(se::Object *obj); // NOLINT
 
-SE_DECLARE_FUNC(js_xr_XrEntry_AfterRenderFrame);
-SE_DECLARE_FUNC(js_xr_XrEntry_BeforeRenderFrame);
-SE_DECLARE_FUNC(js_xr_XrEntry_BeginRenderFrame);
-SE_DECLARE_FUNC(js_xr_XrEntry_ComputeViewProjection);
-SE_DECLARE_FUNC(js_xr_XrEntry_EndRenderFrame);
-SE_DECLARE_FUNC(js_xr_XrEntry_GetFov);
-SE_DECLARE_FUNC(js_xr_XrEntry_IsSessionRunning);
-SE_DECLARE_FUNC(js_xr_XrEntry_PollActions);
-SE_DECLARE_FUNC(js_xr_XrEntry_PollEvents);
+SE_DECLARE_FUNC(js_xr_XrEntry_computeViewProjection);
 SE_DECLARE_FUNC(js_xr_XrEntry_createXrInstance);
 SE_DECLARE_FUNC(js_xr_XrEntry_destroyXrInstance);
 SE_DECLARE_FUNC(js_xr_XrEntry_frameEnd);
 SE_DECLARE_FUNC(js_xr_XrEntry_frameStart);
 SE_DECLARE_FUNC(js_xr_XrEntry_getCocosXrSwapchains);
-SE_DECLARE_FUNC(js_xr_XrEntry_getMultisamplesRTT);
 SE_DECLARE_FUNC(js_xr_XrEntry_getSwapchainImageIndex);
 SE_DECLARE_FUNC(js_xr_XrEntry_getXrViewCount);
 SE_DECLARE_FUNC(js_xr_XrEntry_initPlatformData);
 SE_DECLARE_FUNC(js_xr_XrEntry_initXrSwapchains);
-SE_DECLARE_FUNC(js_xr_XrEntry_isCreatedXRinstance);
+SE_DECLARE_FUNC(js_xr_XrEntry_isCreatedXrInstance);
+SE_DECLARE_FUNC(js_xr_XrEntry_isSessionRunning);
 SE_DECLARE_FUNC(js_xr_XrEntry_pauseXrInstance);
 SE_DECLARE_FUNC(js_xr_XrEntry_platformLoopEnd);
 SE_DECLARE_FUNC(js_xr_XrEntry_platformLoopStart);

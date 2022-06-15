@@ -225,7 +225,7 @@ bool CCVKDevice::doInit(const DeviceInfo & /*info*/) {
     }
 
 #if USE_XR
-    VK_CHECK(xr::XrEntry::getInstance()->XrVkCreateDevice(&deviceCreateInfo, vkGetInstanceProcAddr, _gpuContext->physicalDevice, &_gpuDevice->vkDevice));
+    VK_CHECK(xr::XrEntry::getInstance()->xrVkCreateDevice(&deviceCreateInfo, vkGetInstanceProcAddr, _gpuContext->physicalDevice, &_gpuDevice->vkDevice));
 #else
     VK_CHECK(vkCreateDevice(_gpuContext->physicalDevice, &deviceCreateInfo, nullptr, &_gpuDevice->vkDevice));
 #endif

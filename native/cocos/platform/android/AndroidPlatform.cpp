@@ -480,7 +480,7 @@ int AndroidPlatform::init() {
             _loopTimeOut = LOW_FREQUENCY_TIME_INTERVAL;
             _isLowFrequencyLoopEnabled = true;
 #if USE_XR
-            if (!xr::XrEntry::getInstance()->isCreatedXRinstance()) {
+            if (!xr::XrEntry::getInstance()->isCreatedXrInstance()) {
                 _loopTimeOut = -1;
                 _isLowFrequencyLoopEnabled = false;
             }
@@ -548,7 +548,7 @@ int32_t AndroidPlatform::loop() {
 #if !USE_XR
         if (_inputProxy->isAnimating() ) {
 #else
-        if (_inputProxy->isAnimating() && xr::XrEntry::getInstance()->IsSessionRunning()) {
+        if (_inputProxy->isAnimating() && xr::XrEntry::getInstance()->isSessionRunning()) {
 #endif
             runTask();
             flushTasksOnGameThreadAtForegroundJNI();

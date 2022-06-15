@@ -218,8 +218,6 @@ void GLES3Swapchain::doCreateSurface(void *windowHandle) {
         } else {
             EGL_CHECK(_gpuSwapchain->eglSurface = context->getCurrentDrawSurface());
         }
-#else
-        EGL_CHECK(_gpuSwapchain->eglSurface = context->eglDefaultSurface);
 #endif
         if (_gpuSwapchain->eglSurface == EGL_NO_SURFACE) {
             CC_LOG_ERROR("Recreate window surface failed.");

@@ -249,7 +249,7 @@ bool CCVKGPUContext::initialize() {
 
     // Create the Vulkan instance
 #if USE_XR
-    vkInstance = xr::XrEntry::getInstance()->XrVkCreateInstance(instanceInfo, vkGetInstanceProcAddr);
+    vkInstance = xr::XrEntry::getInstance()->xrVkCreateInstance(instanceInfo, vkGetInstanceProcAddr);
     if (VK_NULL_HANDLE == vkInstance) {
         CC_LOG_ERROR("Create XrVulkan instance failed due to missing layers, aborting...");
         return false;
@@ -286,7 +286,7 @@ bool CCVKGPUContext::initialize() {
 
     ccstd::vector<VkPhysicalDevice> physicalDeviceHandles(physicalDeviceCount);
 #if USE_XR
-    physicalDeviceHandles[0] = xr::XrEntry::getInstance()->GetXrVkGraphicsDevice(vkInstance);
+    physicalDeviceHandles[0] = xr::XrEntry::getInstance()->getXrVkGraphicsDevice(vkInstance);
 #else
     VK_CHECK(vkEnumeratePhysicalDevices(vkInstance, &physicalDeviceCount, physicalDeviceHandles.data()));
 #endif
