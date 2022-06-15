@@ -52,9 +52,12 @@ GLES3Swapchain::~GLES3Swapchain() {
 }
 
 void GLES3Swapchain::doInit(const SwapchainInfo &info) {
-    const auto *context = GLES3Device::getInstance()->context();
     _gpuSwapchain = ccnew GLES3GPUSwapchain;
 #if !USE_XR || XR_OEM_HUAWEIVR
+#if XR_OEM_HUAWEIVR
+    if (info.windowHandle != nullptr) {
+#endif
+    const auto *context = GLES3Device::getInstance()->context();
 #if CC_PLATFORM == CC_PLATFORM_LINUX
     auto window = reinterpret_cast<EGLNativeWindowType>(info.windowHandle);
 #else
@@ -97,23 +100,15 @@ void GLES3Swapchain::doInit(const SwapchainInfo &info) {
     #endif
 #endif
 
-#if XR_OEM_HUAWEIVR
-    if (context->getCurrentDrawSurface() == context->eglDefaultSurface) {
-        EGL_CHECK(_gpuSwapchain->eglSurface = eglCreateWindowSurface(context->eglDisplay, context->eglConfig, window, nullptr));
-    } else {
-        EGL_CHECK(_gpuSwapchain->eglSurface = context->getCurrentDrawSurface());
-    }
-#else
     EGL_CHECK(_gpuSwapchain->eglSurface = eglCreateWindowSurface(context->eglDisplay, context->eglConfig, window, nullptr));
-#endif
     if (_gpuSwapchain->eglSurface == EGL_NO_SURFACE) {
         CC_LOG_ERROR("Create window surface failed.");
         return;
     }
-#endif
-
 #if XR_OEM_HUAWEIVR
     GLES3Device::getInstance()->context()->makeCurrent(_gpuSwapchain, _gpuSwapchain);
+    }
+#endif
 #endif
 
     switch (_vsyncMode) {
@@ -178,6 +173,9 @@ void GLES3Swapchain::doDestroySurface() {
 
 void GLES3Swapchain::doCreateSurface(void *windowHandle) {
 #if !USE_XR || XR_OEM_HUAWEIVR
+#if XR_OEM_HUAWEIVR
+    if (windowHandle != nullptr) {
+#endif
     auto *context = GLES3Device::getInstance()->context();
 #if CC_PLATFORM == CC_PLATFORM_LINUX
     auto window = reinterpret_cast<EGLNativeWindowType>(windowHandle);
@@ -210,15 +208,7 @@ void GLES3Swapchain::doCreateSurface(void *windowHandle) {
 #endif
 
     if (_gpuSwapchain->eglSurface == EGL_NO_SURFACE) {
-#if !USE_XR
         EGL_CHECK(_gpuSwapchain->eglSurface = eglCreateWindowSurface(context->eglDisplay, context->eglConfig, window, nullptr));
-#elif XR_OEM_HUAWEIVR
-        if (context->getCurrentDrawSurface() == context->eglDefaultSurface) {
-            EGL_CHECK(_gpuSwapchain->eglSurface = eglCreateWindowSurface(context->eglDisplay, context->eglConfig, window, nullptr));
-        } else {
-            EGL_CHECK(_gpuSwapchain->eglSurface = context->getCurrentDrawSurface());
-        }
-#endif
         if (_gpuSwapchain->eglSurface == EGL_NO_SURFACE) {
             CC_LOG_ERROR("Recreate window surface failed.");
             return;
@@ -226,6 +216,9 @@ void GLES3Swapchain::doCreateSurface(void *windowHandle) {
     }
 
     context->makeCurrent(_gpuSwapchain, _gpuSwapchain);
+#if XR_OEM_HUAWEIVR
+    }
+#endif
 #endif
 }
 

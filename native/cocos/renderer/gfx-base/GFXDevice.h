@@ -246,6 +246,13 @@ Swapchain *Device::createSwapchainWithXr(const SwapchainInfo &info) {
         Swapchain *res = createSwapchain();
         XrSwapchainInfo swapchainInfo;
         swapchainInfo.copy(info);
+#if XR_OEM_HUAWEIVR
+        if (i > 0) {
+            swapchainInfo.windowHandle = nullptr;
+        }
+#else
+        swapchainInfo.windowHandle = nullptr;
+#endif
         swapchainInfo.width = cocosXrSwapchains[i].width;
         swapchainInfo.height = cocosXrSwapchains[i].height;
         swapchainInfo.xrViewIdx = i;
