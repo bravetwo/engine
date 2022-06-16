@@ -170,7 +170,7 @@ void XRInterface::preGFXDeviceInitialize(gfx::API gfxApi) {
     CC_LOG_INFO("[XR] preGFXDeviceInitialize.api.%d", gfxApi);
     if (gfxApi == gfx::API::GLES3 || gfxApi == gfx::API::VULKAN) {
     #if !XR_OEM_PICO
-        xr::XrEntry::getInstance()->createXrInstance(_graphicsApiName);
+        xr::XrEntry::getInstance()->createXrInstance(_graphicsApiName.c_str());
     #endif
     }
 #endif
