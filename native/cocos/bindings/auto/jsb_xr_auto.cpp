@@ -129,7 +129,7 @@ static bool js_xr_XrEntry_getCocosXrSwapchains(se::State& s) // NOLINT(readabili
     size_t argc = args.size();
     CC_UNUSED bool ok = true;
     if (argc == 0) {
-        std::vector<CocosXrSwapchain>& result = cobj->getCocosXrSwapchains();
+        std::vector<cc::xr::XRSwapchain>& result = cobj->getCocosXrSwapchains();
         ok &= nativevalue_to_se(result, s.rval(), nullptr /*ctx*/);
         SE_PRECONDITION2(ok, false, "js_xr_XrEntry_getCocosXrSwapchains : Error processing arguments");
         SE_HOLD_RETURN_VALUE(result, s.thisObject(), s.rval());

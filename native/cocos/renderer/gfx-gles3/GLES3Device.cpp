@@ -46,10 +46,8 @@
 #include "profiler/Profiler.h"
 #include "states/GLES3GeneralBarrier.h"
 #include "states/GLES3Sampler.h"
-
-#if USE_XR
-#include "Xr.h"
-#endif
+#include "platform/BasePlatform.h"
+#include "platform/java/modules/XRInterface.h"
 
 // when capturing GLES commands (RENDERDOC_HOOK_EGL=1, default value)
 // renderdoc doesn't support this extension during replay
@@ -76,9 +74,8 @@ GLES3Device::~GLES3Device() {
 }
 
 bool GLES3Device::doInit(const DeviceInfo & /*info*/) {
-#if USE_XR && !XR_OEM_PICO
-    xr::XrEntry::getInstance()->createXrInstance(GraphicsApiOpenglES);
-#endif
+    IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
+    if(xr) xr->preGFXDeviceInitialize(_api);
     _gpuContext = ccnew GLES3GPUContext;
     _gpuStateCache = ccnew GLES3GPUStateCache;
     _gpuFramebufferHub = ccnew GLES3GPUFramebufferHub;
@@ -231,13 +228,10 @@ bool GLES3Device::doInit(const DeviceInfo & /*info*/) {
     CC_LOG_INFO("COMPRESSED_FORMATS: %s", compressedFmts.c_str());
     CC_LOG_INFO("FRAMEBUFFER_FETCH: %s", fbfLevelStr.c_str());
 
-#if USE_XR
-    xr::XrEntry::getInstance()->initXrSession(pfnGLES3wLoadProc(),
-                                              GLES3Device::getInstance()->context()->eglDisplay,
-                                              GLES3Device::getInstance()->context()->eglConfig,
-                                              GLES3Device::getInstance()->context()->eglDefaultContext);
-#endif
-
+    if (xr) {
+        xr->initializeGLESData(pfnGLES3wLoadProc(), GLES3Device::getInstance()->context());
+        xr->postGFXDeviceInitialize(_api);
+    }
     return true;
 }
 
@@ -260,27 +254,32 @@ void GLES3Device::acquire(Swapchain *const *swapchains, uint32_t count) {
     if (_onAcquire) _onAcquire->execute();
 
     _swapchains.clear();
-#if USE_XR
-    #if XR_OEM_HUAWEIVR
+    static IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
+    if(xr) {
+#if XR_OEM_HUAWEIVR
+        GLint _xrFramebuffer = 0;
         stateCache()->glTextures[stateCache()->texUint] = 0;
         glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, reinterpret_cast<GLint *>(&_xrFramebuffer));
         stateCache()->glDrawFramebuffer = _xrFramebuffer;
-    #else
-        _xrFramebuffer = xr::XrEntry::getInstance()->getXrFrameBuffer();
-        if (stateCache()->glDrawFramebuffer != _xrFramebuffer) {
-            GL_CHECK(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _xrFramebuffer));
-            stateCache()->glDrawFramebuffer = _xrFramebuffer;
+#else
+        xr::XRSwapchain xrSwapchain = xr->doGFXDeviceAcquire(_api);
+        if (stateCache()->glDrawFramebuffer != xrSwapchain.glDrawFramebuffer) {
+            GL_CHECK(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, xrSwapchain.glDrawFramebuffer));
+            stateCache()->glDrawFramebuffer = xrSwapchain.glDrawFramebuffer;
         }
-    #endif
+
+
 #endif
+        for (uint32_t i = 0; i < count; ++i) {
+#if !XR_OEM_HUAWEIVR
+            xr->attachGLESFramebufferTexture2D();
+#endif
+            static_cast<GLES3Swapchain *>(swapchains[i])->gpuSwapchain()->glFramebuffer = stateCache()->glDrawFramebuffer;
+            _swapchains.push_back(static_cast<GLES3Swapchain *>(swapchains[i])->gpuSwapchain());
+        }
+    }
 
     for (uint32_t i = 0; i < count; ++i) {
-#if USE_XR
-    #if !XR_OEM_HUAWEIVR
-        xr::XrEntry::getInstance()->attachXrFramebufferTexture2D();
-    #endif
-        static_cast<GLES3Swapchain *>(swapchains[i])->gpuSwapchain()->glFramebuffer = _xrFramebuffer;
-#endif
         _swapchains.push_back(static_cast<GLES3Swapchain *>(swapchains[i])->gpuSwapchain());
     }
 }
@@ -292,9 +291,12 @@ void GLES3Device::present() {
     _numInstances = queue->_numInstances;
     _numTriangles = queue->_numTriangles;
 
+    IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
+    bool isGFXDeviceNeedsPresent = xr && xr->isGFXDeviceNeedsPresent(_api);
     for (auto *swapchain : _swapchains) {
-        _gpuContext->present(swapchain);
+        if(isGFXDeviceNeedsPresent) _gpuContext->present(swapchain);
     }
+    if(xr) xr->postGFXDevicePresent(_api);
 
     // Clear queue stats
     queue->_numDrawCalls = 0;

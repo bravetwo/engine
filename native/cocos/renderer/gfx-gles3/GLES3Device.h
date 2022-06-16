@@ -29,9 +29,7 @@
 #include "base/std/any.h"
 #include "gfx-base/GFXDevice.h"
 #include "gfx-gles-common/GLESCommandPool.h"
-#if USE_XR
-#include "gfx-gles-common/gles3w.h"
-#endif
+
 namespace cc {
 namespace gfx {
 
@@ -134,9 +132,6 @@ protected:
     ccstd::vector<ccstd::string> _extensions;
 
     ccstd::array<bool, static_cast<size_t>(Format::COUNT)> _textureExclusive;
-#if USE_XR
-    GLuint _xrFramebuffer{0};
-#endif
 };
 
 } // namespace gfx

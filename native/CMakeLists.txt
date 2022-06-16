@@ -454,6 +454,7 @@ cocos_source_files(
     cocos/platform/interfaces/modules/ISystem.h
     cocos/platform/interfaces/modules/ISystemWindow.h
     cocos/platform/interfaces/modules/IVibrator.h
+    cocos/platform/interfaces/modules/IXRInterface.h
 )
 
 cocos_source_files(
@@ -541,6 +542,8 @@ elseif(ANDROID OR OHOS)
         cocos/platform/java/modules/CommonSystem.h
         cocos/platform/java/modules/SystemWindow.cpp
         cocos/platform/java/modules/SystemWindow.h
+        cocos/platform/java/modules/XRInterface.cpp
+        cocos/platform/java/modules/XRInterface.h
     )
 endif()
 if (USE_SERVER_MODE)

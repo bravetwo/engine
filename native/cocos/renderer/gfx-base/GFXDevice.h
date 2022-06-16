@@ -45,9 +45,6 @@
 #include "states/GFXGeneralBarrier.h"
 #include "states/GFXSampler.h"
 #include "states/GFXTextureBarrier.h"
-#if USE_XR
-#include "Xr.h"
-#endif
 
 namespace cc {
 namespace gfx {
@@ -76,7 +73,7 @@ public:
     inline QueryPool *createQueryPool(const QueryPoolInfo &info);
     inline Swapchain *createSwapchain(const SwapchainInfo &info);
 #if USE_XR
-    inline Swapchain *createSwapchainWithXr(const SwapchainInfo &info);
+    Swapchain *createSwapchainWithXr(const SwapchainInfo &info);
 #endif
     inline const ccstd::vector<Swapchain *> &getSwapchains() { return _swapchains; }
     inline Buffer *createBuffer(const BufferInfo &info);
@@ -238,37 +235,6 @@ Swapchain *Device::createSwapchain(const SwapchainInfo &info) {
 struct XrSwapchainInfo : public SwapchainInfo {
     int xrViewIdx = -1;
 };
-
-Swapchain *Device::createSwapchainWithXr(const SwapchainInfo &info) {
-    xr::XrEntry::getInstance()->initXrSwapchains();
-    auto &cocosXrSwapchains = xr::XrEntry::getInstance()->getCocosXrSwapchains();
-    for (int i = 0; i < cocosXrSwapchains.size(); i++) {
-        Swapchain *res = createSwapchain();
-        XrSwapchainInfo swapchainInfo;
-        swapchainInfo.copy(info);
-#if XR_OEM_HUAWEIVR
-        if (i > 0) {
-            swapchainInfo.windowHandle = nullptr;
-        }
-#else
-        swapchainInfo.windowHandle = nullptr;
-#endif
-        swapchainInfo.width = cocosXrSwapchains[i].width;
-        swapchainInfo.height = cocosXrSwapchains[i].height;
-        swapchainInfo.xrViewIdx = i;
-        res->initialize(swapchainInfo);
-        _swapchains.push_back(res);
-    }
-#if (CC_PLATFORM == CC_PLATFORM_ANDROID && (!USE_XR || XR_OEM_HUAWEIVR)) || CC_PLATFORM == CC_PLATFORM_OHOS
-    if (_swapchains.at(0)->getWindowHandle()) {
-        setRendererAvailable(true);
-    }
-#else
-    setRendererAvailable(true);
-#endif
-
-    return _swapchains.at(0);
-}
 #endif
 
 Buffer *Device::createBuffer(const BufferInfo &info) {

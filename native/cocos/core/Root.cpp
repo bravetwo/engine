@@ -39,9 +39,8 @@
 #include "scene/DirectionalLight.h"
 #include "scene/DrawBatch2D.h"
 #include "scene/SpotLight.h"
-#if USE_XR
-#include "Xr.h"
-#endif
+#include "platform/BasePlatform.h"
+#include "platform/java/modules/XRInterface.h"
 
 namespace cc {
 
@@ -74,37 +73,57 @@ void Root::initialize(gfx::Swapchain *swapchain) {
     _swapchain = swapchain;
     _allCameraList.clear();
 
-#if USE_XR
-    // Xr: _mainWindow, _curWindow, _swapchain invalid.
-    // Xr: splash screen use _mainWindow->_swapchain width, height, surfaceTransform. The left and right eyes must be the same.
-    auto swapchains = gfx::Device::getInstance()->getSwapchains();
-    for (int i = 0, size = swapchains.size(); i < size; i++) {
-        const auto &swapchain = swapchains[i];
-#endif
-    gfx::RenderPassInfo renderPassInfo;
+    IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
+    if(xr) {
+       // Xr: _mainWindow, _curWindow, _swapchain invalid.
+       // Xr: splash screen use _mainWindow->_swapchain width, height, surfaceTransform. The left and right eyes must be the same.
+       auto swapchains = gfx::Device::getInstance()->getSwapchains();
+       for (int i = 0, size = swapchains.size(); i < size; i++) {
+           const auto &swapchain = swapchains[i];
+           gfx::RenderPassInfo renderPassInfo;
 
-    gfx::ColorAttachment colorAttachment;
-    colorAttachment.format = swapchain->getColorTexture()->getFormat();
-    renderPassInfo.colorAttachments.emplace_back(colorAttachment);
+           gfx::ColorAttachment colorAttachment;
+           colorAttachment.format = swapchain->getColorTexture()->getFormat();
+           renderPassInfo.colorAttachments.emplace_back(colorAttachment);
 
-    auto &depthStencilAttachment = renderPassInfo.depthStencilAttachment;
-    depthStencilAttachment.format = swapchain->getDepthStencilTexture()->getFormat();
-    depthStencilAttachment.depthStoreOp = gfx::StoreOp::DISCARD;
-    depthStencilAttachment.stencilStoreOp = gfx::StoreOp::DISCARD;
+           auto &depthStencilAttachment = renderPassInfo.depthStencilAttachment;
+           depthStencilAttachment.format = swapchain->getDepthStencilTexture()->getFormat();
+           depthStencilAttachment.depthStoreOp = gfx::StoreOp::DISCARD;
+           depthStencilAttachment.stencilStoreOp = gfx::StoreOp::DISCARD;
 
-    scene::IRenderWindowInfo info;
-    info.title = ccstd::string{"rootMainWindow"};
-    info.width = swapchain->getWidth();
-    info.height = swapchain->getHeight();
-    info.renderPassInfo = renderPassInfo;
-    info.swapchain = swapchain;
-    _mainWindow = createWindow(info);
+           scene::IRenderWindowInfo info;
+           info.title = ccstd::string{"rootMainWindow"};
+           info.width = swapchain->getWidth();
+           info.height = swapchain->getHeight();
+           info.renderPassInfo = renderPassInfo;
+           info.swapchain = swapchain;
+           _mainWindow = createWindow(info);
 
-    _curWindow = _mainWindow;
-#if USE_XR
-    _mainWindow->setXREyeType(i);
-    }
-#endif
+           _curWindow = _mainWindow;
+           xr->bindXREyeWithRenderWindow(_mainWindow, (xr::XREye) i);
+       }
+   } else {
+       gfx::RenderPassInfo renderPassInfo;
+
+       gfx::ColorAttachment colorAttachment;
+       colorAttachment.format = swapchain->getColorTexture()->getFormat();
+       renderPassInfo.colorAttachments.emplace_back(colorAttachment);
+
+       auto &depthStencilAttachment = renderPassInfo.depthStencilAttachment;
+       depthStencilAttachment.format = swapchain->getDepthStencilTexture()->getFormat();
+       depthStencilAttachment.depthStoreOp = gfx::StoreOp::DISCARD;
+       depthStencilAttachment.stencilStoreOp = gfx::StoreOp::DISCARD;
+
+       scene::IRenderWindowInfo info;
+       info.title = ccstd::string{"rootMainWindow"};
+       info.width = swapchain->getWidth();
+       info.height = swapchain->getHeight();
+       info.renderPassInfo = renderPassInfo;
+       info.swapchain = swapchain;
+       _mainWindow = createWindow(info);
+
+       _curWindow = _mainWindow;
+   }
     // TODO(minggo):
     // return Promise.resolve(builtinResMgr.initBuiltinRes(this._device));
 }
@@ -132,11 +151,12 @@ void Root::destroy() {
 void Root::resize(uint32_t width, uint32_t height) {
     for (const auto &window : _windows) {
         if (window->getSwapchain()) {
-#if USE_XR
-            // xr, window's width and height should not change
-            width = window->getWidth();
-            height = window->getHeight();
-#endif
+            IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
+            if(xr) {
+                // xr, window's width and height should not change
+                width = window->getWidth();
+                height = window->getHeight();
+            }
             window->resize(width, height);
         }
     }
@@ -298,109 +318,145 @@ void Root::frameMove(float deltaTime, int32_t totalFrames) {
         _fpsTime = 0.0;
     }
 
-#if USE_XR
-    if (xr::XrEntry::getInstance()->frameStart()) {
-        for (auto *camera : _allCameraList) {
-            if (camera->isHMD()) {
-                camera->getOriginMatrix();
+    static IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
+    if (xr) {
+        if (xr->beginRenderFrame()) {
+            for (auto *camera : _allCameraList) {
+                if (camera->isHMD()) {
+                    camera->getOriginMatrix();
+                }
             }
+            auto swapchains = gfx::Device::getInstance()->getSwapchains();
+            bool isSceneUpdated = false;
+            for (int xrEye = 0; xrEye < 2; xrEye++) {
+                xr->beginRenderEyeFrame(xrEye);
+
+                for (const auto &scene : _scenes) {
+                    scene->removeBatches();
+                }
+
+                _eventProcessor->emit(EventTypesToJS::ROOT_BATCH2D_UPDATE, this); // cjh added for sync logic in ts.
+
+                // TODO(minggo):
+                //    if (_batcher) {
+                //        _batcher.update();
+                //    }
+
+                //
+                _cameraList.clear();
+
+                for (int i = 0, size = _windows.size(); i < size; i++) {
+                    // _windows contain : left eye window, right eye window, other rt window
+                    xr::XREye wndXREye = xr->getXREyeByRenderWindow( _windows[i]);
+                    if (wndXREye == (xr::XREye) xrEye) {
+                        _windows[i]->extractRenderCameras(_cameraList, xrEye);
+                    } else {
+                        _windows[i]->extractRenderCameras(_cameraList, -1);
+                    }
+                }
+
+                if (_pipelineRuntime != nullptr && !_cameraList.empty()) {
+                    _swapchains.clear();
+                    _swapchains.emplace_back(swapchains[xrEye]);
+                    _device->acquire(_swapchains);
+                    // NOTE: c++ doesn't have a Director, so totalFrames need to be set from JS
+                    uint32_t stamp = totalFrames;
+
+                    _eventProcessor->emit(EventTypesToJS::ROOT_BATCH2D_UPLOAD_BUFFERS, this);
+                    //                if (_batcher != nullptr) {
+                    //                    _batcher->uploadBuffers();
+                    //                }
+                    bool sceneNeedUpdate = xrEye == 0 || (xrEye == 1 && !isSceneUpdated);
+                    if (sceneNeedUpdate) {
+                        for (const auto &scene : _scenes) {
+                            scene->update(stamp);
+                        }
+                        isSceneUpdated = true;
+                        // only one eye enable culling (without other cameras)
+                        if (_cameraList.size() == 1 && _cameraList[0]->isHMD()) {
+                            _cameraList[0]->setCullingEnable(true);
+                            _pipelineRuntime->resetRenderQueue(true);
+                        }
+                    } else {
+                        // another eye disable culling (without other cameras)
+                        if (_cameraList.size() == 1 && _cameraList[0]->isHMD()) {
+                            _cameraList[0]->setCullingEnable(false);
+                            _pipelineRuntime->resetRenderQueue(false);
+                        }
+                    }
+                    CC_PROFILER_UPDATE;
+
+                    _eventProcessor->emit(EventTypesToJS::DIRECTOR_BEFORE_COMMIT, this);
+
+                    std::stable_sort(_cameraList.begin(), _cameraList.end(), [](const auto *a, const auto *b) {
+                        return a->getPriority() < b->getPriority();
+                    });
+                    _pipelineRuntime->render(_cameraList);
+                    _device->present();
+                }
+                _eventProcessor->emit(EventTypesToJS::ROOT_BATCH2D_RESET, this);
+                // cjh TODO:    if (this._batcher) this._batcher.reset();
+
+                xr->endRenderEyeFrame(xrEye);
+
+                for (auto *camera : _allCameraList) {
+                    if (camera->isHMD()) {
+                        camera->dependUpdateData();
+                    }
+                }
+            }
+            xr->endRenderFrame();
         }
-        auto swapchains = gfx::Device::getInstance()->getSwapchains();
-        bool isSceneUpdated = false;
-        for (int xrEye = 0; xrEye < 2; xrEye++) {
-            xr::XrEntry::getInstance()->renderLoopStart(xrEye);
-#endif
-    for (const auto &scene : _scenes) {
-        scene->removeBatches();
-    }
-
-    _eventProcessor->emit(EventTypesToJS::ROOT_BATCH2D_UPDATE, this); // cjh added for sync logic in ts.
-
-    // TODO(minggo):
-    //    if (_batcher) {
-    //        _batcher.update();
-    //    }
-
-    //
-    _cameraList.clear();
-#if !USE_XR
-    for (const auto &window : _windows) {
-        window->extractRenderCameras(_cameraList);
-    }
-#else
-    for (int i = 0, size = _windows.size(); i < size; i++) {
-        // _windows contain : left eye window, right eye window, other rt window
-        if (_windows[i]->isXRWindow() && _windows[i]->getXREyeType() == xrEye) {
-            _windows[i]->extractRenderCameras(_cameraList, xrEye);
-        } else {
-            _windows[i]->extractRenderCameras(_cameraList, -1);
+    } else {
+        for (const auto &scene : _scenes) {
+            scene->removeBatches();
         }
-    }
-#endif
 
-    if (_pipelineRuntime != nullptr && !_cameraList.empty()) {
-        _swapchains.clear();
-#if !USE_XR
-        _swapchains.emplace_back(_swapchain);
-#else
-        _swapchains.emplace_back(swapchains[xrEye]);
-#endif
-        _device->acquire(_swapchains);
-        // NOTE: c++ doesn't have a Director, so totalFrames need to be set from JS
-        uint32_t stamp = totalFrames;
+        _eventProcessor->emit(EventTypesToJS::ROOT_BATCH2D_UPDATE, this); // cjh added for sync logic in ts.
 
-        _eventProcessor->emit(EventTypesToJS::ROOT_BATCH2D_UPLOAD_BUFFERS, this);
-        //                if (_batcher != nullptr) {
-        //                    _batcher->uploadBuffers();
-        //                }
+        // TODO(minggo):
+        //    if (_batcher) {
+        //        _batcher.update();
+        //    }
 
-#if USE_XR
-        bool sceneNeedUpdate = xrEye == 0 || (xrEye == 1 && !isSceneUpdated);
-        if (sceneNeedUpdate) {
-#endif
+        //
+        _cameraList.clear();
+        for (const auto &window : _windows) {
+            window->extractRenderCameras(_cameraList);
+        }
+
+        if (_pipelineRuntime != nullptr && !_cameraList.empty()) {
+            _swapchains.clear();
+            _swapchains.emplace_back(_swapchain);
+            _device->acquire(_swapchains);
+            // NOTE: c++ doesn't have a Director, so totalFrames need to be set from JS
+            uint32_t stamp = totalFrames;
+
+            _eventProcessor->emit(EventTypesToJS::ROOT_BATCH2D_UPLOAD_BUFFERS, this);
+            //                if (_batcher != nullptr) {
+            //                    _batcher->uploadBuffers();
+            //                }
+
             for (const auto &scene : _scenes) {
                 scene->update(stamp);
             }
-#if USE_XR
-            isSceneUpdated = true;
-            // only one eye enable culling (without other cameras)
-            if (_cameraList.size() == 1 && _cameraList[0]->isHMD()) {
-                _cameraList[0]->setCullingEnable(true);
-                _pipelineRuntime->resetRenderQueue(true);
-            }
-        } else {
-            // another eye disable culling (without other cameras)
-            if (_cameraList.size() == 1 && _cameraList[0]->isHMD()) {
-                _cameraList[0]->setCullingEnable(false);
-                _pipelineRuntime->resetRenderQueue(false);
-            }
-        }
+
+            CC_PROFILER_UPDATE;
+
+            _eventProcessor->emit(EventTypesToJS::DIRECTOR_BEFORE_COMMIT, this);
+
+            std::stable_sort(_cameraList.begin(), _cameraList.end(), [](const auto *a, const auto *b) {
+                return a->getPriority() < b->getPriority();
+            });
+#if !defined(CC_SERVER_MODE)
+            _pipelineRuntime->render(_cameraList);
 #endif
-
-        CC_PROFILER_UPDATE;
-
-        _eventProcessor->emit(EventTypesToJS::DIRECTOR_BEFORE_COMMIT, this);
-
-        std::stable_sort(_cameraList.begin(), _cameraList.end(), [](const auto *a, const auto *b) {
-            return a->getPriority() < b->getPriority();
-        });
-        _pipelineRuntime->render(_cameraList);
-        _device->present();
-    }
-
-    _eventProcessor->emit(EventTypesToJS::ROOT_BATCH2D_RESET, this);
-    // cjh TODO:    if (this._batcher) this._batcher.reset();
-#if USE_XR
-            xr::XrEntry::getInstance()->renderLoopEnd(xrEye);
+            _device->present();
         }
-        for (auto *camera : _allCameraList) {
-            if (camera->isHMD()) {
-                camera->dependUpdateData();
-            }
-        }
+
+        _eventProcessor->emit(EventTypesToJS::ROOT_BATCH2D_RESET, this);
+        // cjh TODO:    if (this._batcher) this._batcher.reset();
     }
-    xr::XrEntry::getInstance()->frameEnd();
-#endif
 }
 
 scene::RenderWindow *Root::createWindow(scene::IRenderWindowInfo &info) {

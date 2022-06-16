@@ -31,9 +31,8 @@
 #include "renderer/gfx-base/GFXDevice.h"
 #include "renderer/pipeline/Define.h"
 #include "renderer/pipeline/GeometryRenderer.h"
-#if USE_XR
-#include "Xr.h"
-#endif
+#include "platform/BasePlatform.h"
+#include "platform/java/modules/XRInterface.h"
 
 namespace cc {
 namespace scene {
@@ -178,23 +177,19 @@ void Camera::update(bool forceUpdate /*false*/, int xrEye /*-1*/) {
         const float projectionSignY = _device->getCapabilities().clipSpaceSignY;
         // Only for rendertexture processing
         if (_proj == CameraProjection::PERSPECTIVE) {
-#if USE_XR
             if (xrEye < 0) {
                 Mat4::createPerspective(_fov, _aspect, _nearClip, _farClip,
                                         _fovAxis == CameraFOVAxis::VERTICAL, _device->getCapabilities().clipSpaceMinZ, projectionSignY, static_cast<int>(orientation), &_matProj);
             } else {
                 // xr flow
-                const auto &projFloat = xr::XrEntry::getInstance()->computeViewProjection(xrEye, _nearClip, _farClip, 1.f);
+                static IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
+                const auto &projFloat = xr->getXRViewProjectionData(xrEye, _nearClip, _farClip);
                 int i = 0;
                 for (auto value : projFloat) {
                     _matProj.m[i] = value;
                     i++;
                 }
             }
-#else
-            Mat4::createPerspective(_fov, _aspect, _nearClip, _farClip,
-                                    _fovAxis == CameraFOVAxis::VERTICAL, _device->getCapabilities().clipSpaceMinZ, projectionSignY, static_cast<int>(orientation), &_matProj);
-#endif
         } else {
             const float x = _orthoHeight * _aspect;
             const float y = _orthoHeight;
@@ -219,34 +214,36 @@ void Camera::changeTargetWindow(RenderWindow *window) {
     if (_window) {
         _window->detachCamera(this);
     }
-#if !USE_XR
-    RenderWindow *win = window ? window : Root::getInstance()->getMainWindow();
-    attachCamera(win);
-#else
-    if (_cameraType == CameraType::MAIN) {
-        auto windows = Root::getInstance()->getWindows();
-        if (window) {
-            // detach camera from other window
-            for (const auto &win : windows) {
-                win->detachCamera(this);
+
+    static IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
+    if (xr) {
+        if (_cameraType == CameraType::MAIN) {
+            auto windows = Root::getInstance()->getWindows();
+            if (window) {
+                // detach camera from other window
+                for (const auto &win : windows) {
+                    win->detachCamera(this);
+                }
+                // add camera to rt window
+                attachCamera(window);
+            } else {
+                // add ui camera(without rt) or hmd camera or other camera(without rt) to xr window
+                for (int i = 0, size = windows.size(); i < size; i++) {
+                    // 0,1 is left+right eye xr window
+                    if (i <= 1) attachCamera(windows[i]);
+                }
             }
-            // add camera to rt window
-            attachCamera(window);
         } else {
-            // add ui camera(without rt) or hmd camera or other camera(without rt) to xr window
-            for (int i = 0, size = windows.size(); i < size; i++) {
-                // 0,1 is left+right eye xr window
-                if (i <= 1) attachCamera(windows[i]);
+            // hmd/left/right camera to xr window
+            if (_cameraType < Root::getInstance()->getWindows().size()) {
+                const auto &win = Root::getInstance()->getWindows().at(_cameraType);
+                attachCamera(win);
             }
         }
     } else {
-        // hmd/left/right camera to xr window
-        if (_cameraType < Root::getInstance()->getWindows().size()) {
-            const auto &win = Root::getInstance()->getWindows().at(_cameraType);
-            attachCamera(win);
-        }
+        RenderWindow *win = window ? window : Root::getInstance()->getMainWindow();
+        attachCamera(win);
     }
-#endif
 }
 
 void Camera::attachCamera(RenderWindow *win) {

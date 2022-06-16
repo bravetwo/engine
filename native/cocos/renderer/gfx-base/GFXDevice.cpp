@@ -26,6 +26,8 @@
 #include "GFXDevice.h"
 #include "GFXObject.h"
 #include "base/memory/Memory.h"
+#include "platform/BasePlatform.h"
+#include "platform/java/modules/XRInterface.h"
 
 namespace cc {
 namespace gfx {
@@ -135,6 +137,39 @@ TextureBarrier *Device::getTextureBarrier(const TextureBarrierInfo &info) {
     }
     return _textureBarriers[info];
 }
+
+#if USE_XR
+Swapchain *Device::createSwapchainWithXr(const SwapchainInfo &info) {
+    IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
+    xr->createXRSwapchains();
+    auto &cocosXrSwapchains = xr->getXRSwapchains();
+    for (int i = 0; i < cocosXrSwapchains.size(); i++) {
+        Swapchain *res = createSwapchain();
+        XrSwapchainInfo swapchainInfo;
+        swapchainInfo.copy(info);
+#if XR_OEM_HUAWEIVR
+        if (i > 0) {
+            swapchainInfo.windowHandle = nullptr;
+        }
+#else
+        swapchainInfo.windowHandle = nullptr;
+#endif
+        swapchainInfo.width = cocosXrSwapchains[i].width;
+        swapchainInfo.height = cocosXrSwapchains[i].height;
+        swapchainInfo.xrViewIdx = i;
+        res->initialize(swapchainInfo);
+        _swapchains.push_back(res);
+    }
+#if (CC_PLATFORM == CC_PLATFORM_ANDROID && (!USE_XR || XR_OEM_HUAWEIVR)) || CC_PLATFORM == CC_PLATFORM_OHOS
+    if (_swapchains.at(0)->getWindowHandle()) {
+        setRendererAvailable(true);
+    }
+#else
+    setRendererAvailable(true);
+#endif
+    return _swapchains.at(0);
+}
+#endif
 
 } // namespace gfx
 } // namespace cc

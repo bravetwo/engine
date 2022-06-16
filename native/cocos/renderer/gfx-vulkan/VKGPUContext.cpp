@@ -24,10 +24,8 @@
 ****************************************************************************/
 
 #include "VKGPUObjects.h"
-
-#if USE_XR
-#include "Xr.h"
-#endif
+#include "platform/BasePlatform.h"
+#include "platform/java/modules/XRInterface.h"
 
 namespace cc {
 namespace gfx {
@@ -120,10 +118,8 @@ bool CCVKGPUContext::initialize() {
         }
     }
 
-#if USE_XR && XR_OEM_PICO
-    apiVersion = xr::XrEntry::getInstance()->getXrVkApiVersion(apiVersion);
-#endif
-
+    IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
+    if(xr) apiVersion = xr->getXRVkApiVersion(apiVersion);
     minorVersion = VK_VERSION_MINOR(apiVersion);
     if (minorVersion < 1) {
         requestedExtensions.push_back(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
@@ -248,21 +244,16 @@ bool CCVKGPUContext::initialize() {
 #endif
 
     // Create the Vulkan instance
-#if USE_XR
-    vkInstance = xr::XrEntry::getInstance()->xrVkCreateInstance(instanceInfo, vkGetInstanceProcAddr);
-    if (VK_NULL_HANDLE == vkInstance) {
-        CC_LOG_ERROR("Create XrVulkan instance failed due to missing layers, aborting...");
-        return false;
+    if(xr) {
+        xr->initializeVulkanData(vkGetInstanceProcAddr);
+        vkInstance = xr->createXRVulkanInstance(instanceInfo);
+    } else {
+        VkResult res = vkCreateInstance(&instanceInfo, nullptr, &vkInstance);
+        if (res == VK_ERROR_LAYER_NOT_PRESENT) {
+            CC_LOG_ERROR("Create Vulkan instance failed due to missing layers, aborting...");
+            return false;
+        }
     }
-    VkResult res;
-#else
-    VkResult res = vkCreateInstance(&instanceInfo, nullptr, &vkInstance);
-    if (res == VK_ERROR_LAYER_NOT_PRESENT) {
-        CC_LOG_ERROR("Create Vulkan instance failed due to missing layers, aborting...");
-        return false;
-    }
-#endif
-
     volkLoadInstanceOnly(vkInstance);
 
 #if CC_DEBUG > 0 && !FORCE_DISABLE_VALIDATION || FORCE_ENABLE_VALIDATION
@@ -278,18 +269,18 @@ bool CCVKGPUContext::initialize() {
 
     // Querying valid physical devices on the machine
     uint32_t physicalDeviceCount{0};
-    res = vkEnumeratePhysicalDevices(vkInstance, &physicalDeviceCount, nullptr);
+    VkResult res = vkEnumeratePhysicalDevices(vkInstance, &physicalDeviceCount, nullptr);
 
     if (res || physicalDeviceCount < 1) {
         return false;
     }
 
     ccstd::vector<VkPhysicalDevice> physicalDeviceHandles(physicalDeviceCount);
-#if USE_XR
-    physicalDeviceHandles[0] = xr::XrEntry::getInstance()->getXrVkGraphicsDevice(vkInstance);
-#else
-    VK_CHECK(vkEnumeratePhysicalDevices(vkInstance, &physicalDeviceCount, physicalDeviceHandles.data()));
-#endif
+    if(xr) {
+        physicalDeviceHandles[0] = xr->getXRVulkanGraphicsDevice();
+    } else {
+        VK_CHECK(vkEnumeratePhysicalDevices(vkInstance, &physicalDeviceCount, physicalDeviceHandles.data()));
+    }
 
     ccstd::vector<VkPhysicalDeviceProperties> physicalDevicePropertiesList(physicalDeviceCount);
 

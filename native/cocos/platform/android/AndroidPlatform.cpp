@@ -42,11 +42,8 @@
 #include "platform/java/modules/Network.h"
 #include "platform/java/modules/SystemWindow.h"
 #include "platform/java/modules/Vibrator.h"
-#if USE_XR
-#include "Xr.h"
-#endif
-
-#include "bindings/event/EventDispatcher.h"
+#include "platform/java/modules/XRInterface.h"
+#include "application/ApplicationManager.h"
 
 #include "paddleboat.h"
 
@@ -288,9 +285,10 @@ public:
                         CC_LOG_ERROR("AndroidPlatform: Launch game failed!");
                     }
                 } else {
-#if XR_OEM_HUAWEIVR
-                    cc::xr::XrEntry::getInstance()->resumeXrInstance();
-#endif
+                    IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
+                    if (xr && xr->getVendor() == xr::XRVendor::HUAWEIVR) {
+                        xr->onRenderResume();
+                    }
                     cc::CustomEvent event;
                     event.name = EVENT_RECREATE_WINDOW;
                     event.args->ptrVal = reinterpret_cast<void *>(_androidPlatform->getWindowHandler());
@@ -302,9 +300,10 @@ public:
                 _hasWindow = false;
                 // The window is going away -- kill the surface
                 CC_LOG_DEBUG("AndroidPlatform: APP_CMD_TERM_WINDOW");
-#if XR_OEM_HUAWEIVR
-                cc::xr::XrEntry::getInstance()->pauseXrInstance();
-#endif
+                IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
+                if (xr && xr->getVendor() == xr::XRVendor::HUAWEIVR) {
+                    xr->onRenderPause();
+                }
                 cc::CustomEvent event;
                 event.name = EVENT_DESTROY_WINDOW;
                 event.args->ptrVal = reinterpret_cast<void *>(_androidPlatform->getWindowHandler());
@@ -319,9 +318,21 @@ public:
                 break;
             case APP_CMD_PAUSE:
                 CC_LOG_INFO("AndroidPlatform: APP_CMD_PAUSE");
+                {
+                    IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
+                    if (xr) {
+                        xr->onRenderPause();
+                    }
+                }
                 break;
             case APP_CMD_RESUME: {
                 CC_LOG_INFO("AndroidPlatform: APP_CMD_RESUME");
+                {
+                    IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
+                    if (xr) {
+                        xr->onRenderResume();
+                    }
+                }
                 break;
             }
             case APP_CMD_DESTROY: {
@@ -455,18 +466,13 @@ AndroidPlatform::~AndroidPlatform() = default;
 
 int AndroidPlatform::init() {
 #if USE_XR
-    // Prevent OEM from not calling AttachCurrentThread before using env.
-    JniHelper::getEnv();
-    xr::XrEntry::getInstance()->initPlatformData(JniHelper::getJavaVM(), getActivity());
-    xr::XrEntry::getInstance()->setEventsCallback(&EventDispatcher::dispatchHandleEvent);
-#if XR_OEM_PICO
-    std::string graphicsApiName = GraphicsApiOpenglES;
-#if CC_USE_VULKAN
-    graphicsApiName = GraphicsApiVulkan_1_0;
+    registerInterface(std::make_shared<XRInterface>());
 #endif
-    xr::XrEntry::getInstance()->createXrInstance(graphicsApiName.c_str());
-#endif
-#endif
+    static IXRInterface *xr = getInterface<IXRInterface>();
+    if (xr) {
+        JniHelper::getEnv();
+        xr->initialize(JniHelper::getJavaVM(), getActivity(), &EventDispatcher::dispatchHandleEvent);
+    }
     cc::FileUtilsAndroid::setassetmanager(_app->activity->assetManager);
     _inputProxy = ccnew GameInputProxy(this);
     _inputProxy->registerAppEventCallback([this](int32_t cmd) {
@@ -479,12 +485,12 @@ int AndroidPlatform::init() {
             _lowFrequencyTimer.reset();
             _loopTimeOut = LOW_FREQUENCY_TIME_INTERVAL;
             _isLowFrequencyLoopEnabled = true;
-#if USE_XR
-            if (!xr::XrEntry::getInstance()->isCreatedXrInstance()) {
+            IXRInterface *xr = getInterface<IXRInterface>();
+            bool isXRInstanceCreated = xr && xr->getConfigParameterI(xr::XRConfigKey::INSTANCE_CREATED);
+            if (!isXRInstanceCreated) {
                 _loopTimeOut = -1;
                 _isLowFrequencyLoopEnabled = false;
             }
-#endif
         }
     });
     _app->userData = _inputProxy;
@@ -502,6 +508,10 @@ int AndroidPlatform::init() {
 }
 
 void AndroidPlatform::onDestory() {
+    IXRInterface *xr = getInterface<IXRInterface>();
+    if (xr) {
+        xr->onRenderPause();
+    }
     UniversalPlatform::onDestory();
     unregisterAllInterfaces();
     CC_SAFE_DELETE(_inputProxy)
@@ -521,7 +531,7 @@ uintptr_t AndroidPlatform::getWindowHandler() const {
 }
 
 int32_t AndroidPlatform::loop() {
-
+    IXRInterface *xr = getInterface<IXRInterface>();
     while (true) {
         int events;
         struct android_poll_source *source;
@@ -539,17 +549,10 @@ int32_t AndroidPlatform::loop() {
                 return 0;
             }
         }
-#if USE_XR
-        if (!xr::XrEntry::getInstance()->platformLoopStart()) {
-            continue;
-        }
-#endif
+
+        if(xr && !xr->platformLoopStart()) continue;
         _inputProxy->handleInput();
-#if !USE_XR
-        if (_inputProxy->isAnimating() ) {
-#else
-        if (_inputProxy->isAnimating() && xr::XrEntry::getInstance()->isSessionRunning()) {
-#endif
+        if (_inputProxy->isAnimating() && (xr ? xr->getConfigParameterI(xr::XRConfigKey::SESSION_RUNNING) : true)) {
             runTask();
             flushTasksOnGameThreadAtForegroundJNI();
         }
@@ -564,9 +567,7 @@ int32_t AndroidPlatform::loop() {
             }
         }
 #endif
-#if USE_XR
-        xr::XrEntry::getInstance()->platformLoopEnd();
-#endif
+        if(xr) xr->platformLoopEnd();
     }
 }
 

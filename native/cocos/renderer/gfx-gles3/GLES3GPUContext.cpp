@@ -26,6 +26,8 @@
 #include <thread>
 #include "GLES3GPUObjects.h"
 #include "base/StringUtil.h"
+#include "platform/BasePlatform.h"
+#include "platform/java/modules/XRInterface.h"
 
 #if CC_SWAPPY_ENABLED
     #include "swappy/swappyGL.h"
@@ -311,7 +313,6 @@ void GLES3GPUContext::present(const GLES3GPUSwapchain *swapchain) {
         }
     }
 #endif
-#if !USE_XR
     if (_eglCurrentInterval != swapchain->eglSwapInterval) {
         if (!eglSwapInterval(eglDisplay, swapchain->eglSwapInterval)) {
             CC_LOG_ERROR("eglSwapInterval() - FAILED.");
@@ -320,7 +321,6 @@ void GLES3GPUContext::present(const GLES3GPUSwapchain *swapchain) {
         _eglCurrentInterval = swapchain->eglSwapInterval;
     }
     EGL_CHECK(eglSwapBuffers(eglDisplay, swapchain->eglSurface));
-#endif
 }
 
 EGLContext GLES3GPUContext::getSharedContext() {
@@ -340,9 +340,10 @@ EGLContext GLES3GPUContext::getSharedContext() {
 }
 
 bool GLES3GPUContext::makeCurrent(EGLSurface drawSurface, EGLSurface readSurface, EGLContext context, bool updateCache) {
-#if USE_XR
-    if (_eglCurrentDrawSurface == drawSurface && _eglCurrentReadSurface == readSurface) return true;
-#endif
+    static IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
+    if (xr) {
+        if (_eglCurrentDrawSurface == drawSurface && _eglCurrentReadSurface == readSurface) return true;
+    }
     bool succeeded;
     EGL_CHECK(succeeded = eglMakeCurrent(eglDisplay, drawSurface, readSurface, context));
     if (succeeded && updateCache) {
