@@ -160,7 +160,7 @@ export class ARFeaturePlaneDetection extends ARFeature {
     update() {
         // check start
         if(!this._enable || !this.isReady()) return;
-        ARModuleHelper.getInstance().updatePlanesInfo();
+        //ARModuleHelper.getInstance().updatePlanesInfo();
         this.processChanges();
     }
 

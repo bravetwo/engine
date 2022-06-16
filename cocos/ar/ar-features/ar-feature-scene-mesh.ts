@@ -41,7 +41,7 @@ import { NULL } from '@cocos/physx';
 @ccclass('cc.ARFeatureSceneMesh')
 export class ARFeatureSceneMesh extends ARFeature {
     private static readonly MESH_INFO_SIZE = 8;
-    private static readonly MAX_INDICES = 1024;
+    private static readonly SUB_MAX_INDICES = 1024;
 
     public get featureId(): FeatureType {
         return FeatureType.SceneMesh;
@@ -258,8 +258,11 @@ export class ARFeatureSceneMesh extends ARFeature {
             // create or update node
             let sceneMeshNode : Node | undefined;
             let renderer : MeshRenderer | null;
-            let vertices: Float32Array;
-            let indices: Uint32Array;
+            let vertices: number[];
+            let indices: number[];
+            //let vertices: Float32Array;
+            //let indices: Uint32Array;
+
             sceneMeshNode = this._meshesNodeMap.get(meshRef);
             vertices = armodule.getSceneMeshVertices(meshRef);
             indices = armodule.getSceneMeshTriangleIndices(meshRef);
@@ -276,49 +279,61 @@ export class ARFeatureSceneMesh extends ARFeature {
                 console.log(`${indi}`);
             });//*/
 
-
+            
             if(!sceneMeshNode) {
                 sceneMeshNode = new Node("scene-mesh");
                 this.session.node.addChild(sceneMeshNode);
-                //this._meshesParent!.addChild(sceneMeshNode);
                 this._meshesNodeMap.set(meshRef, sceneMeshNode);
                 console.log(`add mesh: ${meshRef}`);
                 renderer = sceneMeshNode.addComponent(MeshRenderer);
-                renderer.mesh = new Mesh();
-                renderer.material = this._sceneMaterial;
+                //renderer.mesh = new Mesh();
+                //renderer.material = this._sceneMaterial;
 
             } else {
                 console.log(`update mesh: ${meshRef}`);
                 renderer = sceneMeshNode.getComponent(MeshRenderer);
+                if(!renderer) {
+                    renderer = sceneMeshNode.addComponent(MeshRenderer);
+                    //renderer.mesh = new Mesh();
+                    //renderer.material = this._sceneMaterial;
+                }
 
             }
             sceneMeshNode.setWorldPosition(pos);
             sceneMeshNode.setWorldRotation(rot);
 
             /*
-            renderer = sceneMeshNode.getComponent(MeshRenderer);
-            if(!renderer)
-                renderer = sceneMeshNode.addComponent(MeshRenderer);
-            */
+            let mesh : Mesh | undefined;
+            //mesh = renderer!.mesh!;
             
-            let subMeshCount = Math.ceil(indices.length / ARFeatureSceneMesh.MAX_INDICES);
+            let subMeshCount = Math.ceil(indices.length / ARFeatureSceneMesh.SUB_MAX_INDICES);
             for(let j = 0; j < subMeshCount; ++j) {
-                MeshUtils.createDynamicMesh(j, {
+                const start = j * ARFeatureSceneMesh.SUB_MAX_INDICES;
+                const end = Math.min(start + ARFeatureSceneMesh.SUB_MAX_INDICES, subMeshCount);
+                const geo = {
                     positions: vertices,
-                    indices32: indices,
-                }, renderer!.mesh!, { 
-                    maxSubMeshes: subMeshCount,
-                    maxSubMeshVertices : vertices.length,
-                    maxSubMeshIndices : indices.length
-                });
+                    indices32: indices.subarray(start, end),
+                };
+
+                if(renderer!.mesh && j < renderer!.mesh.renderingSubMeshes.length) {
+                    renderer!.mesh.updateSubMesh(j, geo);
+                } else {
+                    MeshUtils.createDynamicMesh(j, geo, mesh, { 
+                        maxSubMeshes: subMeshCount,
+                        maxSubMeshVertices : vertices.length,
+                        maxSubMeshIndices : ARFeatureSceneMesh.SUB_MAX_INDICES
+                    });
+                    renderer!.mesh = mesh!;
+                }
             }
+            //*/
 
             /*
             let mesh : Mesh = new Mesh();
-            MeshUtils.createDynamicMesh(0, {
+            mesh = createMesh({
                 positions: vertices,
-                indices32: indices,
-            }, mesh);
+                indices: indices,
+            });
             console.log(`vertices length: ${vertices.length}`);
             console.log(`indices length: ${indices.length}`);
             const meshGeo = mesh.renderingSubMeshes[0].geometricInfo;
@@ -327,8 +342,14 @@ export class ARFeatureSceneMesh extends ARFeature {
                 indices: meshGeo.indices!.slice()
             };
             renderer.mesh = createMesh(primitives.wireframed(geo as any));
-            renderer.material = this._sceneMaterial;
             */
+            renderer.mesh = createMesh({
+                positions: vertices,
+                indices: indices,
+            });
+
+            renderer.material = this._sceneMaterial;
+            //*/
         }
     }
 }
