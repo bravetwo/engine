@@ -35,7 +35,7 @@ import { Collider } from '../../physics/framework/components/colliders/collider'
 import { XrControlEventType, XrEventHandle } from '../event/xr-event-handle';
 
 export class IXrInteractable extends Component {
-    protected _colliderCom: any = null;
+    protected _colliderCom: Collider | null = null;
 
     protected _triggerId: string | undefined = "";
 
@@ -71,7 +71,7 @@ export class XrInteractable extends IXrInteractable {
         this._colliderCom = this.node.getComponent(Collider);
         
         if (!this._colliderCom) {
-            console.error("this node does not have");
+            return;
         }
 
         this._colliderCom.on(XrControlEventType.HOVER_ENTERED, this._setRayReticle, this);
@@ -79,6 +79,10 @@ export class XrInteractable extends IXrInteractable {
     }
 
     onDisable() {
+        if (!this._colliderCom) {
+            return;
+        }
+        
         this._colliderCom.off(XrControlEventType.HOVER_ENTERED, this._setRayReticle, this);
         this._colliderCom.off(XrControlEventType.HOVER_EXITED, this._unsetRayReticle, this);
     }

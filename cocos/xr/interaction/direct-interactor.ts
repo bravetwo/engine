@@ -60,7 +60,7 @@ export class DirectInteractor extends XrInteractor {
     @serializable
     protected _startingSelectedInteractable: Node | null = null;
 
-    private _colliderCom: any = null;
+    private _colliderCom: Collider | null = null;
     private _directHitCollider: Collider | null = null;
 
     onLoad() {
@@ -71,6 +71,9 @@ export class DirectInteractor extends XrInteractor {
     }
 
     onEnable() {
+        if (!this._colliderCom) {
+            return;
+        }
         this._interactorEvents = this.getComponent(InteractorEvents);
         this._setAttachNode();
         if (this._colliderCom.isTrigger) {
@@ -86,8 +89,13 @@ export class DirectInteractor extends XrInteractor {
     }
 
     onDisable() {
+        if (!this._colliderCom) {
+            return;
+        }
         if (this._colliderCom.isTrigger) {
             this._colliderCom.off('onTriggerEnter', this._onTriggerEnterCb, this);
+            this._colliderCom.off('onTriggerStay', this._onTriggerEnterCb, this);
+            this._colliderCom.off('onTriggerExit', this._onTriggerEnterCb, this);
         } else {
             this._colliderCom.off('onCollisionEnter', this._onCollisionEnterCb, this);
             this._colliderCom.off('onCollisionStay', this._onCollisionEnterCb, this);
