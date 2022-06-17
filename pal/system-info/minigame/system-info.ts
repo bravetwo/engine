@@ -162,7 +162,7 @@ class SystemInfo extends EventTarget {
     }
 
     public close () {
-        // TODO: minigame.exitMiniProgram() not implemented.
+        minigame.exitMiniProgram?.();
     }
 }
 

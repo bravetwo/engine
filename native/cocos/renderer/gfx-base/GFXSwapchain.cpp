@@ -37,7 +37,7 @@ Swapchain::Swapchain()
 Swapchain::~Swapchain() = default;
 
 void Swapchain::initialize(const SwapchainInfo &info) {
-#if !USE_XR
+#if !defined(CC_SERVER_MODE) || !USE_XR
     CC_ASSERT(info.windowHandle);
 #endif
 
