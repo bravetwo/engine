@@ -60,7 +60,7 @@ const _temp_quat = new Quat();
 @menu('AR/ARSession')
 @disallowMultiple
 export class ARSession extends Component {
-    private static readonly FEATURE_PREFIX = "ARFeature";
+    public static readonly FEATURE_PREFIX = "ARFeature";
 
     //#region background and pose control
     // for 3d object
@@ -97,7 +97,7 @@ export class ARSession extends Component {
         this._featuresData = val;
     }
 
-    private featuresMap = new Map<string, IFeature>();
+    private featuresMap = new Map<string, ARFeature>();
 
     //@property
     smooth = false;
@@ -266,12 +266,11 @@ export class ARSession extends Component {
         this._configMask |= config;
     }*/
 
-    tryGetFeature(featureName : string, outFeature : IFeature) : boolean {
+    tryGetFeature(featureName : string) : ARFeature | null {
         if (this.featuresMap.has(featureName)) {
-            outFeature = this.featuresMap.get(featureName)!;
-            return true;
+            return this.featuresMap.get(featureName) as ARFeature;
         }
-        return false;
+        return null;
     }
 
     getFeature<Type extends ARFeature>(fea : Type & Function) : Type | undefined {

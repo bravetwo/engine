@@ -52,6 +52,7 @@ public:
     virtual float* getCameraTexCoords() = 0;
     virtual void setCameraTextureName(int id) = 0;
     virtual void* getCameraTextureRef() = 0;
+    virtual uint8_t* getCameraDepthBuffer() = 0;
 
     virtual uint8_t* getCameraDepthBuffer() = 0;
 

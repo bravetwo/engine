@@ -52,6 +52,11 @@ export interface ARPose {
     rotation : math.Quat;
 }
 
+export interface ARTrackable {
+    id : number;
+    pose? : ARPose;
+}
+
 export interface IFeature {
     name : string;
     enable : boolean;
@@ -110,7 +115,6 @@ export abstract class ARFeature implements IFeature {
         this._session = session;
         
         if(config) {
-            //this._name = ;
             this._enable = config.enable;
 
         } else if(jsonObject) {
@@ -120,10 +124,11 @@ export abstract class ARFeature implements IFeature {
         } else {
             console.log(`constructing feature need use either feature-data or json data`);
         }
-
+        /*
         if(this.isJsonConfig(config)) {
             this._name = (config as IFeature).name;
         }
+        */
     }
 
     protected isJsonConfig(config : IFeatureData | IFeature) : boolean {

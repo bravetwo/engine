@@ -24,7 +24,7 @@
 
 import { Prefab, instantiate, Vec3, resources, Material, builtinResMgr, director, Vec4, Quat } from '../../core';
 import { ccclass, menu, property, disallowMultiple, type } from '../../core/data/class-decorator'
-import { ARFeature, ARPose, FeatureEvent, FeatureType } from '../ar-feature-base';
+import { ARFeature, ARPose, FeatureEvent, FeatureType, IFeatureData } from '../ar-feature-base';
 import { ARSession } from '../ar-session-component';
 import { Node } from '../../core/scene-graph'
 import { createMesh } from '../../3d/misc';
@@ -63,8 +63,11 @@ export class ARFeatureImage extends ARFeature {
     private _updatedImages : ARImage[];
     private _removedImages : ARImage[];
 
-    constructor(jsonObject : any, session : ARSession) {
-        super(jsonObject, session);
+    //constructor(jsonObject : any, session : ARSession) {
+        //super(jsonObject, session);
+    constructor (session : ARSession, config : IFeatureData);
+    constructor (session : ARSession, config : IFeatureData, jsonObject? : any) {
+        super(session, config, jsonObject);
 
         this._imageNames = jsonObject.images;
 
