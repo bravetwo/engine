@@ -54,8 +54,6 @@ public:
     virtual void* getCameraTextureRef() = 0;
     virtual uint8_t* getCameraDepthBuffer() = 0;
 
-    virtual uint8_t* getCameraDepthBuffer() = 0;
-
     //virtual void setPlaneFeatureEnable(bool isOn) = 0;
     virtual int getAddedPlanesCount() = 0;
     virtual int getRemovedPlanesCount() = 0;
