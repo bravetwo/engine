@@ -104,7 +104,7 @@ class XRInterface : public IXRInterface {
   PFNGLES3WLOADPROC _gles3wLoadFuncProc{nullptr};
   gfx::GLES3GPUContext *_gles3GPUContext{nullptr};
 #endif
-
+  uint32_t _multiSamples{1};
   uint32_t _vkQueueFamilyIndex{0};
   xr::XRSwapchain _acquireSwapchain;
   std::vector<cc::xr::XRSwapchain> _xrSwapchains;

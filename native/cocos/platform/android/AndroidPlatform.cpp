@@ -286,7 +286,7 @@ public:
                     }
                 } else {
                     IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
-                    if (xr && xr->getVendor() == xr::XRVendor::HUAWEIVR) {
+                    if (xr) {
                         xr->onRenderResume();
                     }
                     cc::CustomEvent event;
@@ -301,7 +301,7 @@ public:
                 // The window is going away -- kill the surface
                 CC_LOG_DEBUG("AndroidPlatform: APP_CMD_TERM_WINDOW");
                 IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
-                if (xr && xr->getVendor() == xr::XRVendor::HUAWEIVR) {
+                if (xr) {
                     xr->onRenderPause();
                 }
                 cc::CustomEvent event;
@@ -318,21 +318,9 @@ public:
                 break;
             case APP_CMD_PAUSE:
                 CC_LOG_INFO("AndroidPlatform: APP_CMD_PAUSE");
-                {
-                    IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
-                    if (xr) {
-                        xr->onRenderPause();
-                    }
-                }
                 break;
             case APP_CMD_RESUME: {
                 CC_LOG_INFO("AndroidPlatform: APP_CMD_RESUME");
-                {
-                    IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
-                    if (xr) {
-                        xr->onRenderResume();
-                    }
-                }
                 break;
             }
             case APP_CMD_DESTROY: {
@@ -510,7 +498,7 @@ int AndroidPlatform::init() {
 void AndroidPlatform::onDestory() {
     IXRInterface *xr = getInterface<IXRInterface>();
     if (xr) {
-        xr->onRenderPause();
+        xr->onRenderDestroy();
     }
     UniversalPlatform::onDestory();
     unregisterAllInterfaces();

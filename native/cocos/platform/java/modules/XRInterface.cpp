@@ -60,6 +60,9 @@ void XRInterface::setConfigParameterI(xr::XRConfigKey key, int value) {
         case xr::XRConfigKey::VK_QUEUE_FAMILY_INDEX:
             _vkQueueFamilyIndex = value;
             break;
+        case xr::XRConfigKey::MULTI_SAMPLES:
+            _multiSamples = value;
+            break;
         default:
             break;
     }
@@ -74,8 +77,7 @@ int XRInterface::getConfigParameterI(xr::XRConfigKey key) {
         case xr::XRConfigKey::SESSION_RUNNING:
             return xr::XrEntry::getInstance()->isSessionRunning();
         case xr::XRConfigKey::MULTI_SAMPLES:
-            // todo
-            return 4;
+            return _multiSamples;
         default:
             break;
     }
