@@ -173,6 +173,28 @@ static bool js_ar_ARModule_setPlaneDetectionMode(se::State& s)
 }
 SE_BIND_FUNC(js_ar_ARModule_setPlaneDetectionMode)
 
+static bool js_ar_ARModule_setPlaneMaxTrackingNumber(se::State& s)
+{
+    cc::ar::ARModule* cobj = (cc::ar::ARModule*)s.nativeThisObject();
+    SE_PRECONDITION2(cobj, false, "js_ar_ARModule_setPlaneMaxTrackingNumber : Invalid Native Object");
+
+    const auto& args = s.args();
+    size_t argc = args.size();
+    CC_UNUSED bool ok = true;
+    if (argc == 1) {
+        HolderType<int, false> arg0 = {};
+        ok &= sevalue_to_native(args[0], &arg0, s.thisObject());
+        SE_PRECONDITION2(ok, false, "js_ar_ARModule_setPlaneMaxTrackingNumber : Error processing arguments");
+
+        cobj->setPlaneMaxTrackingNumber(arg0.value());
+        return true;
+    }
+
+    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 1);
+    return false;
+}
+SE_BIND_FUNC(js_ar_ARModule_setPlaneMaxTrackingNumber)
+
 static bool js_ar_ARModule_updatePlanesInfo(se::State& s)
 {
     cc::ar::ARModule* cobj = (cc::ar::ARModule*)s.nativeThisObject();
@@ -821,6 +843,7 @@ bool register_all_ar_manual(se::Object *obj) {
 
     __jsb_cc_ar_ARModule_proto->defineFunction("enablePlane", _SE(js_ar_ARModule_enablePlane));
     __jsb_cc_ar_ARModule_proto->defineFunction("setPlaneDetectionMode", _SE(js_ar_ARModule_setPlaneDetectionMode));
+    __jsb_cc_ar_ARModule_proto->defineFunction("setPlaneMaxTrackingNumber", _SE(js_ar_ARModule_setPlaneMaxTrackingNumber));
     __jsb_cc_ar_ARModule_proto->defineFunction("updatePlanesInfo", _SE(js_ar_ARModule_updatePlanesInfo));
     __jsb_cc_ar_ARModule_proto->defineFunction("getAddedPlanesInfo", _SE(js_ar_ARModule_getAddedPlanesInfo));
     __jsb_cc_ar_ARModule_proto->defineFunction("getRemovedPlanesInfo", _SE(js_ar_ARModule_getRemovedPlanesInfo));

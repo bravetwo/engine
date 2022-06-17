@@ -68,6 +68,8 @@ public:
     //void setPlaneFeatureEnable(bool isOn) const;
     void enablePlane(bool enable) const;
     void setPlaneDetectionMode(int mode) const;
+    void setPlaneMaxTrackingNumber(int count) const;
+    
     int getAddedPlanesCount() const;
     int getRemovedPlanesCount() const;
     int getUpdatedPlanesCount() const;

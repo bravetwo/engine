@@ -137,6 +137,10 @@ void ARModule::setPlaneDetectionMode(int mode) const {
     return _impl->setPlaneDetectionMode(mode);
 }
 
+void ARModule::setPlaneMaxTrackingNumber(int count) const {
+    return _impl->setPlaneMaxTrackingNumber(count);
+}
+
 int ARModule::getAddedPlanesCount() const {
     //return _impl->getAddedPlanesCount();
     return _impl->getInfoLength() / 12;
