@@ -26,26 +26,17 @@
 #pragma once
 
 #include <array>
-/*
-#include "base/Log.h"
 
-#define CC_ARAPI_DEBUG
-#ifdef  CC_ARAPI_DEBUG
-#define DLLOG(...)      CC_LOG_DEBUG(__VA_ARGS__)
-#else
-#define DLLOG(...)       do {} while (0)
-#endif
-//*/
 namespace cc {
-namespace ar{
+namespace ar {
 
-using Pose = std::array<float, 7>;
-using Matrix = std::array<float, 16>;
+using Pose      = std::array<float, 7>;
+using Matrix    = std::array<float, 16>;
 using TexCoords = std::array<float, 8>;
 
 class IARAPI {
 public:
-    virtual ~IARAPI() = default;
+    virtual ~IARAPI()     = default;
     virtual void config(int featureMask) = 0;
     virtual int getSupportMask() = 0;
     virtual void start() = 0;
@@ -61,15 +52,18 @@ public:
     virtual float* getCameraTexCoords() = 0;
     virtual void setCameraTextureName(int id) = 0;
     virtual void* getCameraTextureRef() = 0;
+
     virtual uint8_t* getCameraDepthBuffer() = 0;
 
     //virtual void setPlaneFeatureEnable(bool isOn) = 0;
     virtual int getAddedPlanesCount() = 0;
     virtual int getRemovedPlanesCount() = 0;
     virtual int getUpdatedPlanesCount() = 0;
-    
+
     virtual void enablePlane(bool enable) {};
     virtual void setPlaneDetectionMode(int mode) {};
+    virtual void setPlaneMaxTrackingNumber(int count) {};
+
     virtual void updatePlanesInfo() = 0;
     virtual float* getAddedPlanesInfo() = 0;
     virtual int* getRemovedPlanesInfo() = 0;
@@ -83,8 +77,8 @@ public:
     virtual float* getRaycastPose() = 0;
     virtual int getRaycastTrackableId() = 0;
     virtual int getRaycastTrackableType() = 0;
-    
-    virtual void enableSceneMesh(bool enable) {};  
+
+    virtual void enableSceneMesh(bool enable) {};
     virtual float* getAddedSceneMesh() = 0;
     virtual float* getUpdatedSceneMesh() = 0;
     virtual int* getRemovedSceneMesh() = 0;
@@ -92,14 +86,14 @@ public:
     virtual float* getSceneMeshVertices(int meshRef) = 0;
     virtual int* getSceneMeshTriangleIndices(int meshRef) = 0;
     virtual void endRequireSceneMesh() = 0;
-    
+
     virtual void enableImageTracking(bool enable) = 0;
     virtual void addImageToLib(const std::string& imageName) = 0;
     virtual void setMaxTrackingNumber(int number) = 0;
     virtual float* getAddedImagesInfo() = 0;
     virtual float* getUpdatedImagesInfo() = 0;
     virtual float* getRemovedImagesInfo() = 0;
-    
+
     virtual void enableObjectTracking(bool enable) = 0;
     virtual void addObjectToLib(const std::string& imageName) = 0;
     virtual float* getAddedObjectsInfo() = 0;

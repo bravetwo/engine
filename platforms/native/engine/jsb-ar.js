@@ -72,6 +72,10 @@ class ARModuleNative extends ARModule {
         this._native.setPlaneDetectionMode(mode);
     }
 
+    setPlaneMaxTrackingNumber (count) {
+        this._native.setPlaneMaxTrackingNumber(count);
+    }
+
     updatePlanesInfo () {
         return this._native.updatePlanesInfo();
     }

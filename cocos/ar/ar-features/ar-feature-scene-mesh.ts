@@ -282,7 +282,10 @@ export class ARFeatureSceneMesh extends ARFeature {
             
             if(!sceneMeshNode) {
                 sceneMeshNode = new Node("scene-mesh");
-                this.session.node.addChild(sceneMeshNode);
+
+                //this.session.node.addChild(sceneMeshNode);
+                this._meshesParent?.addChild(sceneMeshNode);
+
                 this._meshesNodeMap.set(meshRef, sceneMeshNode);
                 console.log(`add mesh: ${meshRef}`);
                 renderer = sceneMeshNode.addComponent(MeshRenderer);

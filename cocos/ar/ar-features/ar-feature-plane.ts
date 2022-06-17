@@ -89,6 +89,8 @@ export class ARFeaturePlaneDetection extends ARFeature {
     private _updatedPlanes : ARPlane[];
     private _removedPlanes : number[];
 
+    private _planesParent : Node | null = null;
+
     constructor (session : ARSession, config : IFeatureData);
     constructor (session : ARSession, config : IFeatureData, jsonObject? : any) {
         super(session, config, jsonObject);
@@ -133,6 +135,9 @@ export class ARFeaturePlaneDetection extends ARFeature {
         this._updatedPlanes = new Array();
         this._removedPlanes = new Array();
 
+        this._planesParent = new Node("_PLANES_");
+        this._session.node.addChild(this._planesParent);
+
         console.log("plane detection mode:", this.mode);
     }
 
@@ -144,9 +149,16 @@ export class ARFeaturePlaneDetection extends ARFeature {
         super.init();
         const armodule = ARModuleHelper.getInstance();
         armodule.setPlaneDetectionMode(this.mode);
+        armodule.setPlaneMaxTrackingNumber(this.planesMaxSize);
     }
 
     protected onEnable(): void {
+        if(!this._planesParent) {
+            this._planesParent = new Node("_PLANES_");
+            this._session.node.addChild(this._planesParent);
+        }
+        this._planesParent.active = true;
+
         const armodule = ARModuleHelper.getInstance();
         armodule.enablePlane(this._enable);
     }
@@ -155,6 +167,20 @@ export class ARFeaturePlaneDetection extends ARFeature {
         //this._enable = false;
         const armodule = ARModuleHelper.getInstance();
         armodule.enablePlane(this._enable);
+    }
+
+    show() {
+        if(this._planesParent)
+            this._planesParent!.active = true;
+    }
+
+    hide() {
+        if(this._planesParent)
+            this._planesParent!.active = false;
+    }
+
+    destroy() {
+        this._planesParent?.destroy();
     }
 
     update() {
@@ -166,7 +192,7 @@ export class ARFeaturePlaneDetection extends ARFeature {
 
     public processChanges() {
         const armodule = ARModuleHelper.getInstance();
-        let planes = this._session.node;
+        //let planes = this._session.node;
         //*
         this.removedPlanesInfo = armodule.getRemovedPlanesInfo();
         //this._removedPlanes.length = 0;
@@ -217,7 +243,9 @@ export class ARFeaturePlaneDetection extends ARFeature {
                 let index = planesInfo[offset];
                 if (index >= 0 && !this.planesNodeMap.has(index)) {
                     node = instantiate(this.planePrefab as Prefab);
-                    planes.addChild(node);
+                    //planes.addChild(node);
+                    this._planesParent?.addChild(node);
+
                     this.planesNodeMap.set(index, node);
 
                     const vec3 = new Vec3();
