@@ -35,6 +35,7 @@ import { Input, input } from '../../input';
 import { EventHandle } from '../../input/types';
 import { Mat4, Quat, Vec3 } from '../../core/math';
 import { CameraComponent } from '../../core';
+import { EDITOR } from 'internal:constants';
 
 enum TrackingSource_Type {
     VIEW_POSE_ACTIVE_LEFT = 0,
@@ -193,6 +194,8 @@ export class PoseTracker extends Component {
     }
 
     update() {
-        this.node.setRTS(this._quatPose, this._positionPose, Vec3.ONE);
+        if (!EDITOR) {
+            this.node.setRTS(this._quatPose, this._positionPose, Vec3.ONE);
+        }
     }
 }
