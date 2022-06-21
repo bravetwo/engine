@@ -290,8 +290,8 @@ void GLES3Device::present() {
     _numInstances = queue->_numInstances;
     _numTriangles = queue->_numTriangles;
 
-    IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
-    bool isGFXDeviceNeedsPresent = xr && xr->isGFXDeviceNeedsPresent(_api);
+    static IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
+    bool isGFXDeviceNeedsPresent = xr ? xr->isGFXDeviceNeedsPresent(_api) : true;
     for (auto *swapchain : _swapchains) {
         if(isGFXDeviceNeedsPresent) _gpuContext->present(swapchain);
     }

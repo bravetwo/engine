@@ -45,6 +45,8 @@
 #include "states/GFXGeneralBarrier.h"
 #include "states/GFXSampler.h"
 #include "states/GFXTextureBarrier.h"
+#include "platform/BasePlatform.h"
+#include "platform/java/modules/XRInterface.h"
 
 namespace cc {
 namespace gfx {
@@ -72,9 +74,6 @@ public:
     inline Queue *createQueue(const QueueInfo &info);
     inline QueryPool *createQueryPool(const QueryPoolInfo &info);
     inline Swapchain *createSwapchain(const SwapchainInfo &info);
-#if USE_XR
-    Swapchain *createSwapchainWithXr(const SwapchainInfo &info);
-#endif
     inline const ccstd::vector<Swapchain *> &getSwapchains() { return _swapchains; }
     inline Buffer *createBuffer(const BufferInfo &info);
     inline Buffer *createBuffer(const BufferViewInfo &info);
@@ -214,28 +213,52 @@ QueryPool *Device::createQueryPool(const QueryPoolInfo &info) {
 }
 
 Swapchain *Device::createSwapchain(const SwapchainInfo &info) {
-#if !USE_XR
-    Swapchain *res = createSwapchain();
-    res->initialize(info);
-    _swapchains.push_back(res);
-#if CC_PLATFORM == CC_PLATFORM_ANDROID || CC_PLATFORM == CC_PLATFORM_OHOS
-    if (res->getWindowHandle()) {
+    IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
+    if (xr) {
+        bool isHuaweiVR = xr->getVendor() == xr::XRVendor::HUAWEIVR;
+        xr->createXRSwapchains();
+        auto &cocosXrSwapchains = xr->getXRSwapchains();
+        for (int i = 0; i < cocosXrSwapchains.size(); i++) {
+            Swapchain *res = createSwapchain();
+            xr->updateXRSwapchainTypedID(i, res->getTypedID());
+            SwapchainInfo swapchain_info;
+            swapchain_info.copy(info);
+            if (isHuaweiVR) {
+                if (i > 0) {
+                    swapchain_info.windowHandle = nullptr;
+                }
+            } else {
+                swapchain_info.windowHandle = nullptr;
+            }
+            swapchain_info.width = cocosXrSwapchains[i].width;
+            swapchain_info.height = cocosXrSwapchains[i].height;
+            res->initialize(swapchain_info);
+            _swapchains.push_back(res);
+        }
+#if (CC_PLATFORM == CC_PLATFORM_ANDROID) || CC_PLATFORM == CC_PLATFORM_OHOS
+        if (isHuaweiVR && !_swapchains.at(0)->getWindowHandle()) {
+            setRendererAvailable(false);
+        } else {
+            setRendererAvailable(true);
+        }
+#else
         setRendererAvailable(true);
+#endif
+        return _swapchains.at(0);
+    } else {
+        Swapchain *res = createSwapchain();
+        res->initialize(info);
+        _swapchains.push_back(res);
+#if CC_PLATFORM == CC_PLATFORM_ANDROID || CC_PLATFORM == CC_PLATFORM_OHOS
+        if (res->getWindowHandle()) {
+            setRendererAvailable(true);
+        }
+#else
+        setRendererAvailable(true);
+#endif
+        return res;
     }
-#else
-    setRendererAvailable(true);
-#endif
-    return res;
-#else
-    return createSwapchainWithXr(info);
-#endif
 }
-
-#if USE_XR
-struct XrSwapchainInfo : public SwapchainInfo {
-    int xrViewIdx = -1;
-};
-#endif
 
 Buffer *Device::createBuffer(const BufferInfo &info) {
     Buffer *res = createBuffer();

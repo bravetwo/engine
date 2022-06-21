@@ -457,6 +457,7 @@ cocos_source_files(
     cocos/platform/interfaces/modules/ISystem.h
     cocos/platform/interfaces/modules/ISystemWindow.h
     cocos/platform/interfaces/modules/IVibrator.h
+    cocos/platform/interfaces/modules/XRCommon.h
     cocos/platform/interfaces/modules/IXRInterface.h
 )
 

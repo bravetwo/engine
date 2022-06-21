@@ -29,17 +29,17 @@
 #include "base/std/container/array.h"
 #include "math/Vec2.h"
 #include "platform/interfaces/OSInterface.h"
-#ifdef CC_USE_VULKAN
-    #include "gfx-vulkan/VKDevice.h"
+#include "gfx-base/GFXDef-common.h"
+#if CC_USE_VULKAN
+#include "vulkan/vulkan_core.h"
 #endif
-#ifdef CC_USE_GLES3
-    #include "gfx-gles-common/gles3w.h"
-    #include "gfx-gles3/GLES3Device.h"
-#endif
-
 #include "XRCommon.h"
-
 namespace cc {
+// forward declare
+namespace gfx {
+class GLES3GPUContext;
+}
+
 class CC_DLL IXRInterface : public OSInterface {
 public:
     virtual xr::XRVendor getVendor() = 0;
@@ -51,7 +51,7 @@ public:
     virtual std::string getConfigParameterS(xr::XRConfigKey key) = 0;
 
     virtual uint32_t getRuntimeVersion() = 0;
-    virtual void initialize(void *javaVM, void *activity, xr::XREventsCallback callback) = 0;
+    virtual void initialize(void *javaVM, void *activity) = 0;
 
     // render thread lifecycle
     virtual void onRenderPause() = 0;
@@ -68,7 +68,7 @@ public:
     virtual void createXRSwapchains() = 0;
     virtual const std::vector<cc::xr::XRSwapchain>& getXRSwapchains() = 0;
     virtual gfx::Format getXRSwapchainFormat() = 0;
-    virtual void updateXRSwapchainHandle(uint32_t index, void* ccHandle) = 0;
+    virtual void updateXRSwapchainTypedID(uint32_t index, uint32_t typedID) = 0;
     // gfx
 
     // vulkan
@@ -78,13 +78,13 @@ public:
     virtual VkInstance createXRVulkanInstance(const VkInstanceCreateInfo &instInfo) = 0;
     virtual VkDevice createXRVulkanDevice(const VkDeviceCreateInfo *deviceInfo) = 0;
     virtual VkPhysicalDevice getXRVulkanGraphicsDevice() = 0;
-    virtual void getXRSwapchainVkImages(std::vector<VkImage> &vkImages, void *ccSwapchainHandle) = 0;
+    virtual void getXRSwapchainVkImages(std::vector<VkImage> &vkImages, uint32_t ccSwapchainTypedID) = 0;
 #endif
     // vulkan
 
     // gles3
 #ifdef CC_USE_GLES3
-    virtual void initializeGLESData(PFNGLES3WLOADPROC gles3wLoadFuncProc, gfx::GLES3GPUContext *gpuContext) = 0;
+    virtual void initializeGLESData(xr::PFNGLES3WLOADPROC gles3wLoadFuncProc, gfx::GLES3GPUContext *gpuContext) = 0;
     virtual void attachGLESFramebufferTexture2D() = 0;
 #endif
     // gles3

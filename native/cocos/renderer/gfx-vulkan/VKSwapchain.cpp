@@ -278,7 +278,7 @@ bool CCVKSwapchain::checkSwapchainStatus(uint32_t width, uint32_t height) {
     if(xr) {
         newWidth  = width ? width : static_cast<CCVKTexture *>(_colorTexture.get())->_info.width;
         newHeight = height ? height : static_cast<CCVKTexture *>(_colorTexture.get())->_info.height;
-        xr->getXRSwapchainVkImages(_gpuSwapchain->swapchainImages, this);
+        xr->getXRSwapchainVkImages(_gpuSwapchain->swapchainImages, _typedID);
         imageCount = _gpuSwapchain->swapchainImages.size();
     } else {
     if (_gpuSwapchain->vkSurface == VK_NULL_HANDLE) { // vkSurface will be set to VK_NULL_HANDLE after call doDestroySurface

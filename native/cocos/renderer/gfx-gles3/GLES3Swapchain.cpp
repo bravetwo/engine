@@ -52,64 +52,67 @@ GLES3Swapchain::~GLES3Swapchain() {
 }
 
 void GLES3Swapchain::doInit(const SwapchainInfo &info) {
-    _gpuSwapchain = ccnew GLES3GPUSwapchain;
-#if !USE_XR || XR_OEM_HUAWEIVR
-#if XR_OEM_HUAWEIVR
-    if (info.windowHandle != nullptr) {
-#endif
     const auto *context = GLES3Device::getInstance()->context();
+    _gpuSwapchain = ccnew GLES3GPUSwapchain;
+    IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
+    bool isHuaweiVR = xr && xr->getVendor() == xr::XRVendor::HUAWEIVR;
+    bool createWindowSurface = isHuaweiVR ? info.windowHandle != nullptr : true;
+    if (xr && !isHuaweiVR) {
+        createWindowSurface = false;
+    }
+    if (createWindowSurface) {
 #if CC_PLATFORM == CC_PLATFORM_LINUX
-    auto window = reinterpret_cast<EGLNativeWindowType>(info.windowHandle);
+        auto window = reinterpret_cast<EGLNativeWindowType>(info.windowHandle);
 #else
-    auto *window = reinterpret_cast<EGLNativeWindowType>(info.windowHandle);
+        auto *window = reinterpret_cast<EGLNativeWindowType>(info.windowHandle);
 #endif
 
 #if CC_PLATFORM == CC_PLATFORM_ANDROID || CC_PLATFORM == CC_PLATFORM_OHOS
-    EGLint nFmt;
-    if (eglGetConfigAttrib(context->eglDisplay, context->eglConfig, EGL_NATIVE_VISUAL_ID, &nFmt) == EGL_FALSE) {
-        CC_LOG_ERROR("Getting configuration attributes failed.");
-        return;
-    }
+        EGLint nFmt;
+        if (eglGetConfigAttrib(context->eglDisplay, context->eglConfig, EGL_NATIVE_VISUAL_ID, &nFmt) == EGL_FALSE) {
+            CC_LOG_ERROR("Getting configuration attributes failed.");
+            return;
+        }
 
     #if CC_SWAPPY_ENABLED
-    bool enableSwappy = true;
-    auto *platform = static_cast<AndroidPlatform *>(cc::BasePlatform::getPlatform());
-    enableSwappy &= SwappyGL_init(static_cast<JNIEnv *>(platform->getEnv()), static_cast<jobject>(platform->getActivity()));
-    int32_t fps = cc::BasePlatform::getPlatform()->getFps();
-    if (enableSwappy) {
-        if (!fps)
-            SwappyGL_setSwapIntervalNS(SWAPPY_SWAP_60FPS);
-        else
-            SwappyGL_setSwapIntervalNS(1000000000L / fps); //ns
-        enableSwappy &= SwappyGL_setWindow(window);
-        _gpuSwapchain->swappyEnabled = enableSwappy;
-    } else {
-        CC_LOG_ERROR("Failed to enable Swappy in current GL swapchain, fallback instead.");
-    }
+        bool enableSwappy = true;
+        auto *platform = static_cast<AndroidPlatform *>(cc::BasePlatform::getPlatform());
+        enableSwappy &= SwappyGL_init(static_cast<JNIEnv *>(platform->getEnv()), static_cast<jobject>(platform->getActivity()));
+        int32_t fps = cc::BasePlatform::getPlatform()->getFps();
+        if (enableSwappy) {
+            if (!fps)
+                SwappyGL_setSwapIntervalNS(SWAPPY_SWAP_60FPS);
+            else
+                SwappyGL_setSwapIntervalNS(1000000000L / fps); //ns
+            enableSwappy &= SwappyGL_setWindow(window);
+            _gpuSwapchain->swappyEnabled = enableSwappy;
+        } else {
+            CC_LOG_ERROR("Failed to enable Swappy in current GL swapchain, fallback instead.");
+        }
 
     #endif
 
-    auto width = static_cast<int32_t>(info.width);
-    auto height = static_cast<int32_t>(info.height);
+        auto width = static_cast<int32_t>(info.width);
+        auto height = static_cast<int32_t>(info.height);
 
     #if CC_PLATFORM == CC_PLATFORM_ANDROID
-    ANativeWindow_setBuffersGeometry(window, width, height, nFmt);
+        ANativeWindow_setBuffersGeometry(window, width, height, nFmt);
     #elif CC_PLATFORM == CC_PLATFORM_OHOS
-    NativeLayerHandle(window, NativeLayerOps::SET_WIDTH_AND_HEIGHT, width, height);
-    NativeLayerHandle(window, NativeLayerOps::SET_FORMAT, nFmt);
+        NativeLayerHandle(window, NativeLayerOps::SET_WIDTH_AND_HEIGHT, width, height);
+        NativeLayerHandle(window, NativeLayerOps::SET_FORMAT, nFmt);
     #endif
 #endif
 
-    EGL_CHECK(_gpuSwapchain->eglSurface = eglCreateWindowSurface(context->eglDisplay, context->eglConfig, window, nullptr));
-    if (_gpuSwapchain->eglSurface == EGL_NO_SURFACE) {
-        CC_LOG_ERROR("Create window surface failed.");
-        return;
+        EGL_CHECK(_gpuSwapchain->eglSurface = eglCreateWindowSurface(context->eglDisplay, context->eglConfig, window, nullptr));
+        if (_gpuSwapchain->eglSurface == EGL_NO_SURFACE) {
+            CC_LOG_ERROR("Create window surface failed.");
+            return;
+        }
+
+        if (isHuaweiVR) {
+            GLES3Device::getInstance()->context()->makeCurrent(_gpuSwapchain, _gpuSwapchain);
+        }
     }
-#if XR_OEM_HUAWEIVR
-    GLES3Device::getInstance()->context()->makeCurrent(_gpuSwapchain, _gpuSwapchain);
-    }
-#endif
-#endif
 
     switch (_vsyncMode) {
         case VsyncMode::OFF: _gpuSwapchain->eglSwapInterval = 0; break;
@@ -172,54 +175,54 @@ void GLES3Swapchain::doDestroySurface() {
 }
 
 void GLES3Swapchain::doCreateSurface(void *windowHandle) {
-#if !USE_XR || XR_OEM_HUAWEIVR
-#if XR_OEM_HUAWEIVR
-    if (windowHandle != nullptr) {
-#endif
-    auto *context = GLES3Device::getInstance()->context();
-#if CC_PLATFORM == CC_PLATFORM_LINUX
-    auto window = reinterpret_cast<EGLNativeWindowType>(windowHandle);
-#else
-    auto *window = reinterpret_cast<EGLNativeWindowType>(windowHandle);
-#endif
-
-    EGLint nFmt = 0;
-    if (eglGetConfigAttrib(context->eglDisplay, context->eglConfig, EGL_NATIVE_VISUAL_ID, &nFmt) == EGL_FALSE) {
-        CC_LOG_ERROR("Getting configuration attributes failed.");
-        return;
+    IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
+    bool isHuaweiVR = xr && xr->getVendor() == xr::XRVendor::HUAWEIVR;
+    bool createWindowSurface = isHuaweiVR ? windowHandle != nullptr : true;
+    if (xr && !isHuaweiVR) {
+        createWindowSurface = false;
     }
+    if (createWindowSurface) {
+        auto *context = GLES3Device::getInstance()->context();
+#if CC_PLATFORM == CC_PLATFORM_LINUX
+        auto window = reinterpret_cast<EGLNativeWindowType>(windowHandle);
+#else
+        auto *window = reinterpret_cast<EGLNativeWindowType>(windowHandle);
+#endif
 
-    auto width = static_cast<int>(_colorTexture->getWidth());
-    auto height = static_cast<int>(_colorTexture->getHeight());
-    CC_UNUSED_PARAM(width);
-    CC_UNUSED_PARAM(height);
+        EGLint nFmt = 0;
+        if (eglGetConfigAttrib(context->eglDisplay, context->eglConfig, EGL_NATIVE_VISUAL_ID, &nFmt) == EGL_FALSE) {
+            CC_LOG_ERROR("Getting configuration attributes failed.");
+            return;
+        }
+
+        auto width = static_cast<int>(_colorTexture->getWidth());
+        auto height = static_cast<int>(_colorTexture->getHeight());
+        CC_UNUSED_PARAM(width);
+        CC_UNUSED_PARAM(height);
 
 #if CC_SWAPPY_ENABLED
-    if (_gpuSwapchain->swappyEnabled) {
-        _gpuSwapchain->swappyEnabled &= SwappyGL_setWindow(window);
-    }
+        if (_gpuSwapchain->swappyEnabled) {
+            _gpuSwapchain->swappyEnabled &= SwappyGL_setWindow(window);
+        }
 #endif
 
 #if CC_PLATFORM == CC_PLATFORM_ANDROID
-    ANativeWindow_setBuffersGeometry(window, width, height, nFmt);
+        ANativeWindow_setBuffersGeometry(window, width, height, nFmt);
 #elif CC_PLATFORM == CC_PLATFORM_OHOS
-    NativeLayerHandle(window, NativeLayerOps::SET_WIDTH_AND_HEIGHT, width, height);
-    NativeLayerHandle(window, SET_FORMAT, nFmt);
+        NativeLayerHandle(window, NativeLayerOps::SET_WIDTH_AND_HEIGHT, width, height);
+        NativeLayerHandle(window, SET_FORMAT, nFmt);
 #endif
 
-    if (_gpuSwapchain->eglSurface == EGL_NO_SURFACE) {
-        EGL_CHECK(_gpuSwapchain->eglSurface = eglCreateWindowSurface(context->eglDisplay, context->eglConfig, window, nullptr));
         if (_gpuSwapchain->eglSurface == EGL_NO_SURFACE) {
-            CC_LOG_ERROR("Recreate window surface failed.");
-            return;
+            EGL_CHECK(_gpuSwapchain->eglSurface = eglCreateWindowSurface(context->eglDisplay, context->eglConfig, window, nullptr));
+            if (_gpuSwapchain->eglSurface == EGL_NO_SURFACE) {
+                CC_LOG_ERROR("Recreate window surface failed.");
+                return;
+            }
         }
-    }
 
-    context->makeCurrent(_gpuSwapchain, _gpuSwapchain);
-#if XR_OEM_HUAWEIVR
+        context->makeCurrent(_gpuSwapchain, _gpuSwapchain);
     }
-#endif
-#endif
 }
 
 } // namespace gfx

@@ -29,9 +29,6 @@
 #include "base/std/container/string.h"
 #include "base/std/container/unordered_map.h"
 #include "base/std/container/vector.h"
-#if USE_XR
-#include "Xr.h"
-#endif
 
 namespace se {
 class Value;
@@ -272,9 +269,6 @@ public:
     static void dispatchCloseEvent();
     static void dispatchDestroyWindowEvent();
     static void dispatchRecreateWindowEvent();
-#if USE_XR
-    static void dispatchHandleEvent(const xr::HandleEvent &handleEvent);
-#endif
 
     using CustomEventListener = std::function<void(const CustomEvent &)>;
     static uint32_t addCustomEventListener(const ccstd::string &eventName, const CustomEventListener &listener);
@@ -282,9 +276,8 @@ public:
     static void removeAllCustomEventListeners(const ccstd::string &eventName);
     static void removeAllEventListeners();
     static void dispatchCustomEvent(const CustomEvent &event);
-
-private:
     static void doDispatchJsEvent(const char *jsFunctionName, const std::vector<se::Value> &args);
+ private:
     static void dispatchCustomEvent(const char *eventName, int argNum, ...);
 
     struct Node {

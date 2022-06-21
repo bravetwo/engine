@@ -26,7 +26,6 @@
 #pragma once
 
 #include "platform/interfaces/modules/IXRInterface.h"
-
 namespace cc {
 
 class XRInterface : public IXRInterface {
@@ -40,7 +39,7 @@ class XRInterface : public IXRInterface {
   virtual std::string getConfigParameterS(xr::XRConfigKey key) override;
 
   virtual uint32_t getRuntimeVersion() override;
-  virtual void initialize(void *javaVM, void *activity, xr::XREventsCallback callback) override;
+  virtual void initialize(void *javaVM, void *activity) override;
 
   // render thread lifecycle
   virtual void onRenderPause() override;
@@ -57,7 +56,7 @@ class XRInterface : public IXRInterface {
   virtual void createXRSwapchains() override;
   virtual const std::vector<cc::xr::XRSwapchain>& getXRSwapchains() override;
   virtual gfx::Format getXRSwapchainFormat() override;
-  virtual void updateXRSwapchainHandle(uint32_t index, void* ccHandle) override;
+  virtual void updateXRSwapchainTypedID(uint32_t index, uint32_t typedID) override;
   // gfx
 
   // vulkan
@@ -67,13 +66,13 @@ class XRInterface : public IXRInterface {
   virtual VkInstance createXRVulkanInstance(const VkInstanceCreateInfo &instInfo) override;
   virtual VkDevice createXRVulkanDevice(const VkDeviceCreateInfo *deviceInfo) override;
   virtual VkPhysicalDevice getXRVulkanGraphicsDevice() override;
-  virtual void getXRSwapchainVkImages(std::vector<VkImage> &vkImages, void *ccSwapchainHandle) override;
+  virtual void getXRSwapchainVkImages(std::vector<VkImage> &vkImages, uint32_t ccSwapchainTypedID) override;
 #endif
   // vulkan
 
   // gles
 #ifdef CC_USE_GLES3
-  virtual void initializeGLESData(PFNGLES3WLOADPROC gles3wLoadFuncProc, gfx::GLES3GPUContext *gpuContext) override;
+  virtual void initializeGLESData(xr::PFNGLES3WLOADPROC gles3wLoadFuncProc, gfx::GLES3GPUContext *gpuContext) override;
   virtual void attachGLESFramebufferTexture2D() override;
 #endif
   // gles
@@ -101,7 +100,7 @@ class XRInterface : public IXRInterface {
 #endif
 
 #if CC_USE_GLES3
-  PFNGLES3WLOADPROC _gles3wLoadFuncProc{nullptr};
+  xr::PFNGLES3WLOADPROC _gles3wLoadFuncProc{nullptr};
   gfx::GLES3GPUContext *_gles3GPUContext{nullptr};
 #endif
   uint32_t _multiSamples{1};

@@ -159,6 +159,19 @@ void Camera::update(bool forceUpdate /*false*/, int xrEye /*-1*/) {
         return;
     }
 
+    static IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
+    if (xr && xrEye >= 0) {
+        if (_proj == CameraProjection::PERSPECTIVE) {
+            _isProjDirty = true;
+        }
+        if (_cameraType == CameraType::MAIN) {
+            auto win = Root::getInstance()->getWindows().at(xrEye);
+            if (win) {
+                _window = win;
+            }
+        }
+    }
+
     bool viewProjDirty = false;
     // view matrix
     if (_node->getChangedFlags() || forceUpdate) {
@@ -267,19 +280,6 @@ void Camera::attachCamera(RenderWindow *win) {
 }
 
 #if USE_XR
- void Camera::changeTargetWindowByXrEye(int xrEye) {
-     if (xrEye < 0) return;
-     if (_proj == CameraProjection::PERSPECTIVE) {
-         _isProjDirty = true;
-     }
-     if (_cameraType == CameraType::MAIN) {
-         auto win = Root::getInstance()->getWindows().at(xrEye);
-         if (win) {
-             _window = win;
-         }
-     }
- }
-
  void Camera::getOriginMatrix() {
      if (!_node) {
          return;

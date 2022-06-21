@@ -130,7 +130,6 @@ public:
                 return intf;
             }
         }
-        CC_ASSERT(false);
         return nullptr;
     }
 

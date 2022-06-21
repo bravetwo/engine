@@ -468,7 +468,7 @@ int AndroidPlatform::init() {
     static IXRInterface *xr = getInterface<IXRInterface>();
     if (xr) {
         JniHelper::getEnv();
-        xr->initialize(JniHelper::getJavaVM(), getActivity(), &EventDispatcher::dispatchHandleEvent);
+        xr->initialize(JniHelper::getJavaVM(), getActivity());
     }
     cc::FileUtilsAndroid::setassetmanager(_app->activity->assetManager);
     _inputProxy = ccnew GameInputProxy(this);

@@ -335,7 +335,9 @@ void Root::frameMove(float deltaTime, int32_t totalFrames) {
         if (xr->beginRenderFrame()) {
             for (auto *camera : _allCameraList) {
                 if (camera->isHMD()) {
+#if USE_XR
                     camera->getOriginMatrix();
+#endif
                 }
             }
             auto swapchains = gfx::Device::getInstance()->getSwapchains();
@@ -415,7 +417,9 @@ void Root::frameMove(float deltaTime, int32_t totalFrames) {
 
                 for (auto *camera : _allCameraList) {
                     if (camera->isHMD()) {
+#if USE_XR
                         camera->dependUpdateData();
+#endif
                     }
                 }
             }

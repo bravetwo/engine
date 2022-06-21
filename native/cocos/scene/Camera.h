@@ -164,7 +164,6 @@ public:
     void changeTargetWindow(RenderWindow *window);
     void attachCamera(RenderWindow *window);
 #if USE_XR
-    void changeTargetWindowByXrEye(int xrEye);
     void getOriginMatrix();
     void dependUpdateData();
 #endif

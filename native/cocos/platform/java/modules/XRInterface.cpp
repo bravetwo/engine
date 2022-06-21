@@ -28,18 +28,108 @@
 #include <unistd.h>
 #include <functional>
 #include <unordered_map>
+#include "cocos/bindings/jswrapper/SeApi.h"
 #include "base/Log.h"
 #include "base/Macros.h"
 #include "renderer/GFXDeviceManager.h"
-#ifdef CC_USE_GLES3
-    #include "gfx-gles3/GLES3GPUObjects.h"
+#include "bindings/event/EventDispatcher.h"
+#ifdef CC_USE_VULKAN
+#include "gfx-vulkan/VKDevice.h"
 #endif
+#ifdef CC_USE_GLES3
+#include "gfx-gles-common/gles3w.h"
+#include "gfx-gles3/GLES3Device.h"
+#include "renderer/gfx-gles3/GLES3GPUObjects.h"
+#endif
+
 #if USE_XR
     #include "Xr.h"
 #endif
 //const bool IS_ENABLE_XR_LOG = true;
 
 namespace cc {
+static se::Object *jsHandleEventObj = nullptr;
+static void dispatchHandleEventInternal(const xr::HandleEvent &handleEvent) {
+    switch (handleEvent.type) {
+        case xr::HandleEvent::Type::VIEW_POSE_ACTIVE_LEFT:
+        case xr::HandleEvent::Type::HAND_POSE_ACTIVE_LEFT:
+        case xr::HandleEvent::Type::AIM_POSE_ACTIVE_LEFT:
+        case xr::HandleEvent::Type::VIEW_POSE_ACTIVE_RIGHT:
+        case xr::HandleEvent::Type::HAND_POSE_ACTIVE_RIGHT:
+        case xr::HandleEvent::Type::AIM_POSE_ACTIVE_RIGHT: {
+            se::AutoHandleScope scope;
+            if (!jsHandleEventObj) {
+                jsHandleEventObj = se::Object::createPlainObject();
+                jsHandleEventObj->root();
+            }
+
+            const auto &xVal = se::Value(handleEvent.handleInfo.x);
+            const auto &yVal = se::Value(handleEvent.handleInfo.y);
+            const auto &zVal = se::Value(handleEvent.handleInfo.z);
+            const auto &quaternionXVal = se::Value(handleEvent.handleInfo.quaternion.x);
+            const auto &quaternionYVal = se::Value(handleEvent.handleInfo.quaternion.y);
+            const auto &quaternionZVal = se::Value(handleEvent.handleInfo.quaternion.z);
+            const auto &quaternionWVal = se::Value(handleEvent.handleInfo.quaternion.w);
+            jsHandleEventObj->setProperty("x", xVal);
+            jsHandleEventObj->setProperty("y", yVal);
+            jsHandleEventObj->setProperty("z", zVal);
+            jsHandleEventObj->setProperty("quaternionX", quaternionXVal);
+            jsHandleEventObj->setProperty("quaternionY", quaternionYVal);
+            jsHandleEventObj->setProperty("quaternionZ", quaternionZVal);
+            jsHandleEventObj->setProperty("quaternionW", quaternionWVal);
+            se::ValueArray args;
+            args.emplace_back(se::Value(jsHandleEventObj));
+            EventDispatcher::doDispatchJsEvent(xr::HandleEvent::TypeNames[(int)handleEvent.type], args);
+        } break;
+        case xr::HandleEvent::Type::THUMBSTICK_MOVE_LEFT:
+        case xr::HandleEvent::Type::THUMBSTICK_MOVE_RIGHT: {
+            se::AutoHandleScope scope;
+            if (!jsHandleEventObj) {
+                jsHandleEventObj = se::Object::createPlainObject();
+                jsHandleEventObj->root();
+            }
+
+            const auto &xVal = se::Value(handleEvent.handleInfo.x);
+            const auto &yVal = se::Value(handleEvent.handleInfo.y);
+            jsHandleEventObj->setProperty("x", xVal);
+            jsHandleEventObj->setProperty("y", yVal);
+            se::ValueArray args;
+            args.emplace_back(se::Value(jsHandleEventObj));
+            EventDispatcher::doDispatchJsEvent(xr::HandleEvent::TypeNames[(int)handleEvent.type], args);
+        } break;
+        case xr::HandleEvent::Type::TRIGGER_START_LEFT:
+        case xr::HandleEvent::Type::GRIP_START_LEFT:
+        case xr::HandleEvent::Type::TRIGGER_START_RIGHT:
+        case xr::HandleEvent::Type::GRIP_START_RIGHT: {
+            se::AutoHandleScope scope;
+            if (!jsHandleEventObj) {
+                jsHandleEventObj = se::Object::createPlainObject();
+                jsHandleEventObj->root();
+            }
+
+            const auto &val = se::Value(handleEvent.handleInfo.value);
+            jsHandleEventObj->setProperty("value", val);
+            se::ValueArray args;
+            args.emplace_back(se::Value(jsHandleEventObj));
+            EventDispatcher::doDispatchJsEvent(xr::HandleEvent::TypeNames[(int)handleEvent.type], args);
+        } break;
+#if XR_OEM_ROKID
+        case xr::HandleEvent::Type::HOME_DOWN:
+            break;
+        case xr::HandleEvent::Type::HOME_UP: {
+            CC_LOG_ERROR("[XRInterface] exit when home up in rokid.");
+            exit(0);
+        } break;
+#endif
+        case xr::HandleEvent::Type::UNKNOWN:
+            // unknown type, do nothing
+            break;
+        default:
+            EventDispatcher::doDispatchJsEvent(xr::HandleEvent::TypeNames[(int)handleEvent.type], se::EmptyValueArray);
+            break;
+    }
+}
+
 xr::XRVendor XRInterface::getVendor() {
 #if XR_OEM_HUAWEIVR
     return xr::XRVendor::HUAWEIVR;
@@ -115,7 +205,7 @@ uint32_t XRInterface::getRuntimeVersion() {
     return 1;
 }
 
-void XRInterface::initialize(void *javaVM, void *activity, xr::XREventsCallback callback) {
+void XRInterface::initialize(void *javaVM, void *activity) {
 #if USE_XR
     #if CC_USE_VULKAN
     _graphicsApiName = GraphicsApiVulkan_1_1;
@@ -128,7 +218,7 @@ void XRInterface::initialize(void *javaVM, void *activity, xr::XREventsCallback 
 
     CC_LOG_INFO("[XR] initialize vm.%p,aty.%p | %s", javaVM, activity, _graphicsApiName.c_str());
     xr::XrEntry::getInstance()->initPlatformData(javaVM, activity);
-    xr::XrEntry::getInstance()->setEventsCallback(&EventDispatcher::dispatchHandleEvent);
+    xr::XrEntry::getInstance()->setEventsCallback(&dispatchHandleEventInternal);
     #if XR_OEM_PICO
     xr::XrEntry::getInstance()->createXrInstance(_graphicsApiName.c_str());
     #endif
@@ -162,6 +252,11 @@ void XRInterface::onRenderDestroy() {
 #if USE_XR
     CC_LOG_INFO("[XR] onRenderDestroy");
     xr::XrEntry::getInstance()->destroyXrInstance();
+    if (jsHandleEventObj != nullptr) {
+        jsHandleEventObj->unroot();
+        jsHandleEventObj->decRef();
+        jsHandleEventObj = nullptr;
+    }
 #endif
 }
 // render thread lifecycle
@@ -247,10 +342,10 @@ gfx::Format XRInterface::getXRSwapchainFormat() {
     return gfx::Format::SRGB8_A8;
 }
 
-void XRInterface::updateXRSwapchainHandle(uint32_t index, void* ccHandle) {
+void XRInterface::updateXRSwapchainTypedID(uint32_t index, uint32_t typedID) {
 #if USE_XR
     auto &cocosXrSwapchain = xr::XrEntry::getInstance()->getCocosXrSwapchains().at(index);
-    cocosXrSwapchain.ccSwapchainHandle = ccHandle;
+    cocosXrSwapchain.ccSwapchainTypedID = typedID;
 #endif
 }
 // gfx
@@ -290,9 +385,9 @@ VkPhysicalDevice XRInterface::getXRVulkanGraphicsDevice() {
     return _vkPhysicalDevice;
 }
 
-void XRInterface::getXRSwapchainVkImages(std::vector<VkImage> &vkImages, void *ccSwapchainHandle) {
+void XRInterface::getXRSwapchainVkImages(std::vector<VkImage> &vkImages, uint32_t ccSwapchainTypedID) {
 #if USE_XR
-    xr::XrEntry::getInstance()->getSwapchainImages(vkImages, ccSwapchainHandle);
+    xr::XrEntry::getInstance()->getSwapchainImages(vkImages, ccSwapchainTypedID);
 #endif
 }
 #endif

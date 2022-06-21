@@ -37,18 +37,15 @@ Swapchain::Swapchain()
 Swapchain::~Swapchain() = default;
 
 void Swapchain::initialize(const SwapchainInfo &info) {
-#if !defined(CC_SERVER_MODE) && !USE_XR
-    CC_ASSERT(info.windowHandle);
+    IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
+    if (!xr) {
+#if !defined(CC_SERVER_MODE)
+        CC_ASSERT(info.windowHandle);
 #endif
+    }
 
     _windowHandle = info.windowHandle;
     _vsyncMode = info.vsyncMode;
-
-    IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
-    if (xr) {
-        XrSwapchainInfo swapchainInfo = (XrSwapchainInfo &&) info;
-        xr->updateXRSwapchainHandle(swapchainInfo.xrViewIdx, this);
-    }
     doInit(info);
 }
 
