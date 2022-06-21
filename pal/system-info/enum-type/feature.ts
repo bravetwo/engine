@@ -57,6 +57,11 @@ export enum Feature {
      */
     EVENT_ACCELEROMETER = 'EVENT_ACCELEROMETER',
     /**
+     * @en Feature to support dispatching EventGamepad.
+     * @zh 是否支持派发 EventGamepad.
+     */
+    EVENT_GAMEPAD = 'EVENT_GAMEPAD',
+    /**
      * @en Feature to support dispatching EventHandle.
      * @zh 是否支持派发 EventHandle
      */

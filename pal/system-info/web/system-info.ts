@@ -191,6 +191,8 @@ class SystemInfo extends EventTarget {
             [Feature.EVENT_MOUSE]: supportMouse,
             [Feature.EVENT_TOUCH]: supportTouch || supportMouse,
             [Feature.EVENT_ACCELEROMETER]: (window.DeviceMotionEvent !== undefined || window.DeviceOrientationEvent !== undefined),
+            // @ts-expect-error undefined webkitGetGamepads
+            [Feature.EVENT_GAMEPAD]: (navigator.getGamepads !== undefined || navigator.webkitGetGamepads !== undefined),
             [Feature.EVENT_HANDLE]: this.isXR,
         };
 
