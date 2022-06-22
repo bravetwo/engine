@@ -157,7 +157,7 @@ export class Camera extends Component {
     protected _inEditorMode = false;
     protected _flows: string[] | undefined = undefined;
     @serializable
-    protected _cameraType: CameraType = CameraType.MAIN;
+    protected _cameraType: CameraType = CameraType.DEFAULT;
     @serializable
     protected _isHMD = false;
 

@@ -90,9 +90,10 @@ export enum CameraShutter {
 }
 
 export enum CameraType {
-    MAIN = -1,
+    MAIN = 2,
     LEFT_CAMERA = 0,
-    RIGHT_CAMERA = 1
+    RIGHT_CAMERA = 1,
+    DEFAULT = -1
 }
 
 export interface ICameraInfo {

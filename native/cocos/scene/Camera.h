@@ -115,9 +115,10 @@ enum class CameraShutter {
 };
 
 enum CameraType {
-    MAIN = -1,
+    MAIN = 2,
     LEFT_CAMERA = 0,
-    RIGHT_CAMERA = 1
+    RIGHT_CAMERA = 1,
+    DEFAULT = -1
 };
 
 struct ICameraInfo {
@@ -385,7 +386,7 @@ private:
     uint32_t _height{0};
     gfx::ClearFlagBit _clearFlag{gfx::ClearFlagBit::NONE};
     float _clearDepth{1.0F};
-    CameraType            _cameraType = CameraType::MAIN;
+    CameraType            _cameraType = CameraType::DEFAULT;
     bool                  _isHMD = false;
 #if USE_XR
     Mat4                  _matOrigin;

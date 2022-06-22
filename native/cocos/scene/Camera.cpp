@@ -164,7 +164,7 @@ void Camera::update(bool forceUpdate /*false*/, int xrEye /*-1*/) {
         if (_proj == CameraProjection::PERSPECTIVE) {
             _isProjDirty = true;
         }
-        if (_cameraType == CameraType::MAIN) {
+        if (_cameraType == CameraType::MAIN || _cameraType == CameraType::DEFAULT) {
             auto win = Root::getInstance()->getWindows().at(xrEye);
             if (win) {
                 _window = win;
@@ -194,7 +194,7 @@ void Camera::update(bool forceUpdate /*false*/, int xrEye /*-1*/) {
         const float projectionSignY = _device->getCapabilities().clipSpaceSignY;
         // Only for rendertexture processing
         if (_proj == CameraProjection::PERSPECTIVE) {
-            if (xrEye < 0) {
+            if (xrEye < 0 || _cameraType == CameraType::DEFAULT) {
                 Mat4::createPerspective(_fov, _aspect, _nearClip, _farClip,
                                         _fovAxis == CameraFOVAxis::VERTICAL, _device->getCapabilities().clipSpaceMinZ, projectionSignY, static_cast<int>(orientation), &_matProj);
             } else {
@@ -234,7 +234,7 @@ void Camera::changeTargetWindow(RenderWindow *window) {
 
     static IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
     if (xr) {
-        if (_cameraType == CameraType::MAIN) {
+        if (_cameraType == CameraType::MAIN || _cameraType == CameraType::DEFAULT) {
             auto windows = Root::getInstance()->getWindows();
             if (window) {
                 // detach camera from other window

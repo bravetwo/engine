@@ -95,9 +95,10 @@ export enum CameraShutter {
 }
 
 export enum CameraType {
-    MAIN = -1,
+    MAIN = 2,
     LEFT_CAMERA = 0,
-    RIGHT_CAMERA = 1
+    RIGHT_CAMERA = 1,
+    DEFAULT = -1
 }
 
 const FSTOPS: number[] = [1.8, 2.0, 2.2, 2.5, 2.8, 3.2, 3.5, 4.0, 4.5, 5.0, 5.6, 6.3, 7.1, 8.0, 9.0, 10.0, 11.0, 13.0, 14.0, 16.0, 18.0, 20.0, 22.0];
@@ -571,7 +572,7 @@ export class Camera {
     private _exposure = 0;
     private _clearStencil = 0;
     private _geometryRenderer = legacyCC.internal.GeometryRenderer ? new GeometryRenderer() : null;
-    private _cameraType: CameraType = CameraType.MAIN;
+    private _cameraType: CameraType = CameraType.DEFAULT;
     private _isHMD = false;
 
     constructor (device: Device) {
