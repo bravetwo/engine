@@ -23,16 +23,10 @@
 */
 
 import { Prefab, instantiate, Vec3, resources, ccenum, Quat, Vec2 } from '../../core';
-//import { Prefab } from 'cocos/core/assets';
-//import { instantiate } from 'cocos/core/data';
-//import { Vec3 } from 'cocos/core';
-//import { resources } from 'cocos/core';
-import { ccclass, menu, property, disallowMultiple, type } from '../../core/data/class-decorator'
+import { ccclass, property } from '../../core/data/class-decorator'
 import { ARFeature, ARPose, ARTrackable, FeatureEvent, FeatureType, IFeatureData } from '../ar-feature-base';
 import { ARSession } from '../ar-session-component';
-import { Node } from 'cocos/core/scene-graph'
-import load from 'cocos/core/asset-manager/load';
-import { array } from 'cocos/core/utils/js';
+import { Node } from '../../core/scene-graph/node';
 import { ARModuleHelper } from '../ar-module-helper';
 import { ARFeatureData } from '../ar-feature-data';
 

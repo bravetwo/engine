@@ -28,8 +28,6 @@ import { ARFeature, FeatureType, IFeatureData } from '../ar-feature-base';
 import { ARSession } from '../ar-session-component';
 import { Node } from '../../core/scene-graph'
 import { createMesh, MeshUtils } from '../../3d/misc/';
-import load from 'cocos/core/asset-manager/load';
-import { array } from 'cocos/core/utils/js';
 import { ARModuleHelper } from '../ar-module-helper';
 import { Mesh, MeshRenderer, ModelComponent, utils } from '../../3d';
 import { Model } from '../../core/renderer/scene';
