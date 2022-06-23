@@ -67,7 +67,9 @@ export class ARFeaturePlaneDetection extends ARFeature {
     
     mode : ARPlaneDetectionMode;
 
-    private planePrefab : Prefab | null = null;
+    // do not act plane display if null 
+    public planePrefab : Prefab | null = null;
+
     private planesMaxSize = 0;
     //private planesInfo : number[];
 
@@ -194,7 +196,7 @@ export class ARFeaturePlaneDetection extends ARFeature {
         if(this._removedPlanes.length > 0)
                 this.onRemoveEvent.trigger(this._removedPlanes);
 
-        // TODO: Need Move to Agent Process Logic
+        /*/ TODO: Need Move to Agent Process Logic
         let planesInfo = this.removedPlanesInfo;
         if(planesInfo.length > 0) {
             console.log(`remove planes length: ${planesInfo.length}`);
@@ -219,7 +221,7 @@ export class ARFeaturePlaneDetection extends ARFeature {
         if(this._addedPlanes.length > 0)
                 this.onAddEvent.trigger(this._addedPlanes);
 
-        // TODO: Need Move to Agent Process Logic
+        /*/ TODO: Need Move to Agent Process Logic
         planesInfo = this.addedPlanesInfo;
         if(planesInfo.length > 0) {
             console.log(`add planes length: ${planesInfo.length}`);
@@ -257,14 +259,14 @@ export class ARFeaturePlaneDetection extends ARFeature {
                 }
             }
         }
-        
+        //*/
         this.updatedPlanesInfo = armodule.getUpdatedPlanesInfo();
         this._updatedPlanes.length = 0;
         this.assembleInfos(this.updatedPlanesInfo, this._updatedPlanes);
         if(this._updatedPlanes.length > 0)
                 this.onUpdateEvent.trigger(this._updatedPlanes);
 
-        // TODO: Need Move to Agent Process Logic
+        /*/ TODO: Need Move to Agent Process Logic
         planesInfo = this.updatedPlanesInfo;
         offset = 0;
         for (let i = 0; i < armodule.getUpdatedPlanesCount(); i++) {
@@ -290,6 +292,7 @@ export class ARFeaturePlaneDetection extends ARFeature {
                 }
             }
         }
+        */
     }
 
     private assembleInfos(src : number[], dst : ARPlane[]) {
