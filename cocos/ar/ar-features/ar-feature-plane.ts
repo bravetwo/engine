@@ -52,8 +52,6 @@ export class PlaneDetectionConfig extends ARFeatureData {
     @property
     maxPlaneNumber : number = 5;
     @property
-    showPlane : boolean = true;
-    @property
     planePrefab : Prefab | null = null;
 }
 
