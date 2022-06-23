@@ -40,6 +40,12 @@ namespace gfx {
 class GLES3GPUContext;
 }
 
+enum class EGLSurfaceType {
+    NONE,
+    WINDOW,
+    PBUFFER
+};
+
 class CC_DLL IXRInterface : public OSInterface {
 public:
     virtual xr::XRVendor getVendor() = 0;
@@ -86,6 +92,7 @@ public:
 #ifdef CC_USE_GLES3
     virtual void initializeGLESData(xr::PFNGLES3WLOADPROC gles3wLoadFuncProc, gfx::GLES3GPUContext *gpuContext) = 0;
     virtual void attachGLESFramebufferTexture2D() = 0;
+    virtual EGLSurfaceType acquireEGLSurfaceType(uint32_t typedID) = 0;
 #endif
     // gles3
 

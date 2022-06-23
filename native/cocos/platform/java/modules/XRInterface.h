@@ -74,6 +74,7 @@ class XRInterface : public IXRInterface {
 #ifdef CC_USE_GLES3
   virtual void initializeGLESData(xr::PFNGLES3WLOADPROC gles3wLoadFuncProc, gfx::GLES3GPUContext *gpuContext) override;
   virtual void attachGLESFramebufferTexture2D() override;
+  virtual EGLSurfaceType acquireEGLSurfaceType(uint32_t typedID) override;
 #endif
   // gles
 
@@ -110,6 +111,7 @@ class XRInterface : public IXRInterface {
   bool _renderPaused{false};
   bool _renderResumed{false};
   std::unordered_map<void*,xr::XREye> _xrWindowMap;
+  std::unordered_map<uint32_t, EGLSurfaceType> _eglSurfaceTypeMap;
 };
 
 } // namespace cc

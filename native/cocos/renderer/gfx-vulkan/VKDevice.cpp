@@ -624,17 +624,19 @@ void CCVKDevice::acquire(Swapchain *const *swapchains, uint32_t count) {
     static IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
     for (uint32_t i = 0U; i < count; ++i) {
         auto *swapchain = static_cast<CCVKSwapchain *>(swapchains[i]);
+        if (swapchain->gpuSwapchain()->lastPresentResult == VK_NOT_READY) {
+            if (!swapchain->checkSwapchainStatus()) continue;
+        }
+
         if(xr) {
             xr::XRSwapchain xrSwapchain = xr->doGFXDeviceAcquire(_api);
             swapchain->gpuSwapchain()->curImageIndex = xrSwapchain.swapchainImageIndex;
-        } else {
-            if (swapchain->gpuSwapchain()->lastPresentResult == VK_NOT_READY) {
-                if (!swapchain->checkSwapchainStatus()) continue;
-            }
-            vkSwapchains.push_back(swapchain->gpuSwapchain()->vkSwapchain);
-            gpuSwapchains.push_back(swapchain->gpuSwapchain());
-            vkSwapchainIndices.push_back(swapchain->gpuSwapchain()->curImageIndex);
         }
+        if(swapchain->gpuSwapchain()->vkSwapchain)
+            vkSwapchains.push_back(swapchain->gpuSwapchain()->vkSwapchain);
+        if(swapchain->gpuSwapchain())
+            gpuSwapchains.push_back(swapchain->gpuSwapchain());
+        vkSwapchainIndices.push_back(swapchain->gpuSwapchain()->curImageIndex);
     }
 
     _gpuDescriptorSetHub->flush();

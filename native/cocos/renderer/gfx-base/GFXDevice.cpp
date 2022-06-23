@@ -91,29 +91,19 @@ void Device::destroy() {
 
 void Device::destroySurface(void *windowHandle) {
     setRendererAvailable(false);
-    IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
-    bool isHuaweiVR = xr && xr->getVendor() == xr::XRVendor::HUAWEIVR;
-    if (!xr || isHuaweiVR) {
-        for (const auto &swapchain : _swapchains) {
-            if (swapchain->getWindowHandle() == windowHandle) {
-                swapchain->destroySurface();
-                break;
-            }
+    for (const auto &swapchain : _swapchains) {
+        if (swapchain->getWindowHandle() == windowHandle) {
+            swapchain->destroySurface();
+            break;
         }
-    } else {
-        bindContext(true);
     }
 }
 
 void Device::createSurface(void *windowHandle) {
-    IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
-    bool isHuaweiVR = xr && xr->getVendor() == xr::XRVendor::HUAWEIVR;
-    if (!xr || isHuaweiVR) {
-        for (const auto &swapchain : _swapchains) {
-            if (!swapchain->getWindowHandle()) {
-                swapchain->createSurface(windowHandle);
-                break;
-            }
+    for (const auto &swapchain : _swapchains) {
+        if (!swapchain->getWindowHandle()) {
+            swapchain->createSurface(windowHandle);
+            break;
         }
     }
     setRendererAvailable(true);
@@ -139,5 +129,6 @@ TextureBarrier *Device::getTextureBarrier(const TextureBarrierInfo &info) {
     }
     return _textureBarriers[info];
 }
+
 } // namespace gfx
 } // namespace cc

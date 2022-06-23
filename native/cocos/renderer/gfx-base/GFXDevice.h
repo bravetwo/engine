@@ -215,7 +215,6 @@ QueryPool *Device::createQueryPool(const QueryPoolInfo &info) {
 Swapchain *Device::createSwapchain(const SwapchainInfo &info) {
     IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
     if (xr) {
-        bool isHuaweiVR = xr->getVendor() == xr::XRVendor::HUAWEIVR;
         xr->createXRSwapchains();
         auto &cocosXrSwapchains = xr->getXRSwapchains();
         for (int i = 0; i < cocosXrSwapchains.size(); i++) {
@@ -223,22 +222,13 @@ Swapchain *Device::createSwapchain(const SwapchainInfo &info) {
             xr->updateXRSwapchainTypedID(i, res->getTypedID());
             SwapchainInfo swapchain_info;
             swapchain_info.copy(info);
-            if (isHuaweiVR) {
-                if (i > 0) {
-                    swapchain_info.windowHandle = nullptr;
-                }
-            } else {
-                swapchain_info.windowHandle = nullptr;
-            }
             swapchain_info.width = cocosXrSwapchains[i].width;
             swapchain_info.height = cocosXrSwapchains[i].height;
             res->initialize(swapchain_info);
             _swapchains.push_back(res);
         }
 #if (CC_PLATFORM == CC_PLATFORM_ANDROID) || CC_PLATFORM == CC_PLATFORM_OHOS
-        if (isHuaweiVR && !_swapchains.at(0)->getWindowHandle()) {
-            setRendererAvailable(false);
-        } else {
+        if (_swapchains.at(0)->getWindowHandle()) {
             setRendererAvailable(true);
         }
 #else

@@ -26,8 +26,6 @@
 #include <thread>
 #include "GLES3GPUObjects.h"
 #include "base/StringUtil.h"
-#include "platform/BasePlatform.h"
-#include "platform/java/modules/XRInterface.h"
 
 #if CC_SWAPPY_ENABLED
     #include "swappy/swappyGL.h"
@@ -340,10 +338,6 @@ EGLContext GLES3GPUContext::getSharedContext() {
 }
 
 bool GLES3GPUContext::makeCurrent(EGLSurface drawSurface, EGLSurface readSurface, EGLContext context, bool updateCache) {
-    static IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
-    if (xr) {
-        if (_eglCurrentDrawSurface == drawSurface && _eglCurrentReadSurface == readSurface) return true;
-    }
     bool succeeded;
     EGL_CHECK(succeeded = eglMakeCurrent(eglDisplay, drawSurface, readSurface, context));
     if (succeeded && updateCache) {

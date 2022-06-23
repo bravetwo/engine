@@ -346,6 +346,11 @@ void XRInterface::updateXRSwapchainTypedID(uint32_t index, uint32_t typedID) {
 #if USE_XR
     auto &cocosXrSwapchain = xr::XrEntry::getInstance()->getCocosXrSwapchains().at(index);
     cocosXrSwapchain.ccSwapchainTypedID = typedID;
+#if XR_OEM_HUAWEIVR
+    _eglSurfaceTypeMap[typedID] = index == 0 ? EGLSurfaceType::WINDOW : EGLSurfaceType::NONE;
+#else
+    _eglSurfaceTypeMap[typedID] = EGLSurfaceType::PBUFFER;
+#endif
 #endif
 }
 // gfx
@@ -410,6 +415,15 @@ void XRInterface::attachGLESFramebufferTexture2D() {
 #if USE_XR
     xr::XrEntry::getInstance()->attachXrFramebufferTexture2D();
 #endif
+}
+
+EGLSurfaceType XRInterface::acquireEGLSurfaceType(uint32_t typedID) {
+    #if USE_XR
+    if (_eglSurfaceTypeMap.count(typedID) > 0) {
+        return _eglSurfaceTypeMap[typedID];
+    }
+    #endif
+    return EGLSurfaceType::WINDOW;
 }
 #endif
 // gles

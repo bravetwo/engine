@@ -24,8 +24,6 @@
 ****************************************************************************/
 
 #include "GFXSwapchain.h"
-#include "platform/BasePlatform.h"
-#include "platform/java/modules/XRInterface.h"
 
 namespace cc {
 namespace gfx {
@@ -37,15 +35,13 @@ Swapchain::Swapchain()
 Swapchain::~Swapchain() = default;
 
 void Swapchain::initialize(const SwapchainInfo &info) {
-    IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
-    if (!xr) {
 #if !defined(CC_SERVER_MODE)
-        CC_ASSERT(info.windowHandle);
+    CC_ASSERT(info.windowHandle);
 #endif
-    }
 
     _windowHandle = info.windowHandle;
     _vsyncMode = info.vsyncMode;
+
     doInit(info);
 }
 
