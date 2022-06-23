@@ -46,69 +46,282 @@ enum class EGLSurfaceType {
     PBUFFER
 };
 
+/**
+ * @en Mainly responsible for the docking work of the engine and the xr library
+ * @zh 主要负责引擎与xr库的对接工作
+ */
 class CC_DLL IXRInterface : public OSInterface {
 public:
+    /**
+     * @en get xr device vendor
+     * @zh 获取XR设备品牌
+     * @return xr::XRVendor
+     */
     virtual xr::XRVendor getVendor() = 0;
+    /**
+     * @en set int config parameter
+     * @zh 设置整形类型参数
+     * @param key
+     * @param value
+     */
     virtual void setConfigParameterI(xr::XRConfigKey key, int value) = 0;
+    /**
+     * @en get int config parameter
+     * @zh 获取整形类型参数
+     * @param key
+     * @param value
+    */
     virtual int getConfigParameterI(xr::XRConfigKey key) = 0;
+    /**
+     * @en set float config parameter
+     * @zh 设置浮点类型参数
+     * @param key
+     * @param value
+    */
     virtual void setConfigParameterF(xr::XRConfigKey key, float value) = 0;
+    /**
+     * @en get float config parameter
+     * @zh 获取浮点类型参数
+     * @param key
+     * @param value
+    */
     virtual float getConfigParameterF(xr::XRConfigKey key) = 0;
+    /**
+     * @en set string config parameter
+     * @zh 设置字符串类型参数
+     * @param key
+     * @param value
+    */
     virtual void setConfigParameterS(xr::XRConfigKey key, std::string value) = 0;
+    /**
+     * @en get string config parameter
+     * @zh 获取字符串类型参数
+     * @param key
+     * @param value
+    */
     virtual std::string getConfigParameterS(xr::XRConfigKey key) = 0;
-
+    /**
+      * @en get XR runtime version
+      * @zh 获取XR运行时版本号
+      * @return
+     */
     virtual uint32_t getRuntimeVersion() = 0;
+    /**
+     * @en initialize xr runtime envirment
+     * @zh 初始化XR运行环境
+     * @param javaVM android JVM
+     * @param activity android activity
+    */
     virtual void initialize(void *javaVM, void *activity) = 0;
 
     // render thread lifecycle
+    /**
+     * @en call when render pause
+     * @zh 渲染暂停时调用
+     */
     virtual void onRenderPause() = 0;
+    /**
+     * @en call when render resume
+     * @zh 渲染恢复时调用
+    */
     virtual void onRenderResume() = 0;
+    /**
+     * @en call when render destroy
+     * @zh 渲染结束退出时调用
+     */
     virtual void onRenderDestroy() = 0;
     // render thread lifecycle
 
     // gfx
+    /**
+     * @en call before gfx device initialize
+     * @zh GFX设备初始化前调用
+     * @param gfxApi
+     */
     virtual void preGFXDeviceInitialize(gfx::API gfxApi) = 0;
+    /**
+     * @en call after gfx device initialize
+     * @zh GFX设备初始化后调用
+     * @param gfxApi
+     */
     virtual void postGFXDeviceInitialize(gfx::API gfxApi) = 0;
+    /**
+     * @en call when gfx device acquire
+     * @zh GFX设备请求渲染
+     * @param gfxApi
+     * @return
+     */
     virtual const xr::XRSwapchain& doGFXDeviceAcquire(gfx::API gfxApi) = 0;
+    /**
+     * @en call when gfx device present
+     * @zh GFX设备是否需要展示操作
+     */
     virtual bool isGFXDeviceNeedsPresent(gfx::API gfxApi) = 0;
+    /**
+     * @en call after gfx device present
+     * @zh GFX设备展示操作执行之后调用
+     * @param gfxApi
+     */
     virtual void postGFXDevicePresent(gfx::API gfxApi) = 0;
+    /**
+     * @en call when create gfx device's swapchain
+     * @zh 创建GFX交换链时调用
+     */
     virtual void createXRSwapchains() = 0;
+    /**
+     * @en get xr swapchain list
+     * @zh 获取XR交换链列表
+     * @return
+     */
     virtual const std::vector<cc::xr::XRSwapchain>& getXRSwapchains() = 0;
+    /**
+     * @en get xr swapchain's format
+     * @zh 获取XR交换链格式
+     * @return
+     */
     virtual gfx::Format getXRSwapchainFormat() = 0;
+    /**
+     * @en bind engine's swapchain with xr swapchain
+     * @zh 绑定引擎交换链与XR交换链对应关系
+     * @param index xr eye
+     * @param typedID engine swapchain's type id
+     */
     virtual void updateXRSwapchainTypedID(uint32_t index, uint32_t typedID) = 0;
     // gfx
 
     // vulkan
 #ifdef CC_USE_VULKAN
+    /**
+     * @en get the vk version required by XR
+     * @zh 获取XR要求的VK版本信息
+     * @param engineVkApiVersion engine's vk version
+     */
     virtual uint32_t getXRVkApiVersion(uint32_t engineVkApiVersion) = 0;
+    /**
+     * @en initialize vulkan envirment
+     * @zh 初始化vk运行环境
+     * @param addr
+     */
     virtual void initializeVulkanData(const PFN_vkGetInstanceProcAddr &addr) = 0;
+    /**
+     * @en create vulkan instance
+     * @zh 创建vk实例
+     * @param instInfo
+     * @return
+     */
     virtual VkInstance createXRVulkanInstance(const VkInstanceCreateInfo &instInfo) = 0;
+    /**
+     * @en create vulkan device
+     * @zh 创建vk逻辑设备
+     * @param deviceInfo
+     * @return
+     */
     virtual VkDevice createXRVulkanDevice(const VkDeviceCreateInfo *deviceInfo) = 0;
+    /**
+     * @en get vulkan physical device
+     * @zh 获取vk物理设备
+     * @return
+     */
     virtual VkPhysicalDevice getXRVulkanGraphicsDevice() = 0;
+    /**
+     * @en get vkImage list from xrswapchain
+     * @zh 获取xr交换链中vkimage列表
+     * @param vkImages
+     * @param ccSwapchainTypedID
+     */
     virtual void getXRSwapchainVkImages(std::vector<VkImage> &vkImages, uint32_t ccSwapchainTypedID) = 0;
 #endif
     // vulkan
 
     // gles3
 #ifdef CC_USE_GLES3
+    /**
+     * @en initialize gles envirment
+     * @zh 初始化gles运行环境
+     * @param gles3wLoadFuncProc
+     * @param gpuContext
+     */
     virtual void initializeGLESData(xr::PFNGLES3WLOADPROC gles3wLoadFuncProc, gfx::GLES3GPUContext *gpuContext) = 0;
+    /**
+     * @en attach current texture id to fbo
+     * @zh 绑定当前纹理到帧缓冲区
+     */
     virtual void attachGLESFramebufferTexture2D() = 0;
+    /**
+     * @en acquire EGLSurfaceType by engine swapchain's type id
+     * @zh 根据引擎交换链获取对应需要创建的EGLSurface类型
+     * @param typedID
+     * @return
+     */
     virtual EGLSurfaceType acquireEGLSurfaceType(uint32_t typedID) = 0;
 #endif
     // gles3
 
     // stereo render loop
+    /**
+     * @en call when platform loop start
+     * @zh 平台循环开始时调用
+     * @return
+     */
     virtual bool platformLoopStart() = 0;
+    /**
+     * @en call when frame render begin
+     * @zh 一帧渲染开始时调用
+     * @return
+     */
     virtual bool beginRenderFrame() = 0;
+    /**
+     * @en call when single eye render begin
+     * @zh 单眼渲染开始时调用
+     * @param eye
+     * @return
+     */
     virtual bool beginRenderEyeFrame(uint32_t eye) = 0;
+    /**
+     * @en call when single eye render end
+     * @zh 单眼渲染结束时调用
+     * @param eye
+     * @return
+     */
     virtual bool endRenderEyeFrame(uint32_t eye) = 0;
+    /**
+     * @en call when frame render end
+     * @zh 一帧渲染结束时调用
+     * @return
+     */
     virtual bool endRenderFrame() = 0;
+    /**
+     * @en call when platform loop end
+     * @zh 平台循环结束时调用
+     * @return
+     */
     virtual bool platformLoopEnd() = 0;
     // stereo render loop
 
+    /**
+     * @en get xr view projection data
+     * @zh 获取xr双眼投影矩阵数据
+     * @param eye
+     * @param near
+     * @param far
+     * @return
+     */
     virtual ccstd::vector<float> getXRViewProjectionData(uint32_t eye, float near, float far) = 0;
 
     // renderwindow
+    /**
+     * @en get renderwindow's xreye type
+     * @zh 获取当前RenderWindow的XREye类型
+     * @param window
+     * @return
+     */
     virtual xr::XREye getXREyeByRenderWindow(void* window) = 0;
+    /**
+     * @en bind renderwindow with xr eye
+     * @zh 建立RenderWindow与XREye的对应关系
+     * @param window
+     * @param eye
+     */
     virtual void bindXREyeWithRenderWindow(void* window, xr::XREye eye) = 0;
 };
 } // namespace cc
