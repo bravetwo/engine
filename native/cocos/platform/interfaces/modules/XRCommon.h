@@ -26,6 +26,8 @@
 #ifndef XR_COMMON_H_
 #define XR_COMMON_H_ 1
 #include <functional>
+#include <string>
+#include <cstdint>
 
 namespace cc {
 namespace xr {
@@ -51,7 +53,94 @@ enum class XRConfigKey {
     RENDER_SCALE,
     SESSION_RUNNING,
     INSTANCE_CREATED,
-    VK_QUEUE_FAMILY_INDEX
+    VK_QUEUE_FAMILY_INDEX,
+    METRICS_STATE
+};
+
+enum class XRConfigValueType {
+    UNKNOWN,
+    INT,
+    FLOAT,
+    BOOL,
+    STRING,
+    VOID_POINTER
+};
+
+struct XRConfigValue {
+  int vInt = 0;
+  float vFloat = 0;
+  bool vBool = false;
+  void* vPtr = nullptr;
+  std::string vString;
+  XRConfigValueType valueType = XRConfigValueType::UNKNOWN;
+  bool isInt() {
+      return valueType == XRConfigValueType::INT;
+  }
+
+  bool isFloat() {
+      return valueType == XRConfigValueType::FLOAT;
+  }
+
+  bool isBool() {
+      return valueType == XRConfigValueType::BOOL;
+  }
+
+  bool isPointer() {
+      return valueType == XRConfigValueType::VOID_POINTER;
+  }
+
+  bool isString() {
+      return valueType == XRConfigValueType::STRING;
+  }
+
+  bool getBool() {
+      return vBool;
+  }
+
+  int getInt() {
+      return vInt;
+  }
+
+  float getFloat() {
+      return vFloat;
+  }
+
+  std::string getString() {
+      return vString;
+  }
+
+  void* getPointer() {
+      return vPtr;
+  }
+
+  XRConfigValue() {
+
+  }
+
+  XRConfigValue(int value) {
+      valueType = XRConfigValueType::INT;
+      vInt = value;
+  }
+
+  XRConfigValue(float value) {
+      valueType = XRConfigValueType::FLOAT;
+      vFloat = value;
+  }
+
+  XRConfigValue(std::string value) {
+      valueType = XRConfigValueType::STRING;
+      vString = value;
+  }
+
+  XRConfigValue(bool value) {
+      valueType = XRConfigValueType::BOOL;
+      vBool = value;
+  }
+
+  XRConfigValue(void* value) {
+      valueType = XRConfigValueType::VOID_POINTER;
+      vPtr = value;
+  }
 };
 
 struct XRQuaternion {
