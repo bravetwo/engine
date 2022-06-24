@@ -241,6 +241,7 @@ export class ARFeatureSceneMesh extends ARFeature {
             offset = i * ARFeatureSceneMesh.MESH_INFO_SIZE;
             
             let meshRef = meshInfo[offset];
+            console.log(`mesh :: ${meshRef}`);
             let pos = new Vec3(
                 meshInfo[offset + 1],
                 meshInfo[offset + 2],
@@ -264,15 +265,18 @@ export class ARFeatureSceneMesh extends ARFeature {
             sceneMeshNode = this._meshesNodeMap.get(meshRef);
             vertices = armodule.getSceneMeshVertices(meshRef);
             indices = armodule.getSceneMeshTriangleIndices(meshRef);
+            console.log(`vertices ::: ${vertices}`);
+            console.log(`indices ::: ${indices}`);
 
             if(vertices.length <= 0) continue;
             if(indices.length <= 0) continue;
             //
             console.log(`vertices length: ${vertices.length}`);
+            console.log(`indices length: ${indices.length}`);
+            /*
             vertices.forEach(vert => {
                 console.log(`${vert}`);
             });
-            console.log(`indices length: ${indices.length}`);
             indices.forEach(indi => {
                 console.log(`${indi}`);
             });//*/
@@ -329,25 +333,25 @@ export class ARFeatureSceneMesh extends ARFeature {
             }
             //*/
 
-            /*
+            //*
             let mesh : Mesh = new Mesh();
             mesh = createMesh({
                 positions: vertices,
                 indices: indices,
             });
-            console.log(`vertices length: ${vertices.length}`);
-            console.log(`indices length: ${indices.length}`);
             const meshGeo = mesh.renderingSubMeshes[0].geometricInfo;
             const geo = {
                 positions: meshGeo.positions.slice(),
                 indices: meshGeo.indices!.slice()
             };
             renderer.mesh = createMesh(primitives.wireframed(geo as any));
-            */
+            //*/
+            /*
             renderer.mesh = createMesh({
                 positions: vertices,
                 indices: indices,
             });
+            */
 
             renderer.material = this._sceneMaterial;
             //*/

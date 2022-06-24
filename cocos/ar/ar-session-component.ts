@@ -315,6 +315,7 @@ export class ARSession extends Component {
             if(element != null) {
                 console.log(element.name);
                 let featureClass = ARSession.FEATURE_PREFIX + element.name;
+                console.log("feature class::", featureClass);
 
                 // check constructor
                 if((<any>features)[featureClass]) {
@@ -371,7 +372,7 @@ export class ARSession extends Component {
 
             let supportBit = supportMask & (1 << index);
             if(supportBit == 0) {
-                const feaName = (Math.pow(index, 2) as FeatureType).toString();
+                const feaName = FeatureType[Math.pow(index, 2)];
                 this.featuresMap.delete(ARSession.FEATURE_PREFIX + feaName);
                 console.log(`Do not support ${feaName}.`);
             }
