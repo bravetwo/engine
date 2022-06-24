@@ -283,6 +283,11 @@ public:
                     _launched = true;
                     if (cocos_main(0, nullptr) != 0) {
                         CC_LOG_ERROR("AndroidPlatform: Launch game failed!");
+                    } else {
+                        IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
+                        if (xr) {
+                            xr->onRenderResume();
+                        }
                     }
                 } else {
                     IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
@@ -329,6 +334,10 @@ public:
             }
             case APP_CMD_DESTROY: {
                 CC_LOG_INFO("AndroidPlatform: APP_CMD_DESTROY");
+                IXRInterface *xr = _androidPlatform->getInterface<IXRInterface>();
+                if (xr) {
+                    xr->onRenderDestroy();
+                }
                 WindowEvent ev;
                 ev.type = WindowEvent::Type::CLOSE;
                 _androidPlatform->dispatchEvent(ev);
@@ -505,10 +514,6 @@ int AndroidPlatform::init() {
 }
 
 void AndroidPlatform::onDestory() {
-    IXRInterface *xr = getInterface<IXRInterface>();
-    if (xr) {
-        xr->onRenderDestroy();
-    }
     UniversalPlatform::onDestory();
     unregisterAllInterfaces();
     CC_SAFE_DELETE(_inputProxy)
