@@ -35,6 +35,16 @@ import { MorphModel } from '../../3d/models/morph-model';
 import { primitives } from '../../../exports/primitive';
 import { PrimitiveMode } from '../../core/gfx';
 import { NULL } from '@cocos/physx';
+import { ARFeatureData } from '../ar-feature-data';
+import { MeshCollider } from '../../physics/framework';
+
+@ccclass('cc.WorldMeshConfig')
+export class WorldMeshConfig extends ARFeatureData {
+    @property
+    useCollider: boolean = false;
+    @property
+    overlayMesh: Material | null = null;
+}
 
 @ccclass('cc.ARFeatureSceneMesh')
 export class ARFeatureSceneMesh extends ARFeature {
@@ -49,6 +59,7 @@ export class ARFeatureSceneMesh extends ARFeature {
     private count : number = 0;
     private _meshesNodeMap = new Map<number, Node>();
 
+    private _useCollider = false;
     // close all and destroy all while set false
     //private _enable : boolean = true;
 
@@ -60,15 +71,22 @@ export class ARFeatureSceneMesh extends ARFeature {
     constructor (session : ARSession, config : IFeatureData, jsonObject? : any) {
         super(session, config, jsonObject);
 
-        //this._enable = jsonObject.enable;
-
         this._meshesParent = new Node("_MESHES_");
         this._session.node.addChild(this._meshesParent);
 
-        var self = this;
-        resources.load(jsonObject.sceneMaterialPath, Material, function (err, mat) {
-            self._sceneMaterial = mat;
-        });
+        if(config) {
+            let meshConfig = config as WorldMeshConfig;
+            this._useCollider = meshConfig.useCollider;
+
+            if(meshConfig.overlayMesh) {
+                this._sceneMaterial = meshConfig.overlayMesh;
+            }
+        } else if (jsonObject) {
+            var self = this;
+            resources.load(jsonObject.sceneMaterialPath, Material, function (err, mat) {
+                self._sceneMaterial = mat;
+            });
+        }
     }
 
     isReady() : boolean {
@@ -138,16 +156,19 @@ export class ARFeatureSceneMesh extends ARFeature {
             this._sceneMaterial.setProperty('mainColor', new Vec4(0, 1, 1, 1));
         }
 
-        let meshes: number[];
-        meshes = armodule.getRemovedSceneMesh();
-        meshes.forEach(meshRef => {
-            if(this._meshesNodeMap.has(meshRef)) {
-                let node = this._meshesNodeMap.get(meshRef)!;
-                this._meshesNodeMap.delete(meshRef);
-                node.destroy();
-                console.log(`destroy mesh: ${meshRef}`);
-            }
-        });
+        let removedMeshes: number[];
+        removedMeshes = armodule.getRemovedSceneMesh();
+        console.log(`removed meshes ::: ${removedMeshes}`);
+        if(removedMeshes) {
+            removedMeshes.forEach(meshRef => {
+                if(this._meshesNodeMap.has(meshRef)) {
+                    let node = this._meshesNodeMap.get(meshRef)!;
+                    this._meshesNodeMap.delete(meshRef);
+                    node.destroy();
+                    console.log(`destroy mesh: ${meshRef}`);
+                }
+            });
+        }
 
         let addedMeshes : number[];
         let updatetdMeshes : number[];
@@ -216,7 +237,7 @@ export class ARFeatureSceneMesh extends ARFeature {
         });
         //*/
 
-        armodule.endRequireSceneMesh();
+        //armodule.endRequireSceneMesh();
     }
 
     public updateContents() {
@@ -257,22 +278,28 @@ export class ARFeatureSceneMesh extends ARFeature {
             // create or update node
             let sceneMeshNode : Node | undefined;
             let renderer : MeshRenderer | null;
-            let vertices: number[];
-            let indices: number[];
+            let vertices: number[] | null = null;
+            let indices: number[] | null = null;
             //let vertices: Float32Array;
             //let indices: Uint32Array;
 
             sceneMeshNode = this._meshesNodeMap.get(meshRef);
             vertices = armodule.getSceneMeshVertices(meshRef);
             indices = armodule.getSceneMeshTriangleIndices(meshRef);
+            armodule.endRequireSceneMesh();
+            
             console.log(`vertices ::: ${vertices}`);
             console.log(`indices ::: ${indices}`);
 
-            if(vertices.length <= 0) continue;
-            if(indices.length <= 0) continue;
+            if(vertices) continue;
+            if(indices) continue;
+            if(vertices!.length <= 0) continue;
+            if(indices!.length <= 0) continue;
             //
-            console.log(`vertices length: ${vertices.length}`);
-            console.log(`indices length: ${indices.length}`);
+            console.log(`vertices length: ${vertices!.length}`);
+            console.log(`indices length: ${indices!.length}`);
+
+            
             /*
             vertices.forEach(vert => {
                 console.log(`${vert}`);
@@ -336,8 +363,8 @@ export class ARFeatureSceneMesh extends ARFeature {
             //*
             let mesh : Mesh = new Mesh();
             mesh = createMesh({
-                positions: vertices,
-                indices: indices,
+                positions: vertices!,
+                indices: indices!,
             });
             const meshGeo = mesh.renderingSubMeshes[0].geometricInfo;
             const geo = {
@@ -354,6 +381,12 @@ export class ARFeatureSceneMesh extends ARFeature {
             */
 
             renderer.material = this._sceneMaterial;
+            if(this._useCollider) {
+                let collider = sceneMeshNode.addComponent(MeshCollider);
+                collider.mesh = renderer.mesh
+                collider.enabled = false;
+                collider.enabled = true;
+            }
             //*/
         }
     }

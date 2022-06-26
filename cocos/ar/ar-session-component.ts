@@ -120,6 +120,7 @@ export class ARSession extends Component {
     private _configMask = FeatureType.None;
 
     public onLoad() {
+        console.log("load ... armodule ...");
         const armodule = ARModuleHelper.getInstance();
 
         // check for AR support
