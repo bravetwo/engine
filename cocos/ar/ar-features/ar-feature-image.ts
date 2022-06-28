@@ -24,7 +24,7 @@
 
 import { Prefab, instantiate, Vec3, resources, Material, builtinResMgr, director, Vec4, Quat } from '../../core';
 import { ccclass, menu, property, disallowMultiple, type } from '../../core/data/class-decorator'
-import { ARFeature, ARPose, FeatureEvent, FeatureType, IFeatureData } from '../ar-feature-base';
+import { ARFeature, ARPose, ARTrackable, FeatureEvent, FeatureType, IFeatureData } from '../ar-feature-base';
 import { ARSession } from '../ar-session-component';
 import { Node } from '../../core/scene-graph'
 import { createMesh } from '../../3d/misc';
@@ -35,15 +35,22 @@ import { MorphModel } from '../../3d/models/morph-model';
 import { primitives } from '../../../exports/primitive';
 import { PrimitiveMode } from '../../core/gfx';
 import { TERRAIN_NORTH_INDEX } from '../../terrain';
+import { ARFeatureData } from '../ar-feature-data';
 
-export interface ARImage {
-    anchorId : number;
+export interface ARImage extends ARTrackable {
     libIndex : number;
-    pose : ARPose;
 }
 
-@ccclass('cc.ARFeatureImage')
-export class ARFeatureImage extends ARFeature {
+@ccclass('cc.ImageTrackingConfig')
+export class ImageTrackingConfig extends ARFeatureData {
+    @property
+    imageNames : string[] = [];
+    @property
+    maxTrackingNumber : number = 1;
+}
+
+@ccclass('cc.ARFeatureImageTracking')
+export class ARFeatureImageTracking extends ARFeature {
     public get featureId(): FeatureType {
         return FeatureType.ImageTracking;
     }
@@ -54,7 +61,7 @@ export class ARFeatureImage extends ARFeature {
 
     // TODO: need a image lib editor window to create lib, add image and set image size.
     // currently add images in native project, as ar resources group
-    private _imageNames : string[];
+    private _imageNames : string[] = [];
 
     private _maxTrackingNumber : number = 1;
 
@@ -69,11 +76,18 @@ export class ARFeatureImage extends ARFeature {
     constructor (session : ARSession, config : IFeatureData, jsonObject? : any) {
         super(session, config, jsonObject);
 
-        this._imageNames = jsonObject.images;
+        if(config) {
+            let imageConfig = config as ImageTrackingConfig;
+            this._imageNames = imageConfig.imageNames;
+            this._maxTrackingNumber = imageConfig.maxTrackingNumber;
 
-        if(jsonObject.maxTrackingNumber)
-            this._maxTrackingNumber = jsonObject.maxTrackingNumber;
+        } else if(jsonObject) {
+            this._imageNames = jsonObject.images;
 
+            if(jsonObject.maxTrackingNumber)
+                this._maxTrackingNumber = jsonObject.maxTrackingNumber;
+        }
+        
         this._addedImages = new Array();
         this._updatedImages = new Array();
         this._removedImages = new Array();
@@ -115,7 +129,7 @@ export class ARFeatureImage extends ARFeature {
         let imagesInfo : number[];
         imagesInfo = armodule.getAddedImagesInfo();
         if(imagesInfo.length > 0) {
-            //console.log("add images:", imagesInfo.length);
+            console.log("add images:", imagesInfo.length);
             //this._addedImages = this.assembleInfos(imagesInfo);
             this._addedImages.length = 0;
             this.assembleInfos(imagesInfo, this._addedImages);
@@ -126,7 +140,7 @@ export class ARFeatureImage extends ARFeature {
 
         imagesInfo = armodule.getUpdatedImagesInfo();
         if(imagesInfo.length > 0) {
-            //console.log("update images:", imagesInfo.length);
+            console.log("update images:", imagesInfo.length);
             //this._updatedImages = this.assembleInfos(imagesInfo);
             this._updatedImages.length = 0;
             this.assembleInfos(imagesInfo, this._updatedImages);
@@ -137,7 +151,7 @@ export class ARFeatureImage extends ARFeature {
 
         imagesInfo = armodule.getRemovedImagesInfo();
         if(imagesInfo.length > 0) {
-            //console.log("remove images:", imagesInfo.length);
+            console.log("remove images:", imagesInfo.length);
             //this._removedImages = this.assembleInfos(imagesInfo);
             this._removedImages.length = 0;
             this.assembleInfos(imagesInfo, this._removedImages);
@@ -150,13 +164,13 @@ export class ARFeatureImage extends ARFeature {
     private assembleInfos(src : number[], dst : ARImage[]) {
         //let images : ARImage[] = new Array();
         if(src) {
-            let count = src.length / ARFeatureImage.IMAGE_INFO_SIZE;
+            let count = src.length / ARFeatureImageTracking.IMAGE_INFO_SIZE;
             let offset = 0;
             for (let i = 0; i < count; i++) {
-                offset = i * ARFeatureImage.IMAGE_INFO_SIZE;
+                offset = i * ARFeatureImageTracking.IMAGE_INFO_SIZE;
                 
                 let image : ARImage = {
-                    anchorId : src[offset],
+                    id : src[offset],
                     libIndex : src[offset + 1],
                     pose : {
                         position : new Vec3(

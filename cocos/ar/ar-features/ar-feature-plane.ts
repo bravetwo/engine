@@ -55,7 +55,7 @@ export class PlaneDetectionConfig extends ARFeatureData {
     planePrefab : Prefab | null = null;
 }
 
-@ccclass('cc.ARFeaturePlane')
+@ccclass('cc.ARFeaturePlaneDetection')
 export class ARFeaturePlaneDetection extends ARFeature {
     private static readonly PLANE_INFO_SIZE = 12;
 

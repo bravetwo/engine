@@ -290,7 +290,7 @@ export class ARSession extends Component {
                 if((<any>features)[featureClass]) {
                     //var featureInstance = new (<any>features)[featureClass](element, this);
                     var featureInstance = new (<any>features)[featureClass](this, configData);
-                    console.log(featureInstance instanceof ARFeature);
+                    console.log("feature instance::", featureInstance instanceof ARFeature);
 
                     if(!this.featuresMap.has(featureClass)) {
                         this._configMask |= featureInstance.featureId;

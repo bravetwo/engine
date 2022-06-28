@@ -291,8 +291,8 @@ export class ARFeatureSceneMesh extends ARFeature {
             console.log(`vertices ::: ${vertices}`);
             console.log(`indices ::: ${indices}`);
 
-            if(vertices) continue;
-            if(indices) continue;
+            if(!vertices) continue;
+            if(!indices) continue;
             if(vertices!.length <= 0) continue;
             if(indices!.length <= 0) continue;
             //
