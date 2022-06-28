@@ -256,23 +256,18 @@ void GLES3Device::acquire(Swapchain *const *swapchains, uint32_t count) {
     _swapchains.clear();
     static IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
     if(xr) {
+        GLuint _xrFramebuffer = 0;
 #if XR_OEM_HUAWEIVR
-        GLint _xrFramebuffer = 0;
         stateCache()->glTextures[stateCache()->texUint] = 0;
         glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, reinterpret_cast<GLint *>(&_xrFramebuffer));
         stateCache()->glDrawFramebuffer = _xrFramebuffer;
 #else
         xr::XRSwapchain xrSwapchain = xr->doGFXDeviceAcquire(_api);
-        if (stateCache()->glDrawFramebuffer != xrSwapchain.glDrawFramebuffer) {
-            GL_CHECK(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, xrSwapchain.glDrawFramebuffer));
-            stateCache()->glDrawFramebuffer = xrSwapchain.glDrawFramebuffer;
-        }
+        _xrFramebuffer = xrSwapchain.glDrawFramebuffer;
 #endif
         for (uint32_t i = 0; i < count; ++i) {
-#if !XR_OEM_HUAWEIVR
-            xr->attachGLESFramebufferTexture2D();
-#endif
-            static_cast<GLES3Swapchain *>(swapchains[i])->gpuSwapchain()->glFramebuffer = stateCache()->glDrawFramebuffer;
+            GL_CHECK(xr->attachGLESFramebufferTexture2D(););
+            static_cast<GLES3Swapchain *>(swapchains[i])->gpuSwapchain()->glFramebuffer = _xrFramebuffer;
             _swapchains.push_back(static_cast<GLES3Swapchain *>(swapchains[i])->gpuSwapchain());
         }
         return;
