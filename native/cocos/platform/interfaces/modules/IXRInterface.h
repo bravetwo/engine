@@ -58,48 +58,21 @@ public:
      * @return xr::XRVendor
      */
     virtual xr::XRVendor getVendor() = 0;
+
     /**
-     * @en set int config parameter
-     * @zh 设置整形类型参数
+     * @en get xr config parameter
+     * @zh 获取XR配置参数
+     */
+    virtual xr::XRConfigValue getXRConfig(xr::XRConfigKey key) = 0;
+
+    /**
+     * @en set xr config parameter
+     * @zh 设置XR配置参数
      * @param key
      * @param value
      */
-    virtual void setConfigParameterI(xr::XRConfigKey key, int value) = 0;
-    /**
-     * @en get int config parameter
-     * @zh 获取整形类型参数
-     * @param key
-     * @param value
-    */
-    virtual int getConfigParameterI(xr::XRConfigKey key) = 0;
-    /**
-     * @en set float config parameter
-     * @zh 设置浮点类型参数
-     * @param key
-     * @param value
-    */
-    virtual void setConfigParameterF(xr::XRConfigKey key, float value) = 0;
-    /**
-     * @en get float config parameter
-     * @zh 获取浮点类型参数
-     * @param key
-     * @param value
-    */
-    virtual float getConfigParameterF(xr::XRConfigKey key) = 0;
-    /**
-     * @en set string config parameter
-     * @zh 设置字符串类型参数
-     * @param key
-     * @param value
-    */
-    virtual void setConfigParameterS(xr::XRConfigKey key, std::string value) = 0;
-    /**
-     * @en get string config parameter
-     * @zh 获取字符串类型参数
-     * @param key
-     * @param value
-    */
-    virtual std::string getConfigParameterS(xr::XRConfigKey key) = 0;
+    virtual void setXRConfig(xr::XRConfigKey key, xr::XRConfigValue value) = 0;
+
     /**
       * @en get XR runtime version
       * @zh 获取XR运行时版本号

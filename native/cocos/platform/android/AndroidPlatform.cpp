@@ -492,7 +492,7 @@ int AndroidPlatform::init() {
             _loopTimeOut = LOW_FREQUENCY_TIME_INTERVAL;
             _isLowFrequencyLoopEnabled = true;
             IXRInterface *xr = getInterface<IXRInterface>();
-            bool isXRInstanceCreated = xr && xr->getConfigParameterI(xr::XRConfigKey::INSTANCE_CREATED);
+            bool isXRInstanceCreated = xr && xr->getXRConfig(xr::XRConfigKey::INSTANCE_CREATED).getBool();
             if (!isXRInstanceCreated) {
                 _loopTimeOut = -1;
                 _isLowFrequencyLoopEnabled = false;
@@ -554,7 +554,7 @@ int32_t AndroidPlatform::loop() {
 
         if(xr && !xr->platformLoopStart()) continue;
         _inputProxy->handleInput();
-        if (_inputProxy->isAnimating() && (xr ? xr->getConfigParameterI(xr::XRConfigKey::SESSION_RUNNING) : true)) {
+        if (_inputProxy->isAnimating() && (xr ? xr->getXRConfig(xr::XRConfigKey::SESSION_RUNNING).getBool() : true)) {
             runTask();
             if (_inputProxy->isActive()) {
                 flushTasksOnGameThreadAtForegroundJNI();

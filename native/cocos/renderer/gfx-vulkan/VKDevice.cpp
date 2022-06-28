@@ -486,8 +486,7 @@ bool CCVKDevice::doInit(const DeviceInfo & /*info*/) {
 
     if(xr) {
         cc::gfx::CCVKGPUQueue* vkQueue = static_cast<cc::gfx::CCVKQueue *>(getQueue())->gpuQueue();
-        uint32_t vkQueueFamilyIndex = vkQueue->queueFamilyIndex;
-        xr->setConfigParameterI(xr::XRConfigKey::VK_QUEUE_FAMILY_INDEX, vkQueueFamilyIndex);
+        xr->setXRConfig(xr::XRConfigKey::VK_QUEUE_FAMILY_INDEX, (int) vkQueue->queueFamilyIndex);
         xr->postGFXDeviceInitialize(_api);
     }
     return true;

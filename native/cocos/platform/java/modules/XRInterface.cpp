@@ -143,60 +143,19 @@ xr::XRVendor XRInterface::getVendor() {
     return xr::XRVendor::MOBILE;
 }
 
-void XRInterface::setConfigParameterI(xr::XRConfigKey key, int value) {
+xr::XRConfigValue XRInterface::getXRConfig(xr::XRConfigKey key) {
 #if USE_XR
-    CC_LOG_INFO("[XR] setConfigParameterI %d=%d", key, value);
-    switch (key) {
-        case xr::XRConfigKey::VK_QUEUE_FAMILY_INDEX:
-            _vkQueueFamilyIndex = value;
-            break;
-        case xr::XRConfigKey::MULTI_SAMPLES:
-            _multiSamples = value;
-            break;
-        default:
-            break;
-    }
+    return xr::XrEntry::getInstance()->getXRConfig(key);
 #endif
+    cc::xr::XRConfigValue configValue;
+    return configValue;
 }
 
-int XRInterface::getConfigParameterI(xr::XRConfigKey key) {
+void XRInterface::setXRConfig(xr::XRConfigKey key, xr::XRConfigValue value) {
 #if USE_XR
-    switch (key) {
-        case xr::XRConfigKey::INSTANCE_CREATED:
-            return xr::XrEntry::getInstance()->isCreatedXrInstance();
-        case xr::XRConfigKey::SESSION_RUNNING:
-            return xr::XrEntry::getInstance()->isSessionRunning();
-        case xr::XRConfigKey::MULTI_SAMPLES:
-            return _multiSamples;
-        default:
-            break;
-    }
+    CC_LOG_INFO("[XR] setConfigParameterI %d", key);
+    xr::XrEntry::getInstance()->setXRConfig(key, value);
 #endif
-    return 0;
-}
-
-void XRInterface::setConfigParameterF(xr::XRConfigKey key, float value) {
-#if USE_XR
-    CC_LOG_INFO("[XR] setConfigParameterF %d=%f", key, value);
-#endif
-}
-
-float XRInterface::getConfigParameterF(xr::XRConfigKey key) {
-#if USE_XR
-#endif
-    return 0;
-}
-
-void XRInterface::setConfigParameterS(xr::XRConfigKey key, std::string value) {
-#if USE_XR
-    CC_LOG_INFO("[XR] setConfigParameterS %d=%s", key, value.c_str());
-#endif
-}
-
-std::string XRInterface::getConfigParameterS(xr::XRConfigKey key) {
-#if USE_XR
-#endif
-    return "";
 }
 
 uint32_t XRInterface::getRuntimeVersion() {
@@ -285,7 +244,8 @@ void XRInterface::postGFXDeviceInitialize(gfx::API gfxApi) {
     #endif
     } else if (gfxApi == gfx::API::VULKAN) {
     #if CC_USE_VULKAN
-        cc::xr::XrEntry::getInstance()->initXrSession(_vkInstance, _vkPhysicalDevice, _vkDevice, _vkQueueFamilyIndex);
+        int vkQueueFamilyIndex = xr::XrEntry::getInstance()->getXRConfig(cc::xr::XRConfigKey::VK_QUEUE_FAMILY_INDEX).getInt();
+        cc::xr::XrEntry::getInstance()->initXrSession(_vkInstance, _vkPhysicalDevice, _vkDevice, vkQueueFamilyIndex);
     #endif
     }
 #endif

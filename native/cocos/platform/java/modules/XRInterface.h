@@ -31,12 +31,8 @@ namespace cc {
 class XRInterface : public IXRInterface {
  public:
   virtual xr::XRVendor getVendor() override;
-  virtual void setConfigParameterI(xr::XRConfigKey key, int value) override;
-  virtual int getConfigParameterI(xr::XRConfigKey key) override;
-  virtual void setConfigParameterF(xr::XRConfigKey key, float value) override;
-  virtual float getConfigParameterF(xr::XRConfigKey key) override;
-  virtual void setConfigParameterS(xr::XRConfigKey key, std::string value) override;
-  virtual std::string getConfigParameterS(xr::XRConfigKey key) override;
+  virtual xr::XRConfigValue getXRConfig(xr::XRConfigKey key) override;
+  virtual void setXRConfig(xr::XRConfigKey key, xr::XRConfigValue value) override;
 
   virtual uint32_t getRuntimeVersion() override;
   virtual void initialize(void *javaVM, void *activity) override;
@@ -104,8 +100,6 @@ class XRInterface : public IXRInterface {
   xr::PFNGLES3WLOADPROC _gles3wLoadFuncProc{nullptr};
   gfx::GLES3GPUContext *_gles3GPUContext{nullptr};
 #endif
-  uint32_t _multiSamples{1};
-  uint32_t _vkQueueFamilyIndex{0};
   xr::XRSwapchain _acquireSwapchain;
   std::vector<cc::xr::XRSwapchain> _xrSwapchains;
   bool _renderPaused{false};
