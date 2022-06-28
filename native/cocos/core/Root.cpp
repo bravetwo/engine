@@ -364,7 +364,7 @@ void Root::frameMove(float deltaTime, int32_t totalFrames) {
                     xr::XREye wndXREye = xr->getXREyeByRenderWindow( _windows[i]);
                     if (wndXREye == (xr::XREye) xrEye) {
                         _windows[i]->extractRenderCameras(_cameraList, xrEye);
-                    } else {
+                    } else if(wndXREye == xr::XREye::NONE ){
                         _windows[i]->extractRenderCameras(_cameraList, -1);
                     }
                 }
