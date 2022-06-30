@@ -155,6 +155,7 @@ export class ARFeatureSceneMesh extends ARFeature {
             });
             this._sceneMaterial.setProperty('mainColor', new Vec4(0, 1, 1, 1));
         }
+        
 
         let removedMeshes: number[];
         removedMeshes = armodule.getRemovedSceneMesh();
@@ -381,6 +382,7 @@ export class ARFeatureSceneMesh extends ARFeature {
             */
 
             renderer.material = this._sceneMaterial;
+            /*
             if(this._useCollider) {
                 let collider = sceneMeshNode.addComponent(MeshCollider);
                 collider.mesh = renderer.mesh
