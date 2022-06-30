@@ -53,8 +53,6 @@ ForwardPipeline::ForwardPipeline() {
     _pipelineSceneData = ccnew PipelineSceneData();
 }
 
-framegraph::StringHandle ForwardPipeline::fgStrHandleForwardColorTexture = framegraph::FrameGraph::stringToHandle("forwardColorTexture");
-framegraph::StringHandle ForwardPipeline::fgStrHandleForwardDepthTexture = framegraph::FrameGraph::stringToHandle("forwardDepthTexture");
 framegraph::StringHandle ForwardPipeline::fgStrHandleForwardPass = framegraph::FrameGraph::stringToHandle("forwardPass");
 
 bool ForwardPipeline::initialize(const RenderPipelineInfo &info) {
@@ -91,8 +89,10 @@ bool ForwardPipeline::activate(gfx::Swapchain *swapchain) {
 
 void ForwardPipeline::render(const ccstd::vector<scene::Camera *> &cameras) {
     CC_PROFILE(ForwardPipelineRender);
+#if CC_USE_GEOMETRY_RENDERER
     updateGeometryRenderer(cameras); // for capability
-    
+#endif
+
     auto *device = gfx::Device::getInstance();
     const bool enableOcclusionQuery = isOcclusionQueryEnabled();
     if (enableOcclusionQuery) {

@@ -33,10 +33,47 @@ export declare namespace native {
     export type DownloaderTask = { requestURL: string, storagePath: string, identifier: string };
 
     /**
+     * @en DownloaderHints @zh 下载任务的配置接口
+     * @param countOfMaxProcessingTasks
+     * @en Maximum number of download tasks processed at the same time, optional, default is 6
+     * @zh 同时处理的最大下载任务数量, 可选, 默认值为6
+     * @param timeoutInSeconds @en Download request timeout, optional, default is 45 seconds @zh 下载请求的超时时间, 可选, 默认值为45秒
+     * @param tempFileNameSuffix  @en Temporary file suffix generated during download, optional, default is .tmp @zh 下载时产生的临时文件后缀, 可选, 默认值为.tmp
+     */
+    export interface DownloaderHints {
+        countOfMaxProcessingTasks?: number;
+        timeoutInSeconds?: number;
+        tempFileNameSuffix?: string;
+    }
+
+    /**
      * @en Downloader class for task download
      * @zh Downloader 任务下载类
      */
     export class Downloader {
+        /**
+         * @en Downloader default constructor, constructed by the default value of DownloaderHints.
+         * @zh Downloader的默认构造函数, 通过DownloaderHints的默认值构造.
+         * @example
+         * ```ts
+         * let downloader = new native.Downloader(); // create a Downloader object by default constructor
+         */
+        constructor();
+
+        /**
+         * @en Downloader constructor with parameter, constructed by DownloaderHints.
+         * @zh Downloader的有参构造函数, 通过传递的DownloaderHints去构造.
+         * @example
+         * ```ts
+         * const hints: native.DownloaderHints = { // create a DownloaderHints interface
+         *     countOfMaxProcessingTasks: 6,
+         *     timeoutInSeconds: 100,
+         *     tempFileNameSuffix: ".tmp"
+         * };
+         * let downloader = new native.Downloader(hints); // create a Downloader object with DownloaderHints
+         */
+        constructor (hints: DownloaderHints);
+
         /**
          * @en create a download task. The maximum size for a single download file is 4GB.
          * @zh 创建一个下载任务. 单个下载文件最大为4GB.
@@ -46,33 +83,93 @@ export declare namespace native {
          * @return @en DownloaderTask @zh 下载任务对象
          * @example
          * ```ts
-         * // create a download task
-         * let downloader = new native.Downloader();
+         * let task = downloader.createDownloadTask('https://example.com/exampleFile.zip', native.fileUtils.getWritablePath());
+         */
+        createDownloadTask (requestURL:string, storagePath:string, identifier?:string): DownloaderTask;
+
+        /**
+         * @en setter for the callback function after download success
+         * @zh 任务成功下载后的回调函数的修改器
+         * @param task @en download task @zh 下载的任务
+         * @example
+         * ```ts
+         *  // set a download success callback
+         *  downloader.onSuccess = (task) => {
+         *      console.log('Success!'); // call when task download success
+         * };
+         */
+        onSuccess: (task: DownloaderTask) => void | undefined;
+
+        /**
+         * @en setter for the callback function while download.
+         * @zh 任务下载过程中的回调函数的修改器.
+         * @param task @en download task @zh 下载任务
+         * @param bytesReceived @en received bytes in current call @zh 此次接收到的字节
+         * @param totalBytesReceived @en total bytes have been received @zh 已接收到的所有字节
+         * @param totalBytesExpected @en total bytes expected to receive  @zh 预计接收的所有字节
+         * @example
+         * ```ts
+         *  // setter for the callback for download progress prompt
+         *  downloader.onProgress = (task, bytesReceived, totalBytesReceived, totalBytesExpected) => {
+         *      console.log(bytesReceived, totalBytesReceived); // download data info
+         *      console.log(totalBytesReceived / totalBytesExpected * 100).toFixed(1) + '%'); // progress prompt
+         * };
+         */
+        onProgress: (task: DownloaderTask, bytesReceived: number, totalBytesReceived: number, totalBytesExpected: number) => void | undefined;
+
+        /**
+         * @en setter for the callback function when download error
+         * @zh 任务下载发生错误时的回调函数的修改器
+         * @param task @en download task @zh 下载任务
+         * @param errorCode @en  error code  @zh 错误码
+         * @param errorCodeInternal @en internal error code @zh 内部错误码
+         * @param errorStr @en error info string @zh 错误信息
+         * @example
+         * ```ts
+         * // set a download error callback
+         *  downloader.onError = (task, errorCode, errorCodeInternal, errorStr) => {
+         *  console.log('Error:', errorStr);
+         * };
+         */
+        onError: (task: DownloaderTask, errorCode: number, errorCodeInternal: number, errorStr: string) => void | undefined;
+
+        /**
+         * @deprecated since v3.6.0, please use `createDownloadTask` to instead.
+         * @en create a download task. The maximum size for a single download file is 4GB.
+         * @zh 创建一个下载任务. 单个下载文件最大为4GB.
+         * @param requestURL @en Request download resource URL  @zh 请求下载资源的URL
+         * @param storagePath @en Storage path for downloaded file @zh 下载文件存储路径
+         * @param identifier  @en identifier @zh 标识符
+         * @return @en DownloaderTask @zh 下载任务对象
+         * @example
+         * ```ts
          * let task = downloader.createDownloadFileTask('https://example.com/exampleFile.zip', native.fileUtils.getWritablePath());
          */
         createDownloadFileTask (requestURL:string, storagePath:string, identifier?:string): DownloaderTask;
 
         /**
+         * @deprecated since v3.6.0, please use setter `onSuccess` to instead.
          * @en set callback function after download success
          * @zh 设置任务成功下载后的回调函数
          * @param onSucceed @en Download success callback @zh 下载成功后的回调函数
          * @example
          * ```ts
          *  // set a download success callback
-         *  down.setOnFileTaskSuccess((task)=>{
+         *  downloader.setOnFileTaskSuccess((task)=>{
          *  console.log('Success!'); // call when task download success
          * });
          */
         setOnFileTaskSuccess (onSucceed: (task: DownloaderTask) => void): void;
 
         /**
+         * @deprecated since v3.6.0, please use setter `onProgress` to instead.
          * @en set callback function while download.
          * @zh 设置任务下载过程中的回调函数.
          * @param onProgress @en Download progress callback @zh 下载过程中的回调函数
          * @example
          * ```ts
          *  // set a callback for download progress prompt
-         *  down.setOnTaskProgress((task, bytesReceived, totalBytesReceived, totalBytesExpected)=>{
+         *  downloader.setOnTaskProgress((task, bytesReceived, totalBytesReceived, totalBytesExpected)=>{
          *  console.log(bytesReceived, totalBytesReceived); // download data info
          *  console.log(totalBytesReceived / totalBytesExpected * 100).toFixed(1) + '%'); // progress prompt
          * });
@@ -80,13 +177,14 @@ export declare namespace native {
         setOnTaskProgress (onProgress: (task: DownloaderTask, bytesReceived: number,
             totalBytesReceived: number, totalBytesExpected: number) => void): void;
         /**
+         * @deprecated since v3.6.0, please use setter `onError` to instead.
          * @en set callback function when download error
          * @zh 设置任务下载发生错误时的回调函数
          * @param onError @en Download error callback @zh 下载发生错误时的回调函数
          * @example
          * ```ts
          * // set a download error callback
-         *  down.setOnTaskError((task, errorCode, errorCodeInternal, errorStr)=>{
+         *  downloader.setOnTaskError((task, errorCode, errorCodeInternal, errorStr)=>{
          *  console.log('Error:', errorStr);
          * });
         */

@@ -26,7 +26,9 @@
 #include "LightingStage.h"
 #include "../BatchedBuffer.h"
 #include "../Define.h"
-#include "../GeometryRenderer.h"
+#if CC_USE_GEOMETRY_RENDERER
+    #include "../GeometryRenderer.h"
+#endif
 #include "../GlobalDescriptorSetManager.h"
 #include "../InstancedBuffer.h"
 #include "../PipelineStateManager.h"
@@ -526,10 +528,19 @@ void LightingStage::fgTransparent(scene::Camera *camera) {
         }
 
         _planarShadowQueue->recordCommandBuffer(_device, table.getRenderPass(), cmdBuff);
-        camera->getGeometryRenderer()->render(table.getRenderPass(), cmdBuff, pipeline->getPipelineSceneData());
+#if CC_USE_GEOMETRY_RENDERER
+        if (camera->getGeometryRenderer()) {
+            camera->getGeometryRenderer()->render(table.getRenderPass(), cmdBuff, pipeline->getPipelineSceneData());
+        }
+#endif
     };
 
-    if (!_isTransparentQueueEmpty || !camera->getGeometryRenderer()->empty()) {
+    if (!_isTransparentQueueEmpty 
+#if CC_USE_GEOMETRY_RENDERER
+        || (camera->getGeometryRenderer() && !camera->getGeometryRenderer()->empty())) {
+#else
+    ) {
+#endif
         pipeline->getFrameGraph().addPass<RenderData>(static_cast<uint32_t>(DeferredInsertPoint::DIP_TRANSPARENT),
                                                       DeferredPipeline::fgStrHandleTransparentPass, transparentSetup, transparentExec);
     }
@@ -673,7 +684,7 @@ void LightingStage::fgSsprPass(scene::Camera *camera) {
             gfx::AccessFlagBit::DEPTH_STENCIL_ATTACHMENT_WRITE,
             gfx::AccessFlagBit::COMPUTE_SHADER_READ_TEXTURE,
         })};
-        cmdBuff->pipelineBarrier(nullptr, &textureBarrier, &texDepth, 1);
+        cmdBuff->pipelineBarrier(nullptr, nullptr, nullptr, 0, &textureBarrier, &texDepth, 1);
 
         // step 2 bind descriptors
         gfx::DescriptorSet *reflectDesc = _reflectionComp->getDescriptorSet();
@@ -733,7 +744,7 @@ void LightingStage::fgSsprPass(scene::Camera *camera) {
 
         // pipeline barrier
         auto *cmdBuff = pipeline->getCommandBuffers()[0];
-        cmdBuff->pipelineBarrier(nullptr, const_cast<gfx::TextureBarrierList &>(_reflectionComp->getBarrierBeforeDenoise()), {reflectionTex, denoiseTex});
+        cmdBuff->pipelineBarrier(nullptr, {}, {}, const_cast<gfx::TextureBarrierList &>(_reflectionComp->getBarrierBeforeDenoise()), {reflectionTex, denoiseTex});
 
         // bind descriptor set
         bool useEnvmap = pipeline->isEnvmapEnabled();
@@ -765,7 +776,7 @@ void LightingStage::fgSsprPass(scene::Camera *camera) {
 
         // pipeline barrier
         // dispatch -> fragment
-        cmdBuff->pipelineBarrier(nullptr, _reflectionComp->getBarrierAfterDenoise(), {denoiseTex});
+        cmdBuff->pipelineBarrier(nullptr, {}, {}, _reflectionComp->getBarrierAfterDenoise(), {denoiseTex});
 
         _denoiseIndex = (_denoiseIndex + 1) % _reflectionElems.size();
     };
