@@ -268,7 +268,6 @@ export class XRController extends Component {
         } else if (this._inputDevice == XrInputDeviceType.Right_Hand) {
             if (this._xrInteractor) {
                 this._xrInteractor.event.deviceType = DeviceType.Right;
-                console.log("xr0206 onEnable this.deviceType :" + this._xrInteractor.event.deviceType);
             }
             this.registerInputEvent(this._getInputEventType(this.selectActionRight), XrControlEventType.SELECT_ENTERED);
             this.registerInputEvent(this._getInputEventType(this.activateActionRight), XrControlEventType.ACTIVATED);

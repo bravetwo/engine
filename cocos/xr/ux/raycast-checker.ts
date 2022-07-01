@@ -6,7 +6,7 @@ import { XrControlEventType, XrEventHandle, XrUIPressEvent, XrUIPressEventType }
 
 @ccclass('cc.RaycastChecker')
 @help('i18n:cc.RaycastChecker')
-@menu('XR/UI/RaycastChecker')
+@menu('XR/UX/RaycastChecker')
 @executeInEditMode
 export class RaycastChecker extends Component {
     @serializable

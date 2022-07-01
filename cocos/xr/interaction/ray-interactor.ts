@@ -40,7 +40,7 @@ import { Line } from '../../particle/line';
 import { InteractorEvents } from '../event/interactor-events';
 import { XrInteractor, SelectActionTrigger_Type } from './xr-interactor';
 import { IXrInteractable, XrInteractable } from './xr-interactable';
-import { RaycastChecker } from '../ui/raycast-checker';
+import { RaycastChecker } from '../ux/raycast-checker';
 import { PhysicsRayResult } from '../../physics/framework';
 
 enum Line_Type {
@@ -371,12 +371,6 @@ export class RayInteractor extends XrInteractor {
             const ui3DBase = closestResult.collider?.getComponent(RaycastChecker);
             if (ui3DBase) {
                 this._collider = closestResult.collider;
-                // if (press) {
-                //     ui3DBase.uiPress(closestResult.hitPoint);
-                //     this._collider = closestResult.collider;
-                // } else {
-                //     ui3DBase.uiUnPress();
-                // }
                 return true;
             }
         }
@@ -446,7 +440,7 @@ export class RayInteractor extends XrInteractor {
         }
     }
 
-    private _ui3dHit(closestResult: PhysicsRayResult, ui3DBase: RaycastChecker) {
+    private _ui3dHit(closestResult: PhysicsRayResult) {
         this._handleHoverEnter(closestResult);
     }
 
@@ -469,7 +463,7 @@ export class RayInteractor extends XrInteractor {
             } else {
                 const ui3DBase = closestResult.collider?.getComponent(RaycastChecker);
                 if (ui3DBase) {
-                    this._ui3dHit(closestResult, ui3DBase);
+                    this._ui3dHit(closestResult);
                 } else {
                     this._handleHoverExit();
                 }

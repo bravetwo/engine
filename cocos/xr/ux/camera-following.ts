@@ -1,17 +1,17 @@
-import { ccclass, help, menu, displayOrder, serializable, tooltip, type, executeInEditMode} from 'cc.decorator';
+import { ccclass, help, menu, displayOrder, serializable, tooltip, type, executeInEditMode } from 'cc.decorator';
 import { CameraComponent, Component } from "../../core";
 
-@ccclass('cc.UIFollow')
-@help('i18n:cc.UIFollow')
-@menu('XR/UI/UIFollow')
+@ccclass('cc.CameraFollowing')
+@help('i18n:cc.CameraFollowing')
+@menu('XR/UX/CameraFollowing')
 @executeInEditMode
-export class UIFollow extends Component {
+export class CameraFollowing extends Component {
     @serializable
     private _camera: CameraComponent | null = null;
 
     @type(CameraComponent)
     @displayOrder(1)
-    @tooltip('i18n:xr.ui_follow.camera')
+    @tooltip('i18n:xr.camera_following.camera')
     set camera(val) {
         if (val === this._camera) {
             return;

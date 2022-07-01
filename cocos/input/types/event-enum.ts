@@ -834,6 +834,15 @@ export enum InputEventType {
      * 右键抬起事件
      */
     DPAD_RIGHT_UP = 'dpad-right-up',
+
+    /**
+     * @en
+     * The event type for XR keyboard case switching event
+     *
+     * @zh
+     * XR键盘大小写切换事件
+     */
+     XR_CAPS_LOCK = 'xr-caps-lock',
 }
 
 export type SystemEventTypeUnion = SystemEventType | NodeEventType | InputEventType | string;

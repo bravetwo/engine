@@ -31,7 +31,7 @@ import { SpriteFrame } from '../../2d/assets/sprite-frame';
 import { Component } from '../../core/components/component';
 import { EventHandler as ComponentEventHandler } from '../../core/components/component-event-handler';
 import { Color, Size, Vec3 } from '../../core/math';
-import { EventTouch } from '../../input/types';
+import { EventKeyboard, EventTouch, KeyCode } from '../../input/types';
 import { Node } from '../../core/scene-graph/node';
 import { Label, VerticalTextAlignment } from '../../2d/components/label';
 import { Sprite } from '../../2d/components/sprite';
@@ -42,6 +42,8 @@ import { sys } from '../../core/platform/sys';
 import { legacyCC } from '../../core/global-exports';
 import { NodeEventType } from '../../core/scene-graph/node-event';
 import { XrUIPressEventType } from '../../xr/event/xr-event-handle';
+import { xrKeyboardInput, XRKeyboardInputField } from '../../xr';
+import { InputEventType } from '../../input/types/event-enum';
 
 const LEFT_PADDING = 2;
 
@@ -388,6 +390,8 @@ export class EditBox extends Component {
     protected  _maxLength = 20;
 
     private _isLabelVisible = false;
+    private _xrKeyBoardInputField: XRKeyboardInputField | null = null;
+    private _capsLock = false;
 
     public __preload () {
         this._init();
@@ -400,6 +404,9 @@ export class EditBox extends Component {
         this._ensureBackgroundSprite();
         if (this._impl) {
             this._impl.onEnable();
+        }
+        if (sys.isXR) {
+            this._xrKeyBoardInputField = this.node.getComponent(XRKeyboardInputField);
         }
     }
 
@@ -775,8 +782,31 @@ export class EditBox extends Component {
     }
 
     protected _xrUnClick() {
-        if (this._impl) {
-            this._impl.beginEditing();
+        if (this._xrKeyBoardInputField?.show()) {
+            xrKeyboardInput.on(InputEventType.KEY_DOWN, this._xrKeyBoardDown, this);
+            xrKeyboardInput.on(InputEventType.KEY_UP, this._xrKeyBoardUp, this);
+        }
+    }
+
+    protected _xrKeyBoardDown(event: EventKeyboard) {
+        
+    }
+
+    protected _xrKeyBoardUp(event: EventKeyboard) {
+        if (event.keyCode === KeyCode.ENTER) {
+            this._xrKeyBoardInputField?.hide();
+            xrKeyboardInput.off(InputEventType.KEY_DOWN, this._xrKeyBoardDown, this);
+            xrKeyboardInput.off(InputEventType.KEY_UP, this._xrKeyBoardUp, this);
+        } else if (event.keyCode === KeyCode.BACKSPACE) {
+            this.string = this.string.substring(0, this.string.length - 1);
+        } else if (event.keyCode === KeyCode.CAPS_LOCK) {
+            this._capsLock = !this._capsLock;
+        } else {
+            if (!this._capsLock && event.keyCode > 64 && event.keyCode < 91) {
+                this.string += String.fromCharCode(event.keyCode + 32);
+            } else {
+                this.string += String.fromCharCode(event.keyCode);
+            }
         }
     }
 }
