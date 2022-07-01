@@ -147,7 +147,7 @@ export class ARFeatureSceneMesh extends ARFeature {
         if(!this._enable) return;
         this.processChanges();
     }
-
+    /*
     show() {
         if(this._meshesParent)
             this._meshesParent!.active = true;
@@ -161,7 +161,7 @@ export class ARFeatureSceneMesh extends ARFeature {
     destroy() {
         this._meshesParent?.destroy();
     }
-
+    */
     public processChanges() {
         //if(this.count > 2) return;
         const armodule = ARModuleHelper.getInstance();
@@ -177,8 +177,8 @@ export class ARFeatureSceneMesh extends ARFeature {
 
         let removedMeshes: number[];
         removedMeshes = armodule.getRemovedSceneMesh();
-        console.log(`removed meshes ::: ${removedMeshes}`);
         if(removedMeshes) {
+            console.log(`removed meshes ::: ${removedMeshes}`);
             this.onRemoveEvent.trigger(removedMeshes);
 
             /*

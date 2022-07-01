@@ -138,6 +138,12 @@ export class ARModuleAdaptor implements IARModule {
         return null;
     }
 
+    public setAllFeaturesActive(enable : boolean) {
+        this._featuresMap.forEach((feature, id) => {
+            feature.enable = enable;
+        });
+    }
+
     private createFeatures(featuresDataset : ARFeatureData[]) {
         featuresDataset.forEach(configData => {
             if(configData != null) {
