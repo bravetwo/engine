@@ -25,6 +25,7 @@
 import { math } from '../core';
 import { ccclass, menu, property, disallowMultiple, type } from '../core/data/class-decorator'
 import { convertWraps } from '../spine';
+import { ARModuleAdaptor } from './ar-module-adaptor';
 import { ARSession } from './ar-session-component'
 
 interface IFeatureEvent<T> {
@@ -97,7 +98,7 @@ export abstract class ARFeature implements IFeature {
         }
     }
 
-    public get session() : ARSession {
+    public get session() : ARModuleAdaptor {
         return this._session;
     }
 
@@ -107,11 +108,11 @@ export abstract class ARFeature implements IFeature {
     protected _enable : boolean = true;
     //protected _support : boolean = false;
 
-    protected _session: ARSession;
+    protected _session : ARModuleAdaptor;
 
-    constructor (session : ARSession, config : IFeatureData);
-    constructor (session : ARSession, config : IFeatureData, jsonObject : any);
-    constructor (session : ARSession, config : IFeatureData | IFeature, jsonObject? : any) {
+    constructor (session : ARModuleAdaptor, config : IFeatureData);
+    constructor (session : ARModuleAdaptor, config : IFeatureData, jsonObject : any);
+    constructor (session : ARModuleAdaptor, config : IFeatureData | IFeature, jsonObject? : any) {
         this._session = session;
         
         if(config) {

@@ -29,8 +29,15 @@ import { ARFeatureData } from './ar-feature-data';
 import { ARModuleHelper } from './ar-module-helper';
 import * as features from './ar-features';
 
+export interface IARModule {
+    start (): void;
+    resume (): void;
+    pause (): void;
+    update (): void;
+}
+
 @ccclass('cc.ARModuleAdaptor')
-export class ARModuleAdaptor {
+export class ARModuleAdaptor implements IARModule {
     public static readonly FEATURE_PREFIX = "ARFeature";
 
     private _configMask = FeatureType.None;
@@ -71,7 +78,7 @@ export class ARModuleAdaptor {
 
     public resume() {
         const instance = ARModuleHelper.getInstance();
-        instance.onPause();
+        instance.onResume();
     }
 
     public pause() {

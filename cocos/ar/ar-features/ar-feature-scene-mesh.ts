@@ -24,7 +24,7 @@
 
 import { Prefab, instantiate, Vec3, resources, Material, builtinResMgr, director, Vec4, Quat } from '../../core';
 import { ccclass, menu, property, disallowMultiple, type } from '../../core/data/class-decorator'
-import { ARFeature, FeatureType, IFeatureData } from '../ar-feature-base';
+import { ARFeature, ARTrackable, FeatureEvent, FeatureType, IFeatureData } from '../ar-feature-base';
 import { ARSession } from '../ar-session-component';
 import { Node } from '../../core/scene-graph'
 import { createMesh, MeshUtils } from '../../3d/misc/';
@@ -37,6 +37,14 @@ import { PrimitiveMode } from '../../core/gfx';
 import { NULL } from '@cocos/physx';
 import { ARFeatureData } from '../ar-feature-data';
 import { MeshCollider } from '../../physics/framework';
+import { ARModuleAdaptor } from '../ar-module-adaptor';
+
+export interface ARMesh extends ARTrackable {
+    vertices : number[];
+    indices : number[];
+    useMaterial : Material;
+    //bound : Bound;
+}
 
 @ccclass('cc.WorldMeshConfig')
 export class WorldMeshConfig extends ARFeatureData {
@@ -64,15 +72,23 @@ export class ARFeatureSceneMesh extends ARFeature {
     //private _enable : boolean = true;
 
     private _meshesParent : Node | null = null;
-    
+
+    private _addedMeshes : ARMesh[] = [];
+    private _updatedMeshes : ARMesh[] = [];
+
+    readonly onAddEvent = new FeatureEvent<ARMesh[]>();
+    readonly onUpdateEvent = new FeatureEvent<ARMesh[]>();
+    readonly onRemoveEvent = new FeatureEvent<number[]>();
+
     //constructor(jsonObject : any, session : ARSession) {
         //super(jsonObject, session);
-    constructor (session : ARSession, config : IFeatureData);
-    constructor (session : ARSession, config : IFeatureData, jsonObject? : any) {
+    constructor (session : ARModuleAdaptor, config : IFeatureData);
+    constructor (session : ARModuleAdaptor, config : IFeatureData, jsonObject? : any) {
         super(session, config, jsonObject);
 
         this._meshesParent = new Node("_MESHES_");
-        this._session.node.addChild(this._meshesParent);
+        //this._session.node.addChild(this._meshesParent);
+        director.getScene()?.getChildByName("ARManager")?.addChild(this._meshesParent);
 
         if(config) {
             let meshConfig = config as WorldMeshConfig;
@@ -101,11 +117,13 @@ export class ARFeatureSceneMesh extends ARFeature {
 
     protected onEnable(): void {
         //super.start();
+        /*
         if(!this._meshesParent) {
             this._meshesParent = new Node("_MESHES_");
             this._session.node.addChild(this._meshesParent);
         }
         this._meshesParent.active = true;
+        */
         
         /*/
         const testNode = new Node("test");
@@ -161,6 +179,9 @@ export class ARFeatureSceneMesh extends ARFeature {
         removedMeshes = armodule.getRemovedSceneMesh();
         console.log(`removed meshes ::: ${removedMeshes}`);
         if(removedMeshes) {
+            this.onRemoveEvent.trigger(removedMeshes);
+
+            /*
             removedMeshes.forEach(meshRef => {
                 if(this._meshesNodeMap.has(meshRef)) {
                     let node = this._meshesNodeMap.get(meshRef)!;
@@ -168,15 +189,27 @@ export class ARFeatureSceneMesh extends ARFeature {
                     node.destroy();
                     console.log(`destroy mesh: ${meshRef}`);
                 }
-            });
+            });//*/
         }
 
-        let addedMeshes : number[];
-        let updatetdMeshes : number[];
-        addedMeshes = armodule.getAddedSceneMesh();
-        updatetdMeshes = armodule.getUpdatedSceneMesh();
-        if(addedMeshes) this.processMeshInfo(addedMeshes);
-        if(updatetdMeshes) this.processMeshInfo(updatetdMeshes);
+        let addedMeshInfos : number[];
+        let updatetdMeshInfos : number[];
+        addedMeshInfos = armodule.getAddedSceneMesh();
+        updatetdMeshInfos = armodule.getUpdatedSceneMesh();
+        if(addedMeshInfos) {
+            this._addedMeshes.length = 0;
+            this.assembleInfos(addedMeshInfos, this._addedMeshes);
+            this.onAddEvent.trigger(this._addedMeshes);
+
+            //this.processMeshInfo(addedMeshInfos);
+        }
+        if(updatetdMeshInfos) {
+            this._updatedMeshes.length = 0;
+            this.assembleInfos(updatetdMeshInfos, this._updatedMeshes);
+            this.onUpdateEvent.trigger(this._updatedMeshes);
+
+            //this.processMeshInfo(updatetdMeshInfos);
+        }
 
         /*
         meshes = armodule.requireSceneMesh();
@@ -390,6 +423,47 @@ export class ARFeatureSceneMesh extends ARFeature {
                 collider.enabled = true;
             }
             //*/
+        }
+    }
+
+    private assembleInfos(src : number[], dst : ARMesh[]) {
+        if(src) {
+            const armodule = ARModuleHelper.getInstance();
+            let count = src.length / ARFeatureSceneMesh.MESH_INFO_SIZE;
+            let offset = 0;
+            for (let i = 0; i < count; i++) {
+                offset = i * ARFeatureSceneMesh.MESH_INFO_SIZE;
+
+                let meshRef = src[offset];
+
+                const vertices = armodule.getSceneMeshVertices(meshRef);
+                const indices = armodule.getSceneMeshTriangleIndices(meshRef);
+                armodule.endRequireSceneMesh();
+
+                const pos = new Vec3(
+                    src[offset + 1],
+                    src[offset + 2],
+                    src[offset + 3]
+                );
+                const rot = new Quat(
+                    src[offset + 4],
+                    src[offset + 5],
+                    src[offset + 6],
+                    src[offset + 7]
+                );
+
+                let mesh : ARMesh = {
+                    id: meshRef,
+                    pose : {
+                        position : pos,
+                        rotation : rot
+                    },
+                    vertices : vertices,
+                    indices : indices,
+                    useMaterial : this._sceneMaterial!
+                };
+                dst.push(mesh);
+            }
         }
     }
 }

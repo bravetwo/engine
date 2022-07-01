@@ -36,6 +36,7 @@ import { primitives } from '../../../exports/primitive';
 import { PrimitiveMode } from '../../core/gfx';
 import { TERRAIN_NORTH_INDEX } from '../../terrain';
 import { ARFeatureData } from '../ar-feature-data';
+import { ARModuleAdaptor } from '../ar-module-adaptor';
 
 export interface ARImage extends ARTrackable {
     libIndex : number;
@@ -72,8 +73,8 @@ export class ARFeatureImageTracking extends ARFeature {
 
     //constructor(jsonObject : any, session : ARSession) {
         //super(jsonObject, session);
-    constructor (session : ARSession, config : IFeatureData);
-    constructor (session : ARSession, config : IFeatureData, jsonObject? : any) {
+    constructor (session : ARModuleAdaptor, config : IFeatureData);
+    constructor (session : ARModuleAdaptor, config : IFeatureData, jsonObject? : any) {
         super(session, config, jsonObject);
 
         if(config) {

@@ -34,6 +34,7 @@ import { Model } from '../../core/renderer/scene';
 import { MorphModel } from '../../3d/models/morph-model';
 import { primitives } from '../../../exports/primitive';
 import { PrimitiveMode } from '../../core/gfx';
+import { ARModuleAdaptor } from '../ar-module-adaptor';
 
 export interface ARTrackingObject {
     anchorId : number;
@@ -64,8 +65,8 @@ export class ARFeatureObject extends ARFeature {
 
     //constructor(jsonObject : any, session : ARSession) {
         //super(jsonObject, session);
-    constructor (session : ARSession, config : IFeatureData);
-    constructor (session : ARSession, config : IFeatureData, jsonObject? : any) {
+    constructor (session : ARModuleAdaptor, config : IFeatureData);
+    constructor (session : ARModuleAdaptor, config : IFeatureData, jsonObject? : any) {
         super(session, config, jsonObject);
 
         this._objectNames = jsonObject.objects;

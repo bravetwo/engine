@@ -29,6 +29,7 @@ import { ARSession } from '../ar-session-component';
 import { Node } from '../../core/scene-graph/node';
 import { ARModuleHelper } from '../ar-module-helper';
 import { ARFeatureData } from '../ar-feature-data';
+import { ARModuleAdaptor } from '../ar-module-adaptor';
 
 export enum ARPlaneDetectionMode {
     Horizontal_Upward = 1 << 0,
@@ -85,8 +86,8 @@ export class ARFeaturePlaneDetection extends ARFeature {
 
     private _planesParent : Node | null = null;
 
-    constructor (session : ARSession, config : IFeatureData);
-    constructor (session : ARSession, config : IFeatureData, jsonObject? : any) {
+    constructor (session : ARModuleAdaptor, config : IFeatureData);
+    constructor (session : ARModuleAdaptor, config : IFeatureData, jsonObject? : any) {
         super(session, config, jsonObject);
 
         // default values
@@ -129,8 +130,10 @@ export class ARFeaturePlaneDetection extends ARFeature {
         this._updatedPlanes = new Array();
         this._removedPlanes = new Array();
 
+        /*
         this._planesParent = new Node("_PLANES_");
         this._session.node.addChild(this._planesParent);
+        */
 
         console.log("plane detection mode:", this.mode);
     }
@@ -147,11 +150,13 @@ export class ARFeaturePlaneDetection extends ARFeature {
     }
 
     protected onEnable(): void {
+        /*
         if(!this._planesParent) {
             this._planesParent = new Node("_PLANES_");
             this._session.node.addChild(this._planesParent);
         }
         this._planesParent.active = true;
+        */
 
         const armodule = ARModuleHelper.getInstance();
         armodule.enablePlane(this._enable);
@@ -163,6 +168,7 @@ export class ARFeaturePlaneDetection extends ARFeature {
         armodule.enablePlane(this._enable);
     }
 
+    /*
     show() {
         if(this._planesParent)
             this._planesParent!.active = true;
@@ -172,11 +178,12 @@ export class ARFeaturePlaneDetection extends ARFeature {
         if(this._planesParent)
             this._planesParent!.active = false;
     }
-
+    
     destroy() {
         this._planesParent?.destroy();
     }
-
+    */
+   
     update() {
         // check start
         if(!this._enable || !this.isReady()) return;
