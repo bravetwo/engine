@@ -183,10 +183,10 @@ export class ARFeaturePlaneDetection extends ARFeature {
         this._planesParent?.destroy();
     }
     */
-   
+
     update() {
         // check start
-        if(!this._enable || !this.isReady()) return;
+        if(!this._enable) return;
         //ARModuleHelper.getInstance().updatePlanesInfo();
         this.processChanges();
     }

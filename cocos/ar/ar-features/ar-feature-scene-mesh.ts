@@ -144,7 +144,7 @@ export class ARFeatureSceneMesh extends ARFeature {
 
     update() {
         // check start
-        if(!this._enable || !this.isReady()) return;
+        if(!this._enable) return;
         this.processChanges();
     }
 
