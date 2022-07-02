@@ -26,6 +26,8 @@
 #include "core/Root.h"
 #include "core/event/CallbacksInvoker.h"
 #include "core/event/EventTypesToJS.h"
+#include "platform/BasePlatform.h"
+#include "platform/java/modules/XRInterface.h"
 #include "profiler/Profiler.h"
 #include "renderer/gfx-base/GFXDef.h"
 #include "renderer/gfx-base/GFXDevice.h"
@@ -39,8 +41,6 @@
 #include "scene/DirectionalLight.h"
 #include "scene/DrawBatch2D.h"
 #include "scene/SpotLight.h"
-#include "platform/BasePlatform.h"
-#include "platform/java/modules/XRInterface.h"
 
 namespace cc {
 
@@ -74,56 +74,56 @@ void Root::initialize(gfx::Swapchain *swapchain) {
     _allCameraList.clear();
 
     IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
-    if(xr) {
-       // Xr: _mainWindow, _curWindow, _swapchain invalid.
-       // Xr: splash screen use _mainWindow->_swapchain width, height, surfaceTransform. The left and right eyes must be the same.
-       auto swapchains = gfx::Device::getInstance()->getSwapchains();
-       for (int i = 0, size = swapchains.size(); i < size; i++) {
-           const auto &swapchain = swapchains[i];
-           gfx::RenderPassInfo renderPassInfo;
+    if (xr) {
+        // Xr: _mainWindow, _curWindow, _swapchain invalid.
+        // Xr: splash screen use _mainWindow->_swapchain width, height, surfaceTransform. The left and right eyes must be the same.
+        auto swapchains = gfx::Device::getInstance()->getSwapchains();
+        for (int i = 0, size = swapchains.size(); i < size; i++) {
+            const auto &swapchain = swapchains[i];
+            gfx::RenderPassInfo renderPassInfo;
 
-           gfx::ColorAttachment colorAttachment;
-           colorAttachment.format = swapchain->getColorTexture()->getFormat();
-           renderPassInfo.colorAttachments.emplace_back(colorAttachment);
+            gfx::ColorAttachment colorAttachment;
+            colorAttachment.format = swapchain->getColorTexture()->getFormat();
+            renderPassInfo.colorAttachments.emplace_back(colorAttachment);
 
-           auto &depthStencilAttachment = renderPassInfo.depthStencilAttachment;
-           depthStencilAttachment.format = swapchain->getDepthStencilTexture()->getFormat();
-           depthStencilAttachment.depthStoreOp = gfx::StoreOp::DISCARD;
-           depthStencilAttachment.stencilStoreOp = gfx::StoreOp::DISCARD;
+            auto &depthStencilAttachment = renderPassInfo.depthStencilAttachment;
+            depthStencilAttachment.format = swapchain->getDepthStencilTexture()->getFormat();
+            depthStencilAttachment.depthStoreOp = gfx::StoreOp::DISCARD;
+            depthStencilAttachment.stencilStoreOp = gfx::StoreOp::DISCARD;
 
-           scene::IRenderWindowInfo info;
-           info.title = ccstd::string{"rootMainWindow"};
-           info.width = swapchain->getWidth();
-           info.height = swapchain->getHeight();
-           info.renderPassInfo = renderPassInfo;
-           info.swapchain = swapchain;
-           _mainWindow = createWindow(info);
+            scene::IRenderWindowInfo info;
+            info.title = ccstd::string{"rootMainWindow"};
+            info.width = swapchain->getWidth();
+            info.height = swapchain->getHeight();
+            info.renderPassInfo = renderPassInfo;
+            info.swapchain = swapchain;
+            _mainWindow = createWindow(info);
 
-           _curWindow = _mainWindow;
-           xr->bindXREyeWithRenderWindow(_mainWindow, (xr::XREye) i);
-       }
-   } else {
-       gfx::RenderPassInfo renderPassInfo;
+            _curWindow = _mainWindow;
+            xr->bindXREyeWithRenderWindow(_mainWindow, (xr::XREye)i);
+        }
+    } else {
+        gfx::RenderPassInfo renderPassInfo;
 
-       gfx::ColorAttachment colorAttachment;
-       colorAttachment.format = swapchain->getColorTexture()->getFormat();
-       renderPassInfo.colorAttachments.emplace_back(colorAttachment);
+        gfx::ColorAttachment colorAttachment;
+        colorAttachment.format = swapchain->getColorTexture()->getFormat();
+        renderPassInfo.colorAttachments.emplace_back(colorAttachment);
 
-       auto &depthStencilAttachment = renderPassInfo.depthStencilAttachment;
-       depthStencilAttachment.format = swapchain->getDepthStencilTexture()->getFormat();
-       depthStencilAttachment.depthStoreOp = gfx::StoreOp::DISCARD;
-       depthStencilAttachment.stencilStoreOp = gfx::StoreOp::DISCARD;
+        auto &depthStencilAttachment = renderPassInfo.depthStencilAttachment;
+        depthStencilAttachment.format = swapchain->getDepthStencilTexture()->getFormat();
+        depthStencilAttachment.depthStoreOp = gfx::StoreOp::DISCARD;
+        depthStencilAttachment.stencilStoreOp = gfx::StoreOp::DISCARD;
 
-       scene::IRenderWindowInfo info;
-       info.title = ccstd::string{"rootMainWindow"};
-       info.width = swapchain->getWidth();
-       info.height = swapchain->getHeight();
-       info.renderPassInfo = renderPassInfo;
-       info.swapchain = swapchain;
-       _mainWindow = createWindow(info);
+        scene::IRenderWindowInfo info;
+        info.title = ccstd::string{"rootMainWindow"};
+        info.width = swapchain->getWidth();
+        info.height = swapchain->getHeight();
+        info.renderPassInfo = renderPassInfo;
+        info.swapchain = swapchain;
+        _mainWindow = createWindow(info);
 
-       _curWindow = _mainWindow;
-   }
+        _curWindow = _mainWindow;
+    }
     // TODO(minggo):
     // return Promise.resolve(builtinResMgr.initBuiltinRes(this._device));
 }
@@ -152,7 +152,7 @@ void Root::resize(uint32_t width, uint32_t height) {
     for (const auto &window : _windows) {
         if (window->getSwapchain()) {
             IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
-            if(xr) {
+            if (xr) {
                 // xr, window's width and height should not change
                 width = window->getWidth();
                 height = window->getHeight();
@@ -199,7 +199,7 @@ public:
     void setProfiler(scene::Model *profiler) override {
         pipeline->setProfiler(profiler);
     }
-    pipeline::GeometryRenderer  *getGeometryRenderer() const override {
+    pipeline::GeometryRenderer *getGeometryRenderer() const override {
         return pipeline->getGeometryRenderer();
     }
     float getShadingScale() const override {
@@ -208,13 +208,13 @@ public:
     void setShadingScale(float scale) override {
         pipeline->setShadingScale(scale);
     }
-    void setMacroString(const ccstd::string& name, const ccstd::string& value) override {
+    void setMacroString(const ccstd::string &name, const ccstd::string &value) override {
         pipeline->setValue(name, value);
     }
-    void setMacroInt(const ccstd::string& name, int32_t value) override {
+    void setMacroInt(const ccstd::string &name, int32_t value) override {
         pipeline->setValue(name, value);
     }
-    void setMacroBool(const ccstd::string& name, bool value) override {
+    void setMacroBool(const ccstd::string &name, bool value) override {
         pipeline->setValue(name, value);
     }
     void onGlobalPipelineStateChanged() override {
@@ -332,14 +332,14 @@ void Root::frameMove(float deltaTime, int32_t totalFrames) {
 
     static IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
     if (xr) {
-        if (xr->beginRenderFrame()) {
-            for (auto *camera : _allCameraList) {
-                if (camera->isHMD()) {
-#if USE_XR
-                    camera->getOriginMatrix();
-#endif
-                }
-            }
+        if (xr->isRenderAllowable()) {
+            //            for (auto *camera : _allCameraList) {
+            //                if (camera->isHMD()) {
+            //#if USE_XR
+            //                    camera->getOriginMatrix();
+            //#endif
+            //                }
+            //            }
             auto swapchains = gfx::Device::getInstance()->getSwapchains();
             bool isSceneUpdated = false;
             for (int xrEye = 0; xrEye < 2; xrEye++) {
@@ -361,10 +361,10 @@ void Root::frameMove(float deltaTime, int32_t totalFrames) {
 
                 for (int i = 0, size = _windows.size(); i < size; i++) {
                     // _windows contain : left eye window, right eye window, other rt window
-                    xr::XREye wndXREye = xr->getXREyeByRenderWindow( _windows[i]);
-                    if (wndXREye == (xr::XREye) xrEye) {
+                    xr::XREye wndXREye = xr->getXREyeByRenderWindow(_windows[i]);
+                    if (wndXREye == (xr::XREye)xrEye) {
                         _windows[i]->extractRenderCameras(_cameraList, xrEye);
-                    } else if(wndXREye == xr::XREye::NONE ){
+                    } else if (wndXREye == xr::XREye::NONE) {
                         _windows[i]->extractRenderCameras(_cameraList, -1);
                     }
                 }
@@ -414,16 +414,14 @@ void Root::frameMove(float deltaTime, int32_t totalFrames) {
                 // cjh TODO:    if (this._batcher) this._batcher.reset();
 
                 xr->endRenderEyeFrame(xrEye);
-
-                for (auto *camera : _allCameraList) {
-                    if (camera->isHMD()) {
-#if USE_XR
-                        camera->dependUpdateData();
-#endif
-                    }
-                }
             }
-            xr->endRenderFrame();
+            //        for (auto *camera : _allCameraList) {
+            //            if (camera->isHMD()) {
+            //#if USE_XR
+            //                camera->dependUpdateData();
+            //#endif
+            //            }
+            //        }
         }
     } else {
         for (const auto &scene : _scenes) {

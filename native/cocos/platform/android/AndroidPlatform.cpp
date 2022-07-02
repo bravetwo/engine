@@ -25,6 +25,7 @@
 
 #include <thread>
 
+#include "application/ApplicationManager.h"
 #include "base/Log.h"
 #include "base/memory/Memory.h"
 #include "bindings/event/CustomEventTypes.h"
@@ -43,7 +44,6 @@
 #include "platform/java/modules/SystemWindow.h"
 #include "platform/java/modules/Vibrator.h"
 #include "platform/java/modules/XRInterface.h"
-#include "application/ApplicationManager.h"
 
 #include "paddleboat.h"
 
@@ -63,10 +63,10 @@
 
 #define INPUT_ACTION_COUNT 6
 
-//Interval time per frame, in milliseconds
+// Interval time per frame, in milliseconds
 #define LOW_FREQUENCY_TIME_INTERVAL 50
 
-//Maximum runtime of game threads while in the background, in seconds
+// Maximum runtime of game threads while in the background, in seconds
 #define LOW_FREQUENCY_EXPIRED_DURATION_SECONDS 60
 
 #define CC_ENABLE_SUSPEND_GAME_THREAD true
@@ -487,7 +487,7 @@ int AndroidPlatform::init() {
                 _isLowFrequencyLoopEnabled = false;
                 _loopTimeOut = 0;
             }
-        } else if(APP_CMD_STOP == cmd) {
+        } else if (APP_CMD_STOP == cmd) {
             _lowFrequencyTimer.reset();
             _loopTimeOut = LOW_FREQUENCY_TIME_INTERVAL;
             _isLowFrequencyLoopEnabled = true;
@@ -523,7 +523,7 @@ int AndroidPlatform::getSdkVersion() const {
     return AConfiguration_getSdkVersion(_app->config);
 }
 
-int32_t AndroidPlatform::run(int  /*argc*/, const char **/*argv*/) {
+int32_t AndroidPlatform::run(int /*argc*/, const char ** /*argv*/) {
     loop();
     return 0;
 }
@@ -552,10 +552,12 @@ int32_t AndroidPlatform::loop() {
             }
         }
 
-        if(xr && !xr->platformLoopStart()) continue;
+        if (xr && !xr->platformLoopStart()) continue;
         _inputProxy->handleInput();
         if (_inputProxy->isAnimating() && (xr ? xr->getXRConfig(xr::XRConfigKey::SESSION_RUNNING).getBool() : true)) {
+            if (xr) xr->beginRenderFrame();
             runTask();
+            if (xr) xr->endRenderFrame();
             if (_inputProxy->isActive()) {
                 flushTasksOnGameThreadAtForegroundJNI();
             }
@@ -564,14 +566,14 @@ int32_t AndroidPlatform::loop() {
 
 #if CC_ENABLE_SUSPEND_GAME_THREAD
         if (_isLowFrequencyLoopEnabled) {
-            //Suspend a game thread after it has been running in the background for a specified amount of time
+            // Suspend a game thread after it has been running in the background for a specified amount of time
             if (_lowFrequencyTimer.getSeconds() > LOW_FREQUENCY_EXPIRED_DURATION_SECONDS) {
                 _isLowFrequencyLoopEnabled = false;
                 _loopTimeOut = -1;
             }
         }
 #endif
-        if(xr) xr->platformLoopEnd();
+        if (xr) xr->platformLoopEnd();
     }
 }
 
