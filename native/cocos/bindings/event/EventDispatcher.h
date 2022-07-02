@@ -128,6 +128,10 @@ enum class StickKeyCode {
     PLUS,
     L3,
     R3,
+    MENU,
+    START,
+    LEFT_STICK,
+    RIGHT_STICK,
 };
 
 enum class StickAxisCode {
@@ -140,6 +144,8 @@ enum class StickAxisCode {
     RIGHT_STICK_Y,
     L2,
     R2,
+    LEFT_GRIP,
+    RIGHT_GRIP,
 };
 
 struct ControllerInfo {
@@ -161,6 +167,12 @@ struct ControllerInfo {
 
 struct ControllerEvent : public OSEvent {
     CONSTRUCT_EVENT(ControllerEvent, OSEventType::CONTROLLER_OSEVENT)
+    enum class Type {
+        GAMEPAD,
+        HANDLE,
+        UNKNOWN
+    };
+    Type type = Type::UNKNOWN;
     std::vector<std::unique_ptr<ControllerInfo>> controllerInfos;
 };
 
@@ -186,7 +198,7 @@ public:
 enum class KeyCode {
     /**
      * @en The back key on mobile phone
-     * @zh ÒÆ¶¯¶Ë·µ»Ø¼ü
+     * @zh ç§»åŠ¨ç«¯è¿”å›žé”®
      */
     MOBILE_BACK = 6,
     BACKSPACE = 8,
@@ -327,7 +339,8 @@ public:
     static void removeAllEventListeners();
     static void dispatchCustomEvent(const CustomEvent &event);
     static void doDispatchJsEvent(const char *jsFunctionName, const std::vector<se::Value> &args);
- private:
+
+private:
     static void dispatchCustomEvent(const char *eventName, int argNum, ...);
 
     struct Node {

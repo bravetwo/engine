@@ -28,105 +28,316 @@
 #include <unistd.h>
 #include <functional>
 #include <unordered_map>
-#include "cocos/bindings/jswrapper/SeApi.h"
+#include "android/AndroidPlatform.h"
 #include "base/Log.h"
 #include "base/Macros.h"
-#include "renderer/GFXDeviceManager.h"
 #include "bindings/event/EventDispatcher.h"
+#include "cocos/bindings/jswrapper/SeApi.h"
+#include "java/jni/JniHelper.h"
+#include "renderer/GFXDeviceManager.h"
 #ifdef CC_USE_VULKAN
-#include "gfx-vulkan/VKDevice.h"
+    #include "gfx-vulkan/VKDevice.h"
 #endif
 #ifdef CC_USE_GLES3
-#include "gfx-gles-common/gles3w.h"
-#include "gfx-gles3/GLES3Device.h"
-#include "renderer/gfx-gles3/GLES3GPUObjects.h"
+    #include "gfx-gles-common/gles3w.h"
+    #include "gfx-gles3/GLES3Device.h"
+    #include "renderer/gfx-gles3/GLES3GPUObjects.h"
 #endif
 
 #if USE_XR
     #include "Xr.h"
 #endif
-//const bool IS_ENABLE_XR_LOG = true;
+// const bool IS_ENABLE_XR_LOG = true;
 
 namespace cc {
-static se::Object *jsHandleEventObj = nullptr;
-static void dispatchHandleEventInternal(const xr::HandleEvent &handleEvent) {
-    switch (handleEvent.type) {
-        case xr::HandleEvent::Type::VIEW_POSE_ACTIVE_LEFT:
-        case xr::HandleEvent::Type::HAND_POSE_ACTIVE_LEFT:
-        case xr::HandleEvent::Type::AIM_POSE_ACTIVE_LEFT:
-        case xr::HandleEvent::Type::VIEW_POSE_ACTIVE_RIGHT:
-        case xr::HandleEvent::Type::HAND_POSE_ACTIVE_RIGHT:
-        case xr::HandleEvent::Type::AIM_POSE_ACTIVE_RIGHT: {
-            se::AutoHandleScope scope;
-            if (!jsHandleEventObj) {
-                jsHandleEventObj = se::Object::createPlainObject();
-                jsHandleEventObj->root();
-            }
+ControllerEvent controllerEvent;
+static se::Object *jsPoseEventArray = nullptr;
+static void dispatchGamepadEventInternal(const xr::XRControllerEvent &xrControllerEvent) {
+    if (xrControllerEvent.xrControllerInfos.empty()) {
+        return;
+    }
 
-            const auto &xVal = se::Value(handleEvent.handleInfo.x);
-            const auto &yVal = se::Value(handleEvent.handleInfo.y);
-            const auto &zVal = se::Value(handleEvent.handleInfo.z);
-            const auto &quaternionXVal = se::Value(handleEvent.handleInfo.quaternion.x);
-            const auto &quaternionYVal = se::Value(handleEvent.handleInfo.quaternion.y);
-            const auto &quaternionZVal = se::Value(handleEvent.handleInfo.quaternion.z);
-            const auto &quaternionWVal = se::Value(handleEvent.handleInfo.quaternion.w);
-            jsHandleEventObj->setProperty("x", xVal);
-            jsHandleEventObj->setProperty("y", yVal);
-            jsHandleEventObj->setProperty("z", zVal);
-            jsHandleEventObj->setProperty("quaternionX", quaternionXVal);
-            jsHandleEventObj->setProperty("quaternionY", quaternionYVal);
-            jsHandleEventObj->setProperty("quaternionZ", quaternionZVal);
-            jsHandleEventObj->setProperty("quaternionW", quaternionWVal);
-            se::ValueArray args;
-            args.emplace_back(se::Value(jsHandleEventObj));
-            EventDispatcher::doDispatchJsEvent(xr::HandleEvent::TypeNames[(int)handleEvent.type], args);
-        } break;
-        case xr::HandleEvent::Type::THUMBSTICK_MOVE_LEFT:
-        case xr::HandleEvent::Type::THUMBSTICK_MOVE_RIGHT: {
-            se::AutoHandleScope scope;
-            if (!jsHandleEventObj) {
-                jsHandleEventObj = se::Object::createPlainObject();
-                jsHandleEventObj->root();
-            }
+    auto *controllerInfo = ccnew ControllerInfo();
+    if (!controllerInfo) {
+        return;
+    }
 
-            const auto &xVal = se::Value(handleEvent.handleInfo.x);
-            const auto &yVal = se::Value(handleEvent.handleInfo.y);
-            jsHandleEventObj->setProperty("x", xVal);
-            jsHandleEventObj->setProperty("y", yVal);
-            se::ValueArray args;
-            args.emplace_back(se::Value(jsHandleEventObj));
-            EventDispatcher::doDispatchJsEvent(xr::HandleEvent::TypeNames[(int)handleEvent.type], args);
-        } break;
-        case xr::HandleEvent::Type::TRIGGER_START_LEFT:
-        case xr::HandleEvent::Type::GRIP_START_LEFT:
-        case xr::HandleEvent::Type::TRIGGER_START_RIGHT:
-        case xr::HandleEvent::Type::GRIP_START_RIGHT: {
-            se::AutoHandleScope scope;
-            if (!jsHandleEventObj) {
-                jsHandleEventObj = se::Object::createPlainObject();
-                jsHandleEventObj->root();
-            }
+    size_t length = xrControllerEvent.xrControllerInfos.size();
+    for (size_t i = 0; i < length; i++) {
+        switch (xrControllerEvent.xrControllerInfos.at(i)->getXREventType()) {
+            case xr::XREventType::CLICK: {
+                auto *xrClick = static_cast<xr::XRClick *>(xrControllerEvent.xrControllerInfos.at(i).get());
+                switch (xrClick->type) {
+                    case xr::XRClick::Type::MENU:
+                        controllerInfo->buttonInfos.emplace_back(ControllerInfo::ButtonInfo(StickKeyCode::MENU, xrClick->isPress));
+                        break;
+                    case xr::XRClick::Type::TRIGGER_LEFT:
+                        controllerInfo->buttonInfos.emplace_back(ControllerInfo::ButtonInfo(StickKeyCode::L3, xrClick->isPress));
+                        break;
+                    case xr::XRClick::Type::SHOULDER_LEFT:
+                        controllerInfo->buttonInfos.emplace_back(ControllerInfo::ButtonInfo(StickKeyCode::L1, xrClick->isPress));
+                        break;
+                    case xr::XRClick::Type::THUMBSTICK_LEFT:
+                        controllerInfo->buttonInfos.emplace_back(ControllerInfo::ButtonInfo(StickKeyCode::LEFT_STICK, xrClick->isPress));
+                        break;
+                    case xr::XRClick::Type::X:
+                        controllerInfo->buttonInfos.emplace_back(ControllerInfo::ButtonInfo(StickKeyCode::X, xrClick->isPress));
+                        break;
+                    case xr::XRClick::Type::Y:
+                        controllerInfo->buttonInfos.emplace_back(ControllerInfo::ButtonInfo(StickKeyCode::Y, xrClick->isPress));
+                        break;
+                    case xr::XRClick::Type::TRIGGER_RIGHT:
+                        controllerInfo->buttonInfos.emplace_back(ControllerInfo::ButtonInfo(StickKeyCode::R3, xrClick->isPress));
+                        break;
+                    case xr::XRClick::Type::SHOULDER_RIGHT:
+                        controllerInfo->buttonInfos.emplace_back(ControllerInfo::ButtonInfo(StickKeyCode::R1, xrClick->isPress));
+                        break;
+                    case xr::XRClick::Type::THUMBSTICK_RIGHT:
+                        controllerInfo->buttonInfos.emplace_back(ControllerInfo::ButtonInfo(StickKeyCode::RIGHT_STICK, xrClick->isPress));
+                        break;
+                    case xr::XRClick::Type::A:
+                        controllerInfo->buttonInfos.emplace_back(ControllerInfo::ButtonInfo(StickKeyCode::A, xrClick->isPress));
+                        break;
+                    case xr::XRClick::Type::B:
+                        controllerInfo->buttonInfos.emplace_back(ControllerInfo::ButtonInfo(StickKeyCode::B, xrClick->isPress));
+                        break;
+                    case xr::XRClick::Type::HOME:
+                        CC_LOG_INFO("[XRInterface] exit when home click in rokid.");
+                        JniHelper::callStaticVoidMethod("java/lang/System", "exit", 0);
+                        break;
+                    case xr::XRClick::Type::START:
+                        controllerInfo->buttonInfos.emplace_back(ControllerInfo::ButtonInfo(StickKeyCode::START, xrClick->isPress));
+                        break;
+                    case xr::XRClick::Type::DPAD_UP:
+                        controllerInfo->axisInfos.emplace_back(ControllerInfo::AxisInfo(StickAxisCode::Y, xrClick->isPress ? 1.F : 0.F));
+                        break;
+                    case xr::XRClick::Type::DPAD_DOWN:
+                        controllerInfo->axisInfos.emplace_back(ControllerInfo::AxisInfo(StickAxisCode::Y, xrClick->isPress ? -1.F : 0.F));
+                        break;
+                    case xr::XRClick::Type::DPAD_LEFT:
+                        controllerInfo->axisInfos.emplace_back(ControllerInfo::AxisInfo(StickAxisCode::X, xrClick->isPress ? -1.F : 0.F));
+                        break;
+                    case xr::XRClick::Type::DPAD_RIGHT:
+                        controllerInfo->axisInfos.emplace_back(ControllerInfo::AxisInfo(StickAxisCode::X, xrClick->isPress ? 1.F : 0.F));
+                        break;
+                    default:
+                        break;
+                }
+            } break;
+            case xr::XREventType::STICK: {
+                auto *xrStick = static_cast<xr::XRStick *>(xrControllerEvent.xrControllerInfos.at(i).get());
+                switch (xrStick->type) {
+                    case xr::XRStick::Type::STICK_LEFT:
+                        controllerInfo->axisInfos.emplace_back(ControllerInfo::AxisInfo(StickAxisCode::LEFT_STICK_X, xrStick->x));
+                        controllerInfo->axisInfos.emplace_back(ControllerInfo::AxisInfo(StickAxisCode::LEFT_STICK_Y, xrStick->y));
+                        break;
+                    case xr::XRStick::Type::STICK_RIGHT:
+                        controllerInfo->axisInfos.emplace_back(ControllerInfo::AxisInfo(StickAxisCode::RIGHT_STICK_X, xrStick->x));
+                        controllerInfo->axisInfos.emplace_back(ControllerInfo::AxisInfo(StickAxisCode::RIGHT_STICK_Y, xrStick->y));
+                        break;
+                    default:
+                        break;
+                }
+            } break;
+            case xr::XREventType::GRAB: {
+                auto *xrGrab = static_cast<xr::XRGrab *>(xrControllerEvent.xrControllerInfos.at(i).get());
+                switch (xrGrab->type) {
+                    case xr::XRGrab::Type::TRIGGER_LEFT:
+                        controllerInfo->axisInfos.emplace_back(ControllerInfo::AxisInfo(StickAxisCode::L2, xrGrab->value));
+                        break;
+                    case xr::XRGrab::Type::TRIGGER_RIGHT:
+                        controllerInfo->axisInfos.emplace_back(ControllerInfo::AxisInfo(StickAxisCode::R2, xrGrab->value));
+                        break;
+                    default:
+                        break;
+                }
+            } break;
+            default:
+                break;
+        }
+    }
 
-            const auto &val = se::Value(handleEvent.handleInfo.value);
-            jsHandleEventObj->setProperty("value", val);
-            se::ValueArray args;
-            args.emplace_back(se::Value(jsHandleEventObj));
-            EventDispatcher::doDispatchJsEvent(xr::HandleEvent::TypeNames[(int)handleEvent.type], args);
-        } break;
-#if XR_OEM_ROKID
-        case xr::HandleEvent::Type::HOME_DOWN:
-            break;
-        case xr::HandleEvent::Type::HOME_UP: {
-            CC_LOG_ERROR("[XRInterface] exit when home up in rokid.");
-            exit(0);
-        } break;
-#endif
-        case xr::HandleEvent::Type::UNKNOWN:
-            // unknown type, do nothing
-            break;
-        default:
-            EventDispatcher::doDispatchJsEvent(xr::HandleEvent::TypeNames[(int)handleEvent.type], se::EmptyValueArray);
-            break;
+    controllerInfo->napdId = 0; // xr only one gamepad connection
+    controllerEvent.controllerInfos.emplace_back(controllerInfo);
+    controllerEvent.type = ControllerEvent::Type::GAMEPAD;
+    static_cast<AndroidPlatform *>(BasePlatform::getPlatform())->dispatchEvent(controllerEvent);
+    controllerEvent.type = ControllerEvent::Type::UNKNOWN;
+    controllerEvent.controllerInfos.clear();
+}
+
+static void dispatchHandleEventInternal(const xr::XRControllerEvent &xrControllerEvent) {
+    if (xrControllerEvent.xrControllerInfos.empty()) {
+        return;
+    }
+
+    auto *controllerInfo = ccnew ControllerInfo();
+    if (!controllerInfo) {
+        return;
+    }
+
+    size_t length = xrControllerEvent.xrControllerInfos.size();
+    se::AutoHandleScope scope;
+    uint32_t poseIndex = 0;
+    for (size_t i = 0; i < length; i++) {
+        switch (xrControllerEvent.xrControllerInfos.at(i)->getXREventType()) {
+            case xr::XREventType::CLICK: {
+                auto *xrClick = static_cast<xr::XRClick *>(xrControllerEvent.xrControllerInfos.at(i).get());
+                switch (xrClick->type) {
+                    case xr::XRClick::Type::TRIGGER_LEFT:
+                        controllerInfo->buttonInfos.emplace_back(ControllerInfo::ButtonInfo(StickKeyCode::L3, xrClick->isPress));
+                        break;
+                    case xr::XRClick::Type::THUMBSTICK_LEFT:
+                        controllerInfo->buttonInfos.emplace_back(ControllerInfo::ButtonInfo(StickKeyCode::LEFT_STICK, xrClick->isPress));
+                        break;
+                    case xr::XRClick::Type::X:
+                        controllerInfo->buttonInfos.emplace_back(ControllerInfo::ButtonInfo(StickKeyCode::X, xrClick->isPress));
+                        break;
+                    case xr::XRClick::Type::Y:
+                        controllerInfo->buttonInfos.emplace_back(ControllerInfo::ButtonInfo(StickKeyCode::Y, xrClick->isPress));
+                        break;
+                    case xr::XRClick::Type::TRIGGER_RIGHT:
+                        controllerInfo->buttonInfos.emplace_back(ControllerInfo::ButtonInfo(StickKeyCode::R3, xrClick->isPress));
+                        break;
+                    case xr::XRClick::Type::THUMBSTICK_RIGHT:
+                        controllerInfo->buttonInfos.emplace_back(ControllerInfo::ButtonInfo(StickKeyCode::RIGHT_STICK, xrClick->isPress));
+                        break;
+                    case xr::XRClick::Type::A:
+                        controllerInfo->buttonInfos.emplace_back(ControllerInfo::ButtonInfo(StickKeyCode::A, xrClick->isPress));
+                        break;
+                    case xr::XRClick::Type::B:
+                        controllerInfo->buttonInfos.emplace_back(ControllerInfo::ButtonInfo(StickKeyCode::B, xrClick->isPress));
+                        break;
+                    default:
+                        break;
+                }
+            } break;
+            case xr::XREventType::STICK: {
+                auto *xrStick = static_cast<xr::XRStick *>(xrControllerEvent.xrControllerInfos.at(i).get());
+                switch (xrStick->type) {
+                    case xr::XRStick::Type::STICK_LEFT:
+                        controllerInfo->axisInfos.emplace_back(ControllerInfo::AxisInfo(StickAxisCode::LEFT_STICK_X, xrStick->x));
+                        controllerInfo->axisInfos.emplace_back(ControllerInfo::AxisInfo(StickAxisCode::LEFT_STICK_Y, xrStick->y));
+                        break;
+                    case xr::XRStick::Type::STICK_RIGHT:
+                        controllerInfo->axisInfos.emplace_back(ControllerInfo::AxisInfo(StickAxisCode::RIGHT_STICK_X, xrStick->x));
+                        controllerInfo->axisInfos.emplace_back(ControllerInfo::AxisInfo(StickAxisCode::RIGHT_STICK_Y, xrStick->y));
+                        break;
+                    default:
+                        break;
+                }
+            } break;
+            case xr::XREventType::GRAB: {
+                auto *xrGrab = static_cast<xr::XRGrab *>(xrControllerEvent.xrControllerInfos.at(i).get());
+                switch (xrGrab->type) {
+                    case xr::XRGrab::Type::TRIGGER_LEFT:
+                        controllerInfo->axisInfos.emplace_back(ControllerInfo::AxisInfo(StickAxisCode::L2, xrGrab->value));
+                        break;
+                    case xr::XRGrab::Type::TRIGGER_RIGHT:
+                        controllerInfo->axisInfos.emplace_back(ControllerInfo::AxisInfo(StickAxisCode::R2, xrGrab->value));
+                        break;
+                    case xr::XRGrab::Type::GRIP_LEFT:
+                        controllerInfo->axisInfos.emplace_back(ControllerInfo::AxisInfo(StickAxisCode::LEFT_GRIP, xrGrab->value));
+                        break;
+                    case xr::XRGrab::Type::GRIP_RIGHT:
+                        controllerInfo->axisInfos.emplace_back(ControllerInfo::AxisInfo(StickAxisCode::RIGHT_GRIP, xrGrab->value));
+                        break;
+                    default:
+                        break;
+                }
+            } break;
+            case xr::XREventType::POSE: {
+                auto *xrPose = static_cast<xr::XRPose *>(xrControllerEvent.xrControllerInfos.at(i).get());
+                switch (xrPose->type) {
+                    case xr::XRPose::Type::HAND_LEFT:
+                    case xr::XRPose::Type::HAND_RIGHT:
+                    case xr::XRPose::Type::AIM_LEFT:
+                    case xr::XRPose::Type::AIM_RIGHT: {
+                        auto *jsPose = se::Object::createPlainObject();
+                        jsPose->setProperty("code", se::Value(static_cast<int>(xrPose->type)));
+                        jsPose->setProperty("x", se::Value(xrPose->px));
+                        jsPose->setProperty("y", se::Value(xrPose->py));
+                        jsPose->setProperty("z", se::Value(xrPose->pz));
+                        jsPose->setProperty("quaternionX", se::Value(xrPose->qx));
+                        jsPose->setProperty("quaternionY", se::Value(xrPose->qy));
+                        jsPose->setProperty("quaternionZ", se::Value(xrPose->qz));
+                        jsPose->setProperty("quaternionW", se::Value(xrPose->qw));
+                        if (!jsPoseEventArray) {
+                            jsPoseEventArray = se::Object::createArrayObject(0);
+                            jsPoseEventArray->root();
+                        }
+                        jsPoseEventArray->setArrayElement(poseIndex, se::Value(jsPose));
+                        poseIndex++;
+                    } break;
+                    default:
+                        break;
+                }
+            } break;
+            default:
+                break;
+        }
+    }
+
+    if (poseIndex > 0) {
+        jsPoseEventArray->setProperty("length", se::Value(poseIndex));
+        se::ValueArray args;
+        args.emplace_back(se::Value(jsPoseEventArray));
+        EventDispatcher::doDispatchJsEvent("onHandlePoseInput", args);
+    }
+
+    if (!controllerInfo->buttonInfos.empty() || !controllerInfo->axisInfos.empty()) {
+        controllerInfo->napdId = 0; // xr only one handle connection
+        controllerEvent.controllerInfos.emplace_back(controllerInfo);
+        controllerEvent.type = ControllerEvent::Type::HANDLE;
+        EventDispatcher::dispatchControllerEvent(controllerEvent);
+        controllerEvent.type = ControllerEvent::Type::UNKNOWN;
+        controllerEvent.controllerInfos.clear();
+    } else {
+        CC_SAFE_DELETE(controllerInfo);
+    }
+}
+
+static void dispatchHMDEventInternal(const xr::XRControllerEvent &xrControllerEvent) {
+    if (xrControllerEvent.xrControllerInfos.empty()) {
+        return;
+    }
+
+    size_t length = xrControllerEvent.xrControllerInfos.size();
+    se::AutoHandleScope scope;
+    uint32_t poseIndex = 0;
+    for (size_t i = 0; i < length; i++) {
+        if (xrControllerEvent.xrControllerInfos.at(i)->getXREventType() == xr::XREventType::POSE) {
+            auto *xrPose = static_cast<xr::XRPose *>(xrControllerEvent.xrControllerInfos.at(i).get());
+            switch (xrPose->type) {
+                case xr::XRPose::Type::VIEW_LEFT:
+                case xr::XRPose::Type::VIEW_RIGHT:
+                case xr::XRPose::Type::HEAD_MIDDLE: {
+                    auto *jsPose = se::Object::createPlainObject();
+                    jsPose->setProperty("code", se::Value(static_cast<int>(xrPose->type)));
+                    jsPose->setProperty("x", se::Value(xrPose->px));
+                    jsPose->setProperty("y", se::Value(xrPose->py));
+                    jsPose->setProperty("z", se::Value(xrPose->pz));
+                    jsPose->setProperty("quaternionX", se::Value(xrPose->qx));
+                    jsPose->setProperty("quaternionY", se::Value(xrPose->qy));
+                    jsPose->setProperty("quaternionZ", se::Value(xrPose->qz));
+                    jsPose->setProperty("quaternionW", se::Value(xrPose->qw));
+                    if (!jsPoseEventArray) {
+                        jsPoseEventArray = se::Object::createArrayObject(0);
+                        jsPoseEventArray->root();
+                    }
+                    jsPoseEventArray->setArrayElement(poseIndex, se::Value(jsPose));
+                    poseIndex++;
+                } break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    if (poseIndex > 0) {
+        jsPoseEventArray->setProperty("length", se::Value(poseIndex));
+        se::ValueArray args;
+        args.emplace_back(se::Value(jsPoseEventArray));
+        EventDispatcher::doDispatchJsEvent("onHMDPoseInput", args);
     }
 }
 
@@ -140,7 +351,7 @@ xr::XRVendor XRInterface::getVendor() {
 #elif XR_OEM_ROKID
     return xr::XRVendor::ROKID;
 #endif
-    return xr::XRVendor::MOBILE;
+    return xr::XRVendor::MONADO;
 }
 
 xr::XRConfigValue XRInterface::getXRConfig(xr::XRConfigKey key) {
@@ -177,7 +388,9 @@ void XRInterface::initialize(void *javaVM, void *activity) {
 
     CC_LOG_INFO("[XR] initialize vm.%p,aty.%p | %s", javaVM, activity, _graphicsApiName.c_str());
     xr::XrEntry::getInstance()->initPlatformData(javaVM, activity);
-    xr::XrEntry::getInstance()->setEventsCallback(&dispatchHandleEventInternal);
+    xr::XrEntry::getInstance()->setGamepadCallback(&dispatchGamepadEventInternal);
+    xr::XrEntry::getInstance()->setHandleCallback(&dispatchHandleEventInternal);
+    xr::XrEntry::getInstance()->setHMDCallback(&dispatchHMDEventInternal);
     #if XR_OEM_PICO
     xr::XrEntry::getInstance()->createXrInstance(_graphicsApiName.c_str());
     #endif
@@ -187,7 +400,7 @@ void XRInterface::initialize(void *javaVM, void *activity) {
 // render thread lifecycle
 void XRInterface::onRenderPause() {
 #if USE_XR
-    if(!_renderPaused) {
+    if (!_renderPaused) {
         _renderPaused = true;
         _renderResumed = false;
         CC_LOG_INFO("[XR] onRenderPause");
@@ -198,7 +411,7 @@ void XRInterface::onRenderPause() {
 
 void XRInterface::onRenderResume() {
 #if USE_XR
-    if(!_renderResumed) {
+    if (!_renderResumed) {
         _renderResumed = true;
         _renderPaused = false;
         CC_LOG_INFO("[XR] onRenderResume");
@@ -211,10 +424,10 @@ void XRInterface::onRenderDestroy() {
 #if USE_XR
     CC_LOG_INFO("[XR] onRenderDestroy");
     xr::XrEntry::getInstance()->destroyXrInstance();
-    if (jsHandleEventObj != nullptr) {
-        jsHandleEventObj->unroot();
-        jsHandleEventObj->decRef();
-        jsHandleEventObj = nullptr;
+    if (jsPoseEventArray != nullptr) {
+        jsPoseEventArray->unroot();
+        jsPoseEventArray->decRef();
+        jsPoseEventArray = nullptr;
     }
 #endif
 }
@@ -253,7 +466,7 @@ void XRInterface::postGFXDeviceInitialize(gfx::API gfxApi) {
 
 const xr::XRSwapchain &XRInterface::doGFXDeviceAcquire(gfx::API gfxApi) {
 #if USE_XR
-    //CC_LOG_INFO("[XR] doGFXDeviceAcquire.api.%d", gfxApi);
+    // CC_LOG_INFO("[XR] doGFXDeviceAcquire.api.%d", gfxApi);
     if (gfxApi == gfx::API::GLES3 || gfxApi == gfx::API::VULKAN) {
     #ifdef CC_USE_GLES3
         _acquireSwapchain.glDrawFramebuffer = xr::XrEntry::getInstance()->getXrFrameBuffer();
@@ -267,9 +480,9 @@ const xr::XRSwapchain &XRInterface::doGFXDeviceAcquire(gfx::API gfxApi) {
 
 bool XRInterface::isGFXDeviceNeedsPresent(gfx::API gfxApi) {
 #if USE_XR
-    //CC_LOG_INFO("[XR] isGFXDeviceNeedsPresent.api.%d", gfxApi);
-    //if (gfxApi == gfx::API::GLES3 || gfxApi == gfx::API::VULKAN) {
-    //}
+    // CC_LOG_INFO("[XR] isGFXDeviceNeedsPresent.api.%d", gfxApi);
+    // if (gfxApi == gfx::API::GLES3 || gfxApi == gfx::API::VULKAN) {
+    // }
 #endif
     return false;
 }
@@ -289,10 +502,10 @@ void XRInterface::createXRSwapchains() {
 #endif
 }
 
-const std::vector<cc::xr::XRSwapchain>& XRInterface::getXRSwapchains() {
+const std::vector<cc::xr::XRSwapchain> &XRInterface::getXRSwapchains() {
 #if USE_XR
     CC_LOG_INFO("[XR] getXRSwapchains");
-    if(_xrSwapchains.size() == 0)
+    if (_xrSwapchains.size() == 0)
         _xrSwapchains = xr::XrEntry::getInstance()->getCocosXrSwapchains();
 #endif
     return _xrSwapchains;
@@ -306,11 +519,11 @@ void XRInterface::updateXRSwapchainTypedID(uint32_t index, uint32_t typedID) {
 #if USE_XR
     auto &cocosXrSwapchain = xr::XrEntry::getInstance()->getCocosXrSwapchains().at(index);
     cocosXrSwapchain.ccSwapchainTypedID = typedID;
-#if XR_OEM_HUAWEIVR
+    #if XR_OEM_HUAWEIVR
     _eglSurfaceTypeMap[typedID] = index == 0 ? EGLSurfaceType::WINDOW : EGLSurfaceType::NONE;
-#else
+    #else
     _eglSurfaceTypeMap[typedID] = EGLSurfaceType::PBUFFER;
-#endif
+    #endif
 #endif
 }
 // gfx
@@ -318,11 +531,11 @@ void XRInterface::updateXRSwapchainTypedID(uint32_t index, uint32_t typedID) {
 // vulkan
 #ifdef CC_USE_VULKAN
 uint32_t XRInterface::getXRVkApiVersion(uint32_t engineVkApiVersion) {
-#if USE_XR
+    #if USE_XR
     return xr::XrEntry::getInstance()->getXrVkApiVersion(engineVkApiVersion);
-#else
+    #else
     return engineVkApiVersion;
-#endif
+    #endif
 }
 
 void XRInterface::initializeVulkanData(const PFN_vkGetInstanceProcAddr &addr) {
@@ -330,19 +543,19 @@ void XRInterface::initializeVulkanData(const PFN_vkGetInstanceProcAddr &addr) {
 }
 
 VkInstance XRInterface::createXRVulkanInstance(const VkInstanceCreateInfo &instInfo) {
-#if USE_XR
+    #if USE_XR
     _vkInstance = xr::XrEntry::getInstance()->xrVkCreateInstance(instInfo, _vkGetInstanceProcAddr);
     _vkPhysicalDevice = xr::XrEntry::getInstance()->getXrVkGraphicsDevice(_vkInstance);
     return _vkInstance;
-#else
+    #else
     return nullptr;
-#endif
+    #endif
 }
 
 VkDevice XRInterface::createXRVulkanDevice(const VkDeviceCreateInfo *deviceInfo) {
-#if USE_XR
+    #if USE_XR
     VK_CHECK(xr::XrEntry::getInstance()->xrVkCreateDevice(deviceInfo, _vkGetInstanceProcAddr, _vkPhysicalDevice, &_vkDevice));
-#endif
+    #endif
     return _vkDevice;
 }
 
@@ -351,9 +564,9 @@ VkPhysicalDevice XRInterface::getXRVulkanGraphicsDevice() {
 }
 
 void XRInterface::getXRSwapchainVkImages(std::vector<VkImage> &vkImages, uint32_t ccSwapchainTypedID) {
-#if USE_XR
+    #if USE_XR
     xr::XrEntry::getInstance()->getSwapchainImages(vkImages, ccSwapchainTypedID);
-#endif
+    #endif
 }
 #endif
 // vulkan
@@ -361,20 +574,20 @@ void XRInterface::getXRSwapchainVkImages(std::vector<VkImage> &vkImages, uint32_
 // gles
 #ifdef CC_USE_GLES3
 void XRInterface::initializeGLESData(PFNGLES3WLOADPROC gles3wLoadFuncProc, gfx::GLES3GPUContext *gpuContext) {
-#if USE_XR
+    #if USE_XR
     _gles3wLoadFuncProc = gles3wLoadFuncProc;
     _gles3GPUContext = gpuContext;
     void *eglDisplay = gpuContext->eglDisplay;
     void *eglConfig = gpuContext->eglConfig;
     void *eglDefaultContext = gpuContext->eglDefaultContext;
     CC_LOG_INFO("[XR] initializeGLESData.egl.%p/%p/%p", eglDisplay, eglConfig, eglDefaultContext);
-#endif
+    #endif
 }
 
 void XRInterface::attachGLESFramebufferTexture2D() {
-#if USE_XR
+    #if USE_XR
     xr::XrEntry::getInstance()->attachXrFramebufferTexture2D();
-#endif
+    #endif
 }
 
 EGLSurfaceType XRInterface::acquireEGLSurfaceType(uint32_t typedID) {
@@ -391,7 +604,7 @@ EGLSurfaceType XRInterface::acquireEGLSurfaceType(uint32_t typedID) {
 // stereo render loop
 bool XRInterface::platformLoopStart() {
 #if USE_XR
-    //CC_LOG_INFO("[XR] platformLoopStart");
+    // CC_LOG_INFO("[XR] platformLoopStart");
     return xr::XrEntry::getInstance()->platformLoopStart();
 #else
     return false;
@@ -401,6 +614,14 @@ bool XRInterface::platformLoopStart() {
 bool XRInterface::beginRenderFrame() {
 #if USE_XR
     return xr::XrEntry::getInstance()->frameStart();
+#else
+    return false;
+#endif
+}
+
+bool XRInterface::isRenderAllowable() {
+#if USE_XR
+    return xr::XrEntry::getInstance()->isRenderAllowable();
 #else
     return false;
 #endif
@@ -438,7 +659,7 @@ bool XRInterface::platformLoopEnd() {
 
 ccstd::vector<float> XRInterface::getXRViewProjectionData(uint32_t eye, float near, float far) {
 #if USE_XR
-    return xr::XrEntry::getInstance()->computeViewProjection(eye, near, far, 1.0f);
+    return xr::XrEntry::getInstance()->computeViewProjection(eye, near, far, 1.0F);
 #else
     ccstd::vector<float> res;
     res.reserve(16);
@@ -447,7 +668,7 @@ ccstd::vector<float> XRInterface::getXRViewProjectionData(uint32_t eye, float ne
 }
 
 // renderwindow
-xr::XREye XRInterface::getXREyeByRenderWindow(void* window) {
+xr::XREye XRInterface::getXREyeByRenderWindow(void *window) {
     if (_xrWindowMap.count(window) > 0) {
         return _xrWindowMap[window];
     } else {

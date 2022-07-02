@@ -239,10 +239,16 @@ public:
     virtual bool platformLoopStart() = 0;
     /**
      * @en call when frame render begin
-     * @zh 一帧渲染开始时调用
+     * @zh 一帧开始时调用
      * @return
      */
     virtual bool beginRenderFrame() = 0;
+    /**
+     * @en whether the current frame allows rendering
+     * @zh 当前帧是否允许渲染
+     * @return
+     */
+    virtual bool isRenderAllowable() = 0;
     /**
      * @en call when single eye render begin
      * @zh 单眼渲染开始时调用
@@ -259,7 +265,7 @@ public:
     virtual bool endRenderEyeFrame(uint32_t eye) = 0;
     /**
      * @en call when frame render end
-     * @zh 一帧渲染结束时调用
+     * @zh 一帧结束时调用
      * @return
      */
     virtual bool endRenderFrame() = 0;

@@ -24,10 +24,12 @@
 ****************************************************************************/
 
 #ifndef XR_COMMON_H_
-#define XR_COMMON_H_ 1
-#include <functional>
-#include <string>
+#define XR_COMMON_H_
 #include <cstdint>
+#include <functional>
+#include <memory>
+#include <string>
+#include <vector>
 
 namespace cc {
 namespace xr {
@@ -41,7 +43,7 @@ enum class XREye {
 };
 
 enum class XRVendor {
-    MOBILE,
+    MONADO,
     META,
     HUAWEIVR,
     PICO,
@@ -67,251 +69,220 @@ enum class XRConfigValueType {
 };
 
 struct XRConfigValue {
-  int vInt = 0;
-  float vFloat = 0;
-  bool vBool = false;
-  void* vPtr = nullptr;
-  std::string vString;
-  XRConfigValueType valueType = XRConfigValueType::UNKNOWN;
-  bool isInt() {
-      return valueType == XRConfigValueType::INT;
-  }
+    int vInt = 0;
+    float vFloat = 0;
+    bool vBool = false;
+    void *vPtr = nullptr;
+    std::string vString;
+    XRConfigValueType valueType = XRConfigValueType::UNKNOWN;
+    bool isInt() {
+        return valueType == XRConfigValueType::INT;
+    }
 
-  bool isFloat() {
-      return valueType == XRConfigValueType::FLOAT;
-  }
+    bool isFloat() {
+        return valueType == XRConfigValueType::FLOAT;
+    }
 
-  bool isBool() {
-      return valueType == XRConfigValueType::BOOL;
-  }
+    bool isBool() {
+        return valueType == XRConfigValueType::BOOL;
+    }
 
-  bool isPointer() {
-      return valueType == XRConfigValueType::VOID_POINTER;
-  }
+    bool isPointer() {
+        return valueType == XRConfigValueType::VOID_POINTER;
+    }
 
-  bool isString() {
-      return valueType == XRConfigValueType::STRING;
-  }
+    bool isString() {
+        return valueType == XRConfigValueType::STRING;
+    }
 
-  bool getBool() {
-      return vBool;
-  }
+    bool getBool() {
+        return vBool;
+    }
 
-  int getInt() {
-      return vInt;
-  }
+    int getInt() {
+        return vInt;
+    }
 
-  float getFloat() {
-      return vFloat;
-  }
+    float getFloat() {
+        return vFloat;
+    }
 
-  std::string getString() {
-      return vString;
-  }
+    std::string getString() {
+        return vString;
+    }
 
-  void* getPointer() {
-      return vPtr;
-  }
+    void *getPointer() {
+        return vPtr;
+    }
 
-  XRConfigValue() {
+    XRConfigValue() {
+    }
 
-  }
+    XRConfigValue(int value) {
+        valueType = XRConfigValueType::INT;
+        vInt = value;
+    }
 
-  XRConfigValue(int value) {
-      valueType = XRConfigValueType::INT;
-      vInt = value;
-  }
+    XRConfigValue(float value) {
+        valueType = XRConfigValueType::FLOAT;
+        vFloat = value;
+    }
 
-  XRConfigValue(float value) {
-      valueType = XRConfigValueType::FLOAT;
-      vFloat = value;
-  }
+    XRConfigValue(std::string value) {
+        valueType = XRConfigValueType::STRING;
+        vString = value;
+    }
 
-  XRConfigValue(std::string value) {
-      valueType = XRConfigValueType::STRING;
-      vString = value;
-  }
+    XRConfigValue(bool value) {
+        valueType = XRConfigValueType::BOOL;
+        vBool = value;
+    }
 
-  XRConfigValue(bool value) {
-      valueType = XRConfigValueType::BOOL;
-      vBool = value;
-  }
-
-  XRConfigValue(void* value) {
-      valueType = XRConfigValueType::VOID_POINTER;
-      vPtr = value;
-  }
-};
-
-struct XRQuaternion {
-    float x = 0.f;
-    float y = 0.f;
-    float z = 0.f;
-    float w = 1.f;
-
-    XRQuaternion() {}
-
-    XRQuaternion(float xx, float yy, float zz, float ww)
-    : x(xx),
-      y(yy),
-      z(zz),
-      w(ww) {}
-
-    XRQuaternion(float *q)
-    : x(q[0]),
-      y(q[1]),
-      z(q[2]),
-      w(q[3]) {}
-
-    XRQuaternion(const XRQuaternion &copy) {
-        this->x = copy.x;
-        this->y = copy.y;
-        this->z = copy.z;
-        this->w = copy.w;
+    XRConfigValue(void *value) {
+        valueType = XRConfigValueType::VOID_POINTER;
+        vPtr = value;
     }
 };
 
-struct HandleInfo {
-    float x = 0.f;
-    float y = 0.f;
-    float z = 0.f;
-    float value = 0.f;
-    XRQuaternion quaternion;
-
-    HandleInfo() {}
-
-    HandleInfo(float x, float y)
-    : x(x),
-      y(y) {}
-
-    HandleInfo(float value)
-    : value(value) {}
-
-    HandleInfo(float x, float y, float z, float *quaternion)
-    : x(x),
-      y(y),
-      z(z),
-      quaternion(quaternion) {}
-
-    HandleInfo(float x, float y, float z, const XRQuaternion &quaternion)
-    : x(x),
-      y(y),
-      z(z),
-      quaternion(quaternion) {}
+enum class XREventType {
+    CLICK,
+    STICK,
+    GRAB,
+    POSE,
+    UNKNOWN
 };
 
-struct HandleEvent {
+struct XRControllerInfo {
+    virtual XREventType getXREventType() const = 0;
+};
+
+struct XRClick : public XRControllerInfo {
     enum class Type {
-        VIEW_POSE_ACTIVE_LEFT,
-        HAND_POSE_ACTIVE_LEFT,
-        AIM_POSE_ACTIVE_LEFT,
-        TRIGGER_START_LEFT,
-        TRIGGER_END_LEFT,
-        TRIGGER_DOWN_LEFT,
-        TRIGGER_UP_LEFT,
-        THUMBSTICK_MOVE_LEFT,
-        THUMBSTICK_MOVE_END_LEFT,
-        THUMBSTICK_DOWN_LEFT,
-        THUMBSTICK_UP_LEFT,
-        GRIP_START_LEFT,
-        GRIP_END_LEFT,
-        BUTTON_X_DOWN,
-        BUTTON_X_UP,
-        BUTTON_Y_DOWN,
-        BUTTON_Y_UP,
-        MENU_DOWN,
-        MENU_UP,
-        VIEW_POSE_ACTIVE_RIGHT,
-        HAND_POSE_ACTIVE_RIGHT,
-        AIM_POSE_ACTIVE_RIGHT,
-        TRIGGER_START_RIGHT,
-        TRIGGER_END_RIGHT,
-        TRIGGER_DOWN_RIGHT,
-        TRIGGER_UP_RIGHT,
-        THUMBSTICK_MOVE_RIGHT,
-        THUMBSTICK_MOVE_END_RIGHT,
-        THUMBSTICK_DOWN_RIGHT,
-        THUMBSTICK_UP_RIGHT,
-        GRIP_START_RIGHT,
-        GRIP_END_RIGHT,
-        BUTTON_A_DOWN,
-        BUTTON_A_UP,
-        BUTTON_B_DOWN,
-        BUTTON_B_UP,
-        HOME_DOWN,
-        HOME_UP,
-        BACK_DOWN,
-        BACK_UP,
-        START_DOWN,
-        START_UP,
-        DPAD_TOP_DOWN,
-        DPAD_TOP_UP,
-        DPAD_BOTTOM_DOWN,
-        DPAD_BOTTOM_UP,
-        DPAD_LEFT_DOWN,
-        DPAD_LEFT_UP,
-        DPAD_RIGHT_DOWN,
-        DPAD_RIGHT_UP,
+        TRIGGER_LEFT,
+        SHOULDER_LEFT,
+        THUMBSTICK_LEFT,
+        X,
+        Y,
+        MENU,
+        TRIGGER_RIGHT,
+        SHOULDER_RIGHT,
+        THUMBSTICK_RIGHT,
+        A,
+        B,
+        HOME,
+        BACK,
+        START,
+        DPAD_UP,
+        DPAD_DOWN,
+        DPAD_LEFT,
+        DPAD_RIGHT,
         UNKNOWN
     };
 
-    static const constexpr char *TypeNames[] = {
-        "onViewPoseActiveLeft",
-        "onHandPoseActiveLeft",
-        "onAimPoseActiveLeft",
-        "onTriggerStartLeft",
-        "onTriggerEndLeft",
-        "onTriggerDownLeft",
-        "onTriggerUpLeft",
-        "onThumbstickMoveLeft",
-        "onThumbstickMoveEndLeft",
-        "onThumbstickDownLeft",
-        "onThumbstickUpLeft",
-        "onGripStartLeft",
-        "onGripEndLeft",
-        "onButtonXDown",
-        "onButtonXUp",
-        "onButtonYDown",
-        "onButtonYUp",
-        "onMenuDown",
-        "onMenuUp",
-        "onViewPoseActiveRight",
-        "onHandPoseActiveRight",
-        "onAimPoseActiveRight",
-        "onTriggerStartRight",
-        "onTriggerEndRight",
-        "onTriggerDownRight",
-        "onTriggerUpRight",
-        "onThumbstickMoveRight",
-        "onThumbstickMoveEndRight",
-        "onThumbstickDownRight",
-        "onThumbstickUpRight",
-        "onGripStartRight",
-        "onGripEndRight",
-        "onButtonADown",
-        "onButtonAUp",
-        "onButtonBDown",
-        "onButtonBUp",
-        "onHomeDown",
-        "onHomeUp",
-        "onBackDown",
-        "onBackUp",
-        "onStartDown",
-        "onStartUp",
-        "onDpadTopDown",
-        "onDpadTopUp",
-        "onDpadBottomDown",
-        "onDpadBottomUp",
-        "onDpadLeftDown",
-        "onDpadLeftUp",
-        "onDpadRightDown",
-        "onDpadRightUp",
-        "unknown"};
-
-    HandleInfo handleInfo;
+    bool isPress = false;
     Type type = Type::UNKNOWN;
+
+    XRClick(Type type, bool isPress)
+    : type(type),
+      isPress(isPress) {}
+
+    virtual XREventType getXREventType() const override {
+        return XREventType::CLICK;
+    }
 };
-typedef std::function<void(const HandleEvent &handleEvent)> XREventsCallback;
+
+struct XRStick : public XRControllerInfo {
+    enum class Type {
+        STICK_LEFT,
+        STICK_RIGHT,
+        UNKNOWN
+    };
+
+    bool isActive = false;
+    float x = 0.F;
+    float y = 0.F;
+    Type type = Type::UNKNOWN;
+
+    XRStick(Type type, bool isActive)
+    : type(type),
+      isActive(isActive) {}
+
+    XRStick(Type type, float x, float y)
+    : type(type),
+      isActive(true),
+      x(x),
+      y(y) {}
+
+    virtual XREventType getXREventType() const override {
+        return XREventType::STICK;
+    }
+};
+
+struct XRGrab : public XRControllerInfo {
+    enum class Type {
+        TRIGGER_LEFT,
+        GRIP_LEFT,
+        TRIGGER_RIGHT,
+        GRIP_RIGHT,
+        UNKNOWN
+    };
+
+    bool isActive = false;
+    float value = 0.F;
+    Type type = Type::UNKNOWN;
+
+    XRGrab(Type type, bool isActive)
+    : type(type),
+      isActive(isActive) {}
+
+    XRGrab(Type type, float value)
+    : type(type),
+      isActive(true),
+      value(value) {}
+
+    virtual XREventType getXREventType() const override {
+        return XREventType::GRAB;
+    }
+};
+
+struct XRPose : public XRControllerInfo {
+    enum class Type {
+        VIEW_LEFT,
+        HAND_LEFT,
+        AIM_LEFT,
+        VIEW_RIGHT,
+        HAND_RIGHT,
+        AIM_RIGHT,
+        HEAD_MIDDLE,
+        UNKNOWN
+    };
+
+    bool isActive = false;
+    float px = 0.F;
+    float py = 0.F;
+    float pz = 0.F;
+    float qx = 0.F;
+    float qy = 0.F;
+    float qz = 0.F;
+    float qw = 1.F;
+    Type type = Type::UNKNOWN;
+
+    XRPose(Type type, bool isActive)
+    : type(type),
+      isActive(isActive) {}
+
+    XRPose(Type type, float position[3], float quaternion[4])
+    : type(type), isActive(true), px(position[0]), py(position[1]), pz(position[2]), qx(quaternion[0]), qy(quaternion[1]), qz(quaternion[2]), qw(quaternion[3]) {}
+
+    virtual XREventType getXREventType() const override {
+        return XREventType::POSE;
+    }
+};
+
+struct XRControllerEvent {
+    std::vector<std::unique_ptr<XRControllerInfo>> xrControllerInfos;
+};
+typedef std::function<void(const XRControllerEvent &xrControllerEvent)> XRControllerCallback;
 using PFNGLES3WLOADPROC = void *(*)(const char *);
 
 struct XRSwapchain {
@@ -329,4 +300,4 @@ struct XRSwapchain {
 
 } // namespace xr
 } // namespace cc
-#endif //XR_COMMON_H_
+#endif // XR_COMMON_H_

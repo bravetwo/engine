@@ -246,6 +246,9 @@ void EventDispatcher::dispatchControllerEvent(const ControllerEvent &controllerE
     }
 
     const char *eventName = "onControllerInput";
+    if (controllerEvent.type == ControllerEvent::Type::HANDLE) {
+        eventName = "onHandleInput";
+    }
     uint32_t    controllerIndex = 0;
     jsControllerEventArray->setProperty("length", se::Value(static_cast<uint32_t>(controllerEvent.controllerInfos.size())));
 

@@ -140,6 +140,28 @@ static bool js_xr_XrEntry_getCocosXrSwapchains(se::State& s) // NOLINT(readabili
 }
 SE_BIND_FUNC(js_xr_XrEntry_getCocosXrSwapchains)
 
+static bool js_xr_XrEntry_getHMDViewPosition(se::State& s) // NOLINT(readability-identifier-naming)
+{
+    auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntry>(s);
+    SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_getHMDViewPosition : Invalid Native Object");
+    const auto& args = s.args();
+    size_t argc = args.size();
+    CC_UNUSED bool ok = true;
+    if (argc == 1) {
+        HolderType<int, false> arg0 = {};
+        ok &= sevalue_to_native(args[0], &arg0, s.thisObject());
+        SE_PRECONDITION2(ok, false, "js_xr_XrEntry_getHMDViewPosition : Error processing arguments");
+        std::vector<float> result = cobj->getHMDViewPosition(arg0.value());
+        ok &= nativevalue_to_se(result, s.rval(), nullptr /*ctx*/);
+        SE_PRECONDITION2(ok, false, "js_xr_XrEntry_getHMDViewPosition : Error processing arguments");
+        SE_HOLD_RETURN_VALUE(result, s.thisObject(), s.rval());
+        return true;
+    }
+    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 1);
+    return false;
+}
+SE_BIND_FUNC(js_xr_XrEntry_getHMDViewPosition)
+
 static bool js_xr_XrEntry_getSwapchainImageIndex(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntry>(s);
@@ -158,6 +180,28 @@ static bool js_xr_XrEntry_getSwapchainImageIndex(se::State& s) // NOLINT(readabi
     return false;
 }
 SE_BIND_FUNC(js_xr_XrEntry_getSwapchainImageIndex)
+
+static bool js_xr_XrEntry_getXRConfig(se::State& s) // NOLINT(readability-identifier-naming)
+{
+    auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntry>(s);
+    SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_getXRConfig : Invalid Native Object");
+    const auto& args = s.args();
+    size_t argc = args.size();
+    CC_UNUSED bool ok = true;
+    if (argc == 1) {
+        HolderType<cc::xr::XRConfigKey, false> arg0 = {};
+        ok &= sevalue_to_native(args[0], &arg0, s.thisObject());
+        SE_PRECONDITION2(ok, false, "js_xr_XrEntry_getXRConfig : Error processing arguments");
+        cc::xr::XRConfigValue result = cobj->getXRConfig(arg0.value());
+        ok &= nativevalue_to_se(result, s.rval(), nullptr /*ctx*/);
+        SE_PRECONDITION2(ok, false, "js_xr_XrEntry_getXRConfig : Error processing arguments");
+        SE_HOLD_RETURN_VALUE(result, s.thisObject(), s.rval());
+        return true;
+    }
+    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 1);
+    return false;
+}
+SE_BIND_FUNC(js_xr_XrEntry_getXRConfig)
 
 static bool js_xr_XrEntry_getXrViewCount(se::State& s) // NOLINT(readability-identifier-naming)
 {
@@ -232,6 +276,25 @@ static bool js_xr_XrEntry_isCreatedXrInstance(se::State& s) // NOLINT(readabilit
     return false;
 }
 SE_BIND_FUNC(js_xr_XrEntry_isCreatedXrInstance)
+
+static bool js_xr_XrEntry_isRenderAllowable(se::State& s) // NOLINT(readability-identifier-naming)
+{
+    auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntry>(s);
+    SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_isRenderAllowable : Invalid Native Object");
+    const auto& args = s.args();
+    size_t argc = args.size();
+    CC_UNUSED bool ok = true;
+    if (argc == 0) {
+        bool result = cobj->isRenderAllowable();
+        ok &= nativevalue_to_se(result, s.rval(), nullptr /*ctx*/);
+        SE_PRECONDITION2(ok, false, "js_xr_XrEntry_isRenderAllowable : Error processing arguments");
+        SE_HOLD_RETURN_VALUE(result, s.thisObject(), s.rval());
+        return true;
+    }
+    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 0);
+    return false;
+}
+SE_BIND_FUNC(js_xr_XrEntry_isRenderAllowable)
 
 static bool js_xr_XrEntry_isSessionRunning(se::State& s) // NOLINT(readability-identifier-naming)
 {
@@ -358,53 +421,24 @@ static bool js_xr_XrEntry_resumeXrInstance(se::State& s) // NOLINT(readability-i
 }
 SE_BIND_FUNC(js_xr_XrEntry_resumeXrInstance)
 
-static bool js_xr_XrEntry_setEventsCallback(se::State& s) // NOLINT(readability-identifier-naming)
+static bool js_xr_XrEntry_setIPDOffset(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntry>(s);
-    SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_setEventsCallback : Invalid Native Object");
+    SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_setIPDOffset : Invalid Native Object");
     const auto& args = s.args();
     size_t argc = args.size();
     CC_UNUSED bool ok = true;
     if (argc == 1) {
-        HolderType<std::function<void (const cc::xr::HandleEvent &)>, false> arg0 = {};
-        do {
-            if (args[0].isObject() && args[0].toObject()->isFunction())
-            {
-                se::Value jsThis(s.thisObject());
-                se::Value jsFunc(args[0]);
-                jsThis.toObject()->attachObject(jsFunc.toObject());
-                auto * thisObj = s.thisObject();
-                auto lambda = [=](const cc::xr::HandleEvent & larg0) -> void {
-                    se::ScriptEngine::getInstance()->clearException();
-                    se::AutoHandleScope hs;
-        
-                    CC_UNUSED bool ok = true;
-                    se::ValueArray args;
-                    args.resize(1);
-                    ok &= nativevalue_to_se(larg0, args[0], nullptr /*ctx*/);
-                    se::Value rval;
-                    se::Object* funcObj = jsFunc.toObject();
-                    bool succeed = funcObj->call(args, thisObj, &rval);
-                    if (!succeed) {
-                        se::ScriptEngine::getInstance()->clearException();
-                    }
-                };
-                arg0.data = lambda;
-            }
-            else
-            {
-                arg0.data = nullptr;
-            }
-        } while(false)
-        ;
-        SE_PRECONDITION2(ok, false, "js_xr_XrEntry_setEventsCallback : Error processing arguments");
-        cobj->setEventsCallback(arg0.value());
+        HolderType<float, false> arg0 = {};
+        ok &= sevalue_to_native(args[0], &arg0, s.thisObject());
+        SE_PRECONDITION2(ok, false, "js_xr_XrEntry_setIPDOffset : Error processing arguments");
+        cobj->setIPDOffset(arg0.value());
         return true;
     }
     SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 1);
     return false;
 }
-SE_BIND_FUNC(js_xr_XrEntry_setEventsCallback)
+SE_BIND_FUNC(js_xr_XrEntry_setIPDOffset)
 
 static bool js_xr_XrEntry_setMultisamplesRTT(se::State& s) // NOLINT(readability-identifier-naming)
 {
@@ -474,11 +508,14 @@ bool js_register_xr_XrEntry(se::Object* obj) // NOLINT(readability-identifier-na
     cls->defineFunction("frameEnd", _SE(js_xr_XrEntry_frameEnd));
     cls->defineFunction("frameStart", _SE(js_xr_XrEntry_frameStart));
     cls->defineFunction("getCocosXrSwapchains", _SE(js_xr_XrEntry_getCocosXrSwapchains));
+    cls->defineFunction("getHMDViewPosition", _SE(js_xr_XrEntry_getHMDViewPosition));
     cls->defineFunction("getSwapchainImageIndex", _SE(js_xr_XrEntry_getSwapchainImageIndex));
+    cls->defineFunction("getXRConfig", _SE(js_xr_XrEntry_getXRConfig));
     cls->defineFunction("getXrViewCount", _SE(js_xr_XrEntry_getXrViewCount));
     cls->defineFunction("initPlatformData", _SE(js_xr_XrEntry_initPlatformData));
     cls->defineFunction("initXrSwapchains", _SE(js_xr_XrEntry_initXrSwapchains));
     cls->defineFunction("isCreatedXrInstance", _SE(js_xr_XrEntry_isCreatedXrInstance));
+    cls->defineFunction("isRenderAllowable", _SE(js_xr_XrEntry_isRenderAllowable));
     cls->defineFunction("isSessionRunning", _SE(js_xr_XrEntry_isSessionRunning));
     cls->defineFunction("pauseXrInstance", _SE(js_xr_XrEntry_pauseXrInstance));
     cls->defineFunction("platformLoopEnd", _SE(js_xr_XrEntry_platformLoopEnd));
@@ -486,7 +523,7 @@ bool js_register_xr_XrEntry(se::Object* obj) // NOLINT(readability-identifier-na
     cls->defineFunction("renderLoopEnd", _SE(js_xr_XrEntry_renderLoopEnd));
     cls->defineFunction("renderLoopStart", _SE(js_xr_XrEntry_renderLoopStart));
     cls->defineFunction("resumeXrInstance", _SE(js_xr_XrEntry_resumeXrInstance));
-    cls->defineFunction("setEventsCallback", _SE(js_xr_XrEntry_setEventsCallback));
+    cls->defineFunction("setIPDOffset", _SE(js_xr_XrEntry_setIPDOffset));
     cls->defineFunction("setMultisamplesRTT", _SE(js_xr_XrEntry_setMultisamplesRTT));
     cls->defineFunction("setRenderingScale", _SE(js_xr_XrEntry_setRenderingScale));
     cls->defineStaticFunction("getInstance", _SE(js_xr_XrEntry_getInstance_static));
