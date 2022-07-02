@@ -66,4 +66,9 @@ export enum Feature {
      * @zh 是否支持派发 EventHandle
      */
     EVENT_HANDLE = 'EVENT_HANDLE',
+    /**
+     * @en Feature to support dispatching EventHMD.
+     * @zh 是否支持派发 EventHMD
+     */
+    EVENT_HMD = 'EVENT_HMD',
 }

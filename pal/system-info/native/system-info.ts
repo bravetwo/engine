@@ -92,6 +92,7 @@ class SystemInfo extends EventTarget {
             [Feature.EVENT_ACCELEROMETER]: this.isMobile,
             [Feature.EVENT_GAMEPAD]: true,
             [Feature.EVENT_HANDLE]: this.isXR,
+            [Feature.EVENT_HMD]: this.isXR,
         };
 
         this._registerEvent();

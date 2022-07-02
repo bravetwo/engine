@@ -88,69 +88,22 @@ declare namespace jsb {
     }
 
     export let onControllerInput: (infoList: ControllerInfo[]) => void | undefined;
+    export let onHandleInput: (infoList: ControllerInfo[]) => void | undefined;
     export let onControllerChange: (controllerIds: number[]) => void | undefined;
 
-    export interface HandleEvent {
+    export interface PoseInfo {
+        code: number,
         x: number,
         y: number,
         z: number,
-        value: number,
         quaternionX: number,
         quaternionY: number,
         quaternionZ: number,
         quaternionW: number,
     }
-    type HandleEventCallback = (handleEvent: HandleEvent) => void;
-    export let onViewPoseActiveLeft: HandleEventCallback | undefined;
-    export let onHandPoseActiveLeft: HandleEventCallback | undefined;
-    export let onAimPoseActiveLeft: HandleEventCallback | undefined;
-    export let onTriggerStartLeft: HandleEventCallback | undefined;
-    export let onTriggerEndLeft: () => void | undefined;
-    export let onTriggerDownLeft: () => void | undefined;
-    export let onTriggerUpLeft: () => void | undefined;
-    export let onThumbstickMoveLeft: HandleEventCallback | undefined;
-    export let onThumbstickMoveEndLeft: () => void | undefined;
-    export let onThumbstickDownLeft: () => void | undefined;
-    export let onThumbstickUpLeft: () => void | undefined;
-    export let onGripStartLeft: HandleEventCallback | undefined;
-    export let onGripEndLeft: () => void | undefined;
-    export let onButtonXDown: () => void | undefined;
-    export let onButtonXUp: () => void | undefined;
-    export let onButtonYDown: () => void | undefined;
-    export let onButtonYUp: () => void | undefined;
-    export let onMenuDown: () => void | undefined;
-    export let onMenuUp: () => void | undefined;
-    export let onViewPoseActiveRight: HandleEventCallback | undefined;
-    export let onHandPoseActiveRight: HandleEventCallback | undefined;
-    export let onAimPoseActiveRight: HandleEventCallback | undefined;
-    export let onTriggerStartRight: HandleEventCallback | undefined;
-    export let onTriggerEndRight: () => void | undefined;
-    export let onTriggerDownRight: () => void | undefined;
-    export let onTriggerUpRight: () => void | undefined;
-    export let onThumbstickMoveRight: HandleEventCallback | undefined;
-    export let onThumbstickMoveEndRight: () => void | undefined;
-    export let onThumbstickDownRight: () => void | undefined;
-    export let onThumbstickUpRight: () => void | undefined;
-    export let onGripStartRight: HandleEventCallback | undefined;
-    export let onGripEndRight: () => void | undefined;
-    export let onButtonADown: () => void | undefined;
-    export let onButtonAUp: () => void | undefined;
-    export let onButtonBDown: () => void | undefined;
-    export let onButtonBUp: () => void | undefined;
-    export let onHomeDown: () => void | undefined;
-    export let onHomeUp: () => void | undefined;
-    export let onBackDown: () => void | undefined;
-    export let onBackUp: () => void | undefined;
-    export let onStartDown: () => void | undefined;
-    export let onStartUp: () => void | undefined;
-    export let onDpadTopDown: () => void | undefined;
-    export let onDpadTopUp: () => void | undefined;
-    export let onDpadBottomDown: () => void | undefined;
-    export let onDpadBottomUp: () => void | undefined;
-    export let onDpadLeftDown: () => void | undefined;
-    export let onDpadLeftUp: () => void | undefined;
-    export let onDpadRightDown: () => void | undefined;
-    export let onDpadRightUp: () => void | undefined;
+
+    export let onHandlePoseInput: (infoList: PoseInfo[]) => void | undefined;
+    export let onHMDPoseInput: (infoList: PoseInfo[]) => void | undefined;
 
     export interface KeyboardEvent {
         altKey: boolean;

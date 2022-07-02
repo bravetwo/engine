@@ -120,6 +120,7 @@ class SystemInfo extends EventTarget {
             [Feature.EVENT_ACCELEROMETER]: !isPCWechat,
             [Feature.EVENT_GAMEPAD]: false,
             [Feature.EVENT_HANDLE]: this.isXR,
+            [Feature.EVENT_HMD]: this.isXR,
         };
 
         this._registerEvent();

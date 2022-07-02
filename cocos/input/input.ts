@@ -25,11 +25,11 @@
 */
 
 import { EDITOR, NATIVE } from 'internal:constants';
-import { TouchInputSource, MouseInputSource, KeyboardInputSource, AccelerometerInputSource, GamepadInputDevice, HandleInputSource } from 'pal/input';
+import { TouchInputSource, MouseInputSource, KeyboardInputSource, AccelerometerInputSource, GamepadInputDevice, HandleInputDevice, HMDInputDevice } from 'pal/input';
 import { touchManager } from '../../pal/input/touch-manager';
 import { sys } from '../core/platform/sys';
 import { EventTarget } from '../core/event/event-target';
-import { Event, EventAcceleration, EventGamepad, EventHandle, EventKeyboard, EventMouse, EventTouch, Touch } from './types';
+import { Event, EventAcceleration, EventGamepad, EventHandle, EventHMD, EventKeyboard, EventMouse, EventTouch, Touch } from './types';
 import { InputEventType } from './types/event-enum';
 
 export enum EventDispatcherPriority {
@@ -88,65 +88,18 @@ interface InputEventMap {
     [Input.EventType.DEVICEMOTION]: (event: EventAcceleration) => void,
     [Input.EventType.GAMEPAD_CHANGE]: (event: EventGamepad) => void,
     [Input.EventType.GAMEPAD_INPUT]: (event: EventGamepad) => void,
-    [Input.EventType.VIEW_POSE_ACTIVE_LEFT]: (event: EventHandle) => void,
-    [Input.EventType.HAND_POSE_ACTIVE_LEFT]: (event: EventHandle) => void,
-    [Input.EventType.AIM_POSE_ACTIVE_LEFT]: (event: EventHandle) => void,
-    [Input.EventType.TRIGGER_START_LEFT]: (event: EventHandle) => void,
-    [Input.EventType.TRIGGER_END_LEFT]: (event: EventHandle) => void,
-    [Input.EventType.TRIGGER_DOWN_LEFT]: (event: EventHandle) => void,
-    [Input.EventType.TRIGGER_UP_LEFT]: (event: EventHandle) => void,
-    [Input.EventType.THUMBSTICK_MOVE_LEFT]: (event: EventHandle) => void,
-    [Input.EventType.THUMBSTICK_MOVE_END_LEFT]: (event: EventHandle) => void,
-    [Input.EventType.THUMBSTICK_DOWN_LEFT]: (event: EventHandle) => void,
-    [Input.EventType.THUMBSTICK_UP_LEFT]: (event: EventHandle) => void,
-    [Input.EventType.GRIP_START_LEFT]: (event: EventHandle) => void,
-    [Input.EventType.GRIP_END_LEFT]: (event: EventHandle) => void,
-    [Input.EventType.BUTTON_X_DOWN]: (event: EventHandle) => void,
-    [Input.EventType.BUTTON_X_UP]: (event: EventHandle) => void,
-    [Input.EventType.BUTTON_Y_DOWN]: (event: EventHandle) => void,
-    [Input.EventType.BUTTON_Y_UP]: (event: EventHandle) => void,
-    [Input.EventType.MENU_DOWN]: (event: EventHandle) => void,
-    [Input.EventType.MENU_UP]: (event: EventHandle) => void,
-    [Input.EventType.VIEW_POSE_ACTIVE_RIGHT]: (event: EventHandle) => void,
-    [Input.EventType.HAND_POSE_ACTIVE_RIGHT]: (event: EventHandle) => void,
-    [Input.EventType.AIM_POSE_ACTIVE_RIGHT]: (event: EventHandle) => void,
-    [Input.EventType.TRIGGER_START_RIGHT]: (event: EventHandle) => void,
-    [Input.EventType.TRIGGER_END_RIGHT]: (event: EventHandle) => void,
-    [Input.EventType.TRIGGER_DOWN_RIGHT]: (event: EventHandle) => void,
-    [Input.EventType.TRIGGER_UP_RIGHT]: (event: EventHandle) => void,
-    [Input.EventType.THUMBSTICK_MOVE_RIGHT]: (event: EventHandle) => void,
-    [Input.EventType.THUMBSTICK_MOVE_END_RIGHT]: (event: EventHandle) => void,
-    [Input.EventType.THUMBSTICK_DOWN_RIGHT]: (event: EventHandle) => void,
-    [Input.EventType.THUMBSTICK_UP_RIGHT]: (event: EventHandle) => void,
-    [Input.EventType.GRIP_START_RIGHT]: (event: EventHandle) => void,
-    [Input.EventType.GRIP_END_RIGHT]: (event: EventHandle) => void,
-    [Input.EventType.BUTTON_A_DOWN]: (event: EventHandle) => void,
-    [Input.EventType.BUTTON_A_UP]: (event: EventHandle) => void,
-    [Input.EventType.BUTTON_B_DOWN]: (event: EventHandle) => void,
-    [Input.EventType.BUTTON_B_UP]: (event: EventHandle) => void,
-    [Input.EventType.HOME_DOWN]: (event: EventHandle) => void,
-    [Input.EventType.HOME_UP]: (event: EventHandle) => void,
-    [Input.EventType.BACK_DOWN]: (event: EventHandle) => void,
-    [Input.EventType.BACK_UP]: (event: EventHandle) => void,
-    [Input.EventType.START_DOWN]: (event: EventHandle) => void,
-    [Input.EventType.START_UP]: (event: EventHandle) => void,
-    [Input.EventType.DPAD_TOP_DOWN]: (event: EventHandle) => void,
-    [Input.EventType.DPAD_TOP_UP]: (event: EventHandle) => void,
-    [Input.EventType.DPAD_BOTTOM_DOWN]: (event: EventHandle) => void,
-    [Input.EventType.DPAD_BOTTOM_UP]: (event: EventHandle) => void,
-    [Input.EventType.DPAD_LEFT_DOWN]: (event: EventHandle) => void,
-    [Input.EventType.DPAD_LEFT_UP]: (event: EventHandle) => void,
-    [Input.EventType.DPAD_RIGHT_DOWN]: (event: EventHandle) => void,
-    [Input.EventType.DPAD_RIGHT_UP]: (event: EventHandle) => void,
+    [Input.EventType.HANDLE_INPUT]: (event: EventHandle) => void,
+    [Input.EventType.HANDLE_POSE_INPUT]: (event: EventHandle) => void,
+    [Input.EventType.HMD_POSE_INPUT]: (event: EventHMD) => void,
 }
 
 /**
  * @en
- * This Input class manages all events of input. include: touch, mouse, accelerometer, handle and keyboard.
+ * This Input class manages all events of input. include: touch, mouse, accelerometer, gamepad, handle, hmd and keyboard.
  * You can get the `Input` instance with `input`.
  *
  * @zh
- * 该输入类管理所有的输入事件，包括：触摸、鼠标、加速计、手柄 和 键盘。
+ * 该输入类管理所有的输入事件，包括：触摸、鼠标、加速计、游戏手柄、6DOF手柄、头戴显示器 和 键盘。
  * 你可以通过 `input` 获取到 `Input` 的实例。
  *
  * @example
@@ -179,7 +132,8 @@ export class Input {
     private _mouseInput = new MouseInputSource();
     private _keyboardInput = new KeyboardInputSource();
     private _accelerometerInput = new AccelerometerInputSource();
-    private _handleInput = new HandleInputSource();
+    private _handleInput = new HandleInputDevice();
+    private _hmdInput = new HMDInputDevice();
 
     private _eventTouchList: EventTouch[] = [];
     private _eventMouseList: EventMouse[] = [];
@@ -187,6 +141,7 @@ export class Input {
     private _eventAccelerationList: EventAcceleration[] = [];
     private _eventGamepadList: EventGamepad[] = [];
     private _eventHandleList: EventHandle[] = [];
+    private _eventHMDList: EventHMD[] = [];
 
     private _needSimulateTouchMoveEvent = false;
 
@@ -391,56 +346,13 @@ export class Input {
 
         if (sys.hasFeature(sys.Feature.EVENT_HANDLE)) {
             const eventHandleList = this._eventHandleList;
-            this._handleInput.on(InputEventType.VIEW_POSE_ACTIVE_LEFT, (event) => { this._emitEvent(event); });
-            this._handleInput.on(InputEventType.HAND_POSE_ACTIVE_LEFT, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
-            this._handleInput.on(InputEventType.AIM_POSE_ACTIVE_LEFT, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
-            this._handleInput.on(InputEventType.TRIGGER_START_LEFT, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
-            this._handleInput.on(InputEventType.TRIGGER_END_LEFT, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
-            this._handleInput.on(InputEventType.TRIGGER_DOWN_LEFT, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
-            this._handleInput.on(InputEventType.TRIGGER_UP_LEFT, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
-            this._handleInput.on(InputEventType.THUMBSTICK_MOVE_LEFT, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
-            this._handleInput.on(InputEventType.THUMBSTICK_MOVE_END_LEFT, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
-            this._handleInput.on(InputEventType.THUMBSTICK_DOWN_LEFT, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
-            this._handleInput.on(InputEventType.THUMBSTICK_UP_LEFT, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
-            this._handleInput.on(InputEventType.GRIP_START_LEFT, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
-            this._handleInput.on(InputEventType.GRIP_END_LEFT, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
-            this._handleInput.on(InputEventType.BUTTON_X_DOWN, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
-            this._handleInput.on(InputEventType.BUTTON_X_UP, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
-            this._handleInput.on(InputEventType.BUTTON_Y_DOWN, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
-            this._handleInput.on(InputEventType.BUTTON_Y_UP, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
-            this._handleInput.on(InputEventType.MENU_DOWN, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
-            this._handleInput.on(InputEventType.MENU_UP, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
-            this._handleInput.on(InputEventType.VIEW_POSE_ACTIVE_RIGHT, (event) => { this._emitEvent(event); });
-            this._handleInput.on(InputEventType.HAND_POSE_ACTIVE_RIGHT, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
-            this._handleInput.on(InputEventType.AIM_POSE_ACTIVE_RIGHT, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
-            this._handleInput.on(InputEventType.TRIGGER_START_RIGHT, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
-            this._handleInput.on(InputEventType.TRIGGER_END_RIGHT, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
-            this._handleInput.on(InputEventType.TRIGGER_DOWN_RIGHT, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
-            this._handleInput.on(InputEventType.TRIGGER_UP_RIGHT, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
-            this._handleInput.on(InputEventType.THUMBSTICK_MOVE_RIGHT, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
-            this._handleInput.on(InputEventType.THUMBSTICK_MOVE_END_RIGHT, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
-            this._handleInput.on(InputEventType.THUMBSTICK_DOWN_RIGHT, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
-            this._handleInput.on(InputEventType.THUMBSTICK_UP_RIGHT, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
-            this._handleInput.on(InputEventType.GRIP_START_RIGHT, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
-            this._handleInput.on(InputEventType.GRIP_END_RIGHT, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
-            this._handleInput.on(InputEventType.BUTTON_A_DOWN, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
-            this._handleInput.on(InputEventType.BUTTON_A_UP, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
-            this._handleInput.on(InputEventType.BUTTON_B_DOWN, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
-            this._handleInput.on(InputEventType.BUTTON_B_UP, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
-            this._handleInput.on(InputEventType.HOME_DOWN, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
-            this._handleInput.on(InputEventType.HOME_UP, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
-            this._handleInput.on(InputEventType.BACK_DOWN, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
-            this._handleInput.on(InputEventType.BACK_UP, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
-            this._handleInput.on(InputEventType.START_DOWN, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
-            this._handleInput.on(InputEventType.START_UP, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
-            this._handleInput.on(InputEventType.DPAD_TOP_DOWN, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
-            this._handleInput.on(InputEventType.DPAD_TOP_UP, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
-            this._handleInput.on(InputEventType.DPAD_BOTTOM_DOWN, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
-            this._handleInput.on(InputEventType.DPAD_BOTTOM_UP, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
-            this._handleInput.on(InputEventType.DPAD_LEFT_DOWN, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
-            this._handleInput.on(InputEventType.DPAD_LEFT_UP, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
-            this._handleInput.on(InputEventType.DPAD_RIGHT_DOWN, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
-            this._handleInput.on(InputEventType.DPAD_RIGHT_UP, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
+            this._handleInput.on(InputEventType.HANDLE_INPUT, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
+            this._handleInput.on(InputEventType.HANDLE_POSE_INPUT, (event) => { this._dispatchOrPushEvent(event, eventHandleList); });
+        }
+
+        if (sys.hasFeature(sys.Feature.EVENT_HMD)) {
+            const eventHMDList = this._eventHMDList;
+            this._hmdInput.on(InputEventType.HMD_POSE_INPUT, (event) => { this._dispatchOrPushEvent(event, eventHMDList); });
         }
     }
 
@@ -451,6 +363,7 @@ export class Input {
         this._eventAccelerationList.length = 0;
         this._eventGamepadList.length = 0;
         this._eventHandleList.length = 0;
+        this._eventHMDList.length = 0;
     }
 
     private _dispatchOrPushEvent (event: Event, eventList: Event[]) {
@@ -524,16 +437,23 @@ export class Input {
             this._emitEvent(eventHandle);
         }
 
+        const eventHMDList = this._eventHMDList;
+        // TODO: culling event queue
+        for (let i = 0, length = eventHMDList.length; i < length; ++i) {
+            const eventHMD = eventHMDList[i];
+            this._emitEvent(eventHMD);
+        }
+
         this._clearEvents();
     }
 }
 
 /**
  * @en
- * The singleton of the Input class, this singleton manages all events of input. include: touch, mouse, accelerometer, handle and keyboard.
+ * The singleton of the Input class, this singleton manages all events of input. include: touch, mouse, accelerometer, gamepad, handle, hmd and keyboard.
  *
  * @zh
- * 输入类单例，该单例管理所有的输入事件，包括：触摸、鼠标、加速计、手柄 和 键盘。
+ * 输入类单例，该单例管理所有的输入事件，包括：触摸、鼠标、加速计、游戏手柄、6DOF手柄、头戴显示器 和 键盘。
  *
  * @example
  * ```

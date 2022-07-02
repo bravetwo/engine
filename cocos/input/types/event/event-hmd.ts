@@ -23,34 +23,34 @@
  THE SOFTWARE.
 */
 
-import { HandleInputDevice } from 'pal/input';
+import { HMDInputDevice } from 'pal/input';
 import { Event } from './event';
 import { SystemEventTypeUnion } from '../event-enum';
 
 /**
  * @en
- * The 6DOF handle event.
+ * The HMD event.
  *
  * @zh
- * 6DOF手柄事件。
+ * 头戴显示器事件。
  */
-export class EventHandle extends Event {
+export class EventHMD extends Event {
 
     /**
-     * @en The handle device which trigger the current handle event
-     * @zh 触发当前手柄事件的手柄设备
+     * @en The hmd device which trigger the current hmd event
+     * @zh 触发当前头戴显示器事件的头戴显示器设备
      */
-     public handleInputDevice: HandleInputDevice;
+     public hmdInputDevice: HMDInputDevice;
 
     /**
      * @param eventType - The type of the event
-     * @param handleInputDevice - The handle device which trigger the current handle event
+     * @param hmdInputDevice - The hmd device which trigger the current hmd event
      */
-    constructor (eventType: SystemEventTypeUnion, handleInputDevice: HandleInputDevice) {
+    constructor (eventType: SystemEventTypeUnion, hmdInputDevice: HMDInputDevice) {
         super(eventType, false);
-        this.handleInputDevice = handleInputDevice;
+        this.hmdInputDevice = hmdInputDevice;
     }
 }
 
 // @ts-expect-error TODO
-Event.EventHandle = EventHandle;
+Event.EventHMD = EventHMD;

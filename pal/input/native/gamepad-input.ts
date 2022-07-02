@@ -25,14 +25,18 @@ enum Button {
     DPAD_DOWN,
     DPAD_LEFT,
     DPAD_RIGHT,
+    BUTTON_LEFT_STICK,
     LEFT_STICK_UP,
     LEFT_STICK_DOWN,
     LEFT_STICK_LEFT,
     LEFT_STICK_RIGHT,
+    BUTTON_RIGHT_STICK,
     RIGHT_STICK_UP,
     RIGHT_STICK_DOWN,
     RIGHT_STICK_LEFT,
     RIGHT_STICK_RIGHT,
+    ROKID_MENU,
+    ROKID_START,
 }
 
 type NativeButtonState = Record<Button, number>
@@ -48,6 +52,10 @@ const _nativeButtonMap = {
     8: Button.NS_PLUS,
     9: Button.BUTTON_L3,
     10: Button.BUTTON_R3,
+    11: Button.ROKID_MENU,
+    12: Button.ROKID_START,
+    13: Button.BUTTON_LEFT_STICK,
+    14: Button.BUTTON_RIGHT_STICK,
 };
 
 interface IAxisValue {
@@ -75,6 +83,10 @@ export class GamepadInputDevice {
     public get dpad () { return this._dpad; }
     public get leftStick () { return this._leftStick; }
     public get rightStick () { return this._rightStick; }
+    public get buttonMenu () { return this._buttonMenu; }
+    public get buttonStart () { return this._buttonStart; }
+    public get buttonLeftStick () { return this._buttonLeftStick; }
+    public get buttonRightStick () { return this._buttonRightStick; }
 
     public get deviceId () {
         return this._deviceId;
@@ -102,6 +114,10 @@ export class GamepadInputDevice {
     private _dpad!: InputSourceDpad;
     private _leftStick!: InputSourceStick;
     private _rightStick!: InputSourceStick;
+    private _buttonMenu!: InputSourceButton;
+    private _buttonStart!: InputSourceButton;
+    private _buttonLeftStick!: InputSourceButton;
+    private _buttonRightStick!: InputSourceButton;
 
     private _deviceId = -1;
     private _connected = false;
@@ -130,6 +146,10 @@ export class GamepadInputDevice {
         [Button.RIGHT_STICK_DOWN]: 0,
         [Button.RIGHT_STICK_LEFT]: 0,
         [Button.RIGHT_STICK_RIGHT]: 0,
+        [Button.ROKID_MENU]: 0,
+        [Button.ROKID_START]: 0,
+        [Button.BUTTON_LEFT_STICK]: 0,
+        [Button.BUTTON_RIGHT_STICK]: 0,
     };
 
     constructor (deviceId: number) {
@@ -322,6 +342,8 @@ export class GamepadInputDevice {
         dpadRight.getValue = () => this._nativeButtonState[Button.DPAD_RIGHT];
         this._dpad = new InputSourceDpad({ up: dpadUp, down: dpadDown, left: dpadLeft, right: dpadRight });
 
+        this._buttonLeftStick = new InputSourceButton();
+        this._buttonLeftStick.getValue = () => this._nativeButtonState[Button.BUTTON_LEFT_STICK];
         const leftStickUp = new InputSourceButton();
         leftStickUp.getValue = () => this._nativeButtonState[Button.LEFT_STICK_UP];
         const leftStickDown = new InputSourceButton();
@@ -332,6 +354,8 @@ export class GamepadInputDevice {
         leftStickRight.getValue = () => this._nativeButtonState[Button.LEFT_STICK_RIGHT];
         this._leftStick = new InputSourceStick({ up: leftStickUp, down: leftStickDown, left: leftStickLeft, right: leftStickRight });
 
+        this._buttonRightStick = new InputSourceButton();
+        this._buttonRightStick.getValue = () => this._nativeButtonState[Button.BUTTON_RIGHT_STICK];
         const rightStickUp = new InputSourceButton();
         rightStickUp.getValue = () => this._nativeButtonState[Button.RIGHT_STICK_UP];
         const rightStickDown = new InputSourceButton();
@@ -341,5 +365,10 @@ export class GamepadInputDevice {
         const rightStickRight = new InputSourceButton();
         rightStickRight.getValue = () => this._nativeButtonState[Button.RIGHT_STICK_RIGHT];
         this._rightStick = new InputSourceStick({ up: rightStickUp, down: rightStickDown, left: rightStickLeft, right: rightStickRight });
+
+        this._buttonMenu = new InputSourceButton();
+        this._buttonMenu.getValue = () => this._nativeButtonState[Button.ROKID_MENU];  // TODO: Rokid only for now
+        this._buttonStart = new InputSourceButton();
+        this._buttonStart.getValue = () => this._nativeButtonState[Button.ROKID_START];  // TODO: Rokid only for now
     }
 }

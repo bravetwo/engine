@@ -23,6 +23,10 @@ export class GamepadInputDevice {
     public get dpad () { return this._dpad; }
     public get leftStick () { return this._leftStick; }
     public get rightStick () { return this._rightStick; }
+    public get buttonMenu () { return this._buttonMenu; }
+    public get buttonStart () { return this._buttonStart; }
+    public get buttonLeftStick () { return this._buttonLeftStick; }
+    public get buttonRightStick () { return this._buttonRightStick; }
 
     public get deviceId () {
         return this._deviceId;
@@ -50,6 +54,10 @@ export class GamepadInputDevice {
     private _dpad!: InputSourceDpad;
     private _leftStick!: InputSourceStick;
     private _rightStick!: InputSourceStick;
+    private _buttonMenu!: InputSourceButton;
+    private _buttonStart!: InputSourceButton;
+    private _buttonLeftStick!: InputSourceButton;
+    private _buttonRightStick!: InputSourceButton;
 
     private _deviceId = -1;
     private _connected = false;
@@ -116,6 +124,8 @@ export class GamepadInputDevice {
         dpadRight.getValue = () => 0;
         this._dpad = new InputSourceDpad({ up: dpadUp, down: dpadDown, left: dpadLeft, right: dpadRight });
 
+        this._buttonLeftStick = new InputSourceButton();
+        this._buttonLeftStick.getValue = () => 0;
         const leftStickUp = new InputSourceButton();
         leftStickUp.getValue = () => 0;
         const leftStickDown = new InputSourceButton();
@@ -126,6 +136,8 @@ export class GamepadInputDevice {
         leftStickRight.getValue = () => 0;
         this._leftStick = new InputSourceStick({ up: leftStickUp, down: leftStickDown, left: leftStickLeft, right: leftStickRight });
 
+        this._buttonRightStick = new InputSourceButton();
+        this._buttonRightStick.getValue = () => 0;
         const rightStickUp = new InputSourceButton();
         rightStickUp.getValue = () => 0;
         const rightStickDown = new InputSourceButton();
@@ -135,5 +147,10 @@ export class GamepadInputDevice {
         const rightStickRight = new InputSourceButton();
         rightStickRight.getValue = () => 0;
         this._rightStick = new InputSourceStick({ up: rightStickUp, down: rightStickDown, left: rightStickLeft, right: rightStickRight });
+
+        this._buttonMenu = new InputSourceButton();
+        this._buttonMenu.getValue = () => 0;
+        this._buttonStart = new InputSourceButton();
+        this._buttonStart.getValue = () => 0;
     }
 }

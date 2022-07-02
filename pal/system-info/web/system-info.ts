@@ -194,6 +194,7 @@ class SystemInfo extends EventTarget {
             // @ts-expect-error undefined webkitGetGamepads
             [Feature.EVENT_GAMEPAD]: (navigator.getGamepads !== undefined || navigator.webkitGetGamepads !== undefined),
             [Feature.EVENT_HANDLE]: this.isXR,
+            [Feature.EVENT_HMD]: this.isXR,
         };
 
         this._registerEvent();
