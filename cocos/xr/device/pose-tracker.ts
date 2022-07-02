@@ -32,10 +32,9 @@ import { ccclass, help, menu, type, displayOrder, serializable, executeInEditMod
 import { ccenum } from '../../core/value-types/enum';
 import { Component } from '../../core/components/component';
 import { Input, input } from '../../input';
-import { EventHandle } from '../../input/types';
-import { Mat4, Quat, Vec3 } from '../../core/math';
+import { EventHandle, EventHMD } from '../../input/types';
+import { Quat, Vec3 } from '../../core/math';
 import { CameraComponent } from '../../core';
-import { EDITOR } from 'internal:constants';
 
 enum TrackingSource_Type {
     VIEW_POSE_ACTIVE_LEFT = 0,
@@ -112,18 +111,6 @@ export class PoseTracker extends Component {
 
     private _quatPose: Quat = new Quat();
     private _positionPose: Vec3 = new Vec3();
-    @serializable
-    private _ipdOffset = 0;
-
-    set ipdOffset (val) {
-        if (val === this._ipdOffset) {
-            return;
-        }
-        this._ipdOffset = val;
-    }
-    get ipdOffset () {
-        return this._ipdOffset;
-    }
 
     setCameraHMD (isHMD: boolean) {
         let cameraComponent = this.node?.getComponent(CameraComponent);
@@ -133,69 +120,96 @@ export class PoseTracker extends Component {
     }
 
     onEnable () {
-        if (this.trackingSource === TrackingSource_Type.VIEW_POSE_ACTIVE_LEFT) {
+        if (this.trackingSource === TrackingSource_Type.VIEW_POSE_ACTIVE_LEFT ||
+            this.trackingSource === TrackingSource_Type.VIEW_POSE_ACTIVE_RIGHT ||
+            this.trackingSource === TrackingSource_Type.VIEW_POSE_ACTIVE_HMD) {
             this.setCameraHMD(true);
-            input.on(Input.EventType.VIEW_POSE_ACTIVE_LEFT, this._dispatchEventPose, this);
-        } else if (this.trackingSource === TrackingSource_Type.VIEW_POSE_ACTIVE_RIGHT) {
-            this.setCameraHMD(true);
-            input.on(Input.EventType.VIEW_POSE_ACTIVE_RIGHT, this._dispatchEventPose, this);
-        } else if (this.trackingSource === TrackingSource_Type.VIEW_POSE_ACTIVE_HMD) {
-            this.setCameraHMD(true);
-            input.on(Input.EventType.VIEW_POSE_ACTIVE_LEFT, this._dispatchEventPose, this);
-            input.on(Input.EventType.VIEW_POSE_ACTIVE_RIGHT, this._dispatchEventPose, this);
-        } else if (this.trackingSource === TrackingSource_Type.HAND_POSE_ACTIVE_LEFT) {
+            input.on(Input.EventType.HMD_POSE_INPUT, this._dispatchEventHMDPose, this);
+        } else if (this.trackingSource === TrackingSource_Type.HAND_POSE_ACTIVE_LEFT ||
+            this.trackingSource === TrackingSource_Type.HAND_POSE_ACTIVE_RIGHT) {
             this.setCameraHMD(false);
-            input.on(Input.EventType.AIM_POSE_ACTIVE_LEFT, this._dispatchEventPose, this);
-        } else if (this.trackingSource === TrackingSource_Type.HAND_POSE_ACTIVE_RIGHT) {
-            this.setCameraHMD(false);
-            input.on(Input.EventType.AIM_POSE_ACTIVE_RIGHT, this._dispatchEventPose, this);
+            input.on(Input.EventType.HANDLE_POSE_INPUT, this._dispatchEventHandlePose, this);
         }
     }
 
     onDisable() {
         this.setCameraHMD(false);
-        if (this.trackingSource === TrackingSource_Type.VIEW_POSE_ACTIVE_LEFT) {
-            input.off(Input.EventType.VIEW_POSE_ACTIVE_LEFT, this._dispatchEventPose, this);
-        } else if (this.trackingSource === TrackingSource_Type.VIEW_POSE_ACTIVE_RIGHT) {
-            input.off(Input.EventType.VIEW_POSE_ACTIVE_RIGHT, this._dispatchEventPose, this);
-        } else if (this.trackingSource === TrackingSource_Type.VIEW_POSE_ACTIVE_HMD) {
-            input.off(Input.EventType.VIEW_POSE_ACTIVE_LEFT, this._dispatchEventPose, this);
-            input.off(Input.EventType.VIEW_POSE_ACTIVE_RIGHT, this._dispatchEventPose, this);
-        } else if (this.trackingSource === TrackingSource_Type.HAND_POSE_ACTIVE_LEFT) {
-            input.off(Input.EventType.AIM_POSE_ACTIVE_LEFT, this._dispatchEventPose, this);
-        } else if (this.trackingSource === TrackingSource_Type.HAND_POSE_ACTIVE_RIGHT) {
-            input.off(Input.EventType.AIM_POSE_ACTIVE_RIGHT, this._dispatchEventPose, this);
+        if (this.trackingSource === TrackingSource_Type.VIEW_POSE_ACTIVE_LEFT ||
+            this.trackingSource === TrackingSource_Type.VIEW_POSE_ACTIVE_RIGHT ||
+            this.trackingSource === TrackingSource_Type.VIEW_POSE_ACTIVE_HMD) {
+            input.off(Input.EventType.HMD_POSE_INPUT, this._dispatchEventHMDPose, this);
+        } else if (this.trackingSource === TrackingSource_Type.HAND_POSE_ACTIVE_LEFT ||
+            this.trackingSource === TrackingSource_Type.HAND_POSE_ACTIVE_RIGHT) {
+            input.off(Input.EventType.HANDLE_POSE_INPUT, this._dispatchEventHandlePose, this);
         }
     }
 
-    private _dispatchEventPose(eventHandle: EventHandle) {
-        this._quatPose.set(eventHandle.quaternionX, eventHandle.quaternionY, eventHandle.quaternionZ, eventHandle.quaternionW);
-
-        if (this._trackingType === TrackingType_Type.POSITION_AND_ROTATION) {
-            if (eventHandle.getType() === Input.EventType.VIEW_POSE_ACTIVE_LEFT) {
-                this._positionPose.set(eventHandle.x - this._ipdOffset, eventHandle.y, eventHandle.z);
-            } else if (eventHandle.getType() === Input.EventType.VIEW_POSE_ACTIVE_RIGHT) {
-                this._positionPose.set(eventHandle.x + this._ipdOffset, eventHandle.y, eventHandle.z);
+    private _dispatchEventHMDPose(eventHMD: EventHMD) {
+        const hmdInputDevice = eventHMD.hmdInputDevice;
+        if (this.trackingSource === TrackingSource_Type.VIEW_POSE_ACTIVE_LEFT) {
+            if (this._trackingType === TrackingType_Type.POSITION_AND_ROTATION) {
+                this._quatPose = hmdInputDevice.viewLeftOrientation.getValue();
+                this._positionPose = hmdInputDevice.viewLeftPosition.getValue();
+            } else if (this._trackingType === TrackingType_Type.ROTATION) {
+                this._quatPose = hmdInputDevice.viewLeftOrientation.getValue();
+                this._positionPose = Vec3.ZERO;
             } else {
-                this._positionPose.set(eventHandle.x, eventHandle.y, eventHandle.z);
+                this._quatPose = Quat.IDENTITY;
+                this._positionPose = hmdInputDevice.viewLeftPosition.getValue();
             }
-        } else {
-            if (eventHandle.getType() === Input.EventType.VIEW_POSE_ACTIVE_LEFT) {
-                this._positionPose.set(-this._ipdOffset, 0, 0);
-            } else if (eventHandle.getType() === Input.EventType.VIEW_POSE_ACTIVE_RIGHT) {
-                this._positionPose.set(this._ipdOffset, 0, 0);
+        } else if (this.trackingSource === TrackingSource_Type.VIEW_POSE_ACTIVE_RIGHT) {
+            if (this._trackingType === TrackingType_Type.POSITION_AND_ROTATION) {
+                this._quatPose = hmdInputDevice.viewRightOrientation.getValue();
+                this._positionPose = hmdInputDevice.viewRightPosition.getValue();
+            } else if (this._trackingType === TrackingType_Type.ROTATION) {
+                this._quatPose = hmdInputDevice.viewRightOrientation.getValue();
+                this._positionPose = Vec3.ZERO;
             } else {
-                this._positionPose.set(0, 0, 0);
+                this._quatPose = Quat.IDENTITY;
+                this._positionPose = hmdInputDevice.viewRightPosition.getValue();
+            }
+        } else if (this.trackingSource === TrackingSource_Type.VIEW_POSE_ACTIVE_HMD) {
+            if (this._trackingType === TrackingType_Type.POSITION_AND_ROTATION) {
+                this._quatPose = hmdInputDevice.headMiddleOrientation.getValue();
+                this._positionPose = hmdInputDevice.headMiddlePosition.getValue();
+            } else if (this._trackingType === TrackingType_Type.ROTATION) {
+                this._quatPose = hmdInputDevice.headMiddleOrientation.getValue();
+                this._positionPose = Vec3.ZERO;
+            } else {
+                this._quatPose = Quat.IDENTITY;
+                this._positionPose = hmdInputDevice.headMiddlePosition.getValue();
             }
         }
 
         this.node.setRTS(this._quatPose, this._positionPose, Vec3.ONE);
-        this.node.updateWorldTransform();
     }
 
-    update() {
-        if (!EDITOR) {
-            this.node.setRTS(this._quatPose, this._positionPose, Vec3.ONE);
+    private _dispatchEventHandlePose(eventHandle: EventHandle) {
+        const handleInputDevice = eventHandle.handleInputDevice;
+        if (this.trackingSource === TrackingSource_Type.HAND_POSE_ACTIVE_LEFT) {
+            if (this._trackingType === TrackingType_Type.POSITION_AND_ROTATION) {
+                this._quatPose = handleInputDevice.aimLeftOrientation.getValue();
+                this._positionPose = handleInputDevice.aimLeftPosition.getValue();
+            } else if (this._trackingType === TrackingType_Type.ROTATION) {
+                this._quatPose = handleInputDevice.aimLeftOrientation.getValue();
+                this._positionPose = Vec3.ZERO;
+            } else {
+                this._quatPose = Quat.IDENTITY;
+                this._positionPose = handleInputDevice.aimLeftPosition.getValue();
+            }
+        } else if (this.trackingSource === TrackingSource_Type.HAND_POSE_ACTIVE_RIGHT) {
+            if (this._trackingType === TrackingType_Type.POSITION_AND_ROTATION) {
+                this._quatPose = handleInputDevice.aimRightOrientation.getValue();
+                this._positionPose = handleInputDevice.aimRightPosition.getValue();
+            } else if (this._trackingType === TrackingType_Type.ROTATION) {
+                this._quatPose = handleInputDevice.aimRightOrientation.getValue();
+                this._positionPose = Vec3.ZERO;
+            } else {
+                this._quatPose = Quat.IDENTITY;
+                this._positionPose = handleInputDevice.aimRightPosition.getValue();
+            }
         }
+
+        this.node.setRTS(this._quatPose, this._positionPose, Vec3.ONE);
     }
 }

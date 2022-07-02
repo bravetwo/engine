@@ -34,7 +34,6 @@ import { Component } from '../../core/components/component';
 import { Vec2 } from '../../core/math';
 import { CameraComponent } from '../../core/components';
 import { TargetEye, TargetEye_Type } from './target-eye';
-import { PoseTracker } from './pose-tracker';
 
 enum StereoRendering_Type {
     SINGLE_PASS = 0,
@@ -126,10 +125,7 @@ export class HMDCtrl extends Component {
         this._perEyeCamera = val;
         this._getCameras();
         this._copyCameras(Camera_Type.BOTH);
-        
-        if (this._IPDOffset === IPDOffset_Type.Manual) {
-            this._setMainOffset(this._offsetValue / 2);
-        }
+
         if (this._perEyeCamera) {
             if (this._mainCamera) {
                 this._mainCamera.enabled = false;
@@ -317,25 +313,6 @@ export class HMDCtrl extends Component {
             }
             if (this._rightCamera) {
                 this._rightCamera.node.setPosition(value, this._rightCamera.node.getPosition().y, this._rightCamera.node.getPosition().z);
-            }
-
-            this._setMainOffset(value);
-        }
-    }
-
-    private _setMainOffset(value) {
-        if (this._mainCamera) {
-            // If perEyeCamera is turned off (that is, left and right are not enabled), offset is used for the MainCamera
-            if (!this._perEyeCamera) {
-                var poseTracker = this._mainCamera.getComponent(PoseTracker);
-                if (poseTracker) {
-                    poseTracker.ipdOffset = value;
-                }
-            } else {
-                var poseTracker = this._mainCamera.getComponent(PoseTracker);
-                if (poseTracker) {
-                    poseTracker.ipdOffset = 0;
-                }
             }
         }
     }
