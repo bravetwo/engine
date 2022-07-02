@@ -1,7 +1,7 @@
-/****************************************************************************
- Copyright (c) 2021-2022 Xiamen Yaji Software Co., Ltd.
+/*
+ Copyright (c) 2022 Xiamen Yaji Software Co., Ltd.
 
- http://www.cocos.com
+ https://www.cocos.com/
 
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated engine source code (the "Software"), a limited,
@@ -21,14 +21,37 @@
  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
-****************************************************************************/
+ */
+
+import { murmurhash2_32_gc } from '../../../utils/murmurhash2_gc';
+import { GFXObject, ObjectType, BufferBarrierInfo } from '../define';
 
 /**
- * ========================= !DO NOT CHANGE THE FOLLOWING SECTION MANUALLY! =========================
- * The following section is auto-generated.
- * ========================= !DO NOT CHANGE THE FOLLOWING SECTION MANUALLY! =========================
+ * @en GFX buffer barrier.
+ * @zh GFX buffer内存屏障。
  */
-/* eslint-disable max-len */
-export class WebImplExample {
-    name = '';
+export class BufferBarrier extends GFXObject {
+    get info (): Readonly<BufferBarrierInfo> { return this._info; }
+    get hash (): number { return this._hash; }
+
+    protected _info: BufferBarrierInfo = new BufferBarrierInfo();
+    protected _hash = 0;
+
+    constructor (info: Readonly<BufferBarrierInfo>, hash: number) {
+        super(ObjectType.BUFFER_BARRIER);
+        this._info.copy(info);
+        this._hash = hash;
+    }
+
+    static computeHash (info: Readonly<BufferBarrierInfo>) {
+        let res = `${info.prevAccesses} ${info.nextAccesses}`;
+        res += info.type;
+        res += info.offset;
+        res += info.size;
+        res += info.discardContents;
+        res += info.srcQueue ? info.srcQueue.type : 0;
+        res += info.dstQueue ? info.dstQueue.type : 0;
+
+        return murmurhash2_32_gc(res, 666);
+    }
 }

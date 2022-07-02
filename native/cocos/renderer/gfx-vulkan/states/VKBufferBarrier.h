@@ -1,5 +1,5 @@
 /****************************************************************************
- Copyright (c) 2021-2022 Xiamen Yaji Software Co., Ltd.
+ Copyright (c) 2020-2022 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos.com
 
@@ -23,8 +23,26 @@
  THE SOFTWARE.
 ****************************************************************************/
 
-#include "core/memop/CachedArray.h"
+#pragma once
+
+#include "../VKStd.h"
+#include "gfx-base/states/GFXBufferBarrier.h"
 
 namespace cc {
+namespace gfx {
 
-}
+struct CCVKGPUBufferBarrier;
+
+class CC_VULKAN_API CCVKBufferBarrier : public BufferBarrier {
+public:
+    explicit CCVKBufferBarrier(const BufferBarrierInfo &info);
+    ~CCVKBufferBarrier() override;
+
+    inline const CCVKGPUBufferBarrier *gpuBarrier() const { return _gpuBarrier; }
+
+protected:
+    CCVKGPUBufferBarrier *_gpuBarrier = nullptr;
+};
+
+} // namespace gfx
+} // namespace cc

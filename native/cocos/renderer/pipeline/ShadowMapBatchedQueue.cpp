@@ -54,7 +54,7 @@ ShadowMapBatchedQueue::ShadowMapBatchedQueue(RenderPipeline *pipeline)
 
 ShadowMapBatchedQueue::~ShadowMapBatchedQueue() = default;
 
-void ShadowMapBatchedQueue::gatherLightPasses(const scene::Camera *camera, const scene::Light *light, gfx::CommandBuffer *cmdBuffer, uint level) {
+void ShadowMapBatchedQueue::gatherLightPasses(const scene::Camera *camera, const scene::Light *light, gfx::CommandBuffer *cmdBuffer, uint32_t level) {
     clear();
 
     const PipelineSceneData *sceneData = _pipeline->getPipelineSceneData();
@@ -84,10 +84,6 @@ void ShadowMapBatchedQueue::gatherLightPasses(const scene::Camera *camera, const
                 const auto *spotLight = static_cast<const scene::SpotLight *>(light);
                 const RenderObjectList &castShadowObjects = csmLayers->getCastShadowObjects();
                 if (spotLight->isShadowEnabled()) {
-                    const Mat4 matShadowView = light->getNode()->getWorldMatrix().getInversed();
-                    Mat4 matShadowProj;
-                    Mat4::createPerspective(spotLight->getSpotAngle(), 1.0F, 0.001F, spotLight->getRange(), &matShadowProj);
-                    const Mat4 matShadowViewProj = matShadowProj * matShadowView;
                     geometry::AABB ab;
                     for (const auto &ro : castShadowObjects) {
                         const auto *model = ro.model;
@@ -95,8 +91,7 @@ void ShadowMapBatchedQueue::gatherLightPasses(const scene::Camera *camera, const
                             continue;
                         }
                         if (model->getWorldBounds()) {
-                            model->getWorldBounds()->transform(matShadowViewProj, &ab);
-                            if (ab.aabbFrustum(camera->getFrustum())) {
+                            if (model->getWorldBounds()->aabbFrustum(spotLight->getFrustum())) {
                                 add(model);
                             }
                         }

@@ -24,7 +24,7 @@
  */
 
 import { UBOGlobal, UBOShadow, UBOCamera, UNIFORM_SHADOWMAP_BINDING,
-    supportsR32FloatTexture, UNIFORM_SPOT_LIGHTING_MAP_TEXTURE_BINDING } from '../define';
+    supportsR32FloatTexture, UNIFORM_SPOT_SHADOW_MAP_TEXTURE_BINDING } from '../define';
 import { Device, BufferInfo, BufferUsageBit, MemoryUsageBit, DescriptorSet } from '../../gfx';
 import { Camera } from '../../renderer/scene/camera';
 import { Mat4, Vec3, Vec4, Color } from '../../math';
@@ -360,7 +360,7 @@ export class PipelineUBO {
             Mat4.invert(_matShadowView, (light as any).node.getWorldMatrix());
             Mat4.toArray(sv, _matShadowView, UBOShadow.MAT_LIGHT_VIEW_OFFSET);
 
-            Mat4.perspective(_matShadowProj, (light as any).angle, (light as any).aspect, 0.001, (light as any).range);
+            Mat4.perspective(_matShadowProj, (light as any).angle, 1.0, 0.001, (light as any).range);
 
             Mat4.multiply(_matShadowViewProj, _matShadowProj, _matShadowView);
             Mat4.toArray(sv, _matShadowViewProj, UBOShadow.MAT_LIGHT_VIEW_PROJ_OFFSET);
@@ -482,7 +482,7 @@ export class PipelineUBO {
     public updateShadowUBOLight (globalDS: DescriptorSet, light: Light, level = 0) {
         PipelineUBO.updateShadowUBOLightView(this._pipeline, this._shadowUBO, light, level);
         globalDS.bindTexture(UNIFORM_SHADOWMAP_BINDING, builtinResMgr.get<Texture2D>('default-texture').getGFXTexture()!);
-        globalDS.bindTexture(UNIFORM_SPOT_LIGHTING_MAP_TEXTURE_BINDING, builtinResMgr.get<Texture2D>('default-texture').getGFXTexture()!);
+        globalDS.bindTexture(UNIFORM_SPOT_SHADOW_MAP_TEXTURE_BINDING, builtinResMgr.get<Texture2D>('default-texture').getGFXTexture()!);
         globalDS.update();
         globalDS.getBuffer(UBOShadow.BINDING).update(this._shadowUBO);
     }

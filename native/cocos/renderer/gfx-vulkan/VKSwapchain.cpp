@@ -34,8 +34,11 @@
 #include "platform/BasePlatform.h"
 #include "platform/java/modules/XRInterface.h"
 
-#if CC_SWAPPY_ENABLED
+#if (CC_PLATFORM == CC_PLATFORM_ANDROID)
     #include "platform/android/AndroidPlatform.h"
+#endif
+
+#if CC_SWAPPY_ENABLED
     #include "swappy/swappyVk.h"
     #include "swappy/swappy_common.h"
 #endif
@@ -170,7 +173,6 @@ void CCVKSwapchain::doInit(const SwapchainInfo &info) {
         uint32_t desiredNumberOfSwapchainImages = std::max(gpuDevice->backBufferCount, surfaceCapabilities.minImageCount);
 
         VkExtent2D imageExtent = {1U, 1U};
-        VkSurfaceTransformFlagBitsKHR preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
 
         // Find a supported composite alpha format (not all devices support alpha opaque)
         VkCompositeAlphaFlagBitsKHR compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
@@ -205,7 +207,6 @@ void CCVKSwapchain::doInit(const SwapchainInfo &info) {
         _gpuSwapchain->createInfo.imageExtent = imageExtent;
         _gpuSwapchain->createInfo.imageUsage = imageUsage;
         _gpuSwapchain->createInfo.imageArrayLayers = 1;
-        _gpuSwapchain->createInfo.preTransform = preTransform;
         _gpuSwapchain->createInfo.compositeAlpha = compositeAlpha;
         _gpuSwapchain->createInfo.presentMode = swapchainPresentMode;
         _gpuSwapchain->createInfo.clipped = VK_TRUE; // Setting clipped to VK_TRUE allows the implementation to discard rendering outside of the surface area
@@ -225,11 +226,12 @@ void CCVKSwapchain::doInit(const SwapchainInfo &info) {
     textureInfo.format = depthStencilFmt;
     initTexture(textureInfo, _depthStencilTexture);
 
-    checkSwapchainStatus();
+#if CC_PLATFORM == CC_PLATFORM_ANDROID
+    auto *platform = static_cast<AndroidPlatform *>(cc::BasePlatform::getPlatform());
+    checkSwapchainStatus(platform->getWidth(), platform->getHeight());
 
     // Android Game Frame Pacing:swappy
-#if CC_SWAPPY_ENABLED
-    auto *platform = static_cast<AndroidPlatform *>(cc::BasePlatform::getPlatform());
+    #if CC_SWAPPY_ENABLED
     int32_t fps = cc::BasePlatform::getPlatform()->getFps();
 
     uint64_t frameRefreshIntervalNS;
@@ -241,6 +243,9 @@ void CCVKSwapchain::doInit(const SwapchainInfo &info) {
                                             &frameRefreshIntervalNS);
     SwappyVk_setSwapIntervalNS(gpuDevice->vkDevice, _gpuSwapchain->vkSwapchain, fps ? 1000000000L / fps : frameRefreshIntervalNS);
     SwappyVk_setWindow(gpuDevice->vkDevice, _gpuSwapchain->vkSwapchain, static_cast<ANativeWindow *>(info.windowHandle));
+    #endif
+#else
+    checkSwapchainStatus();
 #endif
 }
 
@@ -304,17 +309,7 @@ bool CCVKSwapchain::checkSwapchainStatus(uint32_t width, uint32_t height) {
         newWidth = width ? width : surfaceCapabilities.currentExtent.width;
         newHeight = height ? height : surfaceCapabilities.currentExtent.height;
 
-        VkSurfaceTransformFlagBitsKHR preTransform = surfaceCapabilities.currentTransform;
-        if (ENABLE_PRE_ROTATION) {
-            if (preTransform & TRANSFORMS_THAT_REQUIRE_FLIPPING) {
-                std::swap(newWidth, newHeight);
-            }
-        } else {
-            preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
-        }
-
-        if (_gpuSwapchain->createInfo.preTransform == preTransform &&
-            _gpuSwapchain->createInfo.imageExtent.width == newWidth &&
+        if (_gpuSwapchain->createInfo.imageExtent.width == newWidth &&
             _gpuSwapchain->createInfo.imageExtent.height == newHeight && _gpuSwapchain->lastPresentResult == VK_SUCCESS) {
             return true;
         }
@@ -332,12 +327,10 @@ bool CCVKSwapchain::checkSwapchainStatus(uint32_t width, uint32_t height) {
             return false;
         }
 
-        _transform = mapSurfaceTransform(preTransform);
-        _gpuSwapchain->createInfo.preTransform = preTransform;
         _gpuSwapchain->createInfo.surface = _gpuSwapchain->vkSurface;
         _gpuSwapchain->createInfo.oldSwapchain = _gpuSwapchain->vkSwapchain;
 
-        CC_LOG_INFO("Resizing surface: %dx%d, surface rotation: %d degrees", newWidth, newHeight, (uint32_t)_transform * 90);
+        CC_LOG_INFO("Resizing surface: %dx%d", newWidth, newHeight);
 
         CCVKDevice::getInstance()->waitAllFences();
 
@@ -444,7 +437,12 @@ void CCVKSwapchain::doDestroySurface() {
 void CCVKSwapchain::doCreateSurface(void *windowHandle) { // NOLINT
     if (!_gpuSwapchain || _gpuSwapchain->vkSurface != VK_NULL_HANDLE) return;
     createVkSurface();
+#if CC_PLATFORM == CC_PLATFORM_ANDROID
+    auto *platform = static_cast<AndroidPlatform *>(cc::BasePlatform::getPlatform());
+    checkSwapchainStatus(platform->getWidth(), platform->getHeight());
+#else
     checkSwapchainStatus();
+#endif
 #if CC_SWAPPY_ENABLED
     auto *gpuDevice = CCVKDevice::getInstance()->gpuDevice();
     SwappyVk_setWindow(gpuDevice->vkDevice, _gpuSwapchain->vkSwapchain, static_cast<ANativeWindow *>(windowHandle));

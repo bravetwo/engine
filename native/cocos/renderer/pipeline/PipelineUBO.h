@@ -44,7 +44,7 @@ public:
     static void updateShadowUBOView(const RenderPipeline *pipeline, ccstd::array<float, UBOShadow::COUNT> *shadowBufferView,
                                     const scene::Camera *camera);
     static void updateShadowUBOLightView(const RenderPipeline *pipeline, ccstd::array<float, UBOShadow::COUNT> *shadowBufferView,
-        const scene::Light *light, uint level);
+        const scene::Light *light, uint32_t level);
     static uint8_t getCombineSignY();
 
     PipelineUBO() = default;
@@ -55,28 +55,33 @@ public:
     void updateCameraUBO(const scene::Camera *camera);
     void updateMultiCameraUBO(const ccstd::vector<scene::Camera *> &cameras);
     void updateShadowUBO(const scene::Camera *camera);
-    void updateShadowUBOLight(gfx::DescriptorSet *globalDS, const scene::Light *light, uint level = 0U);
-    void updateShadowUBORange(uint offset, const Mat4 *data);
+    void updateShadowUBOLight(gfx::DescriptorSet *globalDS, const scene::Light *light, uint32_t level = 0U);
+    void updateShadowUBORange(uint32_t offset, const Mat4 *data);
 
-    uint getCurrentCameraUBOOffset() const;
+    uint32_t getCurrentCameraUBOOffset() const;
     void incCameraUBOOffset();
 
 private:
     static float getPCFRadius(const scene::Shadows *shadowInfo, const scene::DirectionalLight *dirLight);
     void initCombineSignY() const;
 
-    RenderPipeline *_pipeline = nullptr;
-    gfx::Device *_device = nullptr;
+    // weak reference
+    RenderPipeline *_pipeline{nullptr};
+    // weak reference
+    gfx::Device *_device{nullptr};
 
     ccstd::array<float, UBOGlobal::COUNT> _globalUBO;
     ccstd::array<float, UBOShadow::COUNT> _shadowUBO;
 
+    // manage memory manually
     ccstd::vector<gfx::Buffer *> _ubos;
     ccstd::vector<float> _cameraUBOs;
 
+    // weak reference, it is recorded in _ubos
     gfx::Buffer *_cameraBuffer{nullptr};
-    uint _currentCameraUBOOffset{0};
-    uint _alignedCameraUBOSize{0};
+    uint32_t _currentCameraUBOOffset{0};
+    uint32_t _alignedCameraUBOSize{0};
+    bool _shadowUBOUpdated{false};
 };
 
 } // namespace pipeline

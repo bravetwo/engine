@@ -35,13 +35,12 @@ import { Model, Camera, SKYBOX_FLAG, Light, LightType, ShadowType, DirectionalLi
 import { legacyCC } from '../../global-exports';
 import { LayoutGraphData } from './layout-graph';
 import { Executor } from './executor';
-import { WebImplExample } from './web-pipeline-impl';
 import { RenderWindow } from '../../renderer/core/render-window';
 import { assert, macro } from '../../platform';
 import { WebSceneTransversal } from './web-scene';
 import { MacroRecord, RenderScene } from '../../renderer';
 import { GlobalDSManager } from '../global-descriptor-set-manager';
-import { supportsR32FloatTexture, UNIFORM_SHADOWMAP_BINDING, UNIFORM_SPOT_LIGHTING_MAP_TEXTURE_BINDING } from '../define';
+import { supportsR32FloatTexture, UNIFORM_SHADOWMAP_BINDING, UNIFORM_SPOT_SHADOW_MAP_TEXTURE_BINDING } from '../define';
 import { OS } from '../../../../pal/system-info/enum-type';
 import { WebDescriptorHierarchy } from './web-descriptor-hierarchy';
 import { Compiler } from './compiler';
@@ -49,7 +48,7 @@ import { PipelineUBO } from './ubos';
 import { builtinResMgr } from '../../builtin/builtin-res-mgr';
 import { Texture2D } from '../../assets/texture-2d';
 import { WebLayoutGraphBuilder } from './web-layout-graph';
-import { GeometryRenderer } from '..';
+import { GeometryRenderer } from '../geometry-renderer';
 
 export class WebSetter {
     constructor (data: RenderData) {
@@ -342,8 +341,8 @@ export class WebPipeline extends Pipeline {
         const shadowMapSampler = this._globalDSManager.pointSampler;
         this.descriptorSet.bindSampler(UNIFORM_SHADOWMAP_BINDING, shadowMapSampler);
         this.descriptorSet.bindTexture(UNIFORM_SHADOWMAP_BINDING, builtinResMgr.get<Texture2D>('default-texture').getGFXTexture()!);
-        this.descriptorSet.bindSampler(UNIFORM_SPOT_LIGHTING_MAP_TEXTURE_BINDING, shadowMapSampler);
-        this.descriptorSet.bindTexture(UNIFORM_SPOT_LIGHTING_MAP_TEXTURE_BINDING, builtinResMgr.get<Texture2D>('default-texture').getGFXTexture()!);
+        this.descriptorSet.bindSampler(UNIFORM_SPOT_SHADOW_MAP_TEXTURE_BINDING, shadowMapSampler);
+        this.descriptorSet.bindTexture(UNIFORM_SPOT_SHADOW_MAP_TEXTURE_BINDING, builtinResMgr.get<Texture2D>('default-texture').getGFXTexture()!);
         this.descriptorSet.update();
         return true;
     }

@@ -62,7 +62,9 @@
 #include "pipeline/custom/Range.h"
 #include "pipeline/custom/RenderGraphTypes.h"
 #include "pipeline/custom/RenderInterfaceTypes.h"
-#include "profiler/DebugRenderer.h"
+#if CC_USE_DEBUG_RENDERER
+    #include "profiler/DebugRenderer.h"
+#endif
 
 namespace cc {
 
@@ -273,10 +275,10 @@ LayoutGraphBuilder *NativePipeline::getLayoutGraphBuilder() {
     return ccnew NativeLayoutGraphBuilder(device, &layoutGraph);
 }
 
-gfx::DescriptorSetLayout *NativePipeline::getDescriptorSetLayout(const ccstd::string& shaderName, UpdateFrequency freq) {
+gfx::DescriptorSetLayout *NativePipeline::getDescriptorSetLayout(const ccstd::string &shaderName, UpdateFrequency freq) {
     auto iter = layoutGraph.shaderLayoutIndex.find(boost::string_view(shaderName));
     if (iter != layoutGraph.shaderLayoutIndex.end()) {
-        const auto& layouts = get(LayoutGraphData::Layout, layoutGraph, iter->second).descriptorSets;
+        const auto &layouts = get(LayoutGraphData::Layout, layoutGraph, iter->second).descriptorSets;
         auto iter2 = layouts.find(freq);
         if (iter2 != layouts.end()) {
             return iter2->second.descriptorSetLayout.get();
@@ -318,7 +320,9 @@ bool NativePipeline::activate(gfx::Swapchain *swapchainIn) {
     macros["CC_PIPELINE_TYPE"] = 0;
     globalDSManager->activate(device);
     pipelineSceneData->activate(device);
+#if CC_USE_DEBUG_RENDERER
     DebugRenderer::getInstance()->activate(device);
+#endif
 
     // generate macros here rather than construct func because _clusterEnabled
     // switch may be changed in root.ts setRenderPipeline() function which is after
@@ -370,8 +374,8 @@ void NativePipeline::render(const ccstd::vector<scene::Camera *> &cameras) {
             framegraph::Texture::Descriptor colorTexInfo;
             colorTexInfo.format = sceneData->isHDR() ? gfx::Format::RGBA16F : gfx::Format::RGBA8;
             colorTexInfo.usage = gfx::TextureUsageBit::COLOR_ATTACHMENT;
-            colorTexInfo.width = static_cast<uint>(static_cast<float>(camera->getWindow()->getWidth()) * shadingScale);
-            colorTexInfo.height = static_cast<uint>(static_cast<float>(camera->getWindow()->getHeight()) * shadingScale);
+            colorTexInfo.width = static_cast<uint32_t>(static_cast<float>(camera->getWindow()->getWidth()) * shadingScale);
+            colorTexInfo.height = static_cast<uint32_t>(static_cast<float>(camera->getWindow()->getHeight()) * shadingScale);
             if (shadingScale != 1.F) {
                 colorTexInfo.usage |= gfx::TextureUsageBit::TRANSFER_SRC;
             }
@@ -405,8 +409,8 @@ void NativePipeline::render(const ccstd::vector<scene::Camera *> &cameras) {
                 return gfx::Viewport{
                     static_cast<int>(static_cast<float>(rect.x) * shadingScale),
                     static_cast<int>(static_cast<float>(rect.y) * shadingScale),
-                    static_cast<uint>(static_cast<float>(rect.width) * shadingScale),
-                    static_cast<uint>(static_cast<float>(rect.height) * shadingScale)};
+                    static_cast<uint32_t>(static_cast<float>(rect.width) * shadingScale),
+                    static_cast<uint32_t>(static_cast<float>(rect.height) * shadingScale)};
             };
 
             auto getScissor = [&shadingScale, &getRenderArea](const scene::Camera *camera) {
@@ -414,8 +418,8 @@ void NativePipeline::render(const ccstd::vector<scene::Camera *> &cameras) {
                 return gfx::Rect{
                     static_cast<int>(static_cast<float>(rect.x) * shadingScale),
                     static_cast<int>(static_cast<float>(rect.y) * shadingScale),
-                    static_cast<uint>(static_cast<float>(rect.width) * shadingScale),
-                    static_cast<uint>(static_cast<float>(rect.height) * shadingScale)};
+                    static_cast<uint32_t>(static_cast<float>(rect.width) * shadingScale),
+                    static_cast<uint32_t>(static_cast<float>(rect.height) * shadingScale)};
             };
 
             builder.setViewport(getViewport(camera), getScissor(camera));
@@ -429,7 +433,7 @@ void NativePipeline::render(const ccstd::vector<scene::Camera *> &cameras) {
         auto passHandle = framegraph::FrameGraph::stringToHandle("forwardPass");
 
         frameGraph.addPass<RenderData2>(
-            static_cast<uint>(ForwardInsertPoint::IP_FORWARD),
+            static_cast<uint32_t>(ForwardInsertPoint::IP_FORWARD),
             passHandle, forwardSetup, forwardExec);
 
         frameGraph.presentFromBlackboard(colorHandle,
@@ -494,15 +498,15 @@ void NativePipeline::setShadingScale(float scale) {
     pipelineSceneData->setShadingScale(scale);
 }
 
-void NativePipeline::setMacroString(const ccstd::string& name, const ccstd::string& value) {
+void NativePipeline::setMacroString(const ccstd::string &name, const ccstd::string &value) {
     macros[name] = value;
 }
 
-void NativePipeline::setMacroInt(const ccstd::string& name, int32_t value) {
+void NativePipeline::setMacroInt(const ccstd::string &name, int32_t value) {
     macros[name] = value;
 }
 
-void NativePipeline::setMacroBool(const ccstd::string& name, bool value) {
+void NativePipeline::setMacroBool(const ccstd::string &name, bool value) {
     macros[name] = value;
 }
 

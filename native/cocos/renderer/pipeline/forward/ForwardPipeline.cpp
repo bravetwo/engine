@@ -54,8 +54,6 @@ ForwardPipeline::ForwardPipeline() {
     _pipelineSceneData = ccnew PipelineSceneData();
 }
 
-framegraph::StringHandle ForwardPipeline::fgStrHandleForwardColorTexture = framegraph::FrameGraph::stringToHandle("forwardColorTexture");
-framegraph::StringHandle ForwardPipeline::fgStrHandleForwardDepthTexture = framegraph::FrameGraph::stringToHandle("forwardDepthTexture");
 framegraph::StringHandle ForwardPipeline::fgStrHandleForwardPass = framegraph::FrameGraph::stringToHandle("forwardPass");
 
 bool ForwardPipeline::initialize(const RenderPipelineInfo &info) {
@@ -92,8 +90,10 @@ bool ForwardPipeline::activate(gfx::Swapchain *swapchain) {
 
 void ForwardPipeline::render(const ccstd::vector<scene::Camera *> &cameras) {
     CC_PROFILE(ForwardPipelineRender);
+#if CC_USE_GEOMETRY_RENDERER
     updateGeometryRenderer(cameras); // for capability
-    
+#endif
+
     auto *device = gfx::Device::getInstance();
     const bool enableOcclusionQuery = isOcclusionQueryEnabled();
     if (enableOcclusionQuery) {
@@ -145,7 +145,7 @@ bool ForwardPipeline::activeRenderer(gfx::Swapchain *swapchain) {
 
     // Main light sampler binding
     _descriptorSet->bindSampler(SHADOWMAP::BINDING, sampler);
-    _descriptorSet->bindSampler(SPOTLIGHTINGMAP::BINDING, sampler);
+    _descriptorSet->bindSampler(SPOTSHADOWMAP::BINDING, sampler);
     _descriptorSet->update();
 
     // update global defines when all states initialized.
@@ -154,8 +154,8 @@ bool ForwardPipeline::activeRenderer(gfx::Swapchain *swapchain) {
     _macros["CC_USE_DEBUG_VIEW"] = static_cast<int32_t>(0);
 
     // step 2 create index buffer
-    uint ibStride = 4;
-    uint ibSize = ibStride * 6;
+    uint32_t ibStride = 4;
+    uint32_t ibSize = ibStride * 6;
     if (_quadIB == nullptr) {
         _quadIB = _device->createBuffer({gfx::BufferUsageBit::INDEX | gfx::BufferUsageBit::TRANSFER_DST,
                                          gfx::MemoryUsageBit::DEVICE, ibSize, ibStride});
@@ -165,7 +165,7 @@ bool ForwardPipeline::activeRenderer(gfx::Swapchain *swapchain) {
         return false;
     }
 
-    uint ibData[] = {0, 1, 2, 1, 3, 2};
+    uint32_t ibData[] = {0, 1, 2, 1, 3, 2};
     _quadIB->update(ibData, sizeof(ibData));
 
     _width = swapchain->getWidth();
