@@ -81,10 +81,10 @@ static void dispatchGamepadEventInternal(const xr::XRControllerEvent &xrControll
                         controllerInfo->buttonInfos.emplace_back(ControllerInfo::ButtonInfo(StickKeyCode::LEFT_STICK, xrClick->isPress));
                         break;
                     case xr::XRClick::Type::X:
-                        controllerInfo->buttonInfos.emplace_back(ControllerInfo::ButtonInfo(StickKeyCode::X, xrClick->isPress));
+                        controllerInfo->buttonInfos.emplace_back(ControllerInfo::ButtonInfo(StickKeyCode::Y, xrClick->isPress));
                         break;
                     case xr::XRClick::Type::Y:
-                        controllerInfo->buttonInfos.emplace_back(ControllerInfo::ButtonInfo(StickKeyCode::Y, xrClick->isPress));
+                        controllerInfo->buttonInfos.emplace_back(ControllerInfo::ButtonInfo(StickKeyCode::X, xrClick->isPress));
                         break;
                     case xr::XRClick::Type::TRIGGER_RIGHT:
                         controllerInfo->buttonInfos.emplace_back(ControllerInfo::ButtonInfo(StickKeyCode::R3, xrClick->isPress));
@@ -96,10 +96,10 @@ static void dispatchGamepadEventInternal(const xr::XRControllerEvent &xrControll
                         controllerInfo->buttonInfos.emplace_back(ControllerInfo::ButtonInfo(StickKeyCode::RIGHT_STICK, xrClick->isPress));
                         break;
                     case xr::XRClick::Type::A:
-                        controllerInfo->buttonInfos.emplace_back(ControllerInfo::ButtonInfo(StickKeyCode::A, xrClick->isPress));
+                        controllerInfo->buttonInfos.emplace_back(ControllerInfo::ButtonInfo(StickKeyCode::B, xrClick->isPress));
                         break;
                     case xr::XRClick::Type::B:
-                        controllerInfo->buttonInfos.emplace_back(ControllerInfo::ButtonInfo(StickKeyCode::B, xrClick->isPress));
+                        controllerInfo->buttonInfos.emplace_back(ControllerInfo::ButtonInfo(StickKeyCode::A, xrClick->isPress));
                         break;
                     case xr::XRClick::Type::HOME:
                         CC_LOG_INFO("[XRInterface] exit when home click in rokid.");
@@ -190,10 +190,10 @@ static void dispatchHandleEventInternal(const xr::XRControllerEvent &xrControlle
                         controllerInfo->buttonInfos.emplace_back(ControllerInfo::ButtonInfo(StickKeyCode::LEFT_STICK, xrClick->isPress));
                         break;
                     case xr::XRClick::Type::X:
-                        controllerInfo->buttonInfos.emplace_back(ControllerInfo::ButtonInfo(StickKeyCode::X, xrClick->isPress));
+                        controllerInfo->buttonInfos.emplace_back(ControllerInfo::ButtonInfo(StickKeyCode::Y, xrClick->isPress));
                         break;
                     case xr::XRClick::Type::Y:
-                        controllerInfo->buttonInfos.emplace_back(ControllerInfo::ButtonInfo(StickKeyCode::Y, xrClick->isPress));
+                        controllerInfo->buttonInfos.emplace_back(ControllerInfo::ButtonInfo(StickKeyCode::X, xrClick->isPress));
                         break;
                     case xr::XRClick::Type::TRIGGER_RIGHT:
                         controllerInfo->buttonInfos.emplace_back(ControllerInfo::ButtonInfo(StickKeyCode::R3, xrClick->isPress));
@@ -202,10 +202,10 @@ static void dispatchHandleEventInternal(const xr::XRControllerEvent &xrControlle
                         controllerInfo->buttonInfos.emplace_back(ControllerInfo::ButtonInfo(StickKeyCode::RIGHT_STICK, xrClick->isPress));
                         break;
                     case xr::XRClick::Type::A:
-                        controllerInfo->buttonInfos.emplace_back(ControllerInfo::ButtonInfo(StickKeyCode::A, xrClick->isPress));
+                        controllerInfo->buttonInfos.emplace_back(ControllerInfo::ButtonInfo(StickKeyCode::B, xrClick->isPress));
                         break;
                     case xr::XRClick::Type::B:
-                        controllerInfo->buttonInfos.emplace_back(ControllerInfo::ButtonInfo(StickKeyCode::B, xrClick->isPress));
+                        controllerInfo->buttonInfos.emplace_back(ControllerInfo::ButtonInfo(StickKeyCode::A, xrClick->isPress));
                         break;
                     default:
                         break;

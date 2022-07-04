@@ -153,6 +153,7 @@ enum class XREventType {
 };
 
 struct XRControllerInfo {
+    virtual ~XRControllerInfo() = default;
     virtual XREventType getXREventType() const = 0;
 };
 
