@@ -15,7 +15,7 @@ export class XrKeyboardInputSource {
         this._eventTarget.off(eventType, callback, target);
     }
 
-    public emit(type: InputEventType, event: EventKeyboard) {
+    public emit(type: InputEventType, event?: EventKeyboard) {
         this._eventTarget.emit(type, event);
     }
 }

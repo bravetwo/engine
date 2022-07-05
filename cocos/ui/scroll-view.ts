@@ -444,6 +444,7 @@ export class ScrollView extends ViewGroup {
     protected _deltaPos = new Vec3();
 
     protected _hoverIn: XrhoverType = XrhoverType.NONE;
+    protected _scrollState = new Vec2(0, 0);
 
     /**
      * @en
@@ -1012,10 +1013,8 @@ export class ScrollView extends ViewGroup {
 
         this.node.on(XrUIPressEventType.XRUI_HOVER_ENTERED, this._xrHoverEnter, this);
         this.node.on(XrUIPressEventType.XRUI_HOVER_EXITED, this._xrHoverExit, this);
-        input.on(Input.EventType.THUMBSTICK_MOVE_LEFT, this._xrThumbStickMove, this);
-        input.on(Input.EventType.THUMBSTICK_MOVE_RIGHT, this._xrThumbStickMove, this);
-        input.on(Input.EventType.THUMBSTICK_MOVE_END_LEFT, this._xrThumbStickMoveEnd, this);
-        input.on(Input.EventType.THUMBSTICK_MOVE_END_RIGHT, this._xrThumbStickMoveEnd, this);
+
+        input.on(Input.EventType.HANDLE_INPUT, this._dispatchEventHandleInput, this);
     }
 
     protected _unregisterEvent () {
@@ -1027,10 +1026,7 @@ export class ScrollView extends ViewGroup {
 
         this.node.off(XrUIPressEventType.XRUI_HOVER_ENTERED, this._xrHoverEnter, this);
         this.node.off(XrUIPressEventType.XRUI_HOVER_EXITED, this._xrHoverExit, this);
-        input.off(Input.EventType.THUMBSTICK_MOVE_LEFT, this._xrThumbStickMove, this);
-        input.off(Input.EventType.THUMBSTICK_MOVE_RIGHT, this._xrThumbStickMove, this);
-        input.off(Input.EventType.THUMBSTICK_MOVE_END_LEFT, this._xrThumbStickMoveEnd, this);
-        input.off(Input.EventType.THUMBSTICK_MOVE_END_RIGHT, this._xrThumbStickMoveEnd, this);
+        input.off(Input.EventType.HANDLE_INPUT, this._dispatchEventHandleInput, this);
     }
 
     protected _onMouseWheel (event: EventMouse, captureListeners?: Node[]) {
@@ -1851,19 +1847,33 @@ export class ScrollView extends ViewGroup {
         this._dispatchEvent(EventType.SCROLL_ENDED);
     }
 
-    protected _xrThumbStickMove(event: EventHandle) {
+    private _dispatchEventHandleInput(event: EventHandle) {
+        const handleInputDevice = event.handleInputDevice;
+        var value;
         if (!this.enabledInHierarchy) {
             return;
         }
-
         if (this._hoverIn === XrhoverType.NONE) {
             return;
-        } else if (this._hoverIn === XrhoverType.LEFT && event.type !== Input.EventType.THUMBSTICK_MOVE_LEFT) {
-            return;
-        } else if (this._hoverIn === XrhoverType.RIGHT && event.type !== Input.EventType.THUMBSTICK_MOVE_RIGHT) {
-            return;
+        } else if (this._hoverIn === XrhoverType.LEFT) {
+            value = handleInputDevice.leftStick.getValue();
+            if (!value.equals(Vec2.ZERO)) {
+                this._xrThumbStickMove(value);
+            }
+        } else if (this._hoverIn === XrhoverType.RIGHT) {
+            value = handleInputDevice.rightStick.getValue();
+            if (!value.equals(Vec2.ZERO)) {
+                this._xrThumbStickMove(value);
+            }
         }
 
+        if (!value && this._scrollState.equals(Vec2.ZERO)) {
+            this._xrThumbStickMoveEnd();
+            this._scrollState.set(value);
+        }
+    }
+
+    protected _xrThumbStickMove(event: Vec2) {
         const deltaMove = new Vec3();
         const wheelPrecision = -62.5;
         const scrollY = event.y;

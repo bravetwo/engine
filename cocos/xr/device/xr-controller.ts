@@ -64,6 +64,12 @@ ccenum(XrEventTypeLeft);
 ccenum(XrEventTypeRight);
 ccenum(XrInputDeviceType);
 
+export enum InteractorEventType {
+    Select = 0,
+    Activate = 1,
+    UIPress = 2
+};
+
 /**
  * @en
  *                      <br>
@@ -101,6 +107,9 @@ export class XRController extends Component {
 
     private _xrEventHandle: XrEventHandle = new XrEventHandle("xrEventHandle");
     private _xrInteractor: XrInteractor | null = null;
+    private _selectState = 0;
+    private _activateState = 0;
+    private _uiPressState = 0;
 
     @type(XrInputDeviceType)
     @displayOrder(1)
@@ -257,178 +266,144 @@ export class XRController extends Component {
     }
 
     public onEnable() {
+        input.on(Input.EventType.HANDLE_INPUT, this._dispatchEventHandleInput, this);
+
         this._xrInteractor = this.getComponent(XrInteractor);
         if (this._inputDevice == XrInputDeviceType.Left_Hand) {
             if (this._xrInteractor) {
                 this._xrInteractor.event.deviceType = DeviceType.Left;
             }
-            this.registerInputEvent(this._getInputEventType(this.selectActionLeft), XrControlEventType.SELECT_ENTERED);
-            this.registerInputEvent(this._getInputEventType(this.activateActionLeft), XrControlEventType.ACTIVATED);
-            this.registerInputEvent(this._getInputEventType(this.UIPressActionLeft), XrControlEventType.UIPRESS_ENTERED);
         } else if (this._inputDevice == XrInputDeviceType.Right_Hand) {
             if (this._xrInteractor) {
                 this._xrInteractor.event.deviceType = DeviceType.Right;
             }
-            this.registerInputEvent(this._getInputEventType(this.selectActionRight), XrControlEventType.SELECT_ENTERED);
-            this.registerInputEvent(this._getInputEventType(this.activateActionRight), XrControlEventType.ACTIVATED);
-            this.registerInputEvent(this._getInputEventType(this.UIPressActionRight), XrControlEventType.UIPRESS_ENTERED);
         }
     }
 
     public onDisable() {
+        input.off(Input.EventType.HANDLE_INPUT, this._dispatchEventHandleInput, this);
+    }
+
+    private _dispatchEventHandleInput(event: EventHandle) {
         if (this._inputDevice == XrInputDeviceType.Left_Hand) {
-            this.unregisterInputEvent(this._getInputEventType(this.selectActionLeft), XrControlEventType.SELECT_ENTERED);
-            this.unregisterInputEvent(this._getInputEventType(this.activateActionLeft), XrControlEventType.ACTIVATED);
-            this.unregisterInputEvent(this._getInputEventType(this.UIPressActionLeft), XrControlEventType.UIPRESS_ENTERED);
+            this._handleInputEvent(InteractorEventType.Select, this.selectActionLeft, event);
+            this._handleInputEvent(InteractorEventType.Activate, this.activateActionLeft, event);
+            this._handleInputEvent(InteractorEventType.UIPress, this.UIPressActionLeft, event);
         } else if (this._inputDevice == XrInputDeviceType.Right_Hand) {
-            this.unregisterInputEvent(this._getInputEventType(this.selectActionRight), XrControlEventType.SELECT_ENTERED);
-            this.unregisterInputEvent(this._getInputEventType(this.activateActionRight), XrControlEventType.ACTIVATED);
-            this.unregisterInputEvent(this._getInputEventType(this.UIPressActionRight), XrControlEventType.UIPRESS_ENTERED);
+            this._handleInputEvent(InteractorEventType.Select, this.selectActionRight, event);
+            this._handleInputEvent(InteractorEventType.Activate, this.activateActionRight, event);
+            this._handleInputEvent(InteractorEventType.UIPress, this.UIPressActionRight, event);
         }
     }
 
-    protected _getInputEventType(type: XrEventTypeLeft | XrEventTypeRight) {
-        var eventType = new Array(2);
-        switch (type) {
+    private _handleInputEvent(type: InteractorEventType, eventType: XrEventTypeLeft | XrEventTypeRight, event: EventHandle) {
+        const handleInputDevice = event.handleInputDevice;
+        var value = 0;
+        switch (eventType) {
             case XrEventTypeRight.BUTTON_A:
-                eventType[0] = Input.EventType.BUTTON_A_DOWN;
-                eventType[1] = Input.EventType.BUTTON_A_UP;
+                value = handleInputDevice.buttonSouth.getValue();
                 break;
             case XrEventTypeRight.BUTTON_B:
-                eventType[0] = Input.EventType.BUTTON_B_DOWN;
-                eventType[1] = Input.EventType.BUTTON_B_UP;
+                value = handleInputDevice.buttonEast.getValue();
                 break;
             case XrEventTypeLeft.BUTTON_X:
-                eventType[0] = Input.EventType.BUTTON_X_DOWN;
-                eventType[1] = Input.EventType.BUTTON_X_UP;
+                value = handleInputDevice.buttonWest.getValue();
                 break;
             case XrEventTypeLeft.BUTTON_Y:
-                eventType[0] = Input.EventType.BUTTON_Y_DOWN;
-                eventType[1] = Input.EventType.BUTTON_Y_UP;
+                value = handleInputDevice.buttonNorth.getValue();
                 break;
             case XrEventTypeLeft.TRIGGER_LEFT:
-                eventType[0] = Input.EventType.TRIGGER_START_LEFT;
-                eventType[1] = Input.EventType.TRIGGER_END_LEFT;
+                value = handleInputDevice.triggerLeft.getValue();
                 break;
             case XrEventTypeRight.TRIGGER_RIGHT:
-                eventType[0] = Input.EventType.TRIGGER_START_RIGHT;
-                eventType[1] = Input.EventType.TRIGGER_END_RIGHT;
+                value = handleInputDevice.triggerRight.getValue();
                 break;
             case XrEventTypeLeft.GRIP_LEFT:
-                eventType[0] = Input.EventType.GRIP_START_LEFT;
-                eventType[1] = Input.EventType.GRIP_END_LEFT;
+                handleInputDevice.gripLeft.getValue();
                 break;
             case XrEventTypeRight.GRIP_RIGHT:
-                eventType[0] = Input.EventType.GRIP_START_RIGHT;
-                eventType[1] = Input.EventType.GRIP_END_RIGHT;
+                value = handleInputDevice.gripRight.getValue();
                 break;
             case XrEventTypeLeft.THUMBSTICK_LEFT:
-                eventType[0] = Input.EventType.THUMBSTICK_DOWN_LEFT;
-                eventType[1] = Input.EventType.THUMBSTICK_UP_LEFT;
+                value = handleInputDevice.buttonLeftStick.getValue();
                 break;
             case XrEventTypeRight.THUMBSTICK_RIGHT:
-                eventType[0] = Input.EventType.THUMBSTICK_DOWN_RIGHT;
-                eventType[1] = Input.EventType.THUMBSTICK_UP_RIGHT;
+                value = handleInputDevice.buttonRightStick.getValue();
                 break;
             default:
                 break;
         }
-
-        return eventType;
-    }
-
-    public registerInputEvent(eventType: Input.EventType[], xrControlEventType: XrControlEventType) {
-        if (eventType.length !== 2) {
-            return;
-        }
-        switch (xrControlEventType) {
-            case XrControlEventType.SELECT_ENTERED:
-                input.on(eventType[0], this._selectStart, this);
-                input.on(eventType[1], this._selectEnd, this);
+        switch (type) {
+            case InteractorEventType.Select:
+                if (value) {
+                    this._selectStart(eventType, value);
+                } else if (this._selectState && !value) {
+                    this._selectEnd(value);
+                }
+                this._selectState = value;
                 break;
-            case XrControlEventType.ACTIVATED:
-                input.on(eventType[0], this._activateStart, this);
-                input.on(eventType[1], this._activateEnd, this);
+            case InteractorEventType.Activate:
+                if (value) {
+                    this._activateStart(eventType, value);
+                } else if (this._activateState && !value) {
+                    this._activateEnd(value);
+                }
+                this._activateState = value;
                 break;
-            case XrControlEventType.UIPRESS_ENTERED:
-                input.on(eventType[0], this._uiPressStart, this);
-                input.on(eventType[1], this._uiPressEnd, this);
-                break;
-            default:
-                break;
-        }
-    }
-
-    public unregisterInputEvent(eventType: Input.EventType[], xrControlEventType: XrControlEventType) {
-        if (eventType.length !== 2) {
-            return;
-        }
-        switch (xrControlEventType) {
-            case XrControlEventType.SELECT_ENTERED:
-                input.off(eventType[0], this._selectStart, this);
-                input.off(eventType[1], this._selectEnd, this);
-                break;
-            case XrControlEventType.ACTIVATED:
-                input.off(eventType[0], this._activateStart, this);
-                input.off(eventType[1], this._activateEnd, this);
-                break;
-            case XrControlEventType.UIPRESS_ENTERED:
-                input.off(eventType[0], this._uiPressStart, this);
-                input.off(eventType[1], this._uiPressEnd, this);
+            case InteractorEventType.UIPress:
+                if (value) {
+                    this._uiPressStart(eventType, value);
+                } else if (this._uiPressState && !value) {
+                    this._uiPressEnd(value);
+                }
+                this._uiPressState = value;
                 break;
             default:
                 break;
         }
     }
 
-    protected _selectStart(event: EventHandle) {
-        if ((event.type === Input.EventType.GRIP_START_LEFT || event.type === Input.EventType.GRIP_START_RIGHT
-            || event.type === Input.EventType.TRIGGER_START_LEFT || event.type === Input.EventType.TRIGGER_START_RIGHT) 
-            && event.value < this._axisToPressThreshold) {
+    protected _selectStart(type: XrEventTypeLeft | XrEventTypeRight, value: number) {
+        if ((type === XrEventTypeLeft.GRIP_LEFT || type === XrEventTypeLeft.TRIGGER_LEFT
+            || type === XrEventTypeRight.GRIP_RIGHT || type === XrEventTypeRight.TRIGGER_RIGHT) 
+            && value < this._axisToPressThreshold) {
             return;
         }
-        this._xrEventHandle.eventHandle = event;
+        this._xrEventHandle.eventHandle = value;
         this._xrInteractor?.selectStart(this._xrEventHandle);
-        // xrEvent.selectStart(this._xrEventHandle);
     }
 
-    protected _selectEnd(event: EventHandle) {
-        this._xrEventHandle.eventHandle = event;
+    protected _selectEnd(value: number) {
+        this._xrEventHandle.eventHandle = value;
         this._xrInteractor?.selectEnd(this._xrEventHandle);
-        // xrEvent.selectEnd(this._xrEventHandle);
     }
 
-    protected _activateStart(event: EventHandle) {
-        if ((event.type === Input.EventType.GRIP_START_LEFT || event.type === Input.EventType.GRIP_START_RIGHT
-            || event.type === Input.EventType.TRIGGER_START_LEFT || event.type === Input.EventType.TRIGGER_START_RIGHT) 
-            && event.value < this._axisToPressThreshold) {
+    protected _activateStart(type: XrEventTypeLeft | XrEventTypeRight, value: number) {
+        if ((type === XrEventTypeLeft.GRIP_LEFT || type === XrEventTypeLeft.TRIGGER_LEFT
+            || type === XrEventTypeRight.GRIP_RIGHT || type === XrEventTypeRight.TRIGGER_RIGHT) 
+            && value < this._axisToPressThreshold) {
             return;
         }
-        this._xrEventHandle.eventHandle = event;
+        this._xrEventHandle.eventHandle = value;
         this._xrInteractor?.activateStart(this._xrEventHandle);
-        // xrEvent.activateStart(this._xrEventHandle);
     }
 
-    protected _activateEnd(event: EventHandle) {
-        this._xrEventHandle.eventHandle = event;
+    protected _activateEnd(value: number) {
+        this._xrEventHandle.eventHandle = value;
         this._xrInteractor?.activateEnd(this._xrEventHandle);
-        // xrEvent.activateEnd();
     }
 
-    protected _uiPressStart(event: EventHandle) {
-        if ((event.type === Input.EventType.GRIP_START_LEFT || event.type === Input.EventType.GRIP_START_RIGHT 
-            || event.type === Input.EventType.TRIGGER_START_LEFT || event.type === Input.EventType.TRIGGER_START_RIGHT) 
-            && event.value < this._axisToPressThreshold) {
+    protected _uiPressStart(type: XrEventTypeLeft | XrEventTypeRight, value: number) {
+        if ((type === XrEventTypeLeft.GRIP_LEFT || type === XrEventTypeLeft.TRIGGER_LEFT
+            || type === XrEventTypeRight.GRIP_RIGHT || type === XrEventTypeRight.TRIGGER_RIGHT) 
+            && value < this._axisToPressThreshold) {
             return;
         }
-        
         this._xrInteractor?.uiPressEnter(this._xrEventHandle);
-        // xrEvent.uiPressStart(this._xrEventHandle);
     }
 
-    protected _uiPressEnd(event: EventHandle) {
+    protected _uiPressEnd(value: number) {
+        this._xrEventHandle.eventHandle = value;
         this._xrInteractor?.uiPressExit(this._xrEventHandle);
-        // xrEvent.uiPressEnd();
     }
-
 }

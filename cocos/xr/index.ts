@@ -41,7 +41,6 @@ export * from './interaction/xr-interactable';
 export * from './interaction/grab-interactable';
 export * from './interaction/teleportable';
 export * from './event/xr-event-handle';
-export * from './event/xr-handler';
 export * from './event/interactable-events';
 export * from './event/interactor-events';
 export * from './locomotion/locomotion-checker';

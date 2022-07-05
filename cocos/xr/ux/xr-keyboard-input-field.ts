@@ -1,7 +1,11 @@
 import { ccclass, help, menu, displayOrder, serializable, tooltip, type } from 'cc.decorator';
 import { Component } from "../../core";
 import { Node } from '../../core/scene-graph/node';
+import { InputEventType } from '../../input/types/event-enum';
+import { EventKeyboard } from '../../input/types/event/event-keyboard';
+import { KeyCode } from '../../input/types/key-code';
 import { XRKeyboard } from './xr-keyboard';
+import { xrKeyboardInput } from './xr-keyboard-handle';
 
 @ccclass('cc.XRKeyboardInputField')
 @help('i18n:cc.XRKeyboardInputField')
@@ -63,6 +67,7 @@ export class XRKeyboardInputField extends Component {
         if (this._xrKeyboard) {
             this._xrKeyboard.occupy = false;
             this._xrKeyboard.node.active = false;
+            this._xrKeyboard.commitText();
             this._xrKeyboard.hideKeyboard();
         }
     }

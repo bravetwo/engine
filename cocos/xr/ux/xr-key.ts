@@ -100,12 +100,14 @@ export class XrKey extends Component {
     onEnable() {
         this.node.on(XrUIPressEventType.XRUI_CLICK, this._xrUIClick, this);
         this.node.on(XrUIPressEventType.XRUI_UNCLICK, this._xrUIUnClick, this);
+        xrKeyboardInput.on(InputEventType.XR_KEYBOARD_INIT, this._init, this);
         xrKeyboardInput.on(InputEventType.XR_CAPS_LOCK, this._xrCapsLock, this);
     }
 
     onDisable() {
         this.node.off(XrUIPressEventType.XRUI_CLICK, this._xrUIClick, this);
         this.node.off(XrUIPressEventType.XRUI_UNCLICK, this._xrUIUnClick, this);
+        xrKeyboardInput.off(InputEventType.XR_KEYBOARD_INIT, this._init, this);
         xrKeyboardInput.off(InputEventType.XR_CAPS_LOCK, this._xrCapsLock, this);
     }
 
@@ -119,6 +121,22 @@ export class XrKey extends Component {
         xrKeyboardInput.emit(InputEventType.KEY_UP, eventKeyboard);
         if (this._key === KeyCode.CAPS_LOCK) {
             xrKeyboardInput.emit(InputEventType.XR_CAPS_LOCK, eventKeyboard);
+        }
+    }
+
+    protected _init() {
+        this._capsLock = false;
+        if (!this._button) {
+            return;
+        }
+        if (this._key === KeyCode.CAPS_LOCK) {
+            this._button.normalSprite = this._spriteFrameOff;
+            this._button.pressedSprite = this._spriteFrameOn;
+            this._button.hoverSprite = this._spriteFrameOn;
+        } else if (this._key > 64 && this._key < 91) {
+            this._button.normalSprite = this._spriteFrameOff;
+            this._button.pressedSprite = this._spriteFrameOff;
+            this._button.hoverSprite = this._spriteFrameOn;
         }
     }
 

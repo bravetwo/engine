@@ -411,6 +411,15 @@ export enum InputEventType {
      * XR键盘大小写切换事件
      */
      XR_CAPS_LOCK = 'xr-caps-lock',
+
+    /**
+     * @en
+     * The event type for XR keyboard initialization event
+     *
+     * @zh
+     * XR键盘初始化事件
+     */
+     XR_KEYBOARD_INIT = 'xr-keyboard-init',
 }
 
 export type SystemEventTypeUnion = SystemEventType | NodeEventType | InputEventType | string;

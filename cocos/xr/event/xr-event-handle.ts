@@ -93,7 +93,7 @@ export class XrEventHandle extends Event {
      * @en 
      * @zh 手柄事件
      */
-    public eventHandle: EventHandle | null = null;
+    public eventHandle: number = 0;
 
     /**
      * @en 

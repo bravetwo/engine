@@ -44,6 +44,9 @@ import { NodeEventType } from '../../core/scene-graph/node-event';
 import { XrUIPressEventType } from '../../xr/event/xr-event-handle';
 import { xrKeyboardInput, XRKeyboardInputField } from '../../xr';
 import { InputEventType } from '../../input/types/event-enum';
+import { TextureBase } from '../../core/assets/texture-base';
+import { Layers, Texture2D } from '../../core';
+import { Layer } from '../../core/animation/marionette/animation-graph';
 
 const LEFT_PADDING = 2;
 
@@ -701,7 +704,6 @@ export class EditBox extends Component {
         this.node.on(NodeEventType.TOUCH_START, this._onTouchBegan, this);
         this.node.on(NodeEventType.TOUCH_END, this._onTouchEnded, this);
 
-        this.node.on(XrUIPressEventType.XRUI_CLICK, this._xrClick, this);
         this.node.on(XrUIPressEventType.XRUI_UNCLICK, this._xrUnClick, this);
     }
 
@@ -709,7 +711,6 @@ export class EditBox extends Component {
         this.node.off(NodeEventType.TOUCH_START, this._onTouchBegan, this);
         this.node.off(NodeEventType.TOUCH_END, this._onTouchEnded, this);
 
-        this.node.off(XrUIPressEventType.XRUI_CLICK, this._xrClick, this);
         this.node.off(XrUIPressEventType.XRUI_UNCLICK, this._xrUnClick, this);
     }
 
@@ -774,24 +775,17 @@ export class EditBox extends Component {
         this._syncSize();
     }
 
-    protected _xrClick() {
-    }
-
     protected _xrUnClick() {
         if (this._xrKeyBoardInputField?.show()) {
-            xrKeyboardInput.on(InputEventType.KEY_DOWN, this._xrKeyBoardDown, this);
             xrKeyboardInput.on(InputEventType.KEY_UP, this._xrKeyBoardUp, this);
+            xrKeyboardInput.emit(InputEventType.XR_KEYBOARD_INIT);
+            this._capsLock = false;
         }
-    }
-
-    protected _xrKeyBoardDown(event: EventKeyboard) {
-        
     }
 
     protected _xrKeyBoardUp(event: EventKeyboard) {
         if (event.keyCode === KeyCode.ENTER) {
             this._xrKeyBoardInputField?.hide();
-            xrKeyboardInput.off(InputEventType.KEY_DOWN, this._xrKeyBoardDown, this);
             xrKeyboardInput.off(InputEventType.KEY_UP, this._xrKeyBoardUp, this);
         } else if (event.keyCode === KeyCode.BACKSPACE) {
             this.string = this.string.substring(0, this.string.length - 1);

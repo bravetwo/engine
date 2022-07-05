@@ -81,36 +81,38 @@ export class ContinuousMover extends LocomotionBase {
 
     onEnable() {
         this._findChecker();
-        if (this._inputControl === InputControl_Type.PRIMARY_2D_AXIS) {
-            if (this.inputDevice?.inputDevice == XrInputDeviceType.Left_Hand) {
-                input.on(Input.EventType.THUMBSTICK_MOVE_LEFT, this._MoveOn, this);
-                input.on(Input.EventType.THUMBSTICK_MOVE_END_LEFT, this._MoveOff, this);
-            } else {
-                input.on(Input.EventType.THUMBSTICK_MOVE_RIGHT, this._MoveOn, this);
-                input.on(Input.EventType.THUMBSTICK_MOVE_END_RIGHT, this._MoveOff, this);
-            }
-        }
+        input.on(Input.EventType.HANDLE_INPUT, this._dispatchEventHandleInput, this);
     }
 
     onDisable() {
+        input.off(Input.EventType.HANDLE_INPUT, this._dispatchEventHandleInput, this);
+    }
+
+    private _dispatchEventHandleInput(event: EventHandle) {
+        const handleInputDevice = event.handleInputDevice;
+        var value;
         if (this._inputControl === InputControl_Type.PRIMARY_2D_AXIS) {
             if (this.inputDevice?.inputDevice == XrInputDeviceType.Left_Hand) {
-                input.off(Input.EventType.THUMBSTICK_MOVE_LEFT, this._MoveOn, this);
-                input.off(Input.EventType.THUMBSTICK_MOVE_END_LEFT, this._MoveOff, this);
+                value = handleInputDevice.leftStick.getValue();
             } else {
-                input.off(Input.EventType.THUMBSTICK_MOVE_RIGHT, this._MoveOn, this);
-                input.off(Input.EventType.THUMBSTICK_MOVE_END_RIGHT, this._MoveOff, this);
+                value = handleInputDevice.rightStick.getValue();
             }
+        }
+
+        if (value.equals(Vec2.ZERO)) {
+            this._MoveOff();
+        } else {
+            this._MoveOn(value);
         }
     }
 
-    private _MoveOn(event: EventHandle) {
+    private _MoveOn(event: Vec2) {
         this._xrSessionNode = this._checker?.getSession(this.uuid)?.node;
         this._move.set(event.x, event.y);
         this._isMove = true;
     }
 
-    private _MoveOff(event: EventHandle) {
+    private _MoveOff() {
         this._isMove = false;
     }
 

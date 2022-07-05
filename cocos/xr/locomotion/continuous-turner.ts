@@ -30,7 +30,7 @@
 
 import { ccclass, help, menu, displayOrder, serializable, tooltip, executeInEditMode} from 'cc.decorator';
 import { Node } from '../../core/scene-graph/node';
-import { Quat, Vec3 } from '../../core';
+import { Quat, Vec2, Vec3 } from '../../core';
 import { XrInputDeviceType } from '../device/xr-controller';
 import { input, Input } from '../../input/input';
 import { EventHandle } from '../../input/types/event/event-handle';
@@ -73,30 +73,32 @@ export class ContinuousTurner extends LocomotionBase {
 
     onEnable() {
         this._findChecker();
-        if (this._inputControl === InputControl_Type.PRIMARY_2D_AXIS) {
-            if (this.inputDevice?.inputDevice == XrInputDeviceType.Left_Hand) {
-                input.on(Input.EventType.THUMBSTICK_MOVE_LEFT, this._turnOn, this);
-                input.on(Input.EventType.THUMBSTICK_MOVE_END_LEFT, this._turnOff, this);
-            } else {
-                input.on(Input.EventType.THUMBSTICK_MOVE_RIGHT, this._turnOn, this);
-                input.on(Input.EventType.THUMBSTICK_MOVE_END_RIGHT, this._turnOff, this);
-            }
-        }
+        input.on(Input.EventType.HANDLE_INPUT, this._dispatchEventHandleInput, this);
     }
 
     onDisable() {
+        input.off(Input.EventType.HANDLE_INPUT, this._dispatchEventHandleInput, this);
+    }
+
+    private _dispatchEventHandleInput(event: EventHandle) {
+        const handleInputDevice = event.handleInputDevice;
+        var value;
         if (this._inputControl === InputControl_Type.PRIMARY_2D_AXIS) {
             if (this.inputDevice?.inputDevice == XrInputDeviceType.Left_Hand) {
-                input.off(Input.EventType.THUMBSTICK_MOVE_LEFT, this._turnOn, this);
-                input.off(Input.EventType.THUMBSTICK_MOVE_END_LEFT, this._turnOff, this);
+                value = handleInputDevice.leftStick.getValue();
             } else {
-                input.off(Input.EventType.THUMBSTICK_MOVE_RIGHT, this._turnOn, this);
-                input.off(Input.EventType.THUMBSTICK_MOVE_END_RIGHT, this._turnOff, this);
+                value = handleInputDevice.rightStick.getValue();
             }
+        }
+
+        if (value.equals(Vec2.ZERO)) {
+            this._turnOff();
+        } else {
+            this._turnOn(value);
         }
     }
 
-    private _turnOn(event: EventHandle) {
+    private _turnOn(event: Vec2) {
         this._xrSessionNode = this._checker?.getSession(this.uuid)?.node;
         if (event.x < 0) {
             this._isTurn = TurnDir.Left;
@@ -107,7 +109,7 @@ export class ContinuousTurner extends LocomotionBase {
         }
     }
 
-    private _turnOff(event: EventHandle) {
+    private _turnOff() {
         this._isTurn = TurnDir.OFF;
     }
 

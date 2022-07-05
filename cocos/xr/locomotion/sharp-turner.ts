@@ -30,7 +30,7 @@
 
 import { ccclass, help, menu, displayOrder, type, serializable, tooltip, executeInEditMode} from 'cc.decorator';
 import { Node } from '../../core/scene-graph/node';
-import { ccenum, Quat, Vec3 } from '../../core';
+import { ccenum, Quat, Vec2, Vec3 } from '../../core';
 import { XrInputDeviceType } from '../device/xr-controller';
 import { Input, input } from '../../input';
 import { EventHandle } from '../../input/types/event/event-handle';
@@ -67,6 +67,7 @@ export class SharpTurner extends LocomotionBase {
 
     private _waitEnd: boolean = true;
     private _xrSessionNode: Node | undefined = undefined;
+    private _stickClickState = 0;
 
     @displayOrder(4)
     @tooltip('i18n:xr.sharp_turner.turnAngle')
@@ -107,38 +108,39 @@ export class SharpTurner extends LocomotionBase {
 
     onEnable() {
         this._findChecker();
-        if (this._inputControl === InputControl_Type.PRIMARY_2D_AXIS) {
-            if (this.inputDevice?.inputDevice == XrInputDeviceType.Left_Hand) {
-                input.on(Input.EventType.THUMBSTICK_MOVE_LEFT, this._turnMove, this);
-                if (this._enableTurnAround === EnableTurnAround_Type.ON) {
-                    input.on(Input.EventType.THUMBSTICK_DOWN_LEFT, this._turnAround, this);
-                }
-            } else {
-                input.on(Input.EventType.THUMBSTICK_MOVE_RIGHT, this._turnMove, this);
-                if (this._enableTurnAround === EnableTurnAround_Type.ON) {
-                    input.on(Input.EventType.THUMBSTICK_DOWN_RIGHT, this._turnAround, this);
-                }
-            }
-        }
+        input.on(Input.EventType.HANDLE_INPUT, this._dispatchEventHandleInput, this);
     }
 
     onDisable() {
+        input.off(Input.EventType.HANDLE_INPUT, this._dispatchEventHandleInput, this);
+    }
+
+    private _dispatchEventHandleInput(event: EventHandle) {
+        const handleInputDevice = event.handleInputDevice;
+        var stickValue;
+        var stickClick;
         if (this._inputControl === InputControl_Type.PRIMARY_2D_AXIS) {
             if (this.inputDevice?.inputDevice == XrInputDeviceType.Left_Hand) {
-                input.off(Input.EventType.THUMBSTICK_MOVE_LEFT, this._turnMove, this);
+                stickValue = handleInputDevice.leftStick.getValue();
                 if (this._enableTurnAround === EnableTurnAround_Type.ON) {
-                    input.off(Input.EventType.THUMBSTICK_DOWN_LEFT, this._turnAround, this);
+                    stickClick = handleInputDevice.buttonLeftStick.getValue();
                 }
             } else {
-                input.off(Input.EventType.THUMBSTICK_MOVE_RIGHT, this._turnMove, this);
+                stickValue = handleInputDevice.rightStick.getValue();
                 if (this._enableTurnAround === EnableTurnAround_Type.ON) {
-                    input.off(Input.EventType.THUMBSTICK_DOWN_RIGHT, this._turnAround, this);
+                    stickClick = handleInputDevice.buttonRightStick.getValue();
                 }
             }
         }
+
+        this._turnMove(stickValue);
+        if (!this._stickClickState && stickClick) {
+            this._turnAround();
+        }
+        this._stickClickState = stickClick;
     }
 
-    private _turnMove(event: EventHandle) {
+    private _turnMove(event: Vec2) {
         this._xrSessionNode = this._checker?.getSession(this.uuid)?.node;
         if (!this._xrSessionNode || !this._waitEnd) {
             return;
@@ -157,7 +159,7 @@ export class SharpTurner extends LocomotionBase {
         }, this._activationTimeout);
     }
 
-    private _turnAround(event: EventHandle) {
+    private _turnAround() {
         this._xrSessionNode = this._checker?.getSession(this.uuid)?.node;
         if (!this._xrSessionNode) {
             return;
