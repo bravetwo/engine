@@ -657,6 +657,16 @@ bool XRInterface::platformLoopEnd() {
 }
 // stereo render loop
 
+ccstd::vector<float> XRInterface::getHMDViewPosition(uint32_t eye) {
+#if USE_XR
+    return xr::XrEntry::getInstance()->getHMDViewPosition(eye);
+#else
+    ccstd::vector<float> res;
+    res.reserve(3);
+    return res;
+#endif
+}
+
 ccstd::vector<float> XRInterface::getXRViewProjectionData(uint32_t eye, float near, float far) {
 #if USE_XR
     return xr::XrEntry::getInstance()->computeViewProjection(eye, near, far, 1.0F);

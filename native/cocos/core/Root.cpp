@@ -32,12 +32,12 @@
 #include "renderer/gfx-base/GFXDef.h"
 #include "renderer/gfx-base/GFXDevice.h"
 #include "renderer/gfx-base/GFXSwapchain.h"
+#include "renderer/pipeline/GeometryRenderer.h"
 #include "renderer/pipeline/PipelineSceneData.h"
 #include "renderer/pipeline/custom/NativePipelineTypes.h"
 #include "renderer/pipeline/custom/RenderInterfaceTypes.h"
 #include "renderer/pipeline/deferred/DeferredPipeline.h"
 #include "renderer/pipeline/forward/ForwardPipeline.h"
-#include "renderer/pipeline/GeometryRenderer.h"
 #include "scene/Camera.h"
 #include "scene/DirectionalLight.h"
 #include "scene/DrawBatch2D.h"
@@ -334,17 +334,19 @@ void Root::frameMove(float deltaTime, int32_t totalFrames) {
     static IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
     if (xr) {
         if (xr->isRenderAllowable()) {
-            //            for (auto *camera : _allCameraList) {
-            //                if (camera->isHMD()) {
-            //#if USE_XR
-            //                    camera->getOriginMatrix();
-            //#endif
-            //                }
-            //            }
             auto swapchains = gfx::Device::getInstance()->getSwapchains();
             bool isSceneUpdated = false;
             for (int xrEye = 0; xrEye < 2; xrEye++) {
                 xr->beginRenderEyeFrame(xrEye);
+
+                for (auto *camera : _allCameraList) {
+                    if (camera->isHMD()) {
+#if USE_XR
+                        const auto &viewPosition = xr->getHMDViewPosition(xrEye);
+                        camera->setNodePosition({viewPosition[0], viewPosition[1], viewPosition[2]});
+#endif
+                    }
+                }
 
                 for (const auto &scene : _scenes) {
                     scene->removeBatches();
@@ -409,7 +411,7 @@ void Root::frameMove(float deltaTime, int32_t totalFrames) {
 #if !defined(CC_SERVER_MODE)
                     for (auto *camera : _cameraList) {
                         if (camera->getGeometryRenderer()) {
-                           camera->getGeometryRenderer()->update();
+                            camera->getGeometryRenderer()->update();
                         }
                     }
 
@@ -422,13 +424,6 @@ void Root::frameMove(float deltaTime, int32_t totalFrames) {
 
                 xr->endRenderEyeFrame(xrEye);
             }
-            //        for (auto *camera : _allCameraList) {
-            //            if (camera->isHMD()) {
-            //#if USE_XR
-            //                camera->dependUpdateData();
-            //#endif
-            //            }
-            //        }
         }
     } else {
         for (const auto &scene : _scenes) {

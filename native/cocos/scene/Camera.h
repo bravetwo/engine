@@ -164,10 +164,7 @@ public:
     void update(bool forceUpdate = false, int xrEye = -1); // for lazy eval situations like the in-editor preview
     void changeTargetWindow(RenderWindow *window);
     void attachCamera(RenderWindow *window);
-#if USE_XR
-    void getOriginMatrix();
-    void dependUpdateData();
-#endif
+    void setNodePosition(const Vec3 &position);
 
     /**
      * transform a screen position (in oriented space) to a world space ray
@@ -395,9 +392,6 @@ private:
     float _clearDepth{1.0F};
     CameraType            _cameraType = CameraType::DEFAULT;
     bool                  _isHMD = false;
-#if USE_XR
-    Mat4                  _matOrigin;
-#endif
 
 #if CC_USE_GEOMETRY_RENDERER
     IntrusivePtr<pipeline::GeometryRenderer> _geometryRenderer;

@@ -278,6 +278,13 @@ public:
     // stereo render loop
 
     /**
+     * @en get hmd view position data
+     * @zh 获取hmd双眼位置坐标
+     * @param eye
+     * @return
+     */
+    virtual ccstd::vector<float> getHMDViewPosition(uint32_t eye) = 0;
+    /**
      * @en get xr view projection data
      * @zh 获取xr双眼投影矩阵数据
      * @param eye
