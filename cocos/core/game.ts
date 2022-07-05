@@ -177,22 +177,6 @@ export interface IGameConfig {
      * @deprecated Since v3.6, Please use ```overrideSettings: { Settings.Category.SCREEN: { 'exactFitScreen': true }}``` to set this.
      */
     exactFitScreen: boolean,
-
-    /**
-     * @zh
-     * 离屏渲染多重采样数。
-     * @en
-     * Render to Texture Multisamples Num.
-     */
-    multisamplesRTT?: number;
-
-    /**
-     * @zh
-     * XR设备推荐渲染分辨率的缩放值。
-     * @en
-     * XR RecommendedImageRect Scale.
-     */
-    renderingScale?: number;
 }
 
 /**
@@ -695,6 +679,13 @@ export class Game extends EventTarget {
             })
             .then(() => settings.init(config.settingsPath, config.overrideSettings))
             .then(() => {
+                if (sys.isXR) {
+                    const xrMSAA = settings.querySettings(Settings.Category.RENDERING, 'msaa') ?? 1;
+                    const xrRenderingScale = settings.querySettings(Settings.Category.RENDERING, 'renderingScale') ?? 1.0;
+                    xr.XrEntry.getInstance().setMultisamplesRTT(xrMSAA);
+                    xr.XrEntry.getInstance().setRenderingScale(xrRenderingScale);
+                }
+
                 this.emit(Game.EVENT_POST_BASE_INIT);
                 return this.onPostBaseInitDelegate.dispatch();
             })
