@@ -281,8 +281,8 @@ bool CCVKSwapchain::checkSwapchainStatus(uint32_t width, uint32_t height) {
     uint32_t newHeight = height;
     uint32_t imageCount = 0;
     if (xr) {
-        newWidth = width ? width : static_cast<CCVKTexture *>(_colorTexture.get())->_info.width;
-        newHeight = height ? height : static_cast<CCVKTexture *>(_colorTexture.get())->_info.height;
+        newWidth = static_cast<CCVKTexture *>(_colorTexture.get())->_info.width;
+        newHeight = static_cast<CCVKTexture *>(_colorTexture.get())->_info.height;
         xr->getXRSwapchainVkImages(_gpuSwapchain->swapchainImages, _typedID);
         imageCount = _gpuSwapchain->swapchainImages.size();
         _gpuSwapchain->createInfo.imageExtent.width = newWidth;
