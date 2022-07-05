@@ -712,7 +712,7 @@ nodeProto.getWorldPosition = function (out?: Vec3): Vec3 {
         if (out) {
             return Vec3.copy(out, this._worldPositionCache);
         }
-        return this._worldPositionCache;
+        return Vec3.copy(new Vec3(), this._worldPositionCache);
     }
     if (out) {
         return Vec3.copy(out, r);
@@ -731,7 +731,7 @@ nodeProto.getWorldRotation = function (out?: Quat): Quat {
         if (out) {
             return Quat.copy(out, this._worldRotationCache);
         }
-        return this._worldRotationCache;
+        return Quat.copy(new Quat(), this._worldRotationCache);
     }
 
     if (out) {
@@ -750,7 +750,7 @@ nodeProto.getWorldScale = function (out?: Vec3): Vec3 {
         if (out) {
             return Vec3.copy(out, this._worldScaleCache);
         }
-        return this._worldScaleCache;
+        return Vec3.copy(new Vec3(), this._worldScaleCache);
     }
     if (out) {
         return Vec3.copy(out, r);
@@ -1234,6 +1234,10 @@ nodeProto._ctor = function (name?: string) {
     this._lrot = new Quat();
     this._lscale = new Vec3(1, 1, 1);
     this._euler = new Vec3();
+
+    this._worldPositionCache = new Vec3();
+    this._worldRotationCache = new Quat();
+    this._worldScaleCache = new Vec3();
 
     this._registeredNodeEventTypeMask = 0;
 
