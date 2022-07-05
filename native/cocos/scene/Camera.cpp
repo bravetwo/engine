@@ -282,6 +282,14 @@ void Camera::attachCamera(RenderWindow *win) {
     }
 }
 
+void Camera::setNodePosition(const Vec3 &position) {
+    if (!_node) {
+        return;
+    }
+
+    _node->setPosition(position);
+}
+
 void Camera::initGeometryRenderer() {
 #if CC_USE_GEOMETRY_RENDERER
     if (!_geometryRenderer) {
@@ -290,51 +298,6 @@ void Camera::initGeometryRenderer() {
     }
 #endif
 }
-
-#if USE_XR
- void Camera::getOriginMatrix() {
-     if (!_node) {
-         return;
-     }
-     Mat4::fromRTS(_node->getRotation(), _node->getPosition(), _node->getScale(), &_matOrigin);
- }
-
- void Camera::dependUpdateData() {
-     if (!_node) {
-         return;
-     }
-
-     this->_node->setMatrix(_matOrigin);
-     // view matrix
-     _matView = this->_node->getWorldMatrix().getInversed();
-     _forward.set(-_matView.m[2], -_matView.m[6], -_matView.m[10]);
-     Mat4 scaleMat{};
-     scaleMat.scale(_node->getWorldScale());
-     // remove scale
-     Mat4::multiply(scaleMat, _matView, &_matView);
-     _position.set(_node->getWorldPosition());
-
-     // projection matrix
-     const float projectionSignY = _device->getCapabilities().clipSpaceSignY;
-     // Only for rendertexture processing
-     if (_proj == CameraProjection::PERSPECTIVE) {
-         Mat4::createPerspective(_fov, _aspect, _nearClip, _farClip,
-                                 _fovAxis == CameraFOVAxis::VERTICAL, _device->getCapabilities().clipSpaceMinZ, projectionSignY, static_cast<int>(_curTransform), &_matProj);
-     } else {
-         const float x = _orthoHeight * _aspect;
-         const float y = _orthoHeight;
-         Mat4::createOrthographicOffCenter(-x, x, -y, y, _nearClip, _farClip,
-                                           _device->getCapabilities().clipSpaceMinZ, projectionSignY,
-                                           static_cast<int>(_curTransform), &_matProj);
-     }
-     _matProjInv   = _matProj.getInversed();
-
-     // view-projection
-     Mat4::multiply(_matProj, _matView, &_matViewProj);
-     _matViewProjInv = _matViewProj.getInversed();
-     _frustum->update(_matViewProj, _matViewProjInv);
- }
-#endif
 
 void Camera::detachCamera() {
     if (_window) {
