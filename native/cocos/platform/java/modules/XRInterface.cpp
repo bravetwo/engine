@@ -103,6 +103,7 @@ static void dispatchGamepadEventInternal(const xr::XRControllerEvent &xrControll
                         break;
                     case xr::XRClick::Type::HOME:
                         CC_LOG_INFO("[XRInterface] exit when home click in rokid.");
+                        xr::XrEntry::destroyInstance();
                         JniHelper::callStaticVoidMethod("java/lang/System", "exit", 0);
                         break;
                     case xr::XRClick::Type::START:
