@@ -101,6 +101,8 @@ public:
 
     inline MessageQueue *getMessageQueue() const { return _mainMessageQueue; }
 
+    void presentWait();
+    void presentSignal();
 protected:
     static DeviceAgent *instance;
 
@@ -116,7 +118,11 @@ protected:
     MessageQueue *_mainMessageQueue{nullptr};
 
     uint32_t _currentIndex = 0U;
+#if USE_XR
+    Semaphore _frameBoundarySemaphore{0};
+#else
     Semaphore _frameBoundarySemaphore{MAX_CPU_FRAME_AHEAD};
+#endif
 
     ccstd::unordered_set<CommandBufferAgent *> _cmdBuffRefs;
 };

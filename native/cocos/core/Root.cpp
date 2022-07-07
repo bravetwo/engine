@@ -341,10 +341,8 @@ void Root::frameMove(float deltaTime, int32_t totalFrames) {
 
                 for (auto *camera : _allCameraList) {
                     if (camera->isHMD()) {
-#if USE_XR
                         const auto &viewPosition = xr->getHMDViewPosition(xrEye);
                         camera->setNodePosition({viewPosition[0], viewPosition[1], viewPosition[2]});
-#endif
                     }
                 }
 
@@ -385,6 +383,7 @@ void Root::frameMove(float deltaTime, int32_t totalFrames) {
                     //                }
                     bool sceneNeedUpdate = xrEye == 0 || (xrEye == 1 && !isSceneUpdated);
                     if (sceneNeedUpdate) {
+                        // consume 2ms
                         for (const auto &scene : _scenes) {
                             scene->update(stamp);
                         }
@@ -424,6 +423,8 @@ void Root::frameMove(float deltaTime, int32_t totalFrames) {
 
                 xr->endRenderEyeFrame(xrEye);
             }
+        } else {
+            CC_LOG_WARNING("[XR] isRenderAllowable is false !!!");
         }
     } else {
         for (const auto &scene : _scenes) {

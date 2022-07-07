@@ -59,7 +59,10 @@ enum class XRConfigKey {
     METRICS_STATE,
     VIEW_COUNT,
     SWAPCHAIN_WIDTH,
-    SWAPCHAIN_HEIGHT
+    SWAPCHAIN_HEIGHT,
+	MUTILTHREAD_MODE,
+    LOGIC_THREAD_ID,
+    RENDER_THREAD_ID
 };
 
 enum class XRConfigValueType {
