@@ -56,7 +56,10 @@ enum class XRConfigKey {
     SESSION_RUNNING,
     INSTANCE_CREATED,
     VK_QUEUE_FAMILY_INDEX,
-    METRICS_STATE
+    METRICS_STATE,
+    VIEW_COUNT,
+    SWAPCHAIN_WIDTH,
+    SWAPCHAIN_HEIGHT
 };
 
 enum class XRConfigValueType {
