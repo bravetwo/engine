@@ -484,8 +484,9 @@ bool XRInterface::isGFXDeviceNeedsPresent(gfx::API gfxApi) {
     // CC_LOG_INFO("[XR] isGFXDeviceNeedsPresent.api.%d", gfxApi);
     // if (gfxApi == gfx::API::GLES3 || gfxApi == gfx::API::VULKAN) {
     // }
-#endif
     return false;
+#endif
+    return true;
 }
 
 void XRInterface::postGFXDevicePresent(gfx::API gfxApi) {
