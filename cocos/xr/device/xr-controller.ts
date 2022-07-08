@@ -319,7 +319,7 @@ export class XRController extends Component {
                 value = handleInputDevice.triggerRight.getValue();
                 break;
             case XrEventTypeLeft.GRIP_LEFT:
-                handleInputDevice.gripLeft.getValue();
+                value = handleInputDevice.gripLeft.getValue();
                 break;
             case XrEventTypeRight.GRIP_RIGHT:
                 value = handleInputDevice.gripRight.getValue();
