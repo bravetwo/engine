@@ -200,14 +200,18 @@ void Camera::update(bool forceUpdate /*false*/, int xrEye /*-1*/) {
             if (xrEye < 0 || _cameraType == CameraType::DEFAULT) {
                 Mat4::createPerspective(_fov, _aspect, _nearClip, _farClip,
                                         _fovAxis == CameraFOVAxis::VERTICAL, _device->getCapabilities().clipSpaceMinZ, projectionSignY, static_cast<int>(orientation), &_matProj);
-            } else {
-                // xr flow
-                static IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
-                const auto &projFloat = xr->getXRViewProjectionData(xrEye, _nearClip, _farClip);
-                int i = 0;
-                for (auto value : projFloat) {
-                    _matProj.m[i] = value;
-                    i++;
+            } else if (xr) {
+                if (xr->getXRConfig(xr::XRConfigKey::SESSION_RUNNING).getBool()) {
+                    // xr flow
+                    const auto &projFloat = xr->getXRViewProjectionData(xrEye, _nearClip, _farClip);
+                    int i = 0;
+                    for (auto value : projFloat) {
+                        _matProj.m[i] = value;
+                        i++;
+                    }
+                } else {
+                    Mat4::createPerspective(_fov, _aspect, _nearClip, _farClip,
+                                            _fovAxis == CameraFOVAxis::VERTICAL, _device->getCapabilities().clipSpaceMinZ, projectionSignY, static_cast<int>(orientation), &_matProj);
                 }
             }
         } else {

@@ -148,19 +148,29 @@ void DeviceAgent::present() {
     if (!cc::gfx::Device::getInstance()->isRendererAvailable()) {
         return;
     }
-    ENQUEUE_MESSAGE_2(
-        _mainMessageQueue, DevicePresent,
-        actor, _actor,
-        frameBoundarySemaphore, &_frameBoundarySemaphore,
-        {
-            actor->present();
-            frameBoundarySemaphore->signal();
-        });
+    static IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
+    if (xr) {
+        ENQUEUE_MESSAGE_1(
+            _mainMessageQueue, DevicePresent,
+            actor, _actor,
+            {
+                actor->present();
+            });
+    } else {
+        ENQUEUE_MESSAGE_2(
+            _mainMessageQueue, DevicePresent,
+            actor, _actor,
+            frameBoundarySemaphore, &_frameBoundarySemaphore,
+            {
+                actor->present();
+                frameBoundarySemaphore->signal();
+            });
 
-    MessageQueue::freeChunksInFreeQueue(_mainMessageQueue);
-    _mainMessageQueue->finishWriting();
-    _currentIndex = (_currentIndex + 1) % MAX_FRAME_INDEX;
-    _frameBoundarySemaphore.wait();
+        MessageQueue::freeChunksInFreeQueue(_mainMessageQueue);
+        _mainMessageQueue->finishWriting();
+        _currentIndex = (_currentIndex + 1) % MAX_FRAME_INDEX;
+        _frameBoundarySemaphore.wait();
+    }
 }
 
 void DeviceAgent::setMultithreaded(bool multithreaded) {
@@ -412,6 +422,17 @@ void DeviceAgent::getQueryPoolResults(QueryPool *queryPool) {
     auto *queryPoolAgent = static_cast<QueryPoolAgent *>(queryPool);
     std::lock_guard<std::mutex> lock(actorQueryPoolAgent->_mutex);
     queryPoolAgent->_results = actorQueryPoolAgent->_results;
+}
+
+void DeviceAgent::presentSignal() {
+    _frameBoundarySemaphore.signal();
+}
+
+void DeviceAgent::presentWait() {
+    MessageQueue::freeChunksInFreeQueue(_mainMessageQueue);
+    _mainMessageQueue->finishWriting();
+    _currentIndex = (_currentIndex + 1) % MAX_FRAME_INDEX;
+    _frameBoundarySemaphore.wait();
 }
 
 } // namespace gfx

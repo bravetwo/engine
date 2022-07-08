@@ -220,14 +220,16 @@ Swapchain *Device::createSwapchain(const SwapchainInfo &info) {
     IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
     if (xr) {
         xr->createXRSwapchains();
-        auto &cocosXrSwapchains = xr->getXRSwapchains();
-        for (int i = 0; i < cocosXrSwapchains.size(); i++) {
+        int viewCount = xr->getXRConfig(xr::XRConfigKey::VIEW_COUNT).getInt();
+        int swapChainWidth = xr->getXRConfig(xr::XRConfigKey::SWAPCHAIN_WIDTH).getInt();
+        int swapChainHeight = xr->getXRConfig(xr::XRConfigKey::SWAPCHAIN_HEIGHT).getInt();
+        for (int i = 0; i < viewCount; i++) {
             Swapchain *res = createSwapchain();
             xr->updateXRSwapchainTypedID(i, res->getTypedID());
             SwapchainInfo swapchain_info;
             swapchain_info.copy(info);
-            swapchain_info.width = cocosXrSwapchains[i].width;
-            swapchain_info.height = cocosXrSwapchains[i].height;
+            swapchain_info.width = swapChainWidth;
+            swapchain_info.height = swapChainHeight;
             res->initialize(swapchain_info);
             _swapchains.push_back(res);
         }

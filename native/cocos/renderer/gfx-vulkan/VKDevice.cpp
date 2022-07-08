@@ -672,6 +672,8 @@ void CCVKDevice::acquire(Swapchain *const *swapchains, uint32_t count) {
 
 void CCVKDevice::present() {
     CC_PROFILE(CCVKDevicePresent);
+    static IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
+    bool isGFXDeviceNeedsPresent = xr ? xr->isGFXDeviceNeedsPresent(_api) : true;
     auto *queue = static_cast<CCVKQueue *>(_queue);
     _numDrawCalls = queue->_numDrawCalls;
     _numInstances = queue->_numInstances;
@@ -701,7 +703,7 @@ void CCVKDevice::present() {
         presentInfo.pSwapchains = vkSwapchains.data();
         presentInfo.pImageIndices = vkSwapchainIndices.data();
 
-        VkResult res = vkCCPresentFunc(queue->gpuQueue()->vkQueue, &presentInfo);
+        VkResult res = isGFXDeviceNeedsPresent ? VK_SUCCESS : vkCCPresentFunc(queue->gpuQueue()->vkQueue, &presentInfo);
         for (auto *gpuSwapchain : gpuSwapchains) {
             gpuSwapchain->lastPresentResult = res;
         }
@@ -718,6 +720,9 @@ void CCVKDevice::present() {
     gpuFencePool()->reset();
     gpuRecycleBin()->clear();
     gpuStagingBufferPool()->reset();
+    if (xr) {
+        xr->postGFXDevicePresent(_api);
+    }
 }
 
 CCVKGPUFencePool *CCVKDevice::gpuFencePool() { return _gpuFencePools[_gpuDevice->curBackBufferIndex]; }
