@@ -4,7 +4,6 @@ import { CameraComponent, Component } from "../../core";
 @ccclass('cc.CameraFollowing')
 @help('i18n:cc.CameraFollowing')
 @menu('XR/UX/CameraFollowing')
-@executeInEditMode
 export class CameraFollowing extends Component {
     @serializable
     private _camera: CameraComponent | null = null;
