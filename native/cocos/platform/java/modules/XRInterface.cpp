@@ -108,7 +108,7 @@ static void dispatchGamepadEventInternal(const xr::XRControllerEvent &xrControll
                     case xr::XRClick::Type::HOME:
                         CC_LOG_INFO("[XRInterface] exit when home click in rokid.");
                         xr::XrEntry::destroyInstance();
-                        JniHelper::callStaticVoidMethod("java/lang/System", "exit", 0);
+                        JniHelper::callObjectVoidMethod(static_cast<jobject>(static_cast<AndroidPlatform *>(BasePlatform::getPlatform())->getActivity()), "android/app/Activity", "finish");
                         break;
                     case xr::XRClick::Type::START:
                         controllerInfo->buttonInfos.emplace_back(ControllerInfo::ButtonInfo(StickKeyCode::START, xrClick->isPress));
