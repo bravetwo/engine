@@ -443,7 +443,7 @@ void XRInterface::onRenderDestroy() {
 void XRInterface::preGFXDeviceInitialize(gfx::API gfxApi) {
 #if USE_XR
     CC_LOG_INFO("[XR] preGFXDeviceInitialize.api.%d | Multi Thread.%d", gfxApi, gfx::DeviceAgent::getInstance() ? 1 : 0);
-    setXRConfig(xr::XRConfigKey::MUTILTHREAD_MODE, gfx::DeviceAgent::getInstance() ? true : false);
+    setXRConfig(xr::XRConfigKey::MULTITHREAD_MODE, gfx::DeviceAgent::getInstance() ? true : false);
     xr::XrEntry::getInstance()->setXRConfig(xr::XRConfigKey::RENDER_THREAD_ID, (int) gettid());
 
     if (gfxApi == gfx::API::GLES3 || gfxApi == gfx::API::VULKAN) {
