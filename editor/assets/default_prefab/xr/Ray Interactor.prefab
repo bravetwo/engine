@@ -80,7 +80,6 @@
     },
     "_trackingSource": 4,
     "_trackingType": 1,
-    "_ipdOffset": 0,
     "_id": ""
   },
   {
@@ -125,6 +124,7 @@
       "__id__": 7
     },
     "_texture": null,
+    "_material": null,
     "_worldSpace": false,
     "_positions": [
       {
