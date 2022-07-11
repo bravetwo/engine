@@ -35,6 +35,7 @@ import { Input, input } from '../../input';
 import { EventHandle, EventHMD } from '../../input/types';
 import { Quat, Vec3 } from '../../core/math';
 import { CameraComponent } from '../../core';
+import { TrackingType } from '../../core/renderer/scene';
 
 enum TrackingSource_Type {
     VIEW_POSE_ACTIVE_LEFT = 0,
@@ -59,7 +60,7 @@ enum UpdateType_Type {
 ccenum(TrackingSource_Type);
 ccenum(TrackingType_Type);
 ccenum(UpdateType_Type);
- 
+
 /**
  * @en
  *                      <br>
@@ -72,14 +73,14 @@ ccenum(UpdateType_Type);
 @executeInEditMode
 export class PoseTracker extends Component {
     @serializable
-    protected _trackingSource : TrackingSource_Type = TrackingSource_Type.HAND_POSE_ACTIVE_LEFT;
+    protected _trackingSource: TrackingSource_Type = TrackingSource_Type.HAND_POSE_ACTIVE_LEFT;
     @serializable
-    protected _trackingType : TrackingType_Type = TrackingType_Type.POSITION_AND_ROTATION;
+    protected _trackingType: TrackingType_Type = TrackingType_Type.POSITION_AND_ROTATION;
 
     @type(TrackingSource_Type)
     @displayOrder(1)
     @tooltip('i18n:xr.pose_tracker.trackingSource')
-    set trackingSource (val) {
+    set trackingSource(val) {
         if (val === this._trackingSource) {
             return;
         }
@@ -87,53 +88,74 @@ export class PoseTracker extends Component {
         if (this.trackingSource === TrackingSource_Type.VIEW_POSE_ACTIVE_LEFT ||
             this.trackingSource === TrackingSource_Type.VIEW_POSE_ACTIVE_RIGHT ||
             this.trackingSource === TrackingSource_Type.VIEW_POSE_ACTIVE_HMD) {
-            this.setCameraHMD(true);
+            this.setCameraTrackingType(this.trackingType);
         } else {
-            this.setCameraHMD(false);
+            this.setCameraNoTracking();
         }
     }
-    get trackingSource () {
+    get trackingSource() {
         return this._trackingSource;
     }
 
     @type(TrackingType_Type)
     @displayOrder(2)
     @tooltip('i18n:xr.pose_tracker.trackingType')
-    set trackingType (val) {
+    set trackingType(val) {
         if (val === this._trackingType) {
             return;
         }
         this._trackingType = val;
+        if (this.trackingSource === TrackingSource_Type.VIEW_POSE_ACTIVE_LEFT ||
+            this.trackingSource === TrackingSource_Type.VIEW_POSE_ACTIVE_RIGHT ||
+            this.trackingSource === TrackingSource_Type.VIEW_POSE_ACTIVE_HMD) {
+            this.setCameraTrackingType(this.trackingType);
+        } else {
+            this.setCameraNoTracking();
+        }
     }
-    get trackingType () {
+    get trackingType() {
         return this._trackingType;
     }
 
     private _quatPose: Quat = new Quat();
     private _positionPose: Vec3 = new Vec3();
 
-    setCameraHMD (isHMD: boolean) {
+    setCameraTrackingType(type: TrackingType_Type) {
         let cameraComponent = this.node?.getComponent(CameraComponent);
         if (cameraComponent) {
-            cameraComponent.isHMD = isHMD;
+            switch (type) {
+                case TrackingType_Type.POSITION_AND_ROTATION:
+                    cameraComponent.trackingType = TrackingType.POSITION_AND_ROTATION;
+                case TrackingType_Type.POSITION:
+                    cameraComponent.trackingType = TrackingType.POSITION;
+                case TrackingType_Type.ROTATION:
+                    cameraComponent.trackingType = TrackingType.ROTATION;
+            }
         }
     }
 
-    onEnable () {
+    setCameraNoTracking() {
+        let cameraComponent = this.node?.getComponent(CameraComponent);
+        if (cameraComponent) {
+            cameraComponent.trackingType = TrackingType.NO_TRACKING;
+        }
+    }
+
+    onEnable() {
         if (this.trackingSource === TrackingSource_Type.VIEW_POSE_ACTIVE_LEFT ||
             this.trackingSource === TrackingSource_Type.VIEW_POSE_ACTIVE_RIGHT ||
             this.trackingSource === TrackingSource_Type.VIEW_POSE_ACTIVE_HMD) {
-            this.setCameraHMD(true);
+            this.setCameraTrackingType(this.trackingType);
             input.on(Input.EventType.HMD_POSE_INPUT, this._dispatchEventHMDPose, this);
         } else if (this.trackingSource === TrackingSource_Type.HAND_POSE_ACTIVE_LEFT ||
             this.trackingSource === TrackingSource_Type.HAND_POSE_ACTIVE_RIGHT) {
-            this.setCameraHMD(false);
+            this.setCameraNoTracking();
             input.on(Input.EventType.HANDLE_POSE_INPUT, this._dispatchEventHandlePose, this);
         }
     }
 
     onDisable() {
-        this.setCameraHMD(false);
+        this.setCameraNoTracking();
         if (this.trackingSource === TrackingSource_Type.VIEW_POSE_ACTIVE_LEFT ||
             this.trackingSource === TrackingSource_Type.VIEW_POSE_ACTIVE_RIGHT ||
             this.trackingSource === TrackingSource_Type.VIEW_POSE_ACTIVE_HMD) {

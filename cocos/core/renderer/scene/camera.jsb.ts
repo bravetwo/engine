@@ -90,10 +90,17 @@ export enum CameraShutter {
 }
 
 export enum CameraType {
-    MAIN = 2,
+    DEFAULT = -1,
     LEFT_CAMERA = 0,
     RIGHT_CAMERA = 1,
-    DEFAULT = -1
+    MAIN = 2,
+}
+
+export enum TrackingType {
+    NO_TRACKING = 0,
+    POSITION_AND_ROTATION = 1,
+    POSITION = 2,
+    ROTATION = 3,
 }
 
 export interface ICameraInfo {
@@ -105,7 +112,7 @@ export interface ICameraInfo {
     priority: number;
     pipeline?: string;
     cameraType: CameraType;
-    isHMD: boolean;
+    trackingType: TrackingType;
 }
 
 export const SKYBOX_FLAG = ClearFlagBit.STENCIL << 1;

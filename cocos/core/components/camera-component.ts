@@ -32,7 +32,7 @@ import { Ray } from '../geometry';
 import { Color, Rect, toRadian, Vec3 } from '../math';
 import { CAMERA_DEFAULT_MASK } from '../pipeline/define';
 import { scene } from '../renderer';
-import { SKYBOX_FLAG, CameraProjection, CameraFOVAxis, CameraAperture, CameraISO, CameraShutter, CameraType } from '../renderer/scene/camera';
+import { SKYBOX_FLAG, CameraProjection, CameraFOVAxis, CameraAperture, CameraISO, CameraShutter, CameraType, TrackingType } from '../renderer/scene/camera';
 import { Root } from '../root';
 import { Node } from '../scene-graph/node';
 import { Layers } from '../scene-graph/layers';
@@ -158,7 +158,7 @@ export class Camera extends Component {
     @serializable
     protected _cameraType: CameraType = CameraType.DEFAULT;
     @serializable
-    protected _isHMD = false;
+    protected _trackingType: TrackingType = TrackingType.NO_TRACKING;
 
     /**
      * @en The render camera representation.
@@ -506,17 +506,17 @@ export class Camera extends Component {
         }
     }
 
-    get isHMD() {
-        return this._isHMD;
+    get trackingType() {
+        return this._trackingType;
     }
 
-    set isHMD(val) {
-        if (this._isHMD === val) {
+    set trackingType(val) {
+        if (this._trackingType === val) {
             return;
         }
-        this._isHMD = val;
+        this._trackingType = val;
         if (this.camera) {
-            this.camera.isHMD = val;
+            this.camera.trackingType = val;
         }
     }
 
@@ -638,7 +638,7 @@ export class Camera extends Component {
                     : legacyCC.director.root && legacyCC.director.root.tempWindow,
                 priority: this._priority,
                 cameraType: this.cameraType,
-                isHMD: this.isHMD,
+                trackingType: this.trackingType,
             });
 
             this._camera.setViewportInOrientedSpace(this._rect);
