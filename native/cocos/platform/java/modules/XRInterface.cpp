@@ -47,8 +47,8 @@
 #if USE_XR
     #include "Xr.h"
 #endif
-#include "base/threading/MessageQueue.h"
 #include "application/ApplicationManager.h"
+#include "base/threading/MessageQueue.h"
 #include "platform/java/jni/JniHelper.h"
 // print log
 const bool IS_ENABLE_XR_LOG = false;
@@ -107,7 +107,9 @@ static void dispatchGamepadEventInternal(const xr::XRControllerEvent &xrControll
                         break;
                     case xr::XRClick::Type::HOME:
                         CC_LOG_INFO("[XRInterface] exit when home click in rokid.");
+#if USE_XR
                         xr::XrEntry::destroyInstance();
+#endif
                         JniHelper::callObjectVoidMethod(static_cast<jobject>(static_cast<AndroidPlatform *>(BasePlatform::getPlatform())->getActivity()), "android/app/Activity", "finish");
                         break;
                     case xr::XRClick::Type::START:
@@ -391,12 +393,12 @@ void XRInterface::initialize(void *javaVM, void *activity) {
     _graphicsApiName = GraphicsApiOpenglES;
     #endif
 
-    CC_LOG_INFO("[XR] initialize vm.%p,aty.%p | %s | %d", javaVM, activity, _graphicsApiName.c_str(), (int) gettid());
+    CC_LOG_INFO("[XR] initialize vm.%p,aty.%p | %s | %d", javaVM, activity, _graphicsApiName.c_str(), (int)gettid());
     xr::XrEntry::getInstance()->initPlatformData(javaVM, activity);
     xr::XrEntry::getInstance()->setGamepadCallback(&dispatchGamepadEventInternal);
     xr::XrEntry::getInstance()->setHandleCallback(&dispatchHandleEventInternal);
     xr::XrEntry::getInstance()->setHMDCallback(&dispatchHMDEventInternal);
-    xr::XrEntry::getInstance()->setXRConfig(xr::XRConfigKey::LOGIC_THREAD_ID, (int) gettid());
+    xr::XrEntry::getInstance()->setXRConfig(xr::XRConfigKey::LOGIC_THREAD_ID, (int)gettid());
     #if XR_OEM_PICO
     xr::XrEntry::getInstance()->createXrInstance(_graphicsApiName.c_str());
     #endif
@@ -444,7 +446,7 @@ void XRInterface::preGFXDeviceInitialize(gfx::API gfxApi) {
 #if USE_XR
     CC_LOG_INFO("[XR] preGFXDeviceInitialize.api.%d | Multi Thread.%d", gfxApi, gfx::DeviceAgent::getInstance() ? 1 : 0);
     setXRConfig(xr::XRConfigKey::MULTITHREAD_MODE, gfx::DeviceAgent::getInstance() ? true : false);
-    xr::XrEntry::getInstance()->setXRConfig(xr::XRConfigKey::RENDER_THREAD_ID, (int) gettid());
+    xr::XrEntry::getInstance()->setXRConfig(xr::XRConfigKey::RENDER_THREAD_ID, (int)gettid());
 
     if (gfxApi == gfx::API::GLES3 || gfxApi == gfx::API::VULKAN) {
     #if !XR_OEM_PICO
@@ -508,12 +510,12 @@ void XRInterface::postGFXDevicePresent(gfx::API gfxApi) {
 void XRInterface::createXRSwapchains() {
 #if USE_XR
     CC_LOG_INFO("[XR] createXRSwapchains");
-    if(gfx::DeviceAgent::getInstance()) {
+    if (gfx::DeviceAgent::getInstance()) {
         ENQUEUE_MESSAGE_0(gfx::DeviceAgent::getInstance()->getMessageQueue(),
                           CreateXRSwapchains,
                           {
                               CC_LOG_INFO("[XR] [RT] initXrSwapchains");
-                              xr::XrEntry::getInstance()->setXRConfig(xr::XRConfigKey::RENDER_THREAD_ID, (int) gettid());
+                              xr::XrEntry::getInstance()->setXRConfig(xr::XRConfigKey::RENDER_THREAD_ID, (int)gettid());
                               JniHelper::getEnv();
                               xr::XrEntry::getInstance()->initXrSwapchains();
                           });
@@ -538,7 +540,7 @@ gfx::Format XRInterface::getXRSwapchainFormat() {
 
 void XRInterface::updateXRSwapchainTypedID(uint32_t index, uint32_t typedID) {
 #if USE_XR
-    if(gfx::DeviceAgent::getInstance()) {
+    if (gfx::DeviceAgent::getInstance()) {
         ENQUEUE_MESSAGE_2(gfx::DeviceAgent::getInstance()->getMessageQueue(),
                           UpdateXRSwapchainTypedID, index, index, typedID, typedID,
                           {
@@ -549,7 +551,7 @@ void XRInterface::updateXRSwapchainTypedID(uint32_t index, uint32_t typedID) {
         auto &cocosXrSwapchain = xr::XrEntry::getInstance()->getCocosXrSwapchains().at(index);
         cocosXrSwapchain.ccSwapchainTypedID = typedID;
     }
-#if XR_OEM_HUAWEIVR
+    #if XR_OEM_HUAWEIVR
     _eglSurfaceTypeMap[typedID] = index == 0 ? EGLSurfaceType::WINDOW : EGLSurfaceType::NONE;
     #else
     _eglSurfaceTypeMap[typedID] = EGLSurfaceType::PBUFFER;
@@ -643,20 +645,20 @@ bool XRInterface::platformLoopStart() {
 
 bool XRInterface::beginRenderFrame() {
 #if USE_XR
-    if(IS_ENABLE_XR_LOG) CC_LOG_INFO("[XR] beginRenderFrame.%d", _committedFrame);
+    if (IS_ENABLE_XR_LOG) CC_LOG_INFO("[XR] beginRenderFrame.%d", _committedFrame);
     if (gfx::DeviceAgent::getInstance()) {
         static uint64_t frameId = 0;
         frameId++;
-        if(_committedFrame) {
+        if (_committedFrame) {
             gfx::DeviceAgent::getInstance()->presentWait();
             _committedFrame = false;
         }
-        if(IS_ENABLE_XR_LOG) CC_LOG_INFO("[XR] beginRenderFrame waitFrame.%lld", frameId);
+        if (IS_ENABLE_XR_LOG) CC_LOG_INFO("[XR] beginRenderFrame waitFrame.%lld", frameId);
         xr::XrEntry::getInstance()->waitFrame();
         ENQUEUE_MESSAGE_1(gfx::DeviceAgent::getInstance()->getMessageQueue(),
                           BeginRenderFrame, frameId, frameId,
                           {
-                              if(IS_ENABLE_XR_LOG) CC_LOG_INFO("[XR] [RT] beginRenderFrame.%lld", frameId);
+                              if (IS_ENABLE_XR_LOG) CC_LOG_INFO("[XR] [RT] beginRenderFrame.%lld", frameId);
                               xr::XrEntry::getInstance()->frameStart();
                           });
         return true;
@@ -678,12 +680,12 @@ bool XRInterface::isRenderAllowable() {
 
 bool XRInterface::beginRenderEyeFrame(uint32_t eye) {
 #if USE_XR
-    if(IS_ENABLE_XR_LOG) CC_LOG_INFO("[XR] beginRenderEyeFrame %d", eye);
+    if (IS_ENABLE_XR_LOG) CC_LOG_INFO("[XR] beginRenderEyeFrame %d", eye);
     if (gfx::DeviceAgent::getInstance()) {
         ENQUEUE_MESSAGE_1(gfx::DeviceAgent::getInstance()->getMessageQueue(),
                           BeginRenderEyeFrame, eye, eye,
                           {
-                              if(IS_ENABLE_XR_LOG) CC_LOG_INFO("[XR] [RT] beginRenderEyeFrame %d", eye);
+                              if (IS_ENABLE_XR_LOG) CC_LOG_INFO("[XR] [RT] beginRenderEyeFrame %d", eye);
                               xr::XrEntry::getInstance()->renderLoopStart(eye);
                           });
     } else {
@@ -695,12 +697,12 @@ bool XRInterface::beginRenderEyeFrame(uint32_t eye) {
 
 bool XRInterface::endRenderEyeFrame(uint32_t eye) {
 #if USE_XR
-    if(IS_ENABLE_XR_LOG) CC_LOG_INFO("[XR] endRenderEyeFrame %d", eye);
+    if (IS_ENABLE_XR_LOG) CC_LOG_INFO("[XR] endRenderEyeFrame %d", eye);
     if (gfx::DeviceAgent::getInstance()) {
         ENQUEUE_MESSAGE_1(gfx::DeviceAgent::getInstance()->getMessageQueue(),
                           EndRenderEyeFrame, eye, eye,
                           {
-                              if(IS_ENABLE_XR_LOG) CC_LOG_INFO("[XR] [RT] endRenderEyeFrame %d", eye);
+                              if (IS_ENABLE_XR_LOG) CC_LOG_INFO("[XR] [RT] endRenderEyeFrame %d", eye);
                               xr::XrEntry::getInstance()->renderLoopEnd(eye);
                           });
     } else {
@@ -712,8 +714,8 @@ bool XRInterface::endRenderEyeFrame(uint32_t eye) {
 
 bool XRInterface::endRenderFrame() {
 #if USE_XR
-    if(IS_ENABLE_XR_LOG) CC_LOG_INFO("[XR] endRenderFrame.%d",
-               cc::ApplicationManager::getInstance()->getCurrentAppSafe()->getEngine()->getTotalFrames());
+    if (IS_ENABLE_XR_LOG) CC_LOG_INFO("[XR] endRenderFrame.%d",
+                                      cc::ApplicationManager::getInstance()->getCurrentAppSafe()->getEngine()->getTotalFrames());
 
     if (gfx::DeviceAgent::getInstance()) {
         ENQUEUE_MESSAGE_0(gfx::DeviceAgent::getInstance()->getMessageQueue(),
@@ -721,11 +723,11 @@ bool XRInterface::endRenderFrame() {
                           {
                               xr::XrEntry::getInstance()->frameEnd();
                               gfx::DeviceAgent::getInstance()->presentSignal();
-                              if(IS_ENABLE_XR_LOG) CC_LOG_INFO("[XR] [RT] presentSignal endRenderFrame.%d",
-                                         cc::ApplicationManager::getInstance()->getCurrentAppSafe()->getEngine()->getTotalFrames());
+                              if (IS_ENABLE_XR_LOG) CC_LOG_INFO("[XR] [RT] presentSignal endRenderFrame.%d",
+                                                                cc::ApplicationManager::getInstance()->getCurrentAppSafe()->getEngine()->getTotalFrames());
                           });
         _committedFrame = true;
-        //CC_LOG_INFO("[XR] endRenderFrame pass presentWait errno %d", errno);
+        // CC_LOG_INFO("[XR] endRenderFrame pass presentWait errno %d", errno);
     } else {
         xr::XrEntry::getInstance()->frameEnd();
     }
