@@ -260,8 +260,8 @@
     "_screenScale": 1,
     "_visibility": 1822425087,
     "_targetTexture": null,
-    "_cameraType": -1,
-    "_isHMD": false,
+    "_cameraType": 2,
+    "_trackingType": 0,
     "_id": ""
   },
   {
@@ -385,8 +385,8 @@
     "_screenScale": 1,
     "_visibility": 1822425087,
     "_targetTexture": null,
-    "_cameraType": -1,
-    "_isHMD": false,
+    "_cameraType": 2,
+    "_trackingType": 0,
     "_id": ""
   },
   {
@@ -462,8 +462,8 @@
     "_screenScale": 1,
     "_visibility": 1822425087,
     "_targetTexture": null,
-    "_cameraType": -1,
-    "_isHMD": true,
+    "_cameraType": 2,
+    "_trackingType": 3,
     "_id": ""
   },
   {
@@ -502,7 +502,7 @@
     "__prefab": {
       "__id__": 21
     },
-    "_stereoRendering": 0,
+    "_stereoRendering": 1,
     "_perEyeCamera": false,
     "_sync": false,
     "_foveationRendering": 0,
@@ -514,6 +514,7 @@
       "x": 1,
       "y": 1
     },
+    "_realIPDOffset": 0,
     "_id": ""
   },
   {
@@ -534,7 +535,7 @@
     "_layer": 0,
     "_streamSource": null,
     "_targetCamera": null,
-    "_perEyeCamera": 0,
+    "_gateFit": 0,
     "_scaling": 1,
     "_id": ""
   },
@@ -555,8 +556,6 @@
     },
     "_trackingSource": 2,
     "_trackingType": 1,
-    "_additionalXRotation": 0,
-    "_ipdOffset": 0,
     "_id": ""
   },
   {
