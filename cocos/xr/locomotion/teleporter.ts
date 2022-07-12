@@ -42,7 +42,6 @@ import { LocomotionChecker } from './locomotion-checker';
 @ccclass('cc.Teleporter')
 @help('i18n:cc.Teleporter')
 @menu('XR/Locomotion/Teleporter')
-@executeInEditMode
 export class Teleporter extends Component {
     @serializable
     protected _checker: LocomotionChecker | null = null;

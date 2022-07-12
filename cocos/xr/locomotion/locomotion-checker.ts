@@ -42,7 +42,6 @@ import { TrackingOrigin } from '../device/tracking-origin';
 @ccclass('cc.LocomotionChecker')
 @help('i18n:cc.LocomotionChecker')
 @menu('XR/Locomotion/LocomotionChecker')
-@executeInEditMode
 export class LocomotionChecker extends Component {
     @serializable
     protected _timeout = 10;

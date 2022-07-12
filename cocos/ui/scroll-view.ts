@@ -28,7 +28,7 @@ import { ccclass, help, executionOrder, menu, requireComponent, tooltip, display
 import { EDITOR } from 'internal:constants';
 import { EventHandler as ComponentEventHandler } from '../core/components/component-event-handler';
 import { UITransform } from '../2d/framework';
-import { Event, EventMouse, EventTouch, Touch, SystemEventType, EventHandle } from '../input/types';
+import { Event, EventMouse, EventTouch, Touch, SystemEventType, EventHandle, EventGamepad } from '../input/types';
 import { logID } from '../core/platform/debug';
 import { Size, Vec2, Vec3 } from '../core/math';
 import { Layout } from './layout';
@@ -1015,6 +1015,7 @@ export class ScrollView extends ViewGroup {
         this.node.on(XrUIPressEventType.XRUI_HOVER_EXITED, this._xrHoverExit, this);
 
         input.on(Input.EventType.HANDLE_INPUT, this._dispatchEventHandleInput, this);
+        input.on(Input.EventType.GAMEPAD_INPUT, this._dispatchEventHandleInput, this);
     }
 
     protected _unregisterEvent () {
@@ -1027,6 +1028,7 @@ export class ScrollView extends ViewGroup {
         this.node.off(XrUIPressEventType.XRUI_HOVER_ENTERED, this._xrHoverEnter, this);
         this.node.off(XrUIPressEventType.XRUI_HOVER_EXITED, this._xrHoverExit, this);
         input.off(Input.EventType.HANDLE_INPUT, this._dispatchEventHandleInput, this);
+        input.off(Input.EventType.GAMEPAD_INPUT, this._dispatchEventHandleInput, this);
     }
 
     protected _onMouseWheel (event: EventMouse, captureListeners?: Node[]) {
@@ -1847,8 +1849,13 @@ export class ScrollView extends ViewGroup {
         this._dispatchEvent(EventType.SCROLL_ENDED);
     }
 
-    private _dispatchEventHandleInput(event: EventHandle) {
-        const handleInputDevice = event.handleInputDevice;
+    private _dispatchEventHandleInput(event: EventHandle | EventGamepad) {
+        let handleInputDevice;
+        if (event instanceof EventGamepad) {
+            handleInputDevice = event.gamepad;
+        } else if (event instanceof EventHandle) {
+            handleInputDevice = event.handleInputDevice;
+        }
         var value;
         if (!this.enabledInHierarchy) {
             return;

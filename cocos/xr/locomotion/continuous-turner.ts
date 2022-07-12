@@ -36,6 +36,7 @@ import { input, Input } from '../../input/input';
 import { EventHandle } from '../../input/types/event/event-handle';
 import { degreesToRadians } from '../../core/utils/misc';
 import { InputControl_Type, LocomotionBase } from './locomotion-base';
+import { EventGamepad } from '../../input/types/event/event-gamepad';
 
 enum TurnDir {
     OFF = 0,
@@ -50,7 +51,6 @@ enum TurnDir {
 @ccclass('cc.ContinuousTurner')
 @help('i18n:cc.ContinuousTurner')
 @menu('XR/Locomotion/ContinuousTurner')
-@executeInEditMode
 export class ContinuousTurner extends LocomotionBase {
     @serializable
     protected _turnSpeed = 60;
@@ -74,14 +74,21 @@ export class ContinuousTurner extends LocomotionBase {
     onEnable() {
         this._findChecker();
         input.on(Input.EventType.HANDLE_INPUT, this._dispatchEventHandleInput, this);
+        input.on(Input.EventType.GAMEPAD_INPUT, this._dispatchEventHandleInput, this);
     }
 
     onDisable() {
         input.off(Input.EventType.HANDLE_INPUT, this._dispatchEventHandleInput, this);
+        input.off(Input.EventType.GAMEPAD_INPUT, this._dispatchEventHandleInput, this);
     }
 
-    private _dispatchEventHandleInput(event: EventHandle) {
-        const handleInputDevice = event.handleInputDevice;
+    private _dispatchEventHandleInput(event: EventHandle | EventGamepad) {
+        let handleInputDevice;
+        if (event instanceof EventGamepad) {
+            handleInputDevice = event.gamepad;
+        } else if (event instanceof EventHandle) {
+            handleInputDevice = event.handleInputDevice;
+        }
         var value;
         if (this._inputControl === InputControl_Type.PRIMARY_2D_AXIS) {
             if (this.inputDevice?.inputDevice == XrInputDeviceType.Left_Hand) {

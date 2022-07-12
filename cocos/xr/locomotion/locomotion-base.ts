@@ -44,7 +44,6 @@
   * @en The base class of Locomotion related behaviors
   * @zh Locomotion相关行为的基类
   */
- @executeInEditMode
  export class LocomotionBase extends Component {
      @serializable
      protected _checker: LocomotionChecker | null = null;

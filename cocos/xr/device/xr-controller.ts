@@ -33,9 +33,11 @@ import { Component } from '../../core/components';
 import { DeviceType, XrControlEventType, XrEventHandle } from '../event/xr-event-handle';
 import { Node } from '../../core/scene-graph/node';
 import { Input, input } from '../../input';
-import { EventHandle } from '../../input/types';
+import { EventGamepad, EventHandle } from '../../input/types';
 import { XrInteractor } from '../interaction/xr-interactor';
 import { ccenum } from '../../core';
+import { HandleInputDevice } from '../../../pal/input/native/handle-input';
+import { GamepadInputDevice } from '../../../pal/input/native/gamepad-input';
 
 export enum XrEventTypeLeft {
     BUTTON_X = 0,
@@ -267,6 +269,7 @@ export class XRController extends Component {
 
     public onEnable() {
         input.on(Input.EventType.HANDLE_INPUT, this._dispatchEventHandleInput, this);
+        input.on(Input.EventType.GAMEPAD_INPUT, this._dispatchEventHandleInput, this);
 
         this._xrInteractor = this.getComponent(XrInteractor);
         if (this._inputDevice == XrInputDeviceType.Left_Hand) {
@@ -282,22 +285,37 @@ export class XRController extends Component {
 
     public onDisable() {
         input.off(Input.EventType.HANDLE_INPUT, this._dispatchEventHandleInput, this);
+        input.off(Input.EventType.GAMEPAD_INPUT, this._dispatchEventHandleInput, this);
     }
 
-    private _dispatchEventHandleInput(event: EventHandle) {
-        if (this._inputDevice == XrInputDeviceType.Left_Hand) {
-            this._handleInputEvent(InteractorEventType.Select, this.selectActionLeft, event);
-            this._handleInputEvent(InteractorEventType.Activate, this.activateActionLeft, event);
-            this._handleInputEvent(InteractorEventType.UIPress, this.UIPressActionLeft, event);
-        } else if (this._inputDevice == XrInputDeviceType.Right_Hand) {
-            this._handleInputEvent(InteractorEventType.Select, this.selectActionRight, event);
-            this._handleInputEvent(InteractorEventType.Activate, this.activateActionRight, event);
-            this._handleInputEvent(InteractorEventType.UIPress, this.UIPressActionRight, event);
+    private _dispatchEventHandleInput(event: EventHandle | EventGamepad) {
+        let handleInputDevice;
+        if (event instanceof EventGamepad) {
+            handleInputDevice = event.gamepad;
+            if (this._inputDevice == XrInputDeviceType.Left_Hand) {
+                this._handleEventGamepad(InteractorEventType.Select, this.selectActionLeft, handleInputDevice);
+                this._handleEventGamepad(InteractorEventType.Activate, this.activateActionLeft, handleInputDevice);
+                this._handleEventGamepad(InteractorEventType.UIPress, this.UIPressActionLeft, handleInputDevice);
+            } else if (this._inputDevice == XrInputDeviceType.Right_Hand) {
+                this._handleEventGamepad(InteractorEventType.Select, this.selectActionRight, handleInputDevice);
+                this._handleEventGamepad(InteractorEventType.Activate, this.activateActionRight, handleInputDevice);
+                this._handleEventGamepad(InteractorEventType.UIPress, this.UIPressActionRight, handleInputDevice);
+            }
+        } else if (event instanceof EventHandle) {
+            handleInputDevice = event.handleInputDevice;
+            if (this._inputDevice == XrInputDeviceType.Left_Hand) {
+                this._handleEventHandle(InteractorEventType.Select, this.selectActionLeft, handleInputDevice);
+                this._handleEventHandle(InteractorEventType.Activate, this.activateActionLeft, handleInputDevice);
+                this._handleEventHandle(InteractorEventType.UIPress, this.UIPressActionLeft, handleInputDevice);
+            } else if (this._inputDevice == XrInputDeviceType.Right_Hand) {
+                this._handleEventHandle(InteractorEventType.Select, this.selectActionRight, handleInputDevice);
+                this._handleEventHandle(InteractorEventType.Activate, this.activateActionRight, handleInputDevice);
+                this._handleEventHandle(InteractorEventType.UIPress, this.UIPressActionRight, handleInputDevice);
+            }
         }
     }
 
-    private _handleInputEvent(type: InteractorEventType, eventType: XrEventTypeLeft | XrEventTypeRight, event: EventHandle) {
-        const handleInputDevice = event.handleInputDevice;
+    private _handleEventHandle(type: InteractorEventType, eventType: XrEventTypeLeft | XrEventTypeRight, handleInputDevice: HandleInputDevice) {
         var value = 0;
         switch (eventType) {
             case XrEventTypeRight.BUTTON_A:
@@ -333,6 +351,43 @@ export class XRController extends Component {
             default:
                 break;
         }
+        this._handleEvent(type, eventType, value);
+    }
+
+    private _handleEventGamepad(type: InteractorEventType, eventType: XrEventTypeLeft | XrEventTypeRight, gamepad: GamepadInputDevice) {
+        var value = 0;
+        switch (eventType) {
+            case XrEventTypeRight.BUTTON_A:
+                value = gamepad.buttonSouth.getValue();
+                break;
+            case XrEventTypeRight.BUTTON_B:
+                value = gamepad.buttonEast.getValue();
+                break;
+            case XrEventTypeLeft.BUTTON_X:
+                value = gamepad.buttonWest.getValue();
+                break;
+            case XrEventTypeLeft.BUTTON_Y:
+                value = gamepad.buttonNorth.getValue();
+                break;
+            case XrEventTypeLeft.TRIGGER_LEFT:
+                value = gamepad.buttonL3.getValue();
+                break;
+            case XrEventTypeRight.TRIGGER_RIGHT:
+                value = gamepad.buttonR3.getValue();
+                break;
+            case XrEventTypeLeft.THUMBSTICK_LEFT:
+                value = gamepad.buttonLeftStick.getValue();
+                break;
+            case XrEventTypeRight.THUMBSTICK_RIGHT:
+                value = gamepad.buttonRightStick.getValue();
+                break;
+            default:
+                break;
+        }
+        this._handleEvent(type, eventType, value);
+    }
+
+    private _handleEvent(type: InteractorEventType, eventType: XrEventTypeLeft | XrEventTypeRight, value: number) {
         switch (type) {
             case InteractorEventType.Select:
                 if (value) {

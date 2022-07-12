@@ -35,6 +35,8 @@ import { XrInputDeviceType } from '../device/xr-controller';
 import { input, Input } from '../../input/input';
 import { EventHandle } from '../../input/types/event/event-handle';
 import { InputControl_Type, LocomotionBase } from './locomotion-base';
+import { EventGamepad } from '../../input/types/event/event-gamepad';
+import { InputEventType } from '../../input/types/event-enum';
 
 /**
  * @en 连续移动控制 
@@ -43,7 +45,6 @@ import { InputControl_Type, LocomotionBase } from './locomotion-base';
 @ccclass('cc.ContinuousMover')
 @help('i18n:cc.ContinuousMover')
 @menu('XR/Locomotion/ContinuousMover')
-@executeInEditMode
 export class ContinuousMover extends LocomotionBase {
     @serializable
     protected _moveSpeed = 1;
@@ -82,14 +83,21 @@ export class ContinuousMover extends LocomotionBase {
     onEnable() {
         this._findChecker();
         input.on(Input.EventType.HANDLE_INPUT, this._dispatchEventHandleInput, this);
+        input.on(Input.EventType.GAMEPAD_INPUT, this._dispatchEventHandleInput, this);
     }
 
     onDisable() {
         input.off(Input.EventType.HANDLE_INPUT, this._dispatchEventHandleInput, this);
+        input.off(Input.EventType.GAMEPAD_INPUT, this._dispatchEventHandleInput, this);
     }
 
-    private _dispatchEventHandleInput(event: EventHandle) {
-        const handleInputDevice = event.handleInputDevice;
+    private _dispatchEventHandleInput(event: EventHandle | EventGamepad) {
+        let handleInputDevice;
+        if (event instanceof EventGamepad) {
+            handleInputDevice = event.gamepad;
+        } else if (event instanceof EventHandle) {
+            handleInputDevice = event.handleInputDevice;
+        }
         var value;
         if (this._inputControl === InputControl_Type.PRIMARY_2D_AXIS) {
             if (this.inputDevice?.inputDevice == XrInputDeviceType.Left_Hand) {

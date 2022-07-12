@@ -56,7 +56,7 @@ export class XrKey extends Component {
 
     @type(SpriteFrame)
     @displayOrder(3)
-    @tooltip('i18n:xr.xr_key.spriteFrameOn')
+    @tooltip('i18n:xr.xr_key.spriteFrameOff')
     set spriteFrameOff(val) {
         if (val === this._spriteFrameOff) {
             return;
