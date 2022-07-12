@@ -75,6 +75,7 @@ export class XrInteractable extends IXrInteractable {
         }
 
         this._colliderCom.on(XrControlEventType.HOVER_ENTERED, this._setRayReticle, this);
+        this._colliderCom.on(XrControlEventType.HOVER_STAY, this._setRayReticle, this);
         this._colliderCom.on(XrControlEventType.HOVER_EXITED, this._unsetRayReticle, this);
     }
 
@@ -84,6 +85,7 @@ export class XrInteractable extends IXrInteractable {
         }
         
         this._colliderCom.off(XrControlEventType.HOVER_ENTERED, this._setRayReticle, this);
+        this._colliderCom.off(XrControlEventType.HOVER_STAY, this._setRayReticle, this);
         this._colliderCom.off(XrControlEventType.HOVER_EXITED, this._unsetRayReticle, this);
     }
 
@@ -91,7 +93,7 @@ export class XrInteractable extends IXrInteractable {
         
     }
 
-    protected _unsetRayReticle(event: XrEventHandle) {
+    protected _unsetRayReticle() {
         if (this._rayReticle) {
             this._rayReticle.active = false;
         }
