@@ -530,7 +530,7 @@ export class RayInteractor extends XrInteractor {
 
     public uiPressExit() {
         if (this._pressState) {
-            this._collider?.emit(XrControlEventType.UIPRESS_EXITED, this);
+            this._collider?.emit(XrControlEventType.UIPRESS_EXITED, this._event);
             this._collider = null;
             this._pressState = false;
         }

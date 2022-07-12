@@ -44,9 +44,6 @@ import { NodeEventType } from '../../core/scene-graph/node-event';
 import { XrUIPressEventType } from '../../xr/event/xr-event-handle';
 import { xrKeyboardInput, XRKeyboardInputField } from '../../xr';
 import { InputEventType } from '../../input/types/event-enum';
-import { TextureBase } from '../../core/assets/texture-base';
-import { Layers, Texture2D } from '../../core';
-import { Layer } from '../../core/animation/marionette/animation-graph';
 
 const LEFT_PADDING = 2;
 
@@ -410,12 +407,36 @@ export class EditBox extends Component {
         }
         if (sys.isXR) {
             this._xrKeyBoardInputField = this.node.getComponent(XRKeyboardInputField);
+            if (this._xrKeyBoardInputField) {
+                if (this._textLabel && this._textLabel.node.active) {
+                    this._xrKeyBoardInputField.fontSize = this._textLabel.fontSize;
+                    this._xrKeyBoardInputField.spacingX = this._textLabel.spacingX;
+                    this._xrKeyBoardInputField.label = this._textLabel;
+                    const uiTransform = this.node._uiProps.uiTransformComp;
+                    if (uiTransform) {
+                        this._xrKeyBoardInputField.labelLength = uiTransform.width + this.node.scale.x * this._textLabel.node.position.x;
+                    }
+                }
+                if (this._placeholderLabel && this._placeholderLabel.node.active) {
+                    this._xrKeyBoardInputField.fontSize = this._placeholderLabel.fontSize;
+                    this._xrKeyBoardInputField.spacingX = this._placeholderLabel.spacingX;
+                    this._xrKeyBoardInputField.label = this._placeholderLabel;
+                    const uiTransform = this.node._uiProps.uiTransformComp;
+                    if (uiTransform) {
+                        this._xrKeyBoardInputField.labelLength = uiTransform.width + this.node.scale.x * this._placeholderLabel.node.position.x;
+                    }
+                }
+            }
         }
     }
 
     public update () {
         if (this._impl) {
             this._impl.update();
+        }
+
+        if (sys.isXR && this._xrKeyBoardInputField) {
+            this._xrKeyBoardInputField.string = this._string;
         }
     }
 
@@ -775,8 +796,8 @@ export class EditBox extends Component {
         this._syncSize();
     }
 
-    protected _xrUnClick() {
-        if (this._xrKeyBoardInputField?.show()) {
+    protected _xrUnClick(point: Vec3) {
+        if (this._xrKeyBoardInputField?.show(point)) {
             xrKeyboardInput.on(InputEventType.KEY_UP, this._xrKeyBoardUp, this);
             xrKeyboardInput.emit(InputEventType.XR_KEYBOARD_INIT);
             this._capsLock = false;
@@ -789,13 +810,17 @@ export class EditBox extends Component {
             xrKeyboardInput.off(InputEventType.KEY_UP, this._xrKeyBoardUp, this);
         } else if (event.keyCode === KeyCode.BACKSPACE) {
             this.string = this.string.substring(0, this.string.length - 1);
+            this._xrKeyBoardInputField?.updateStringWidth(this.string, true);
         } else if (event.keyCode === KeyCode.CAPS_LOCK) {
             this._capsLock = !this._capsLock;
         } else {
-            if (!this._capsLock && event.keyCode > 64 && event.keyCode < 91) {
-                this.string += String.fromCharCode(event.keyCode + 32);
-            } else {
-                this.string += String.fromCharCode(event.keyCode);
+            if (this.string.length < this.maxLength) {
+                if (!this._capsLock && event.keyCode > 64 && event.keyCode < 91) {
+                    this.string += String.fromCharCode(event.keyCode + 32);
+                } else {
+                    this.string += String.fromCharCode(event.keyCode);
+                }
+                this._xrKeyBoardInputField?.updateStringWidth(this.string, false);
             }
         }
     }

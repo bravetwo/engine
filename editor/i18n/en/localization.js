@@ -1132,6 +1132,30 @@ module.exports = {
         },
         teleporter: {
             checker: 'Select to specify a Locomotion Checker, or if the user does not specify it, the default binding traverses the current sence and obtains the first Locomotion Checker'
+        },
+        camera_following: {
+            camera: ''
+        },
+        raycast_checker: {
+            ignoreReversedUI: ''
+        },
+        xr_key: {
+            key: '',
+            spriteFrameOn: '',
+            spriteFrameOff: '',
+            capitalSpriteFrameOn: '',
+            capitalSpriteFrameOff: ''
+        },
+        xr_keyboard_input_field: {
+            suspendTransform: '',
+            xRKeyboard: ''
+        },
+        xr_keyboard: {
+            showCaret: '',
+            disableUIInteractionWhenTyping: '',
+            onCommitText: '',
+            onShowKeyboard: '',
+            onHideKeyboard: ''
         }
     },
 };

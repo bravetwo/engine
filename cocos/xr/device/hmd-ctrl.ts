@@ -34,7 +34,7 @@ import { Component } from '../../core/components/component';
 import { Vec2 } from '../../core/math';
 import { CameraComponent } from '../../core/components';
 import { TargetEye, TargetEye_Type } from './target-eye';
-import { sys } from '../../core';
+import { CCBoolean, sys } from '../../core';
 
 enum StereoRendering_Type {
     SINGLE_PASS = 0,
@@ -118,7 +118,7 @@ export class HMDCtrl extends Component {
         return this._stereoRendering;
     }
 
-    @type(Boolean)
+    @type(CCBoolean)
     @displayOrder(2)
     @tooltip('i18n:xr.hmd_ctrl.perEyeCamera')
     set perEyeCamera(val) {

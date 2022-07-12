@@ -92,7 +92,7 @@ export class RaycastChecker extends Component {
         this.node.emit(XrUIPressEventType.XRUI_CLICK, this._event);
     }
 
-    private _uiPressExit() {
-        this.node.emit(XrUIPressEventType.XRUI_UNCLICK, this);
+    private _uiPressExit(event: XrEventHandle) {
+        this.node.emit(XrUIPressEventType.XRUI_UNCLICK, event.hitPoint);
     }
 }
