@@ -145,9 +145,6 @@ void DeviceAgent::acquire(Swapchain *const *swapchains, uint32_t count) {
 }
 
 void DeviceAgent::present() {
-    if (!cc::gfx::Device::getInstance()->isRendererAvailable()) {
-        return;
-    }
     static IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
     if (xr) {
         ENQUEUE_MESSAGE_1(

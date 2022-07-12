@@ -43,13 +43,13 @@ import { RenderWindow } from './renderer/core/render-window';
 const v2_0 = new Vec2();
 type SplashEffectType = 'NONE' | 'FADE-INOUT';
 interface ISplashSetting {
-    readonly enabled: boolean;
-    readonly totalTime: number;
-    readonly base64src: string;
-    readonly effect: SplashEffectType;
-    readonly clearColor: Color;
-    readonly displayRatio: number;
-    readonly displayWatermark: boolean;
+    enabled: boolean;
+    totalTime: number;
+    base64src: string;
+    effect: SplashEffectType;
+    clearColor: Color;
+    displayRatio: number;
+    displayWatermark: boolean;
 }
 
 type Writable<T> = { -readonly [K in keyof T]: T[K] };
@@ -57,7 +57,6 @@ type Writable<T> = { -readonly [K in keyof T]: T[K] };
 export class SplashScreen {
     private settings!: ISplashSetting;
     private _curTime = 0;
-    private _isFinished = false;
 
     private device!: Device;
     private swapchain!: Swapchain;
@@ -81,7 +80,15 @@ export class SplashScreen {
     private watermarkTexture!: Texture;
 
     public get isFinished () {
-        return this._isFinished;
+        return this._curTime >= this.settings.totalTime;
+    }
+
+    set curTime (val) {
+        this._curTime = val;
+    }
+
+    get curTime () {
+        return this._curTime;
     }
 
     public init (): Promise<void> | undefined {
@@ -97,8 +104,7 @@ export class SplashScreen {
         this._curTime = 0;
 
         if (EDITOR || (PREVIEW && !NATIVE) || !this.settings.enabled || this.settings.base64src === '' || this.settings.totalTime <= 0) {
-            (this.settings as any) = null;
-            this._isFinished = true;
+            this.settings.totalTime = 0;
         } else {
             this.device = legacyCC.director.root!.device;
             this.swapchain = legacyCC.director.root!.mainWindow!.swapchain;
@@ -211,9 +217,6 @@ export class SplashScreen {
             this.watermarkMat.passes[0].update();
         }
         this.frame();
-        if (this._curTime > settings.totalTime) {
-            this._isFinished = true;
-        }
     }
 
     private initLogo () {

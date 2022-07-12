@@ -193,9 +193,6 @@ export class Input {
      * @param target - The event listener's target and callee
      */
     public on<K extends keyof InputEventMap> (eventType: K, callback: InputEventMap[K], target?: any) {
-        if (EDITOR && !legacyCC.GAME_VIEW) {
-            return callback;
-        }
         this._eventTarget.on(eventType, callback, target);
         return callback;
     }
@@ -211,9 +208,6 @@ export class Input {
      * @param target - The event listener's target and callee
      */
     public once<K extends keyof InputEventMap> (eventType: K, callback: InputEventMap[K], target?: any) {
-        if (EDITOR && !legacyCC.GAME_VIEW) {
-            return callback;
-        }
         this._eventTarget.once(eventType, callback, target);
         return callback;
     }
