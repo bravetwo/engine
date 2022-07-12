@@ -91,7 +91,7 @@ export class XrInteractable extends IXrInteractable {
         
     }
 
-    protected _unsetRayReticle(event: XrEventHandle) {
+    protected _unsetRayReticle() {
         if (this._rayReticle) {
             this._rayReticle.active = false;
         }

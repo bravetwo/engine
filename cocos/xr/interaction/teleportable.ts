@@ -65,10 +65,6 @@ export class Teleportable extends XrInteractable {
     protected _teleportableType: Teleportable_Type = Teleportable_Type.Area;
     @serializable
     protected _teleportAnchorNode: Node | null = null;
-    // @type([Collider])
-    // @serializable
-    // @displayOrder(3)
-    // public _colliders: Collider[] = [];
     @serializable
     protected _teleportTrigger: TeleportTrigger_Type = TeleportTrigger_Type.OnSelectExited;
     @serializable

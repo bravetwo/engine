@@ -76,10 +76,6 @@ export class GrabInteractable extends XrInteractable {
     protected _attachTransform: Node | null = null;
     @serializable
     protected _attachEaseInTime = 0.15;
-    // @type([Collider])
-    // @serializable
-    // @displayOrder(3)
-    // public _colliders: Collider[] = [];
     @serializable
     protected _grabTrigger: GrabTrigger_Type = GrabTrigger_Type.OnSelectEntered;
     @serializable
@@ -320,8 +316,8 @@ export class GrabInteractable extends XrInteractable {
 
     protected _setRayReticle(event: XrEventHandle) {
         if (this._rayReticle) {
-            if (this._rayReticle && event.attachNode) {
-                this._rayReticle.setWorldPosition(event.attachNode.getWorldPosition());
+            if (this._rayReticle) {
+                this._rayReticle.setWorldPosition(event.hitPoint);
                 this._rayReticle.active = true;
             }
         }
@@ -427,6 +423,7 @@ export class GrabInteractable extends XrInteractable {
         if (!event || !this._colliderCom) {
             return;
         }
+        this._unsetRayReticle();
         this._isGrab = true;
         this._triggerId = event.triggerId;
         this._attachNode = event.attachNode;
