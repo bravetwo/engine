@@ -108,6 +108,7 @@ static void dispatchGamepadEventInternal(const xr::XRControllerEvent &xrControll
                     case xr::XRClick::Type::HOME:
                         CC_LOG_INFO("[XRInterface] exit when home click in rokid.");
 #if USE_XR
+                        xr::XrEntry::getInstance()->destroyXrInstance();
                         xr::XrEntry::destroyInstance();
 #endif
                         JniHelper::callObjectVoidMethod(static_cast<jobject>(static_cast<AndroidPlatform *>(BasePlatform::getPlatform())->getActivity()), "android/app/Activity", "finish");
@@ -432,6 +433,7 @@ void XRInterface::onRenderDestroy() {
 #if USE_XR
     CC_LOG_INFO("[XR] onRenderDestroy");
     xr::XrEntry::getInstance()->destroyXrInstance();
+    xr::XrEntry::destroyInstance();
     if (jsPoseEventArray != nullptr) {
         jsPoseEventArray->unroot();
         jsPoseEventArray->decRef();
