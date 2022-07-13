@@ -28,7 +28,8 @@ se::Class* __jsb_cc_xr_XrEntry_class = nullptr;  // NOLINT
 static bool js_xr_XrEntry_computeViewProjection(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntry>(s);
-    SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_computeViewProjection : Invalid Native Object");
+    // SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_computeViewProjection : Invalid Native Object");
+    if (nullptr == cobj) return true;
     const auto& args = s.args();
     size_t argc = args.size();
     CC_UNUSED bool ok = true;
@@ -56,7 +57,8 @@ SE_BIND_FUNC(js_xr_XrEntry_computeViewProjection)
 static bool js_xr_XrEntry_createXrInstance(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntry>(s);
-    SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_createXrInstance : Invalid Native Object");
+    // SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_createXrInstance : Invalid Native Object");
+    if (nullptr == cobj) return true;
     const auto& args = s.args();
     size_t argc = args.size();
     CC_UNUSED bool ok = true;
@@ -75,7 +77,8 @@ SE_BIND_FUNC(js_xr_XrEntry_createXrInstance)
 static bool js_xr_XrEntry_destroyXrInstance(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntry>(s);
-    SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_destroyXrInstance : Invalid Native Object");
+    // SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_destroyXrInstance : Invalid Native Object");
+    if (nullptr == cobj) return true;
     const auto& args = s.args();
     size_t argc = args.size();
     if (argc == 0) {
@@ -90,7 +93,8 @@ SE_BIND_FUNC(js_xr_XrEntry_destroyXrInstance)
 static bool js_xr_XrEntry_frameEnd(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntry>(s);
-    SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_frameEnd : Invalid Native Object");
+    // SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_frameEnd : Invalid Native Object");
+    if (nullptr == cobj) return true;
     const auto& args = s.args();
     size_t argc = args.size();
     if (argc == 0) {
@@ -105,7 +109,8 @@ SE_BIND_FUNC(js_xr_XrEntry_frameEnd)
 static bool js_xr_XrEntry_frameStart(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntry>(s);
-    SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_frameStart : Invalid Native Object");
+    // SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_frameStart : Invalid Native Object");
+    if (nullptr == cobj) return true;
     const auto& args = s.args();
     size_t argc = args.size();
     CC_UNUSED bool ok = true;
@@ -124,7 +129,8 @@ SE_BIND_FUNC(js_xr_XrEntry_frameStart)
 static bool js_xr_XrEntry_getCocosXrSwapchains(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntry>(s);
-    SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_getCocosXrSwapchains : Invalid Native Object");
+    // SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_getCocosXrSwapchains : Invalid Native Object");
+    if (nullptr == cobj) return true;
     const auto& args = s.args();
     size_t argc = args.size();
     CC_UNUSED bool ok = true;
@@ -143,21 +149,24 @@ SE_BIND_FUNC(js_xr_XrEntry_getCocosXrSwapchains)
 static bool js_xr_XrEntry_getHMDViewPosition(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntry>(s);
-    SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_getHMDViewPosition : Invalid Native Object");
+    // SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_getHMDViewPosition : Invalid Native Object");
+    if (nullptr == cobj) return true;
     const auto& args = s.args();
     size_t argc = args.size();
     CC_UNUSED bool ok = true;
-    if (argc == 1) {
-        HolderType<int, false> arg0 = {};
+    if (argc == 2) {
+        HolderType<unsigned int, false> arg0 = {};
+        HolderType<int, false> arg1 = {};
         ok &= sevalue_to_native(args[0], &arg0, s.thisObject());
+        ok &= sevalue_to_native(args[1], &arg1, s.thisObject());
         SE_PRECONDITION2(ok, false, "js_xr_XrEntry_getHMDViewPosition : Error processing arguments");
-        std::vector<float> result = cobj->getHMDViewPosition(arg0.value());
+        std::vector<float> result = cobj->getHMDViewPosition(arg0.value(), arg1.value());
         ok &= nativevalue_to_se(result, s.rval(), nullptr /*ctx*/);
         SE_PRECONDITION2(ok, false, "js_xr_XrEntry_getHMDViewPosition : Error processing arguments");
         SE_HOLD_RETURN_VALUE(result, s.thisObject(), s.rval());
         return true;
     }
-    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 1);
+    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 2);
     return false;
 }
 SE_BIND_FUNC(js_xr_XrEntry_getHMDViewPosition)
@@ -165,7 +174,8 @@ SE_BIND_FUNC(js_xr_XrEntry_getHMDViewPosition)
 static bool js_xr_XrEntry_getSwapchainImageIndex(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntry>(s);
-    SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_getSwapchainImageIndex : Invalid Native Object");
+    // SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_getSwapchainImageIndex : Invalid Native Object");
+    if (nullptr == cobj) return true;
     const auto& args = s.args();
     size_t argc = args.size();
     CC_UNUSED bool ok = true;
@@ -184,7 +194,8 @@ SE_BIND_FUNC(js_xr_XrEntry_getSwapchainImageIndex)
 static bool js_xr_XrEntry_getXRConfig(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntry>(s);
-    SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_getXRConfig : Invalid Native Object");
+    // SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_getXRConfig : Invalid Native Object");
+    if (nullptr == cobj) return true;
     const auto& args = s.args();
     size_t argc = args.size();
     CC_UNUSED bool ok = true;
@@ -206,7 +217,8 @@ SE_BIND_FUNC(js_xr_XrEntry_getXRConfig)
 static bool js_xr_XrEntry_getXrViewCount(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntry>(s);
-    SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_getXrViewCount : Invalid Native Object");
+    // SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_getXrViewCount : Invalid Native Object");
+    if (nullptr == cobj) return true;
     const auto& args = s.args();
     size_t argc = args.size();
     CC_UNUSED bool ok = true;
@@ -225,7 +237,8 @@ SE_BIND_FUNC(js_xr_XrEntry_getXrViewCount)
 static bool js_xr_XrEntry_initPlatformData(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntry>(s);
-    SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_initPlatformData : Invalid Native Object");
+    // SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_initPlatformData : Invalid Native Object");
+    if (nullptr == cobj) return true;
     const auto& args = s.args();
     size_t argc = args.size();
     CC_UNUSED bool ok = true;
@@ -246,7 +259,8 @@ SE_BIND_FUNC(js_xr_XrEntry_initPlatformData)
 static bool js_xr_XrEntry_initXrSwapchains(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntry>(s);
-    SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_initXrSwapchains : Invalid Native Object");
+    // SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_initXrSwapchains : Invalid Native Object");
+    if (nullptr == cobj) return true;
     const auto& args = s.args();
     size_t argc = args.size();
     if (argc == 0) {
@@ -261,7 +275,8 @@ SE_BIND_FUNC(js_xr_XrEntry_initXrSwapchains)
 static bool js_xr_XrEntry_isCreatedXrInstance(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntry>(s);
-    SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_isCreatedXrInstance : Invalid Native Object");
+    // SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_isCreatedXrInstance : Invalid Native Object");
+    if (nullptr == cobj) return true;
     const auto& args = s.args();
     size_t argc = args.size();
     CC_UNUSED bool ok = true;
@@ -280,7 +295,8 @@ SE_BIND_FUNC(js_xr_XrEntry_isCreatedXrInstance)
 static bool js_xr_XrEntry_isRenderAllowable(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntry>(s);
-    SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_isRenderAllowable : Invalid Native Object");
+    // SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_isRenderAllowable : Invalid Native Object");
+    if (nullptr == cobj) return true;
     const auto& args = s.args();
     size_t argc = args.size();
     CC_UNUSED bool ok = true;
@@ -299,7 +315,8 @@ SE_BIND_FUNC(js_xr_XrEntry_isRenderAllowable)
 static bool js_xr_XrEntry_isSessionRunning(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntry>(s);
-    SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_isSessionRunning : Invalid Native Object");
+    // SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_isSessionRunning : Invalid Native Object");
+    if (nullptr == cobj) return true;
     const auto& args = s.args();
     size_t argc = args.size();
     CC_UNUSED bool ok = true;
@@ -318,7 +335,8 @@ SE_BIND_FUNC(js_xr_XrEntry_isSessionRunning)
 static bool js_xr_XrEntry_pauseXrInstance(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntry>(s);
-    SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_pauseXrInstance : Invalid Native Object");
+    // SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_pauseXrInstance : Invalid Native Object");
+    if (nullptr == cobj) return true;
     const auto& args = s.args();
     size_t argc = args.size();
     if (argc == 0) {
@@ -333,7 +351,8 @@ SE_BIND_FUNC(js_xr_XrEntry_pauseXrInstance)
 static bool js_xr_XrEntry_platformLoopEnd(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntry>(s);
-    SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_platformLoopEnd : Invalid Native Object");
+    // SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_platformLoopEnd : Invalid Native Object");
+    if (nullptr == cobj) return true;
     const auto& args = s.args();
     size_t argc = args.size();
     CC_UNUSED bool ok = true;
@@ -352,7 +371,8 @@ SE_BIND_FUNC(js_xr_XrEntry_platformLoopEnd)
 static bool js_xr_XrEntry_platformLoopStart(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntry>(s);
-    SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_platformLoopStart : Invalid Native Object");
+    // SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_platformLoopStart : Invalid Native Object");
+    if (nullptr == cobj) return true;
     const auto& args = s.args();
     size_t argc = args.size();
     CC_UNUSED bool ok = true;
@@ -371,7 +391,8 @@ SE_BIND_FUNC(js_xr_XrEntry_platformLoopStart)
 static bool js_xr_XrEntry_renderLoopEnd(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntry>(s);
-    SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_renderLoopEnd : Invalid Native Object");
+    // SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_renderLoopEnd : Invalid Native Object");
+    if (nullptr == cobj) return true;
     const auto& args = s.args();
     size_t argc = args.size();
     CC_UNUSED bool ok = true;
@@ -390,7 +411,8 @@ SE_BIND_FUNC(js_xr_XrEntry_renderLoopEnd)
 static bool js_xr_XrEntry_renderLoopStart(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntry>(s);
-    SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_renderLoopStart : Invalid Native Object");
+    // SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_renderLoopStart : Invalid Native Object");
+    if (nullptr == cobj) return true;
     const auto& args = s.args();
     size_t argc = args.size();
     CC_UNUSED bool ok = true;
@@ -409,7 +431,8 @@ SE_BIND_FUNC(js_xr_XrEntry_renderLoopStart)
 static bool js_xr_XrEntry_resumeXrInstance(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntry>(s);
-    SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_resumeXrInstance : Invalid Native Object");
+    // SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_resumeXrInstance : Invalid Native Object");
+    if (nullptr == cobj) return true;
     const auto& args = s.args();
     size_t argc = args.size();
     if (argc == 0) {
@@ -424,7 +447,8 @@ SE_BIND_FUNC(js_xr_XrEntry_resumeXrInstance)
 static bool js_xr_XrEntry_setIPDOffset(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntry>(s);
-    SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_setIPDOffset : Invalid Native Object");
+    // SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_setIPDOffset : Invalid Native Object");
+    if (nullptr == cobj) return true;
     const auto& args = s.args();
     size_t argc = args.size();
     CC_UNUSED bool ok = true;
@@ -443,7 +467,8 @@ SE_BIND_FUNC(js_xr_XrEntry_setIPDOffset)
 static bool js_xr_XrEntry_setMultisamplesRTT(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntry>(s);
-    SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_setMultisamplesRTT : Invalid Native Object");
+    // SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_setMultisamplesRTT : Invalid Native Object");
+    if (nullptr == cobj) return true;
     const auto& args = s.args();
     size_t argc = args.size();
     CC_UNUSED bool ok = true;
@@ -462,7 +487,8 @@ SE_BIND_FUNC(js_xr_XrEntry_setMultisamplesRTT)
 static bool js_xr_XrEntry_setRenderingScale(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntry>(s);
-    SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_setRenderingScale : Invalid Native Object");
+    // SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_setRenderingScale : Invalid Native Object");
+    if (nullptr == cobj) return true;
     const auto& args = s.args();
     size_t argc = args.size();
     CC_UNUSED bool ok = true;
@@ -477,6 +503,35 @@ static bool js_xr_XrEntry_setRenderingScale(se::State& s) // NOLINT(readability-
     return false;
 }
 SE_BIND_FUNC(js_xr_XrEntry_setRenderingScale)
+
+static bool js_xr_XrEntry_waitFrame(se::State& s) // NOLINT(readability-identifier-naming)
+{
+    auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntry>(s);
+    // SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_waitFrame : Invalid Native Object");
+    if (nullptr == cobj) return true;
+    const auto& args = s.args();
+    size_t argc = args.size();
+    if (argc == 0) {
+        cobj->waitFrame();
+        return true;
+    }
+    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 0);
+    return false;
+}
+SE_BIND_FUNC(js_xr_XrEntry_waitFrame)
+
+static bool js_xr_XrEntry_destroyInstance_static(se::State& s) // NOLINT(readability-identifier-naming)
+{
+    const auto& args = s.args();
+    size_t argc = args.size();
+    if (argc == 0) {
+        cc::xr::XrEntry::destroyInstance();
+        return true;
+    }
+    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 0);
+    return false;
+}
+SE_BIND_FUNC(js_xr_XrEntry_destroyInstance_static)
 
 static bool js_xr_XrEntry_getInstance_static(se::State& s) // NOLINT(readability-identifier-naming)
 {
@@ -526,6 +581,8 @@ bool js_register_xr_XrEntry(se::Object* obj) // NOLINT(readability-identifier-na
     cls->defineFunction("setIPDOffset", _SE(js_xr_XrEntry_setIPDOffset));
     cls->defineFunction("setMultisamplesRTT", _SE(js_xr_XrEntry_setMultisamplesRTT));
     cls->defineFunction("setRenderingScale", _SE(js_xr_XrEntry_setRenderingScale));
+    cls->defineFunction("waitFrame", _SE(js_xr_XrEntry_waitFrame));
+    cls->defineStaticFunction("destroyInstance", _SE(js_xr_XrEntry_destroyInstance_static));
     cls->defineStaticFunction("getInstance", _SE(js_xr_XrEntry_getInstance_static));
     cls->install();
     JSBClassType::registerClass<cc::xr::XrEntry>(cls);

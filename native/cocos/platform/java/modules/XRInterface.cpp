@@ -49,7 +49,7 @@
 #endif
 #include "application/ApplicationManager.h"
 #include "base/threading/MessageQueue.h"
-#include "platform/java/jni/JniHelper.h"
+
 // print log
 const bool IS_ENABLE_XR_LOG = false;
 
@@ -111,7 +111,7 @@ static void dispatchGamepadEventInternal(const xr::XRControllerEvent &xrControll
                         xr::XrEntry::getInstance()->destroyXrInstance();
                         xr::XrEntry::destroyInstance();
 #endif
-                        JniHelper::callObjectVoidMethod(static_cast<jobject>(static_cast<AndroidPlatform *>(BasePlatform::getPlatform())->getActivity()), "android/app/Activity", "finish");
+                        CC_CURRENT_APPLICATION_SAFE()->close();
                         break;
                     case xr::XRClick::Type::START:
                         controllerInfo->buttonInfos.emplace_back(ControllerInfo::ButtonInfo(StickKeyCode::START, xrClick->isPress));
@@ -746,9 +746,9 @@ bool XRInterface::platformLoopEnd() {
 }
 // stereo render loop
 
-ccstd::vector<float> XRInterface::getHMDViewPosition(uint32_t eye) {
+ccstd::vector<float> XRInterface::getHMDViewPosition(uint32_t eye, int trackingType) {
 #if USE_XR
-    return xr::XrEntry::getInstance()->getHMDViewPosition(eye);
+    return xr::XrEntry::getInstance()->getHMDViewPosition(eye, trackingType);
 #else
     ccstd::vector<float> res;
     res.reserve(3);

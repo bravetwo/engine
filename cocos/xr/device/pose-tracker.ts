@@ -126,10 +126,13 @@ export class PoseTracker extends Component {
             switch (type) {
                 case TrackingType_Type.POSITION_AND_ROTATION:
                     cameraComponent.trackingType = TrackingType.POSITION_AND_ROTATION;
+                    break;
                 case TrackingType_Type.POSITION:
                     cameraComponent.trackingType = TrackingType.POSITION;
+                    break;
                 case TrackingType_Type.ROTATION:
                     cameraComponent.trackingType = TrackingType.ROTATION;
+                    break;
             }
         }
     }

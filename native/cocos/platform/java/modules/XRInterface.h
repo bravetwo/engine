@@ -84,7 +84,7 @@ public:
     virtual bool platformLoopEnd() override;
     // stereo render loop
 
-    virtual ccstd::vector<float> getHMDViewPosition(uint32_t eye) override;
+    virtual ccstd::vector<float> getHMDViewPosition(uint32_t eye, int trackingType) override;
     virtual ccstd::vector<float> getXRViewProjectionData(uint32_t eye, float near, float far) override;
     // renderwindow
     virtual xr::XREye getXREyeByRenderWindow(void *window) override;

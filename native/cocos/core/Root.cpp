@@ -337,7 +337,7 @@ void Root::frameMove(float deltaTime, int32_t totalFrames) {
 
                 for (auto *camera : _allCameraList) {
                     if (camera->getTrackingType() != scene::NO_TRACKING) {
-                        const auto &viewPosition = xr->getHMDViewPosition(xrEye);
+                        const auto &viewPosition = xr->getHMDViewPosition(xrEye, camera->getTrackingType());
                         camera->setNodePosition({viewPosition[0], viewPosition[1], viewPosition[2]});
                     }
                 }

@@ -41,6 +41,8 @@ SE_DECLARE_FUNC(js_xr_XrEntry_resumeXrInstance);
 SE_DECLARE_FUNC(js_xr_XrEntry_setIPDOffset);
 SE_DECLARE_FUNC(js_xr_XrEntry_setMultisamplesRTT);
 SE_DECLARE_FUNC(js_xr_XrEntry_setRenderingScale);
+SE_DECLARE_FUNC(js_xr_XrEntry_waitFrame);
+SE_DECLARE_FUNC(js_xr_XrEntry_destroyInstance);
 SE_DECLARE_FUNC(js_xr_XrEntry_getInstance);
 #endif //#if (USE_XR > 0)
 // clang-format on
