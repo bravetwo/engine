@@ -404,11 +404,14 @@ void Root::frameMove(float deltaTime, int32_t totalFrames) {
                         return a->getPriority() < b->getPriority();
                     });
 #if !defined(CC_SERVER_MODE)
+
+                #if CC_USE_GEOMETRY_RENDERER
                     for (auto *camera : _cameraList) {
                         if (camera->getGeometryRenderer()) {
                             camera->getGeometryRenderer()->update();
                         }
                     }
+                #endif
 
                     _pipelineRuntime->render(_cameraList);
 #endif
@@ -464,11 +467,14 @@ void Root::frameMove(float deltaTime, int32_t totalFrames) {
                 return a->getPriority() < b->getPriority();
             });
 #if !defined(CC_SERVER_MODE)
+
+        #if CC_USE_GEOMETRY_RENDERER
             for (auto *camera : _cameraList) {
                 if (camera->getGeometryRenderer()) {
                     camera->getGeometryRenderer()->update();
                 }
             }
+        #endif
 
             _pipelineRuntime->render(_cameraList);
 #endif
