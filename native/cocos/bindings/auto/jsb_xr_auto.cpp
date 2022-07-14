@@ -444,6 +444,26 @@ static bool js_xr_XrEntry_resumeXrInstance(se::State& s) // NOLINT(readability-i
 }
 SE_BIND_FUNC(js_xr_XrEntry_resumeXrInstance)
 
+static bool js_xr_XrEntry_setBaseSpaceType(se::State& s) // NOLINT(readability-identifier-naming)
+{
+    auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntry>(s);
+    // SE_PRECONDITION2(cobj, false, "js_xr_XrEntry_setBaseSpaceType : Invalid Native Object");
+    if (nullptr == cobj) return true;
+    const auto& args = s.args();
+    size_t argc = args.size();
+    CC_UNUSED bool ok = true;
+    if (argc == 1) {
+        HolderType<int, false> arg0 = {};
+        ok &= sevalue_to_native(args[0], &arg0, s.thisObject());
+        SE_PRECONDITION2(ok, false, "js_xr_XrEntry_setBaseSpaceType : Error processing arguments");
+        cobj->setBaseSpaceType(arg0.value());
+        return true;
+    }
+    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 1);
+    return false;
+}
+SE_BIND_FUNC(js_xr_XrEntry_setBaseSpaceType)
+
 static bool js_xr_XrEntry_setIPDOffset(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntry>(s);
@@ -578,6 +598,7 @@ bool js_register_xr_XrEntry(se::Object* obj) // NOLINT(readability-identifier-na
     cls->defineFunction("renderLoopEnd", _SE(js_xr_XrEntry_renderLoopEnd));
     cls->defineFunction("renderLoopStart", _SE(js_xr_XrEntry_renderLoopStart));
     cls->defineFunction("resumeXrInstance", _SE(js_xr_XrEntry_resumeXrInstance));
+    cls->defineFunction("setBaseSpaceType", _SE(js_xr_XrEntry_setBaseSpaceType));
     cls->defineFunction("setIPDOffset", _SE(js_xr_XrEntry_setIPDOffset));
     cls->defineFunction("setMultisamplesRTT", _SE(js_xr_XrEntry_setMultisamplesRTT));
     cls->defineFunction("setRenderingScale", _SE(js_xr_XrEntry_setRenderingScale));

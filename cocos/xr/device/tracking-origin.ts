@@ -32,6 +32,7 @@ import { ccclass, help, menu, type, visible, displayOrder, serializable, tooltip
 import { ccenum } from '../../core/value-types/enum';
 import { Component } from '../../core/components/component';
 import { Node } from '../../core/scene-graph/node';
+import { sys } from '../../core';
 
  enum TrackingOriginMode_Type {
     Unbond = 0,
@@ -110,6 +111,12 @@ export class TrackingOrigin extends Component {
     private _setYOffset(value) {
         if (this._offsetObject) {
             this._offsetObject.position.set(this._offsetObject.position.x, value, this._offsetObject.position.z);
+        }
+    }
+
+    onEnable () {
+        if (sys.isXR) {
+            xr.XrEntry.getInstance().setBaseSpaceType(this.trackingOriginMode);
         }
     }
 }

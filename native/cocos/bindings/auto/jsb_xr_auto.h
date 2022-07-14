@@ -38,6 +38,7 @@ SE_DECLARE_FUNC(js_xr_XrEntry_platformLoopStart);
 SE_DECLARE_FUNC(js_xr_XrEntry_renderLoopEnd);
 SE_DECLARE_FUNC(js_xr_XrEntry_renderLoopStart);
 SE_DECLARE_FUNC(js_xr_XrEntry_resumeXrInstance);
+SE_DECLARE_FUNC(js_xr_XrEntry_setBaseSpaceType);
 SE_DECLARE_FUNC(js_xr_XrEntry_setIPDOffset);
 SE_DECLARE_FUNC(js_xr_XrEntry_setMultisamplesRTT);
 SE_DECLARE_FUNC(js_xr_XrEntry_setRenderingScale);
