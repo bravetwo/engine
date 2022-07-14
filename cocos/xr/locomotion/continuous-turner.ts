@@ -106,7 +106,10 @@ export class ContinuousTurner extends LocomotionBase {
     }
 
     private _turnOn(event: Vec2) {
-        this._xrSessionNode = this._checker?.getSession(this.uuid)?.node;
+        const xrAgentNode = this._checker?.getSession(this.uuid);
+        if (xrAgentNode) {
+            this._xrSessionNode = xrAgentNode;
+        }
         if (event.x < 0) {
             this._isTurn = TurnDir.Left;
         } else if (event.x > 0) {

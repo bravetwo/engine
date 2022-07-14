@@ -115,7 +115,10 @@ export class ContinuousMover extends LocomotionBase {
     }
 
     private _MoveOn(event: Vec2) {
-        this._xrSessionNode = this._checker?.getSession(this.uuid)?.node;
+        const xrAgentNode = this._checker?.getSession(this.uuid);
+        if (xrAgentNode) {
+            this._xrSessionNode = xrAgentNode;
+        }
         this._move.set(event.x, event.y);
         this._isMove = true;
     }

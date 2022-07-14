@@ -148,7 +148,10 @@ export class SharpTurner extends LocomotionBase {
     }
 
     private _turnMove(event: Vec2) {
-        this._xrSessionNode = this._checker?.getSession(this.uuid)?.node;
+        const xrAgentNode = this._checker?.getSession(this.uuid);
+        if (xrAgentNode) {
+            this._xrSessionNode = xrAgentNode;
+        }
         if (!this._xrSessionNode || !this._waitEnd) {
             return;
         }
@@ -167,7 +170,10 @@ export class SharpTurner extends LocomotionBase {
     }
 
     private _turnAround() {
-        this._xrSessionNode = this._checker?.getSession(this.uuid)?.node;
+        const xrAgentNode = this._checker?.getSession(this.uuid);
+        if (xrAgentNode) {
+            this._xrSessionNode = xrAgentNode;
+        }
         if (!this._xrSessionNode) {
             return;
         }

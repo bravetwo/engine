@@ -228,14 +228,14 @@ export class Teleportable extends XrInteractable {
         if (this._teleportableType === Teleportable_Type.Anchor) {
             if (this._teleporter?.checker?.XR_Agent) {
                 if (this._teleportAnchorNode) {
-                    this._teleporter.checker.XR_Agent.node.setWorldPosition(this._teleportAnchorNode.getWorldPosition());
+                    this._teleporter.checker.XR_Agent.setWorldPosition(this._teleportAnchorNode.getWorldPosition());
                 } else if (event.attachNode) {
-                    this._teleporter.checker.XR_Agent.node.setWorldPosition(this.node.getWorldPosition());
+                    this._teleporter.checker.XR_Agent.setWorldPosition(this.node.getWorldPosition());
                 }
             }
         } else {
             if (this._teleporter?.checker?.XR_Agent && event.hitPoint) {
-                this._teleporter.checker.XR_Agent.node.setWorldPosition(event.hitPoint);
+                this._teleporter.checker.XR_Agent.setWorldPosition(event.hitPoint);
             }
         }        
     }
