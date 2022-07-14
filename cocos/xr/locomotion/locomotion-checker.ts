@@ -82,7 +82,7 @@ export class LocomotionChecker extends Component {
         if (!this._xrAgent) {
             const scene = director.getScene() as any;
             if (scene) {
-                const agent = scene.getComponentInChildren(TrackingOrigin);
+                const agent = scene.getComponentInChildren(TrackingOrigin).node;
                 if (agent) {
                     this._xrAgent = agent;
                 }
