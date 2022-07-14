@@ -28,70 +28,71 @@
  * @module component/xr
  */
 
- import { displayOrder, type, serializable, tooltip, executeInEditMode} from 'cc.decorator';
- import { Component } from '../../core/components';
- import { ccenum, director } from '../../core';
- import { XRController } from '../device/xr-controller';
- import { LocomotionChecker } from './locomotion-checker';
+import { displayOrder, type, serializable, tooltip, executeInEditMode } from 'cc.decorator';
+import { Component } from '../../core/components';
+import { ccenum, director } from '../../core';
+import { XRController } from '../device/xr-controller';
+import { LocomotionChecker } from './locomotion-checker';
 
- export enum InputControl_Type {
-     PRIMARY_2D_AXIS = 0,
-     SECONDARY_2D_AXIS = 1,
- }
- ccenum(InputControl_Type);
- 
- /**
-  * @en The base class of Locomotion related behaviors
-  * @zh Locomotion相关行为的基类
-  */
- export class LocomotionBase extends Component {
-     @serializable
-     protected _checker: LocomotionChecker | null = null;
-     @serializable
-     protected _inputDevice: XRController | null = null;
-     @serializable
-     protected _inputControl: InputControl_Type = InputControl_Type.PRIMARY_2D_AXIS;
- 
-     @type(LocomotionChecker)
-     @displayOrder(1)
-     @tooltip('i18n:xr.locomotion_base.checker')
-     set checker (val) {
-         if (val === this._checker) {
-             return;
-         }
-         this._checker = val;
-     }
-     get checker () {
-         return this._checker;
-     }
- 
-     @type(XRController)
-     @displayOrder(2)
-     @tooltip('i18n:xr.locomotion_base.inputDevice')
-     set inputDevice (val) {
-         if (val === this._inputDevice) {
-             return;
-         }
-         this._inputDevice = val;
-     }
-     get inputDevice () {
-         return this._inputDevice;
-     }
- 
-     @type(InputControl_Type)
-     @displayOrder(3)
-     @tooltip('i18n:xr.locomotion_base.inputControl')
-     set inputControl (val) {
-         if (val === this._inputControl) {
-             return;
-         }
-         this._inputControl = val;
-     }
-     get inputControl () {
-         return this._inputControl;
-     } 
- 
-     protected _findChecker() {
+export enum InputControl_Type {
+    PRIMARY_2D_AXIS = 0,
+    SECONDARY_2D_AXIS = 1,
+}
+ccenum(InputControl_Type);
+
+/**
+ * @en The base class of Locomotion related behaviors
+ * @zh Locomotion相关行为的基类
+ */
+@executeInEditMode
+export class LocomotionBase extends Component {
+    @serializable
+    protected _checker: LocomotionChecker | null = null;
+    @serializable
+    protected _inputDevice: XRController | null = null;
+    @serializable
+    protected _inputControl: InputControl_Type = InputControl_Type.PRIMARY_2D_AXIS;
+
+    @type(LocomotionChecker)
+    @displayOrder(1)
+    @tooltip('i18n:xr.locomotion_base.checker')
+    set checker(val) {
+        if (val === this._checker) {
+            return;
+        }
+        this._checker = val;
+    }
+    get checker() {
+        return this._checker;
+    }
+
+    @type(XRController)
+    @displayOrder(2)
+    @tooltip('i18n:xr.locomotion_base.inputDevice')
+    set inputDevice(val) {
+        if (val === this._inputDevice) {
+            return;
+        }
+        this._inputDevice = val;
+    }
+    get inputDevice() {
+        return this._inputDevice;
+    }
+
+    @type(InputControl_Type)
+    @displayOrder(3)
+    @tooltip('i18n:xr.locomotion_base.inputControl')
+    set inputControl(val) {
+        if (val === this._inputControl) {
+            return;
+        }
+        this._inputControl = val;
+    }
+    get inputControl() {
+        return this._inputControl;
+    }
+
+    protected _findChecker() {
         if (!this._checker) {
             const scene = director.getScene() as any;
             if (scene) {
@@ -101,5 +102,5 @@
                 }
             }
         }
-     }
- }
+    }
+}

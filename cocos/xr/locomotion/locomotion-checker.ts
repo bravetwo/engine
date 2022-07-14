@@ -32,6 +32,7 @@ import { ccclass, help, menu, displayOrder, type, serializable, executeInEditMod
 import { Component } from '../../core/components';
 import { director } from '../../core/director';
 import { TrackingOrigin } from '../device/tracking-origin';
+import { Node } from '../../core/scene-graph/node';
 
 /**
  * @en
@@ -42,11 +43,12 @@ import { TrackingOrigin } from '../device/tracking-origin';
 @ccclass('cc.LocomotionChecker')
 @help('i18n:cc.LocomotionChecker')
 @menu('XR/Locomotion/LocomotionChecker')
+@executeInEditMode
 export class LocomotionChecker extends Component {
     @serializable
     protected _timeout = 10;
     @serializable
-    protected _xrAgent: TrackingOrigin | null = null;
+    protected _xrAgent: Node | null = null;
 
     private _accupyId: string = "";
     private _time = 0;
@@ -63,7 +65,7 @@ export class LocomotionChecker extends Component {
         return this._timeout;
     }
 
-    @type(TrackingOrigin)
+    @type(Node)
     @displayOrder(2)
     @tooltip('i18n:xr.locomotion_checker.xrAgent')
     set XR_Agent (val) {
