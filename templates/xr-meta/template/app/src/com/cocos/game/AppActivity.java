@@ -55,13 +55,13 @@ public class AppActivity extends CocosActivity {
 
     @Override
     protected void onDestroy() {
-        System.exit(0);
         super.onDestroy();
         // Workaround in https://stackoverflow.com/questions/16283079/re-launch-of-activity-on-home-button-but-only-the-first-time/16447508
         if (!isTaskRoot()) {
             return;
         }
         SDKWrapper.shared().onDestroy();
+        System.exit(0);
     }
 
     @Override

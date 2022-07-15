@@ -61,7 +61,6 @@ public class InstantActivity extends CocosActivity {
             return;
         }
         SDKWrapper.shared().onDestroy();
-        System.exit(0);
     }
 
     @Override
