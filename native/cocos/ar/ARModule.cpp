@@ -252,5 +252,22 @@ float* ARModule::getRemovedObjectsInfo() const {
     return _impl->getRemovedObjectsInfo();
 }
 
+// face detection & tracking
+void ARModule::enableFaceTracking(bool enable) const {
+    _impl->enableFaceTracking(enable);
+}
+float* ARModule::getAddedFacesInfo() const {
+    return _impl->getAddedFacesInfo();
+}
+float* ARModule::getUpdatedFacesInfo() const {
+    return _impl->getUpdatedFacesInfo();
+}
+float* ARModule::getRemovedFacesInfo() const {
+    return _impl->getRemovedFacesInfo();
+}
+float* ARModule::getFaceBlendShapesOf(int faceRef)  const {
+    return _impl->getFaceBlendShapesOf(faceRef);
+}
+
 } // namespace ar
 } // namespace cc

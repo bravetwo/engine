@@ -99,6 +99,12 @@ public:
     virtual float* getAddedObjectsInfo() = 0;
     virtual float* getUpdatedObjectsInfo() = 0;
     virtual float* getRemovedObjectsInfo() = 0;
+
+    virtual void enableFaceTracking(bool enable) = 0;
+    virtual float* getAddedFacesInfo() = 0;
+    virtual float* getUpdatedFacesInfo() = 0;
+    virtual float* getRemovedFacesInfo() = 0;
+    virtual float* getFaceBlendShapesOf(int faceRef)  = 0;
 };
 
 } // namespace ar

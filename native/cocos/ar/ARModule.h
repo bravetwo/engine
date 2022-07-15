@@ -65,7 +65,6 @@ public:
     void* getCameraTextureRef() const;
     uint8_t* getCameraDepthBuffer() const;
 
-    //void setPlaneFeatureEnable(bool isOn) const;
     void enablePlane(bool enable) const;
     void setPlaneDetectionMode(int mode) const;
     void setPlaneMaxTrackingNumber(int count) const;
@@ -106,6 +105,12 @@ public:
     float* getAddedObjectsInfo() const;
     float* getUpdatedObjectsInfo() const;
     float* getRemovedObjectsInfo() const;
+
+    void enableFaceTracking(bool enable) const;
+    float* getAddedFacesInfo() const;
+    float* getUpdatedFacesInfo() const;
+    float* getRemovedFacesInfo() const;
+    float* getFaceBlendShapesOf(int faceRef)  const;
 
 private:
     std::unique_ptr<IARAPI> _impl;

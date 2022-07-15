@@ -76,7 +76,8 @@ export enum FeatureType {
     PlaneDetection = 1 << 0, 
     SceneMesh = 1 << 1,
     ImageTracking = 1 << 2,
-    ObjectTracking = 1 << 3
+    ObjectTracking = 1 << 3,
+    FaceTracking = 1 << 4
 }
 
 export abstract class ARFeature implements IFeature {

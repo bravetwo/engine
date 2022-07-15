@@ -183,4 +183,20 @@ class ARModuleNative extends ARModule {
     getRemovedObjectsInfo() {
         return this._native.getRemovedObjectsInfo();
     }
+
+    enableFaceTracking(enable) {
+        this._native.enableFaceTracking(enable);
+    }
+    getAddedFacesInfo() {
+        return this._native.getAddedFacesInfo();
+    }
+    getUpdatedFacesInfo() {
+        return this._native.getUpdatedFacesInfo();
+    }
+    getRemovedFacesInfo() {
+        return this._native.getRemovedFacesInfo();
+    }
+    getFaceBlendShapesOf(faceRef) {
+        return this._native.getFaceBlendShapesOf(faceRef);
+    }
 }

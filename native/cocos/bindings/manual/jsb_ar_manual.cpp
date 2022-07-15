@@ -566,7 +566,7 @@ static bool js_ar_ARModule_getSceneMeshVertices(se::State& s)
         HolderType<int, false> arg0 = {};
         ok &= sevalue_to_native(args[0], &arg0, s.thisObject());
         SE_PRECONDITION2(ok, false, "js_ar_ARModule_getSceneMeshVertices : Error processing arguments");
-        
+
         float* buffer = cobj->getSceneMeshVertices(arg0.value());
         int len = cobj->getInfoLength();
         se::Object* verticesInfo = se::Object::createTypedArray(se::Object::TypedArrayType::FLOAT32, buffer, 4 * len);
@@ -591,7 +591,7 @@ static bool js_ar_ARModule_getSceneMeshTriangleIndices(se::State& s)
         HolderType<int, false> arg0 = {};
         ok &= sevalue_to_native(args[0], &arg0, s.thisObject());
         SE_PRECONDITION2(ok, false, "js_ar_ARModule_getSceneMeshTriangleIndices : Error processing arguments");
-        
+
         int* buffer = cobj->getSceneMeshTriangleIndices(arg0.value());
         int len = cobj->getInfoLength();
         se::Object* indicesInfo = se::Object::createTypedArray(se::Object::TypedArrayType::UINT32, buffer, 4 * len);
@@ -834,6 +834,113 @@ static bool js_ar_ARModule_getRemovedObjectsInfo(se::State& s)
 }
 SE_BIND_FUNC(js_ar_ARModule_getRemovedObjectsInfo)
 
+static bool js_ar_ARModule_enableFaceTracking(se::State& s)
+{
+    cc::ar::ARModule* cobj = (cc::ar::ARModule*)s.nativeThisObject();
+    SE_PRECONDITION2(cobj, false, "js_ar_ARModule_enableFaceTracking : Invalid Native Object");
+
+    const auto& args = s.args();
+    size_t argc = args.size();
+    CC_UNUSED bool ok = true;
+    if (argc == 1) {
+        HolderType<bool, false> arg0 = {};
+        ok &= sevalue_to_native(args[0], &arg0, s.thisObject());
+        SE_PRECONDITION2(ok, false, "js_ar_ARModule_enableFaceTracking : Error processing arguments");
+
+        cobj->enableFaceTracking(arg0.value());
+        return true;
+    }
+
+    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 1);
+    return false;
+}
+SE_BIND_FUNC(js_ar_ARModule_enableFaceTracking)
+
+static bool js_ar_ARModule_getAddedFacesInfo(se::State& s)
+{
+    cc::ar::ARModule* cobj = (cc::ar::ARModule*)s.nativeThisObject();
+    SE_PRECONDITION2(cobj, false, "js_ar_ARModule_getAddedFacesInfo : Invalid Native Object");
+
+    const auto& args = s.args();
+    size_t argc = args.size();
+    if (argc == 0) {
+        float* buffer = cobj->getAddedFacesInfo();
+        int len = cobj->getInfoLength();
+        se::Object* info = se::Object::createTypedArray(se::Object::TypedArrayType::FLOAT32, buffer, 4 * len);
+        s.rval().setObject(info);
+        return true;
+    }
+
+    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 0);
+    return false;
+}
+SE_BIND_FUNC(js_ar_ARModule_getAddedFacesInfo)
+
+static bool js_ar_ARModule_getUpdatedFacesInfo(se::State& s)
+{
+    cc::ar::ARModule* cobj = (cc::ar::ARModule*)s.nativeThisObject();
+    SE_PRECONDITION2(cobj, false, "js_ar_ARModule_getUpdatedFacesInfo : Invalid Native Object");
+
+    const auto& args = s.args();
+    size_t argc = args.size();
+    if (argc == 0) {
+        float* buffer = cobj->getUpdatedFacesInfo();
+        int len = cobj->getInfoLength();
+        se::Object* info = se::Object::createTypedArray(se::Object::TypedArrayType::FLOAT32, buffer, 4 * len);
+        s.rval().setObject(info);
+        return true;
+    }
+
+    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 0);
+    return false;
+}
+SE_BIND_FUNC(js_ar_ARModule_getUpdatedFacesInfo)
+
+static bool js_ar_ARModule_getRemovedFacesInfo(se::State& s)
+{
+    cc::ar::ARModule* cobj = (cc::ar::ARModule*)s.nativeThisObject();
+    SE_PRECONDITION2(cobj, false, "js_ar_ARModule_getRemovedFacesInfo : Invalid Native Object");
+
+    const auto& args = s.args();
+    size_t argc = args.size();
+    if (argc == 0) {
+        float* buffer = cobj->getRemovedFacesInfo();
+        int len = cobj->getInfoLength();
+        se::Object* info = se::Object::createTypedArray(se::Object::TypedArrayType::FLOAT32, buffer, 4 * len);
+        s.rval().setObject(info);
+        return true;
+    }
+
+    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 0);
+    return false;
+}
+SE_BIND_FUNC(js_ar_ARModule_getRemovedFacesInfo)
+
+static bool js_ar_ARModule_getFaceBlendShapesOf(se::State& s)
+{
+    cc::ar::ARModule* cobj = (cc::ar::ARModule*)s.nativeThisObject();
+    SE_PRECONDITION2(cobj, false, "js_ar_ARModule_getFaceBlendShapesOf : Invalid Native Object");
+
+    const auto& args = s.args();
+    size_t argc = args.size();
+    CC_UNUSED bool ok = true;
+    if (argc == 1) {
+        HolderType<int, false> arg0 = {};
+        ok &= sevalue_to_native(args[0], &arg0, s.thisObject());
+        SE_PRECONDITION2(ok, false, "js_ar_ARModule_getFaceBlendShapesOf : Error processing arguments");
+
+        float* buffer = cobj->getFaceBlendShapesOf(arg0.value());
+        int len = cobj->getInfoLength();
+        se::Object* verticesInfo = se::Object::createTypedArray(se::Object::TypedArrayType::FLOAT32, buffer, 4 * len);
+        s.rval().setObject(verticesInfo);
+        return true;
+    }
+
+    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 0);
+    return false;
+}
+SE_BIND_FUNC(js_ar_ARModule_getFaceBlendShapesOf)
+
 bool register_all_ar_manual(se::Object *obj) {
     __jsb_cc_ar_ARModule_proto->defineFunction("config", _SE(js_ar_ARModule_config));
     __jsb_cc_ar_ARModule_proto->defineFunction("getSupportMask", _SE(js_ar_ARModule_getSupportMask));
@@ -879,6 +986,12 @@ bool register_all_ar_manual(se::Object *obj) {
     __jsb_cc_ar_ARModule_proto->defineFunction("getAddedObjectsInfo", _SE(js_ar_ARModule_getAddedObjectsInfo));
     __jsb_cc_ar_ARModule_proto->defineFunction("getUpdatedObjectsInfo", _SE(js_ar_ARModule_getUpdatedObjectsInfo));
     __jsb_cc_ar_ARModule_proto->defineFunction("getRemovedObjectsInfo", _SE(js_ar_ARModule_getRemovedObjectsInfo));
+
+    __jsb_cc_ar_ARModule_proto->defineFunction("enableFaceTracking", _SE(js_ar_ARModule_enableFaceTracking));
+    __jsb_cc_ar_ARModule_proto->defineFunction("getAddedFacesInfo", _SE(js_ar_ARModule_getAddedFacesInfo));
+    __jsb_cc_ar_ARModule_proto->defineFunction("getUpdatedFacesInfo", _SE(js_ar_ARModule_getUpdatedFacesInfo));
+    __jsb_cc_ar_ARModule_proto->defineFunction("getRemovedFacesInfo", _SE(js_ar_ARModule_getRemovedFacesInfo));
+    __jsb_cc_ar_ARModule_proto->defineFunction("getFaceBlendShapesOf", _SE(js_ar_ARModule_getFaceBlendShapesOf));
 
     return true;
 }
