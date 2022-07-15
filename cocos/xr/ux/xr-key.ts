@@ -1,12 +1,13 @@
 import { ccclass, help, menu, displayOrder, serializable, tooltip, type } from 'cc.decorator';
-import { Label, SpriteFrame } from '../../2d';
-import { Component, ccenum } from "../../core";
+import { Graphics, Label, SpriteFrame } from '../../2d';
+import { Component, ccenum, Vec3 } from "../../core";
 import { Button } from '../../ui/button';
 import { XrUIPressEventType } from '../event/xr-event-handle';
 import { KeyCode } from '../../input/types/key-code';
 import { EventKeyboard } from '../../input/types/event/event-keyboard';
 import { InputEventType } from '../../input/types/event-enum';
 import { xrKeyboardInput } from './xr-keyboard-handle';
+import { XrKeyboardInput } from './xr-keyboard-input';
 
 ccenum(KeyCode);
 
@@ -24,9 +25,6 @@ export class XrKey extends Component {
     private _capitalSpriteFrameOn: SpriteFrame | null = null;
     @serializable
     private _capitalSpriteFrameOff: SpriteFrame | null = null;
-
-    private _button: Button | null = null;
-    private _capsLock = false;
 
     @type(KeyCode)
     @displayOrder(1)
@@ -93,8 +91,18 @@ export class XrKey extends Component {
         return this._capitalSpriteFrameOff;
     }
 
+    private _button: Button | null = null;
+    private _capsLock = false;
+    // only input use
+    private _xrKeyboardInput: XrKeyboardInput | null = null;
+
     onLoad() {
         this._button = this.node.getComponent(Button);
+        if (this._key === KeyCode.NONE) {
+            if (!this._xrKeyboardInput) {
+                this._xrKeyboardInput = this.node.addComponent(XrKeyboardInput);
+            }
+        }
     }
 
     onEnable() {
@@ -112,15 +120,21 @@ export class XrKey extends Component {
     }
 
     protected _xrUIClick() {
-        const eventKeyboard = new EventKeyboard(this._key, InputEventType.KEY_DOWN);
-        xrKeyboardInput.emit(InputEventType.KEY_DOWN, eventKeyboard);
+        if (this._key !== KeyCode.NONE) {
+            const eventKeyboard = new EventKeyboard(this._key, InputEventType.KEY_DOWN);
+            xrKeyboardInput.emit(InputEventType.KEY_DOWN, eventKeyboard);
+        }
     }
 
-    protected _xrUIUnClick() {
-        const eventKeyboard = new EventKeyboard(this._key, InputEventType.KEY_UP);
-        xrKeyboardInput.emit(InputEventType.KEY_UP, eventKeyboard);
-        if (this._key === KeyCode.CAPS_LOCK) {
-            xrKeyboardInput.emit(InputEventType.XR_CAPS_LOCK, eventKeyboard);
+    protected _xrUIUnClick(point: Vec3) {
+        if (this._key === KeyCode.NONE) {
+            this._xrKeyboardInput?.moveCursor(point);
+        } else {
+            const eventKeyboard = new EventKeyboard(this._key, InputEventType.KEY_UP);
+            xrKeyboardInput.emit(InputEventType.KEY_UP, eventKeyboard);
+            if (this._key === KeyCode.CAPS_LOCK) {
+                xrKeyboardInput.emit(InputEventType.XR_CAPS_LOCK, eventKeyboard);
+            }
         }
     }
 
@@ -149,11 +163,11 @@ export class XrKey extends Component {
             if (this._key === KeyCode.CAPS_LOCK) {
                 this._button.normalSprite = this._spriteFrameOn;
                 this._button.pressedSprite = this._spriteFrameOff;
-                this._button.hoverSprite = this._spriteFrameOff;            
+                this._button.hoverSprite = this._spriteFrameOff;
             } else if (this._key > 64 && this._key < 91) {
                 this._button.normalSprite = this._capitalSpriteFrameOff;
                 this._button.pressedSprite = this._capitalSpriteFrameOff;
-                this._button.hoverSprite = this._capitalSpriteFrameOn; 
+                this._button.hoverSprite = this._capitalSpriteFrameOn;
             }
         } else {
             if (this._key === KeyCode.CAPS_LOCK) {

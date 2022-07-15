@@ -55,3 +55,4 @@ export * from './ux/xr-key';
 export * from './ux/xr-keyboard-handle';
 export * from './ux/xr-keyboard-input-field';
 export * from './ux/xr-keyboard';
+export * from './ux/xr-keyboard-input';

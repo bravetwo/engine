@@ -420,6 +420,15 @@ export enum InputEventType {
      * XR键盘初始化事件
      */
      XR_KEYBOARD_INIT = 'xr-keyboard-init',
+
+     /**
+     * @en
+     * The event type for XR keyboard input event
+     *
+     * @zh
+     * XR键盘input事件
+     */
+     XR_KEYBOARD_INPUT = 'xr-keyboard-input'
 }
 
 export type SystemEventTypeUnion = SystemEventType | NodeEventType | InputEventType | string;
