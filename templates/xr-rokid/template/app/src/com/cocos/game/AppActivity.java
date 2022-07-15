@@ -61,6 +61,7 @@ public class AppActivity extends CocosActivity {
             return;
         }
         SDKWrapper.shared().onDestroy();
+        System.exit(0);
     }
 
     @Override
