@@ -31,8 +31,10 @@ bool js_register_cc_render_PipelineRuntime(se::Object *obj); // NOLINT
 
 SE_DECLARE_FUNC(js_render_PipelineRuntime_activate);
 SE_DECLARE_FUNC(js_render_PipelineRuntime_destroy);
+SE_DECLARE_FUNC(js_render_PipelineRuntime_isResetRenderQueue);
 SE_DECLARE_FUNC(js_render_PipelineRuntime_onGlobalPipelineStateChanged);
 SE_DECLARE_FUNC(js_render_PipelineRuntime_render);
+SE_DECLARE_FUNC(js_render_PipelineRuntime_resetRenderQueue);
 SE_DECLARE_FUNC(js_render_PipelineRuntime_setMacroBool);
 SE_DECLARE_FUNC(js_render_PipelineRuntime_setMacroInt);
 SE_DECLARE_FUNC(js_render_PipelineRuntime_setMacroString);

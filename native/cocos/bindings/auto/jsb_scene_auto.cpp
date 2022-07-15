@@ -9149,7 +9149,7 @@ static bool js_scene_RenderWindow_extractRenderCameras(se::State& s) // NOLINT(r
         HolderType<int, false> arg1 = {};
         ok &= sevalue_to_native(args[0], &arg0, s.thisObject());
         ok &= sevalue_to_native(args[1], &arg1, s.thisObject());
-        SE_PRECONDITION2(ok, false, "js_scene_RenderWindow_extractRenderCameras : Error processing arguments");
+        SE_PRECONDITION2(ok, false, "Error processing arguments");
         cobj->extractRenderCameras(arg0.value(), arg1.value());
         return true;
     }
@@ -15822,7 +15822,7 @@ SE_BIND_PROP_SET(js_scene_ICameraInfo_set_pipeline)
 static bool js_scene_ICameraInfo_get_cameraType(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::scene::ICameraInfo>(s);
-    // SE_PRECONDITION2(cobj, false, "js_scene_ICameraInfo_get_cameraType : Invalid Native Object");
+    // SE_PRECONDITION2(cobj, false, "Invalid Native Object");
     if (nullptr == cobj) return true;
 
     CC_UNUSED bool ok = true;
@@ -15838,11 +15838,11 @@ static bool js_scene_ICameraInfo_set_cameraType(se::State& s) // NOLINT(readabil
 {
     const auto& args = s.args();
     auto* cobj = SE_THIS_OBJECT<cc::scene::ICameraInfo>(s);
-    SE_PRECONDITION2(cobj, false, "js_scene_ICameraInfo_set_cameraType : Invalid Native Object");
+    SE_PRECONDITION2(cobj, false, "Invalid Native Object");
 
     CC_UNUSED bool ok = true;
     ok &= sevalue_to_native(args[0], &cobj->cameraType, s.thisObject());
-    SE_PRECONDITION2(ok, false, "js_scene_ICameraInfo_set_cameraType : Error processing new value");
+    SE_PRECONDITION2(ok, false, "Error processing new value");
     return true;
 }
 SE_BIND_PROP_SET(js_scene_ICameraInfo_set_cameraType)
@@ -15850,7 +15850,7 @@ SE_BIND_PROP_SET(js_scene_ICameraInfo_set_cameraType)
 static bool js_scene_ICameraInfo_get_trackingType(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::scene::ICameraInfo>(s);
-    // SE_PRECONDITION2(cobj, false, "js_scene_ICameraInfo_get_trackingType : Invalid Native Object");
+    // SE_PRECONDITION2(cobj, false, "Invalid Native Object");
     if (nullptr == cobj) return true;
 
     CC_UNUSED bool ok = true;
@@ -15866,11 +15866,11 @@ static bool js_scene_ICameraInfo_set_trackingType(se::State& s) // NOLINT(readab
 {
     const auto& args = s.args();
     auto* cobj = SE_THIS_OBJECT<cc::scene::ICameraInfo>(s);
-    SE_PRECONDITION2(cobj, false, "js_scene_ICameraInfo_set_trackingType : Invalid Native Object");
+    SE_PRECONDITION2(cobj, false, "Invalid Native Object");
 
     CC_UNUSED bool ok = true;
     ok &= sevalue_to_native(args[0], &cobj->trackingType, s.thisObject());
-    SE_PRECONDITION2(ok, false, "js_scene_ICameraInfo_set_trackingType : Error processing new value");
+    SE_PRECONDITION2(ok, false, "Error processing new value");
     return true;
 }
 SE_BIND_PROP_SET(js_scene_ICameraInfo_set_trackingType)
@@ -16036,7 +16036,7 @@ se::Class* __jsb_cc_scene_Camera_class = nullptr;  // NOLINT
 static bool js_scene_Camera_attachCamera(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::scene::Camera>(s);
-    // SE_PRECONDITION2(cobj, false, "js_scene_Camera_attachCamera : Invalid Native Object");
+    // SE_PRECONDITION2(cobj, false, "Invalid Native Object");
     if (nullptr == cobj) return true;
     const auto& args = s.args();
     size_t argc = args.size();
@@ -16044,7 +16044,7 @@ static bool js_scene_Camera_attachCamera(se::State& s) // NOLINT(readability-ide
     if (argc == 1) {
         HolderType<cc::scene::RenderWindow*, false> arg0 = {};
         ok &= sevalue_to_native(args[0], &arg0, s.thisObject());
-        SE_PRECONDITION2(ok, false, "js_scene_Camera_attachCamera : Error processing arguments");
+        SE_PRECONDITION2(ok, false, "Error processing arguments");
         cobj->attachCamera(arg0.value());
         return true;
     }
@@ -16204,7 +16204,7 @@ SE_BIND_FUNC(js_scene_Camera_getAspect)
 static bool js_scene_Camera_getCameraType(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::scene::Camera>(s);
-    // SE_PRECONDITION2(cobj, false, "js_scene_Camera_getCameraType : Invalid Native Object");
+    // SE_PRECONDITION2(cobj, false, "Invalid Native Object");
     if (nullptr == cobj) return true;
     const auto& args = s.args();
     size_t argc = args.size();
@@ -16212,7 +16212,7 @@ static bool js_scene_Camera_getCameraType(se::State& s) // NOLINT(readability-id
     if (argc == 0) {
         auto result = static_cast<int>(cobj->getCameraType());
         ok &= nativevalue_to_se(result, s.rval(), nullptr /*ctx*/);
-        SE_PRECONDITION2(ok, false, "js_scene_Camera_getCameraType : Error processing arguments");
+        SE_PRECONDITION2(ok, false, "Error processing arguments");
         SE_HOLD_RETURN_VALUE(result, s.thisObject(), s.rval());
         return true;
     }
@@ -16768,7 +16768,7 @@ SE_BIND_FUNC_AS_PROP_GET(js_scene_Camera_getSurfaceTransform)
 static bool js_scene_Camera_getTrackingType(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::scene::Camera>(s);
-    // SE_PRECONDITION2(cobj, false, "js_scene_Camera_getTrackingType : Invalid Native Object");
+    // SE_PRECONDITION2(cobj, false, "Invalid Native Object");
     if (nullptr == cobj) return true;
     const auto& args = s.args();
     size_t argc = args.size();
@@ -16776,7 +16776,7 @@ static bool js_scene_Camera_getTrackingType(se::State& s) // NOLINT(readability-
     if (argc == 0) {
         auto result = static_cast<unsigned int>(cobj->getTrackingType());
         ok &= nativevalue_to_se(result, s.rval(), nullptr /*ctx*/);
-        SE_PRECONDITION2(ok, false, "js_scene_Camera_getTrackingType : Error processing arguments");
+        SE_PRECONDITION2(ok, false, "Error processing arguments");
         SE_HOLD_RETURN_VALUE(result, s.thisObject(), s.rval());
         return true;
     }
@@ -16907,7 +16907,7 @@ SE_BIND_FUNC(js_scene_Camera_initialize)
 static bool js_scene_Camera_isCullingEnable(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::scene::Camera>(s);
-    // SE_PRECONDITION2(cobj, false, "js_scene_Camera_isCullingEnable : Invalid Native Object");
+    // SE_PRECONDITION2(cobj, false, "Invalid Native Object");
     if (nullptr == cobj) return true;
     const auto& args = s.args();
     size_t argc = args.size();
@@ -16915,7 +16915,7 @@ static bool js_scene_Camera_isCullingEnable(se::State& s) // NOLINT(readability-
     if (argc == 0) {
         bool result = cobj->isCullingEnable();
         ok &= nativevalue_to_se(result, s.rval(), nullptr /*ctx*/);
-        SE_PRECONDITION2(ok, false, "js_scene_Camera_isCullingEnable : Error processing arguments");
+        SE_PRECONDITION2(ok, false, "Error processing arguments");
         SE_HOLD_RETURN_VALUE(result, s.thisObject(), s.rval());
         return true;
     }
@@ -17009,7 +17009,7 @@ SE_BIND_FUNC_AS_PROP_SET(js_scene_Camera_setAperture)
 static bool js_scene_Camera_setCameraType(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::scene::Camera>(s);
-    // SE_PRECONDITION2(cobj, false, "js_scene_Camera_setCameraType : Invalid Native Object");
+    // SE_PRECONDITION2(cobj, false, "Invalid Native Object");
     if (nullptr == cobj) return true;
     const auto& args = s.args();
     size_t argc = args.size();
@@ -17017,7 +17017,7 @@ static bool js_scene_Camera_setCameraType(se::State& s) // NOLINT(readability-id
     if (argc == 1) {
         HolderType<cc::scene::CameraType, true> arg0 = {};
         ok &= sevalue_to_native(args[0], &arg0, s.thisObject());
-        SE_PRECONDITION2(ok, false, "js_scene_Camera_setCameraType : Error processing arguments");
+        SE_PRECONDITION2(ok, false, "Error processing arguments");
         cobj->setCameraType(arg0.value());
         return true;
     }
@@ -17109,7 +17109,7 @@ SE_BIND_FUNC_AS_PROP_SET(js_scene_Camera_setClearStencil)
 static bool js_scene_Camera_setCullingEnable(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::scene::Camera>(s);
-    // SE_PRECONDITION2(cobj, false, "js_scene_Camera_setCullingEnable : Invalid Native Object");
+    // SE_PRECONDITION2(cobj, false, "Invalid Native Object");
     if (nullptr == cobj) return true;
     const auto& args = s.args();
     size_t argc = args.size();
@@ -17117,7 +17117,7 @@ static bool js_scene_Camera_setCullingEnable(se::State& s) // NOLINT(readability
     if (argc == 1) {
         HolderType<bool, false> arg0 = {};
         ok &= sevalue_to_native(args[0], &arg0, s.thisObject());
-        SE_PRECONDITION2(ok, false, "js_scene_Camera_setCullingEnable : Error processing arguments");
+        SE_PRECONDITION2(ok, false, "Error processing arguments");
         cobj->setCullingEnable(arg0.value());
         return true;
     }
@@ -17351,7 +17351,7 @@ SE_BIND_FUNC_AS_PROP_SET(js_scene_Camera_setNode)
 static bool js_scene_Camera_setNodePosition(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::scene::Camera>(s);
-    // SE_PRECONDITION2(cobj, false, "js_scene_Camera_setNodePosition : Invalid Native Object");
+    // SE_PRECONDITION2(cobj, false, "Invalid Native Object");
     if (nullptr == cobj) return true;
     const auto& args = s.args();
     size_t argc = args.size();
@@ -17359,7 +17359,7 @@ static bool js_scene_Camera_setNodePosition(se::State& s) // NOLINT(readability-
     if (argc == 1) {
         HolderType<cc::Vec3, true> arg0 = {};
         ok &= sevalue_to_native(args[0], &arg0, s.thisObject());
-        SE_PRECONDITION2(ok, false, "js_scene_Camera_setNodePosition : Error processing arguments");
+        SE_PRECONDITION2(ok, false, "Error processing arguments");
         cobj->setNodePosition(arg0.value());
         return true;
     }
@@ -17491,7 +17491,7 @@ SE_BIND_FUNC_AS_PROP_SET(js_scene_Camera_setShutter)
 static bool js_scene_Camera_setTrackingType(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::scene::Camera>(s);
-    // SE_PRECONDITION2(cobj, false, "js_scene_Camera_setTrackingType : Invalid Native Object");
+    // SE_PRECONDITION2(cobj, false, "Invalid Native Object");
     if (nullptr == cobj) return true;
     const auto& args = s.args();
     size_t argc = args.size();
@@ -17499,7 +17499,7 @@ static bool js_scene_Camera_setTrackingType(se::State& s) // NOLINT(readability-
     if (argc == 1) {
         HolderType<cc::scene::TrackingType, true> arg0 = {};
         ok &= sevalue_to_native(args[0], &arg0, s.thisObject());
-        SE_PRECONDITION2(ok, false, "js_scene_Camera_setTrackingType : Error processing arguments");
+        SE_PRECONDITION2(ok, false, "Error processing arguments");
         cobj->setTrackingType(arg0.value());
         return true;
     }
@@ -17632,7 +17632,7 @@ static bool js_scene_Camera_update(se::State& s) // NOLINT(readability-identifie
         HolderType<int, false> arg1 = {};
         ok &= sevalue_to_native(args[0], &arg0, s.thisObject());
         ok &= sevalue_to_native(args[1], &arg1, s.thisObject());
-        SE_PRECONDITION2(ok, false, "js_scene_Camera_update : Error processing arguments");
+        SE_PRECONDITION2(ok, false, "Error processing arguments");
         cobj->update(arg0.value(), arg1.value());
         return true;
     }
