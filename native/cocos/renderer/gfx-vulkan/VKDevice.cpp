@@ -50,7 +50,6 @@
 #include "gfx-base/SPIRVUtils.h"
 #include "profiler/Profiler.h"
 #include "platform/BasePlatform.h"
-#include "platform/java/modules/XRInterface.h"
 
 #if CC_SWAPPY_ENABLED
     #include "swappy/swappyVk.h"
@@ -97,8 +96,10 @@ CCVKDevice::~CCVKDevice() {
 }
 
 bool CCVKDevice::doInit(const DeviceInfo & /*info*/) {
-    IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
-    if(xr) xr->preGFXDeviceInitialize(_api);
+    if (!_xr)
+        _xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
+    if (_xr)
+        _xr->preGFXDeviceInitialize(_api);
     _gpuContext = ccnew CCVKGPUContext;
     if (!_gpuContext->initialize()) {
         CC_SAFE_DESTROY_AND_DELETE(_gpuContext)
@@ -221,8 +222,8 @@ bool CCVKDevice::doInit(const DeviceInfo & /*info*/) {
         }
     }
 
-    if (xr) {
-        _gpuDevice->vkDevice = xr->createXRVulkanDevice(&deviceCreateInfo);
+    if (_xr) {
+        _gpuDevice->vkDevice = _xr->createXRVulkanDevice(&deviceCreateInfo);
     } else {
         VK_CHECK(vkCreateDevice(_gpuContext->physicalDevice, &deviceCreateInfo, nullptr, &_gpuDevice->vkDevice));
     }
@@ -484,10 +485,10 @@ bool CCVKDevice::doInit(const DeviceInfo & /*info*/) {
     CC_LOG_INFO("DEVICE_EXTENSIONS: %s", deviceExtensions.c_str());
     CC_LOG_INFO("COMPRESSED_FORMATS: %s", compressedFmts.c_str());
 
-    if(xr) {
+    if(_xr) {
         cc::gfx::CCVKGPUQueue* vkQueue = static_cast<cc::gfx::CCVKQueue *>(getQueue())->gpuQueue();
-        xr->setXRConfig(xr::XRConfigKey::VK_QUEUE_FAMILY_INDEX, (int) vkQueue->queueFamilyIndex);
-        xr->postGFXDeviceInitialize(_api);
+        _xr->setXRConfig(xr::XRConfigKey::VK_QUEUE_FAMILY_INDEX, (int) vkQueue->queueFamilyIndex);
+        _xr->postGFXDeviceInitialize(_api);
     }
     return true;
 }
@@ -550,7 +551,7 @@ void CCVKDevice::doDestroy() {
         }
         cmdFuncCCVKDestroySampler(_gpuDevice, &_gpuDevice->defaultSampler);
 
-        if (_gpuDevice->memoryAllocator != VK_NULL_HANDLE) {
+        if (!_xr && _gpuDevice->memoryAllocator != VK_NULL_HANDLE) {
             VmaStats stats;
             vmaCalculateStats(_gpuDevice->memoryAllocator, &stats);
             CC_LOG_INFO("Total device memory leaked: %d bytes.", stats.total.usedBytes);
@@ -622,15 +623,14 @@ void CCVKDevice::acquire(Swapchain *const *swapchains, uint32_t count) {
     vkSwapchains.clear();
     vkAcquireBarriers.resize(count, acquireBarrier);
     vkPresentBarriers.resize(count, presentBarrier);
-    static IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
     for (uint32_t i = 0U; i < count; ++i) {
         auto *swapchain = static_cast<CCVKSwapchain *>(swapchains[i]);
         if (swapchain->gpuSwapchain()->lastPresentResult == VK_NOT_READY) {
             if (!swapchain->checkSwapchainStatus()) continue;
         }
 
-        if(xr) {
-            xr::XRSwapchain xrSwapchain = xr->doGFXDeviceAcquire(_api);
+        if(_xr) {
+            xr::XRSwapchain xrSwapchain = _xr->doGFXDeviceAcquire(_api);
             swapchain->gpuSwapchain()->curImageIndex = xrSwapchain.swapchainImageIndex;
         }
         if(swapchain->gpuSwapchain()->vkSwapchain)
@@ -672,8 +672,7 @@ void CCVKDevice::acquire(Swapchain *const *swapchains, uint32_t count) {
 
 void CCVKDevice::present() {
     CC_PROFILE(CCVKDevicePresent);
-    static IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
-    bool isGFXDeviceNeedsPresent = xr ? xr->isGFXDeviceNeedsPresent(_api) : true;
+    bool isGFXDeviceNeedsPresent = _xr ? _xr->isGFXDeviceNeedsPresent(_api) : true;
     auto *queue = static_cast<CCVKQueue *>(_queue);
     _numDrawCalls = queue->_numDrawCalls;
     _numInstances = queue->_numInstances;
@@ -720,8 +719,8 @@ void CCVKDevice::present() {
     gpuFencePool()->reset();
     gpuRecycleBin()->clear();
     gpuStagingBufferPool()->reset();
-    if (xr) {
-        xr->postGFXDevicePresent(_api);
+    if (_xr) {
+        _xr->postGFXDevicePresent(_api);
     }
 }
 

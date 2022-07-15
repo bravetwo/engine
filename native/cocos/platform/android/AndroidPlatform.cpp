@@ -476,7 +476,7 @@ int AndroidPlatform::init() {
 #if USE_XR
     registerInterface(std::make_shared<XRInterface>());
 #endif
-    static IXRInterface *xr = getInterface<IXRInterface>();
+    IXRInterface *xr = getInterface<IXRInterface>();
     if (xr) {
         JniHelper::getEnv();
         xr->initialize(JniHelper::getJavaVM(), getActivity());

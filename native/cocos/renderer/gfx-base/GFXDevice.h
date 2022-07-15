@@ -187,6 +187,7 @@ protected:
     ccstd::unordered_map<TextureBarrierInfo, TextureBarrier *, Hasher<TextureBarrierInfo>> _textureBarriers;
     ccstd::unordered_map<BufferBarrierInfo, BufferBarrier *, Hasher<BufferBarrierInfo>> _bufferBarriers;
 
+    IXRInterface *_xr{nullptr};
 private:
     ccstd::vector<Swapchain *> _swapchains; // weak reference
 };
@@ -212,15 +213,16 @@ QueryPool *Device::createQueryPool(const QueryPoolInfo &info) {
 }
 
 Swapchain *Device::createSwapchain(const SwapchainInfo &info) {
-    IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
-    if (xr) {
-        xr->createXRSwapchains();
-        int viewCount = xr->getXRConfig(xr::XRConfigKey::VIEW_COUNT).getInt();
-        int swapChainWidth = xr->getXRConfig(xr::XRConfigKey::SWAPCHAIN_WIDTH).getInt();
-        int swapChainHeight = xr->getXRConfig(xr::XRConfigKey::SWAPCHAIN_HEIGHT).getInt();
+    if (!_xr)
+        _xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
+    if (_xr) {
+        _xr->createXRSwapchains();
+        int viewCount = _xr->getXRConfig(xr::XRConfigKey::VIEW_COUNT).getInt();
+        int swapChainWidth = _xr->getXRConfig(xr::XRConfigKey::SWAPCHAIN_WIDTH).getInt();
+        int swapChainHeight = _xr->getXRConfig(xr::XRConfigKey::SWAPCHAIN_HEIGHT).getInt();
         for (int i = 0; i < viewCount; i++) {
             Swapchain *res = createSwapchain();
-            xr->updateXRSwapchainTypedID(i, res->getTypedID());
+            _xr->updateXRSwapchainTypedID(i, res->getTypedID());
             SwapchainInfo swapchain_info;
             swapchain_info.copy(info);
             swapchain_info.width = swapChainWidth;

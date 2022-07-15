@@ -145,8 +145,9 @@ void DeviceAgent::acquire(Swapchain *const *swapchains, uint32_t count) {
 }
 
 void DeviceAgent::present() {
-    static IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
-    if (xr) {
+    if (!_xr)
+        _xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
+    if (_xr) {
         ENQUEUE_MESSAGE_1(
             _mainMessageQueue, DevicePresent,
             actor, _actor,

@@ -34,7 +34,6 @@
     #include "renderer/pipeline/GeometryRenderer.h"
 #endif
 #include "platform/BasePlatform.h"
-#include "platform/java/modules/XRInterface.h"
 
 namespace cc {
 namespace scene {
@@ -162,8 +161,9 @@ void Camera::update(bool forceUpdate /*false*/, int xrEye /*-1*/) {
         return;
     }
 
-    static IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
-    if (xr && xrEye >= 0) {
+    if(_xr)
+        _xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
+    if (_xr && xrEye >= 0) {
         if (_proj == CameraProjection::PERSPECTIVE) {
             _isProjDirty = true;
         }
@@ -200,10 +200,10 @@ void Camera::update(bool forceUpdate /*false*/, int xrEye /*-1*/) {
             if (xrEye < 0 || _cameraType == CameraType::DEFAULT) {
                 Mat4::createPerspective(_fov, _aspect, _nearClip, _farClip,
                                         _fovAxis == CameraFOVAxis::VERTICAL, _device->getCapabilities().clipSpaceMinZ, projectionSignY, static_cast<int>(orientation), &_matProj);
-            } else if (xr) {
-                if (xr->getXRConfig(xr::XRConfigKey::SESSION_RUNNING).getBool()) {
+            } else if (_xr) {
+                if (_xr->getXRConfig(xr::XRConfigKey::SESSION_RUNNING).getBool()) {
                     // xr flow
-                    const auto &projFloat = xr->getXRViewProjectionData(xrEye, _nearClip, _farClip);
+                    const auto &projFloat = _xr->getXRViewProjectionData(xrEye, _nearClip, _farClip);
                     int i = 0;
                     for (auto value : projFloat) {
                         _matProj.m[i] = value;
@@ -239,8 +239,9 @@ void Camera::changeTargetWindow(RenderWindow *window) {
         _window->detachCamera(this);
     }
 
-    static IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
-    if (xr) {
+    if(!_xr)
+        _xr= BasePlatform::getPlatform()->getInterface<class IXRInterface>();
+    if (_xr) {
         if (_cameraType == CameraType::MAIN || _cameraType == CameraType::DEFAULT) {
             auto windows = Root::getInstance()->getWindows();
             if (window) {

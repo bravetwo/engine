@@ -125,6 +125,7 @@ protected:
 #endif
 
     ccstd::unordered_set<CommandBufferAgent *> _cmdBuffRefs;
+    IXRInterface *_xr{nullptr};
 };
 
 } // namespace gfx

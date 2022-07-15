@@ -40,6 +40,7 @@
 #include "math/Vec4.h"
 #include "renderer/gfx-base/GFXDef-common.h"
 #include "renderer/pipeline/Define.h"
+#include "platform/java/modules/XRInterface.h"
 
 namespace cc {
 class Node;
@@ -412,6 +413,7 @@ private:
     uint32_t _visibility = pipeline::CAMERA_DEFAULT_MASK;
     float _exposure{0.F};
     uint32_t _clearStencil{0};
+    IXRInterface *_xr{nullptr};
 
     CC_DISALLOW_COPY_MOVE_ASSIGN(Camera);
 };

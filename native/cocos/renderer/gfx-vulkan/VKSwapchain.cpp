@@ -32,7 +32,6 @@
 #include "VKTexture.h"
 #include "VKUtils.h"
 #include "platform/BasePlatform.h"
-#include "platform/java/modules/XRInterface.h"
 
 #include "application/ApplicationManager.h"
 #include "platform/interfaces/modules/ISystemWindow.h"
@@ -59,7 +58,8 @@ void CCVKSwapchain::doInit(const SwapchainInfo &info) {
     const auto *gpuContext = CCVKDevice::getInstance()->gpuContext();
     _gpuSwapchain = ccnew CCVKGPUSwapchain;
     gpuDevice->swapchains.insert(_gpuSwapchain);
-    IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
+    if (!_xr)
+        _xr = BasePlatform::getPlatform()->getInterface<cc::IXRInterface>();
 
     createVkSurface();
 
@@ -68,7 +68,7 @@ void CCVKSwapchain::doInit(const SwapchainInfo &info) {
     uint32_t queueFamilyPropertiesCount = utils::toUint(gpuContext->queueFamilyProperties.size());
     _gpuSwapchain->queueFamilyPresentables.resize(queueFamilyPropertiesCount);
     for (uint32_t propertyIndex = 0U; propertyIndex < queueFamilyPropertiesCount; propertyIndex++) {
-        if (xr) {
+        if (_xr) {
             _gpuSwapchain->queueFamilyPresentables[propertyIndex] = true;
         } else {
             vkGetPhysicalDeviceSurfaceSupportKHR(gpuContext->physicalDevice, propertyIndex,
@@ -90,7 +90,7 @@ void CCVKSwapchain::doInit(const SwapchainInfo &info) {
 
     Format colorFmt = Format::BGRA8;
     Format depthStencilFmt = Format::DEPTH_STENCIL;
-    if(xr) {
+    if(_xr) {
 #ifdef VK_USE_PLATFORM_ANDROID_KHR
         colorFmt               = Format::SRGB8_A8;
 #endif
@@ -276,14 +276,13 @@ void CCVKSwapchain::doResize(uint32_t width, uint32_t height, SurfaceTransform /
 }
 
 bool CCVKSwapchain::checkSwapchainStatus(uint32_t width, uint32_t height) {
-    static IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
     uint32_t newWidth = width;
     uint32_t newHeight = height;
     uint32_t imageCount = 0;
-    if (xr) {
+    if (_xr) {
         newWidth = static_cast<CCVKTexture *>(_colorTexture.get())->_info.width;
         newHeight = static_cast<CCVKTexture *>(_colorTexture.get())->_info.height;
-        xr->getXRSwapchainVkImages(_gpuSwapchain->swapchainImages, _typedID);
+        _xr->getXRSwapchainVkImages(_gpuSwapchain->swapchainImages, _typedID);
         imageCount = _gpuSwapchain->swapchainImages.size();
         _gpuSwapchain->createInfo.imageExtent.width = newWidth;
         _gpuSwapchain->createInfo.imageExtent.height = newHeight;
@@ -451,8 +450,7 @@ void CCVKSwapchain::doCreateSurface(void *windowHandle) { // NOLINT
 }
 
 void CCVKSwapchain::createVkSurface() {
-    IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
-    if (xr) {
+    if (_xr) {
         _gpuSwapchain->vkSurface = VK_NULL_HANDLE;
         return;
     }

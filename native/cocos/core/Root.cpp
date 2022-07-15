@@ -327,7 +327,7 @@ void Root::frameMove(float deltaTime, int32_t totalFrames) {
         _fpsTime = 0.0;
     }
 
-    static IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
+    IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
     if (xr) {
         if (xr->isRenderAllowable()) {
             auto swapchains = gfx::Device::getInstance()->getSwapchains();
