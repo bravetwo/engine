@@ -28,7 +28,7 @@
  * @module component/xr
  */
 
-import { ccclass, help, menu, displayOrder, type, serializable, tooltip, executeInEditMode} from 'cc.decorator';
+import { ccclass, help, menu, displayOrder, type, serializable, tooltip} from 'cc.decorator';
 import { Node } from '../../core/scene-graph/node';
 import { Vec2, Vec3 } from '../../core';
 import { XrInputDeviceType } from '../device/xr-controller';
@@ -36,7 +36,6 @@ import { input, Input } from '../../input/input';
 import { EventHandle } from '../../input/types/event/event-handle';
 import { InputControl_Type, LocomotionBase } from './locomotion-base';
 import { EventGamepad } from '../../input/types/event/event-gamepad';
-import { InputEventType } from '../../input/types/event-enum';
 
 /**
  * @en 连续移动控制 
@@ -52,7 +51,7 @@ export class ContinuousMover extends LocomotionBase {
     protected _forwardSource: Node | null = null;
 
     private _isMove: boolean = false;
-    private _xrSessionNode: Node | undefined = undefined;
+    private _xrSessionNode: Node | null = null;
     private _move: Vec2 = new Vec2(0, 0);
 
     @displayOrder(4)
@@ -115,7 +114,7 @@ export class ContinuousMover extends LocomotionBase {
     }
 
     private _MoveOn(event: Vec2) {
-        const xrAgentNode = this._checker?.getSession(this.uuid);
+        const xrAgentNode = this._checker?.XR_Agent;
         if (xrAgentNode) {
             this._xrSessionNode = xrAgentNode;
         }
@@ -141,7 +140,6 @@ export class ContinuousMover extends LocomotionBase {
         if (!this._xrSessionNode || !this._isMove) {
             return;
         }
-
         const position = this._xrSessionNode.getPosition();
         Vec3.scaleAndAdd(position, position, this._getDirection(this._move.x, 0, -this._move.y), this._moveSpeed * dt);
         this._xrSessionNode.setPosition(position);

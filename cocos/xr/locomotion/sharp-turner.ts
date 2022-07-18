@@ -28,7 +28,7 @@
  * @module component/xr
  */
 
-import { ccclass, help, menu, displayOrder, type, serializable, tooltip, executeInEditMode} from 'cc.decorator';
+import { ccclass, help, menu, displayOrder, type, serializable, tooltip} from 'cc.decorator';
 import { Node } from '../../core/scene-graph/node';
 import { ccenum, Quat, Vec2, Vec3 } from '../../core';
 import { XrInputDeviceType } from '../device/xr-controller';
@@ -66,7 +66,7 @@ export class SharpTurner extends LocomotionBase {
     protected _activationTimeout: number = 0.5;
 
     private _waitEnd: boolean = true;
-    private _xrSessionNode: Node | undefined = undefined;
+    private _xrSessionNode: Node | null = null;
     private _stickClickState = 0;
 
     @displayOrder(4)
@@ -148,7 +148,7 @@ export class SharpTurner extends LocomotionBase {
     }
 
     private _turnMove(event: Vec2) {
-        const xrAgentNode = this._checker?.getSession(this.uuid);
+        const xrAgentNode = this._checker?.XR_Agent;
         if (xrAgentNode) {
             this._xrSessionNode = xrAgentNode;
         }
@@ -170,7 +170,7 @@ export class SharpTurner extends LocomotionBase {
     }
 
     private _turnAround() {
-        const xrAgentNode = this._checker?.getSession(this.uuid);
+        const xrAgentNode = this._checker?.XR_Agent;
         if (xrAgentNode) {
             this._xrSessionNode = xrAgentNode;
         }

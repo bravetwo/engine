@@ -28,7 +28,7 @@
  * @module component/xr
  */
 
-import { ccclass, help, menu, displayOrder, serializable, tooltip, executeInEditMode} from 'cc.decorator';
+import { ccclass, help, menu, displayOrder, serializable, tooltip} from 'cc.decorator';
 import { Node } from '../../core/scene-graph/node';
 import { Quat, Vec2, Vec3 } from '../../core';
 import { XrInputDeviceType } from '../device/xr-controller';
@@ -56,7 +56,7 @@ export class ContinuousTurner extends LocomotionBase {
     protected _turnSpeed = 60;
 
     private _isTurn: TurnDir = TurnDir.OFF;
-    private _xrSessionNode: Node | undefined = undefined;
+    private _xrSessionNode: Node | null = null;
 
     @displayOrder(4)
     @tooltip('i18n:xr.continuous_turner.turnSpeed')
@@ -106,7 +106,7 @@ export class ContinuousTurner extends LocomotionBase {
     }
 
     private _turnOn(event: Vec2) {
-        const xrAgentNode = this._checker?.getSession(this.uuid);
+        const xrAgentNode = this._checker?.XR_Agent;
         if (xrAgentNode) {
             this._xrSessionNode = xrAgentNode;
         }
