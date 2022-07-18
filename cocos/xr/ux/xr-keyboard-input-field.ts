@@ -47,6 +47,12 @@ export class XRKeyboardInputField extends Component {
         this._maxContextLength = len;
     }
 
+    onEnable() {
+        if (this._xrKeyboard) {
+            this._xrKeyboard.node.active = false;
+        }
+    }
+
     public show() {
         if (this._xrKeyboard && this._suspendTransform) {
             if (this._keyboardNode) {

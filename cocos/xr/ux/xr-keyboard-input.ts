@@ -7,6 +7,8 @@ import { EventKeyboard } from "../../input/types/event/event-keyboard";
 import { KeyCode } from "../../input/types/key-code";
 import { Vec3 } from "../../core";
 
+const MAX_SIZE = 2048;
+
 enum StringChangeType {
     INIT = 0,
     DELETE = 1,
@@ -71,19 +73,30 @@ export class XrKeyboardInput extends Component {
     }
 
     public moveCursor(point: Vec3) {
-        if (this._stringWidths.length <= 0) {
+        if (this._stringWidths.length <= 0 || !this._label) {
             return;
         }
         let pos = new Vec3;
-        this._label?.node.inverseTransformPoint(pos, point);
+        this._label.node.inverseTransformPoint(pos, point);
+        var stringWidth = 0;
+        var posx = pos.x;
+        if (this._label.contextWidth >= MAX_SIZE) {
+            posx = pos.x + this._label.contextWidth - MAX_SIZE;
+        }
+
         for (var i = 0; i < this._stringWidths.length; i++) {
-            if (this._stringWidths[i] > pos.x) {
+            if (this._stringWidths[i] > posx) {
                 break;
             }
         }
         this._pos = i - 1;
-        const posX = (this._pos === -1) ? 0 : this._stringWidths[this._pos];
-        this._cursorNode.setPosition(posX, this._cursorNode.position.y, this._cursorNode.position.z);
+        stringWidth = (this._pos === -1) ? 0 : this._stringWidths[this._pos];
+
+        if (this._label.contextWidth >= MAX_SIZE) {
+            stringWidth = stringWidth - (this._label.contextWidth - MAX_SIZE);
+        }
+
+        this._cursorNode.setPosition(stringWidth, this._cursorNode.position.y, this._cursorNode.position.z);
     }
 
     protected _keyUp(event: EventKeyboard) {
@@ -117,11 +130,10 @@ export class XrKeyboardInput extends Component {
             return;
         }
         this._label.string = str;
-
+        this._label.updateRenderData(true);
         if (type === StringChangeType.DELETE) {
             this._stringDeleteWidth();
         } else {
-            this._label.updateRenderData(true);
             if (type === StringChangeType.ADD) {
                 this._stringAddWidth();
             } else {
@@ -130,6 +142,7 @@ export class XrKeyboardInput extends Component {
         }
 
         let stringWidth = (this._pos === -1) ? 0 : this._stringWidths[this._pos];
+        stringWidth = this._label.contextWidth > MAX_SIZE ? stringWidth - (this._label.contextWidth - MAX_SIZE) : stringWidth;
 
         this._cursorNode.setPosition(stringWidth, this._cursorNode.position.y, this._cursorNode.position.z);
     }
@@ -148,11 +161,11 @@ export class XrKeyboardInput extends Component {
     }
 
     private _stringAddWidth() {
-        if (!this._label?.node._uiProps.uiTransformComp) {
+        if (!this._label) {
             return;
         }
         if (this._stringWidths.length > 0) {
-            const d = this._label.node._uiProps.uiTransformComp.width - this._stringWidths[this._stringWidths.length - 1];
+            const d = this._label.contextWidth - this._stringWidths[this._stringWidths.length - 1];
             for (let i = this._stringWidths.length - 1; i > this._pos - 1; --i) {
                 if (i === 0) {
                     this._stringWidths[i] = d;
@@ -161,7 +174,7 @@ export class XrKeyboardInput extends Component {
                 }
             }
         }
-        this._stringWidths.push(this._label.node._uiProps.uiTransformComp.width);
+        this._stringWidths.push(this._label.contextWidth);
     }
 
     private _stringInitWidth() {
