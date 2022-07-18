@@ -702,7 +702,7 @@ void CCVKDevice::present() {
         presentInfo.pSwapchains = vkSwapchains.data();
         presentInfo.pImageIndices = vkSwapchainIndices.data();
 
-        VkResult res = isGFXDeviceNeedsPresent ? VK_SUCCESS : vkCCPresentFunc(queue->gpuQueue()->vkQueue, &presentInfo);
+        VkResult res = !isGFXDeviceNeedsPresent ? VK_SUCCESS : vkCCPresentFunc(queue->gpuQueue()->vkQueue, &presentInfo);
         for (auto *gpuSwapchain : gpuSwapchains) {
             gpuSwapchain->lastPresentResult = res;
         }
