@@ -27,11 +27,21 @@
 
 #include "ar/ARModule.h"
 
+#define USE_AR_NDK
+
 #if CC_PLATFORM == CC_PLATFORM_ANDROID
 //#include "ar/android/ARAndroidAPIImpl.h"
 //using ARAPIImpl = cc::ar::ARAndroidAPIImpl;
+
+#ifdef USE_AR_NDK
+#include "platform/android/AndroidPlatform.h"
+#include "platform/BasePlatform.h"
+#include "ar/ARNDKLib.h"
+using ARAPIImpl = cc::ar::ARNDKLib;
+#else
 #include "ar/ARAndroidLib.h"
 using ARAPIImpl = cc::ar::ARAndroidLib;
+#endif
 
 #elif CC_PLATFORM == CC_PLATFORM_MAC_IOS
 //#include "ar/ios/ARKitAPIImpl.h"
@@ -74,7 +84,15 @@ int ARModule::getSupportMask() {
 }
 
 void ARModule::start() {
+#ifdef USE_AR_NDK
+#if CC_PLATFORM == CC_PLATFORM_ANDROID
+    auto *platform = cc::BasePlatform::getPlatform();
+    auto *androidPlatform = static_cast<cc::AndroidPlatform *>(platform);
+    _impl->start(androidPlatform->getActivity());
+#endif
+#else
     _impl->start();
+#endif
 }
 
 void ARModule::onResume() {
@@ -83,11 +101,6 @@ void ARModule::onResume() {
 
 void ARModule::onPause() {
     _impl->pause();
-}
-
-void ARModule::beforeUpdate() {
-    //_impl->beforeUpdate();
-    //_impl->update();
 }
 
 void ARModule::update() {
@@ -129,43 +142,6 @@ uint8_t* ARModule::getCameraDepthBuffer() const {
 }
 
 
-void ARModule::enablePlane(bool enable) const {
-    return _impl->enablePlane(enable);
-}
-
-void ARModule::setPlaneDetectionMode(int mode) const {
-    return _impl->setPlaneDetectionMode(mode);
-}
-
-void ARModule::setPlaneMaxTrackingNumber(int count) const {
-    return _impl->setPlaneMaxTrackingNumber(count);
-}
-
-int ARModule::getAddedPlanesCount() const {
-    //return _impl->getAddedPlanesCount();
-    return _impl->getInfoLength() / 12;
-}
-int ARModule::getRemovedPlanesCount() const {
-    //return _impl->getRemovedPlanesCount();
-    return _impl->getInfoLength();
-}
-int ARModule::getUpdatedPlanesCount() const {
-    //return _impl->getUpdatedPlanesCount();
-    return _impl->getInfoLength() / 12;
-}
-void ARModule::updatePlanesInfo() const {
-    _impl->updatePlanesInfo();
-}
-float* ARModule::getAddedPlanesInfo() const {
-    return _impl->getAddedPlanesInfo();
-}
-
-int* ARModule::getRemovedPlanesInfo() const {
-    return _impl->getRemovedPlanesInfo();
-}
-float* ARModule::getUpdatedPlanesInfo() const {
-    return _impl->getUpdatedPlanesInfo();
-}
 
 int ARModule::getInfoLength() const {
     return _impl->getInfoLength();
@@ -190,6 +166,44 @@ int ARModule::getHitId() const {
     return _impl->getRaycastTrackableId();
 }
 
+#pragma region plane detection
+void ARModule::enablePlane(bool enable) const {
+    return _impl->enablePlane(enable);
+}
+
+void ARModule::setPlaneDetectionMode(int mode) const {
+    return _impl->setPlaneDetectionMode(mode);
+}
+
+void ARModule::setPlaneMaxTrackingNumber(int count) const {
+    return _impl->setPlaneMaxTrackingNumber(count);
+}
+
+int ARModule::getAddedPlanesCount() const {
+    //return _impl->getAddedPlanesCount();
+    return _impl->getInfoLength() / 12;
+}
+int ARModule::getRemovedPlanesCount() const {
+    //return _impl->getRemovedPlanesCount();
+    return _impl->getInfoLength();
+}
+int ARModule::getUpdatedPlanesCount() const {
+    //return _impl->getUpdatedPlanesCount();
+    return _impl->getInfoLength() / 12;
+}
+float* ARModule::getAddedPlanesInfo() const {
+    return _impl->getAddedPlanesInfo();
+}
+
+int* ARModule::getRemovedPlanesInfo() const {
+    return _impl->getRemovedPlanesInfo();
+}
+float* ARModule::getUpdatedPlanesInfo() const {
+    return _impl->getUpdatedPlanesInfo();
+}
+#pragma endregion // plane detection
+
+#pragma region scene mesh reconstruction
 void ARModule::enableSceneMesh(bool enable) const {
     return _impl->enableSceneMesh(enable);
 }
@@ -214,8 +228,9 @@ int* ARModule::getSceneMeshTriangleIndices(int meshRef) const {
 void ARModule::endRequireSceneMesh() const {
     return _impl->endRequireSceneMesh();
 }
+#pragma endregion // scene mesh reconstruction
 
-// Image Tracking
+#pragma region image recognition & tracking
 void ARModule::enableImageTracking(bool enable) const {
     _impl->enableImageTracking(enable);
 }
@@ -234,8 +249,9 @@ float* ARModule::getUpdatedImagesInfo() const {
 float* ARModule::getRemovedImagesInfo() const {
     return _impl->getRemovedImagesInfo();
 }
+#pragma endregion // image recognition & tracking
 
-// Object Tracking
+#pragma region object recognition & tracking
 void ARModule::enableObjectTracking(bool enable) const {
     _impl->enableObjectTracking(enable);
 }
@@ -251,8 +267,9 @@ float* ARModule::getUpdatedObjectsInfo() const {
 float* ARModule::getRemovedObjectsInfo() const {
     return _impl->getRemovedObjectsInfo();
 }
+#pragma endregion // object recognition & tracking
 
-// face detection & tracking
+#pragma region face detection & tracking
 void ARModule::enableFaceTracking(bool enable) const {
     _impl->enableFaceTracking(enable);
 }
@@ -268,6 +285,7 @@ float* ARModule::getRemovedFacesInfo() const {
 float* ARModule::getFaceBlendShapesOf(int faceRef)  const {
     return _impl->getFaceBlendShapesOf(faceRef);
 }
+#pragma endregion // face detection & tracking
 
 } // namespace ar
 } // namespace cc

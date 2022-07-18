@@ -52,7 +52,7 @@ public:
     void start();
     void onResume();
     void onPause();
-    void beforeUpdate();
+    //void beforeUpdate();
     void update();
     bool checkStart();
     int getAPIState();
@@ -65,17 +65,6 @@ public:
     void* getCameraTextureRef() const;
     uint8_t* getCameraDepthBuffer() const;
 
-    void enablePlane(bool enable) const;
-    void setPlaneDetectionMode(int mode) const;
-    void setPlaneMaxTrackingNumber(int count) const;
-    
-    int getAddedPlanesCount() const;
-    int getRemovedPlanesCount() const;
-    int getUpdatedPlanesCount() const;
-    void updatePlanesInfo() const;
-    float* getAddedPlanesInfo() const;
-    int* getRemovedPlanesInfo() const;
-    float* getUpdatedPlanesInfo() const;
     int getInfoLength() const;
     
     int tryHitAttachAnchor(int trackableId) const;
@@ -84,6 +73,20 @@ public:
     float* getHitResult() const;
     int getHitId() const;
     
+    // plane detection
+    void enablePlane(bool enable) const;
+    void setPlaneDetectionMode(int mode) const;
+    void setPlaneMaxTrackingNumber(int count) const;
+    
+    int getAddedPlanesCount() const;
+    int getRemovedPlanesCount() const;
+    int getUpdatedPlanesCount() const;
+    //void updatePlanesInfo() const;
+    float* getAddedPlanesInfo() const;
+    int* getRemovedPlanesInfo() const;
+    float* getUpdatedPlanesInfo() const;
+
+    // scene mesh reconstruction
     void enableSceneMesh(bool enable) const;
     float* getAddedSceneMesh() const;
     float* getUpdatedSceneMesh() const;
@@ -93,6 +96,7 @@ public:
     int* getSceneMeshTriangleIndices(int meshRef) const;
     void endRequireSceneMesh() const;
 
+    // image recognition & tracking
     void enableImageTracking(bool enable) const;
     void addImageToLib(const std::string& imageName) const;
     void setMaxTrackingNumber(int number) const;
@@ -100,12 +104,14 @@ public:
     float* getUpdatedImagesInfo() const;
     float* getRemovedImagesInfo() const;
 
+    // object recognition & tracking
     void enableObjectTracking(bool enable) const;
     void addObjectToLib(const std::string& imageName) const;
     float* getAddedObjectsInfo() const;
     float* getUpdatedObjectsInfo() const;
     float* getRemovedObjectsInfo() const;
 
+    // face detection & tracking
     void enableFaceTracking(bool enable) const;
     float* getAddedFacesInfo() const;
     float* getUpdatedFacesInfo() const;
