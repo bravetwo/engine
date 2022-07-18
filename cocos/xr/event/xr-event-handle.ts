@@ -29,7 +29,6 @@
  */
 
 import { Vec3 } from '../../core/math';
-import { EventHandle } from '../../input/types/event/event-handle';
 import { Node } from '../../core/scene-graph/node';
 import { Event } from '../../input/types';
 

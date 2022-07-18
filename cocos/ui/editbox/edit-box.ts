@@ -391,7 +391,6 @@ export class EditBox extends Component {
 
     private _isLabelVisible = false;
     private _xrKeyBoardInputField: XRKeyboardInputField | null = null;
-    private _capsLock = false;
 
     public __preload () {
         this._init();
@@ -779,7 +778,6 @@ export class EditBox extends Component {
         if (this._xrKeyBoardInputField?.show()) {
             xrKeyboardInput.on(InputEventType.KEY_UP, this._xrKeyBoardUp, this);
             xrKeyboardInput.emit(InputEventType.XR_KEYBOARD_INIT);
-            this._capsLock = false;
         }
     }
 
