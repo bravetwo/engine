@@ -27,7 +27,7 @@ import { RenderingSubMesh } from '../../assets/rendering-sub-mesh';
 import { RenderPriority, UNIFORM_REFLECTION_TEXTURE_BINDING, UNIFORM_REFLECTION_STORAGE_BINDING } from '../../pipeline/define';
 import { BatchingSchemes, IMacroPatch, Pass } from '../core/pass';
 import { DescriptorSet, DescriptorSetInfo, Device, InputAssembler, Texture, TextureType, TextureUsageBit, TextureInfo,
-    Format, Sampler, Filter, Address, Shader, SamplerInfo } from '../../gfx';
+    Format, Sampler, Filter, Address, Shader, SamplerInfo, deviceManager } from '../../gfx';
 import { legacyCC } from '../../global-exports';
 import { errorID } from '../../platform/debug';
 import { getPhaseID } from '../../pipeline/pass-phase';
@@ -147,8 +147,8 @@ export class SubModel {
      * @en The descriptor set for world bound
      * @zh 用于存储世界包围盒的描述符集组
      */
-    get worldBoundDescriptorSet (): DescriptorSet {
-        return this._worldBoundDescriptorSet!;
+    get worldBoundDescriptorSet (): DescriptorSet | null {
+        return this._worldBoundDescriptorSet;
     }
 
     /**
@@ -186,17 +186,20 @@ export class SubModel {
      */
     public initialize (subMesh: RenderingSubMesh, passes: Pass[], patches: IMacroPatch[] | null = null): void {
         const root = legacyCC.director.root as Root;
-        this._device = root.device;
+        this._device = deviceManager.gfxDevice;
         _dsInfo.layout = passes[0].localSetLayout;
 
         this._inputAssembler = this._device.createInputAssembler(subMesh.iaInfo);
         this._descriptorSet = this._device.createDescriptorSet(_dsInfo);
 
         const pipeline = (legacyCC.director.root as Root).pipeline;
-        const occlusionPass = pipeline.pipelineSceneData.getOcclusionQueryPass()!;
-        const occlusionDSInfo = new DescriptorSetInfo(null!);
-        occlusionDSInfo.layout = occlusionPass.localSetLayout;
-        this._worldBoundDescriptorSet = this._device.createDescriptorSet(occlusionDSInfo);
+        const occlusionPass = pipeline.pipelineSceneData.getOcclusionQueryPass();
+        if (occlusionPass) {
+            const occlusionDSInfo = new DescriptorSetInfo(null!);
+            occlusionDSInfo.layout = occlusionPass.localSetLayout;
+            this._worldBoundDescriptorSet = this._device.createDescriptorSet(occlusionDSInfo);
+        }
+
         this._subMesh = subMesh;
         this._patches = patches;
         this._passes = passes;
@@ -285,7 +288,7 @@ export class SubModel {
         this._inputAssembler!.destroy();
         this._inputAssembler = null;
 
-        this._worldBoundDescriptorSet!.destroy();
+        this._worldBoundDescriptorSet?.destroy();
         this._worldBoundDescriptorSet = null;
 
         this.priority = RenderPriority.DEFAULT;
@@ -313,7 +316,7 @@ export class SubModel {
             pass.update();
         }
         this._descriptorSet!.update();
-        this._worldBoundDescriptorSet!.update();
+        this._worldBoundDescriptorSet?.update();
     }
 
     /**

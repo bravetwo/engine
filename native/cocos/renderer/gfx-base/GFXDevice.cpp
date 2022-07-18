@@ -61,7 +61,11 @@ bool Device::initialize(const DeviceInfo &info) {
     static_assert(sizeof(void *) == 8, "pointer size assumption broken");
 #endif
 
-    return doInit(info);
+    bool result = doInit(info);
+
+    CC_SAFE_ADD_REF(_cmdBuff);
+    CC_SAFE_ADD_REF(_queue);
+    return result;
 }
 
 void Device::destroy() {
@@ -91,7 +95,6 @@ void Device::destroy() {
 }
 
 void Device::destroySurface(void *windowHandle) {
-    setRendererAvailable(false);
     for (const auto &swapchain : _swapchains) {
         if (swapchain->getWindowHandle() == windowHandle) {
             swapchain->destroySurface();
@@ -107,7 +110,6 @@ void Device::createSurface(void *windowHandle) {
             break;
         }
     }
-    setRendererAvailable(true);
 }
 
 Sampler *Device::getSampler(const SamplerInfo &info) {

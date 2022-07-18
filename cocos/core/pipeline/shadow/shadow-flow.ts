@@ -31,7 +31,7 @@ import { ShadowStage } from './shadow-stage';
 import { RenderPass, LoadOp, StoreOp,
     Format, Texture, TextureType, TextureUsageBit, ColorAttachment,
     DepthStencilAttachment, RenderPassInfo, TextureInfo, FramebufferInfo, Swapchain,
-    Framebuffer, DescriptorSet } from '../../gfx';
+    Framebuffer, DescriptorSet, API } from '../../gfx';
 import { RenderFlowTag } from '../pipeline-serialization';
 import { ForwardPipeline } from '../forward/forward-pipeline';
 import { RenderPipeline } from '..';
@@ -75,9 +75,14 @@ export class ShadowFlow extends RenderFlow {
     public activate (pipeline: RenderPipeline) {
         super.activate(pipeline);
 
-        // 0: SHADOWMAP_RGBE, 1: SHADOWMAP_FLOAT.
-        const isFloat = supportsR32FloatTexture(pipeline.device) ? 0 : 1;
-        pipeline.macros.CC_SHADOWMAP_FORMAT = isFloat;
+        // 0: SHADOWMAP_FLOAT, 1: SHADOWMAP_RGBE.
+        const isRGBE = supportsR32FloatTexture(pipeline.device) ? 0 : 1;
+        pipeline.macros.CC_SHADOWMAP_FORMAT = isRGBE;
+
+        // 0: SHADOWMAP_LINER_DEPTH_OFF, 1: SHADOWMAP_LINER_DEPTH_ON.
+        const isLinear = pipeline.device.gfxAPI === API.WEBGL ? 1 : 0;
+        pipeline.macros.CC_SHADOWMAP_USE_LINEAR_DEPTH = isLinear;
+
         pipeline.onGlobalPipelineStateChanged();
     }
 
@@ -130,14 +135,14 @@ export class ShadowFlow extends RenderFlow {
 
         for (let l = 0; l < _validLights.length; l++) {
             const light = _validLights[l];
-            const globalDS = pipeline.globalDSManager.getOrCreateDescriptorSet(l)!;
+            const ds = pipeline.globalDSManager.getOrCreateDescriptorSet(light)!;
 
             if (!shadowFrameBufferMap.has(light)) {
                 this._initShadowFrameBuffer(pipeline, light, camera.window.swapchain);
             }
 
             const shadowFrameBuffer = shadowFrameBufferMap.get(light);
-            this._renderStage(camera, light, shadowFrameBuffer!, globalDS);
+            this._renderStage(camera, light, shadowFrameBuffer!, ds);
         }
 
         _validLights.length = 0;
@@ -256,14 +261,15 @@ export class ShadowFlow extends RenderFlow {
 
         for (let l = 0; l < validLights.length; l++) {
             const light = validLights[l];
+            const ds = pipeline.globalDSManager.getOrCreateDescriptorSet(light)!;
+            if (!scene.shadowFrameBufferMap.has(light)) {
+                this._initShadowFrameBuffer(this._pipeline, light, camera.window.swapchain);
+            }
+
             const shadowFrameBuffer = scene.shadowFrameBufferMap.get(light);
-            const globalDS = pipeline.globalDSManager.getOrCreateDescriptorSet(l)!;
-
-            if (!scene.shadowFrameBufferMap.has(light)) { continue; }
-
             for (let i = 0; i < this._stages.length; i++) {
                 const shadowStage = this._stages[i] as ShadowStage;
-                shadowStage.setUsage(globalDS, light, shadowFrameBuffer!);
+                shadowStage.setUsage(ds, light, shadowFrameBuffer!);
                 shadowStage.clearFramebuffer(camera);
             }
         }

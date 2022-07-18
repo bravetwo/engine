@@ -118,10 +118,6 @@ public:
     template <typename ExecuteMethod>
     void registerOnAcquireCallback(ExecuteMethod &&execute);
 
-    inline bool isRendererAvailable() const { return _rendererAvailable; }
-
-    inline void setRendererAvailable(bool available) { _rendererAvailable = available; }
-
 protected:
     static Device *instance;
 
@@ -173,9 +169,9 @@ protected:
     ccstd::array<bool, static_cast<size_t>(Feature::COUNT)> _features;
     ccstd::array<FormatFeature, static_cast<size_t>(Format::COUNT)> _formatFeatures;
 
-    IntrusivePtr<Queue> _queue;
-    IntrusivePtr<QueryPool> _queryPool;
-    IntrusivePtr<CommandBuffer> _cmdBuff;
+    Queue *_queue{nullptr};
+    QueryPool *_queryPool{nullptr};
+    CommandBuffer *_cmdBuff{nullptr};
     Executable *_onAcquire{nullptr};
 
     uint32_t _numDrawCalls{0U};
@@ -190,7 +186,6 @@ protected:
 
 private:
     ccstd::vector<Swapchain *> _swapchains; // weak reference
-    bool _rendererAvailable{false};
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -217,13 +212,6 @@ Swapchain *Device::createSwapchain(const SwapchainInfo &info) {
     Swapchain *res = createSwapchain();
     res->initialize(info);
     _swapchains.push_back(res);
-#if CC_PLATFORM == CC_PLATFORM_ANDROID || CC_PLATFORM == CC_PLATFORM_OHOS
-    if (res->getWindowHandle()) {
-        setRendererAvailable(true);
-    }
-#else
-    setRendererAvailable(true);
-#endif
     return res;
 }
 

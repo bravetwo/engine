@@ -34,7 +34,7 @@ import { legacyCC } from '../../global-exports';
 import type { SkyboxInfo } from '../../scene-graph/scene-globals';
 import { Root } from '../../root';
 import { GlobalDSManager } from '../../pipeline/global-descriptor-set-manager';
-import { Device } from '../../gfx';
+import { Device, deviceManager } from '../../gfx';
 import { Enum } from '../../value-types';
 
 let skybox_mesh: Mesh | null = null;
@@ -221,8 +221,10 @@ export class Skybox {
     protected _useHDR = true;
     protected _useDiffuseMap = false;
     protected _editableMaterial: MaterialInstance | null = null;
+    protected _activated = false;
 
     public initialize (skyboxInfo: SkyboxInfo) {
+        this._activated = false;
         this._enabled = skyboxInfo.enabled;
         this._useIBL = skyboxInfo.useIBL;
         this._useDiffuseMap = skyboxInfo.applyDiffuseMap;
@@ -277,7 +279,7 @@ export class Skybox {
 
         if (!skybox_material) {
             const mat = new Material();
-            mat.initialize({ effectName: 'skybox', defines: { USE_RGBE_CUBEMAP: isRGBE } });
+            mat.initialize({ effectName: 'pipeline/skybox', defines: { USE_RGBE_CUBEMAP: isRGBE } });
             skybox_material = new MaterialInstance({ parent: mat });
         }
 
@@ -302,6 +304,8 @@ export class Skybox {
 
         this._updateGlobalBinding();
         this._updatePipeline();
+
+        this._activated = true;
     }
 
     protected _updatePipeline () {
@@ -322,7 +326,9 @@ export class Skybox {
             pipeline.macros.CC_USE_HDR = useHDRValue;
             pipeline.macros.CC_IBL_CONVOLUTED = useConvMapValue;
 
-            root.onGlobalPipelineStateChanged();
+            if (this._activated) {
+                root.onGlobalPipelineStateChanged();
+            }
         }
 
         if (this.enabled) {
@@ -344,7 +350,7 @@ export class Skybox {
 
     protected _updateGlobalBinding () {
         if (this._globalDSManager) {
-            const device = legacyCC.director.root.device as Device;
+            const device = deviceManager.gfxDevice;
 
             const envmap = this.envmap ? this.envmap : this._default;
             if (envmap) {

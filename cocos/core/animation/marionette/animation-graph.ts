@@ -65,6 +65,14 @@ export type { TransitionView as Transition };
 
 export type TransitionInternal = Transition;
 
+export enum TransitionInterruptionSource {
+    NONE,
+    CURRENT_STATE,
+    NEXT_STATE,
+    CURRENT_STATE_THEN_NEXT_STATE,
+    NEXT_STATE_THEN_CURRENT_STATE,
+}
+
 @ccclass(`${CLASS_NAME_PREFIX_ANIM}AnimationTransition`)
 class AnimationTransition extends Transition {
     /**
@@ -101,6 +109,25 @@ class AnimationTransition extends Transition {
         this._exitCondition = value;
     }
 
+    /**
+     * @internal This field is exposed for **experimental editor only** usage.
+     */
+    get interruptible () {
+        return this.interruptionSource !== TransitionInterruptionSource.NONE;
+    }
+
+    set interruptible (value) {
+        this.interruptionSource = value
+            ? TransitionInterruptionSource.CURRENT_STATE_THEN_NEXT_STATE
+            : TransitionInterruptionSource.NONE;
+    }
+
+    /**
+     * @internal This field is exposed for **internal** usage.
+     */
+    @serializable
+    public interruptionSource = TransitionInterruptionSource.NONE;
+
     @serializable
     private _exitCondition = 1.0;
 }
@@ -128,6 +155,14 @@ export class EmptyStateTransition extends Transition {
      */
     @serializable
     public duration = 0.3;
+
+    /**
+     * @en The start time of (final) destination motion state when this transition starts.
+     * Its unit is the duration of destination motion state.
+     * @zh 此过渡开始时，（最终）目标动作状态的起始时间。其单位是目标动作状态的周期。
+     */
+    @serializable
+    public destinationStart = 0.0;
 }
 
 @ccclass('cc.animation.StateMachine')

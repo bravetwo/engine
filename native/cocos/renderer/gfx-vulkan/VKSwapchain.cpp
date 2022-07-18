@@ -32,9 +32,8 @@
 #include "VKTexture.h"
 #include "VKUtils.h"
 
-#if (CC_PLATFORM == CC_PLATFORM_ANDROID)
-    #include "platform/android/AndroidPlatform.h"
-#endif
+#include "application/ApplicationManager.h"
+#include "platform/interfaces/modules/ISystemWindow.h"
 
 #if CC_SWAPPY_ENABLED
     #include "swappy/swappyVk.h"
@@ -214,15 +213,12 @@ void CCVKSwapchain::doInit(const SwapchainInfo &info) {
     initTexture(textureInfo, _depthStencilTexture);
 
 #if CC_PLATFORM == CC_PLATFORM_ANDROID
-    auto *platform = static_cast<AndroidPlatform *>(cc::BasePlatform::getPlatform());
-    checkSwapchainStatus(platform->getWidth(), platform->getHeight());
-#else
-    checkSwapchainStatus();
-#endif
+    auto *window = CC_CURRENT_ENGINE()->getInterface<cc::ISystemWindow>();
+    auto viewSize = window->getViewSize();
+    checkSwapchainStatus(viewSize.x, viewSize.y);
 
     // Android Game Frame Pacing:swappy
-#if CC_SWAPPY_ENABLED
-    auto *platform = static_cast<AndroidPlatform *>(cc::BasePlatform::getPlatform());
+    #if CC_SWAPPY_ENABLED
     int32_t fps = cc::BasePlatform::getPlatform()->getFps();
 
     uint64_t frameRefreshIntervalNS;
@@ -234,6 +230,9 @@ void CCVKSwapchain::doInit(const SwapchainInfo &info) {
                                             &frameRefreshIntervalNS);
     SwappyVk_setSwapIntervalNS(gpuDevice->vkDevice, _gpuSwapchain->vkSwapchain, fps ? 1000000000L / fps : frameRefreshIntervalNS);
     SwappyVk_setWindow(gpuDevice->vkDevice, _gpuSwapchain->vkSwapchain, static_cast<ANativeWindow *>(info.windowHandle));
+    #endif
+#else
+    checkSwapchainStatus();
 #endif
 }
 
@@ -408,8 +407,9 @@ void CCVKSwapchain::doCreateSurface(void *windowHandle) { // NOLINT
     if (!_gpuSwapchain || _gpuSwapchain->vkSurface != VK_NULL_HANDLE) return;
     createVkSurface();
 #if CC_PLATFORM == CC_PLATFORM_ANDROID
-    auto *platform = static_cast<AndroidPlatform *>(cc::BasePlatform::getPlatform());
-    checkSwapchainStatus(platform->getWidth(), platform->getHeight());
+    auto *window = CC_CURRENT_ENGINE()->getInterface<cc::ISystemWindow>();
+    auto viewSize = window->getViewSize();
+    checkSwapchainStatus(viewSize.x, viewSize.y);
 #else
     checkSwapchainStatus();
 #endif

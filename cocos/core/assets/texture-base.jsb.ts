@@ -23,12 +23,10 @@
  THE SOFTWARE.
 */
 import { ccclass, serializable } from 'cc.decorator';
-import {
-    _assertThisInitialized,
-    _initializerDefineProperty,
-} from '../data/utils/decorator-jsb-utils';
+import { deviceManager } from '../gfx';
 import { legacyCC } from '../global-exports';
 import { Filter, PixelFormat, WrapMode } from './asset-enum';
+import './asset';
 
 const textureBaseProto: any = jsb.TextureBase.prototype;
 
@@ -56,10 +54,7 @@ textureBaseProto._deserialize = function (serializedData: any, handle: any) {
 };
 
 textureBaseProto._getGFXDevice = function () {
-    if (legacyCC.director.root) {
-        return legacyCC.director.root.device;
-    }
-    return null;
+    return deviceManager.gfxDevice;
 };
 
 textureBaseProto._getGFXFormat = function () {
@@ -125,11 +120,12 @@ textureBaseProto.getSamplerInfo = function () {
 
 const oldDestroy = textureBaseProto.destroy;
 textureBaseProto.destroy = function () {
-    let destroyed = oldDestroy.call(this);
-    if (destroyed && legacyCC.director.root?.batcher2D) {
-        legacyCC.director.root.batcher2D._releaseDescriptorSetCache(this.getHash());
+    if (legacyCC.director.root?.batcher2D) {
+        // legacyCC.director.root.batcher2D._releaseDescriptorSetCache(this.getHash());
+        legacyCC.director.root.batcher2D._releaseDescriptorSetCache(this.getGFXTexture(), this.getGFXSampler());
     }
-    return destroyed;
+    // dispatch into C++ virtual function CCObject::destroy
+    return oldDestroy.call(this);
 };
 
 textureBaseProto._onGFXSamplerUpdated = function (gfxSampler, samplerInfo) {

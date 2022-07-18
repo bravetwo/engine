@@ -585,17 +585,11 @@ bool js_register_cc_TextureCube(se::Object *obj); // NOLINT
 
 SE_DECLARE_FUNC(js_assets_TextureCube_getGfxTextureCreateInfo);
 SE_DECLARE_FUNC(js_assets_TextureCube_getGfxTextureViewCreateInfo);
-SE_DECLARE_FUNC(js_assets_TextureCube_getImage);
-SE_DECLARE_FUNC(js_assets_TextureCube_getMipmapAtlas);
-SE_DECLARE_FUNC(js_assets_TextureCube_getMipmaps);
 SE_DECLARE_FUNC(js_assets_TextureCube_initialize);
 SE_DECLARE_FUNC(js_assets_TextureCube_releaseTexture);
 SE_DECLARE_FUNC(js_assets_TextureCube_reset);
-SE_DECLARE_FUNC(js_assets_TextureCube_setImage);
 SE_DECLARE_FUNC(js_assets_TextureCube_setMipmapAtlasForJS);
-SE_DECLARE_FUNC(js_assets_TextureCube_setMipmaps);
 SE_DECLARE_FUNC(js_assets_TextureCube_setMipmapsForJS);
-SE_DECLARE_FUNC(js_assets_TextureCube_setmipmapAtlas);
 SE_DECLARE_FUNC(js_assets_TextureCube_fromTexture2DArray);
 SE_DECLARE_FUNC(js_assets_TextureCube_TextureCube);
 
@@ -608,7 +602,6 @@ SE_DECLARE_FUNC(js_assets_BuiltinResMgr_addAsset);
 SE_DECLARE_FUNC(js_assets_BuiltinResMgr_getAsset);
 SE_DECLARE_FUNC(js_assets_BuiltinResMgr_initBuiltinRes);
 SE_DECLARE_FUNC(js_assets_BuiltinResMgr_isInitialized);
-SE_DECLARE_FUNC(js_assets_BuiltinResMgr_tryCompileAllPasses);
 SE_DECLARE_FUNC(js_assets_BuiltinResMgr_getInstance);
 SE_DECLARE_FUNC(js_assets_BuiltinResMgr_BuiltinResMgr);
 
@@ -776,7 +769,6 @@ extern se::Class * __jsb_cc_Skeleton_class; // NOLINT
 bool js_register_cc_Skeleton(se::Object *obj); // NOLINT
 
 SE_DECLARE_FUNC(js_assets_Skeleton_getBindposes);
-SE_DECLARE_FUNC(js_assets_Skeleton_getInverseBindposes);
 SE_DECLARE_FUNC(js_assets_Skeleton_setBindposes);
 SE_DECLARE_FUNC(js_assets_Skeleton_Skeleton);
 
