@@ -76,6 +76,8 @@ public:
     inline QueryPool *createQueryPool(const QueryPoolInfo &info);
     inline Swapchain *createSwapchain(const SwapchainInfo &info);
     inline const ccstd::vector<Swapchain *> &getSwapchains() { return _swapchains; }
+    void removeSwapchain(Swapchain *swapchain);
+    void checkReleaseSwapchains();
     inline Buffer *createBuffer(const BufferInfo &info);
     inline Buffer *createBuffer(const BufferViewInfo &info);
     inline Texture *createTexture(const TextureInfo &info);

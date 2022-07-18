@@ -121,24 +121,21 @@ void DeviceValidator::doDestroy() {
         _queue = nullptr;
     }
 
-    IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
-    if (!xr) {
-        DeviceResourceTracker<CommandBuffer>::checkEmpty();
-        DeviceResourceTracker<QueryPool>::checkEmpty();
-        DeviceResourceTracker<Queue>::checkEmpty();
-        DeviceResourceTracker<Swapchain>::checkEmpty();
-        DeviceResourceTracker<Buffer>::checkEmpty();
-        DeviceResourceTracker<Texture>::checkEmpty();
-        DeviceResourceTracker<Sampler>::checkEmpty();
-        DeviceResourceTracker<Shader>::checkEmpty();
-        DeviceResourceTracker<InputAssembler>::checkEmpty();
-        DeviceResourceTracker<RenderPass>::checkEmpty();
-        DeviceResourceTracker<Framebuffer>::checkEmpty();
-        DeviceResourceTracker<DescriptorSet>::checkEmpty();
-        DeviceResourceTracker<DescriptorSetLayout>::checkEmpty();
-        DeviceResourceTracker<PipelineLayout>::checkEmpty();
-        DeviceResourceTracker<PipelineState>::checkEmpty();
-    }
+    DeviceResourceTracker<CommandBuffer>::checkEmpty();
+    DeviceResourceTracker<QueryPool>::checkEmpty();
+    DeviceResourceTracker<Queue>::checkEmpty();
+    DeviceResourceTracker<Swapchain>::checkEmpty();
+    DeviceResourceTracker<Buffer>::checkEmpty();
+    DeviceResourceTracker<Texture>::checkEmpty();
+    DeviceResourceTracker<Sampler>::checkEmpty();
+    DeviceResourceTracker<Shader>::checkEmpty();
+    DeviceResourceTracker<InputAssembler>::checkEmpty();
+    DeviceResourceTracker<RenderPass>::checkEmpty();
+    DeviceResourceTracker<Framebuffer>::checkEmpty();
+    DeviceResourceTracker<DescriptorSet>::checkEmpty();
+    DeviceResourceTracker<DescriptorSetLayout>::checkEmpty();
+    DeviceResourceTracker<PipelineLayout>::checkEmpty();
+    DeviceResourceTracker<PipelineState>::checkEmpty();
 
     _actor->destroy();
 }
