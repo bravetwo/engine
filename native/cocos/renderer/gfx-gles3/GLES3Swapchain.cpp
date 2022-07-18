@@ -111,6 +111,9 @@ void GLES3Swapchain::doInit(const SwapchainInfo &info) {
             return;
         }
     }
+    if (xr) {
+        GLES3Device::getInstance()->context()->makeCurrent(_gpuSwapchain, _gpuSwapchain);
+    }
 
     switch (_vsyncMode) {
         case VsyncMode::OFF: _gpuSwapchain->eglSwapInterval = 0; break;
