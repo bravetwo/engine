@@ -294,6 +294,7 @@ private:
     bool _useDeferredPipeline{false};
     bool _usesCustomPipeline{false};
     CallbacksInvoker *_eventProcessor{nullptr};
+    IXRInterface *_xr{nullptr};
 
     // Cache ccstd::vector to avoid allocate every frame in frameMove
     ccstd::vector<scene::Camera *> _cameraList;

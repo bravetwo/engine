@@ -74,8 +74,8 @@ void Root::initialize(gfx::Swapchain *swapchain) {
     _swapchain = swapchain;
     _allCameraList.clear();
 
-    IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
-    if (xr) {
+    _xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
+    if (_xr) {
         // Xr: _mainWindow, _curWindow, _swapchain invalid.
         // Xr: splash screen use _mainWindow->_swapchain width, height, surfaceTransform. The left and right eyes must be the same.
         auto swapchains = gfx::Device::getInstance()->getSwapchains();
@@ -101,7 +101,7 @@ void Root::initialize(gfx::Swapchain *swapchain) {
             _mainWindow = createWindow(info);
 
             _curWindow = _mainWindow;
-            xr->bindXREyeWithRenderWindow(_mainWindow, (xr::XREye)i);
+            _xr->bindXREyeWithRenderWindow(_mainWindow, (xr::XREye)i);
         }
     } else {
         gfx::RenderPassInfo renderPassInfo;
@@ -152,8 +152,7 @@ void Root::destroy() {
 void Root::resize(uint32_t width, uint32_t height) {
     for (const auto &window : _windows) {
         if (window->getSwapchain()) {
-            IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
-            if (xr) {
+            if (_xr) {
                 // xr, window's width and height should not change
                 width = window->getWidth();
                 height = window->getHeight();
@@ -325,17 +324,16 @@ void Root::frameMove(float deltaTime, int32_t totalFrames) {
         _fpsTime = 0.0;
     }
 
-    IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
-    if (xr) {
-        if (xr->isRenderAllowable()) {
+    if (_xr) {
+        if (_xr->isRenderAllowable()) {
             auto swapchains = gfx::Device::getInstance()->getSwapchains();
             bool isSceneUpdated = false;
             for (int xrEye = 0; xrEye < 2; xrEye++) {
-                xr->beginRenderEyeFrame(xrEye);
+                _xr->beginRenderEyeFrame(xrEye);
 
                 for (auto *camera : _allCameraList) {
                     if (camera->getTrackingType() != scene::NO_TRACKING) {
-                        const auto &viewPosition = xr->getHMDViewPosition(xrEye, camera->getTrackingType());
+                        const auto &viewPosition = _xr->getHMDViewPosition(xrEye, camera->getTrackingType());
                         camera->setNodePosition({viewPosition[0], viewPosition[1], viewPosition[2]});
                     }
                 }
@@ -353,7 +351,7 @@ void Root::frameMove(float deltaTime, int32_t totalFrames) {
 
                 for (int i = 0, size = _windows.size(); i < size; i++) {
                     // _windows contain : left eye window, right eye window, other rt window
-                    xr::XREye wndXREye = xr->getXREyeByRenderWindow(_windows[i]);
+                    xr::XREye wndXREye = _xr->getXREyeByRenderWindow(_windows[i]);
                     if (wndXREye == static_cast<xr::XREye>(xrEye)) {
                         _windows[i]->extractRenderCameras(_cameraList, xrEye);
                     } else if (wndXREye == xr::XREye::NONE) {
@@ -417,7 +415,7 @@ void Root::frameMove(float deltaTime, int32_t totalFrames) {
                     _batcher->reset();
                 }
 
-                xr->endRenderEyeFrame(xrEye);
+                _xr->endRenderEyeFrame(xrEye);
             }
         } else {
             CC_LOG_WARNING("[XR] isRenderAllowable is false !!!");

@@ -161,7 +161,7 @@ void Camera::update(bool forceUpdate /*false*/, int xrEye /*-1*/) {
         return;
     }
 
-    if(_xr)
+    if(!_xr)
         _xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
     if (_xr && xrEye >= 0) {
         if (_proj == CameraProjection::PERSPECTIVE) {
