@@ -96,7 +96,7 @@ void GLES3Swapchain::doInit(const SwapchainInfo &info) {
     #endif
 #endif
 
-    IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
+    IXRInterface *xr = CC_GET_XR_INTERFACE();
     EGLSurfaceType surfaceType = xr ? xr->acquireEGLSurfaceType(getTypedID()) : EGLSurfaceType::WINDOW;
     if (surfaceType == EGLSurfaceType::PBUFFER) {
         EGLint pbufferAttribs[]{
@@ -208,7 +208,7 @@ void GLES3Swapchain::doCreateSurface(void *windowHandle) {
 #endif
 
     if (_gpuSwapchain->eglSurface == EGL_NO_SURFACE) {
-        IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
+        IXRInterface *xr = CC_GET_XR_INTERFACE();
         EGLSurfaceType surfaceType = xr ? xr->acquireEGLSurfaceType(getTypedID()) : EGLSurfaceType::WINDOW;
         if (surfaceType == EGLSurfaceType::PBUFFER) {
             EGLint pbufferAttribs[]{

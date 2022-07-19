@@ -46,7 +46,7 @@
 #include "profiler/Profiler.h"
 #include "states/GLES3GeneralBarrier.h"
 #include "states/GLES3Sampler.h"
-#include "platform/BasePlatform.h"
+#include "application/ApplicationManager.h"
 #include "platform/java/modules/XRInterface.h"
 
 // when capturing GLES commands (RENDERDOC_HOOK_EGL=1, default value)
@@ -75,7 +75,7 @@ GLES3Device::~GLES3Device() {
 
 bool GLES3Device::doInit(const DeviceInfo & /*info*/) {
     if (!_xr)
-        _xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
+        _xr = CC_GET_XR_INTERFACE();
     if(_xr) _xr->preGFXDeviceInitialize(_api);
     _gpuContext = ccnew GLES3GPUContext;
     _gpuStateCache = ccnew GLES3GPUStateCache;

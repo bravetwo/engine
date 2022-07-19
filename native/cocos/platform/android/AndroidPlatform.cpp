@@ -286,13 +286,13 @@ public:
                     if (cocos_main(0, nullptr) != 0) {
                         CC_LOG_ERROR("AndroidPlatform: Launch game failed!");
                     } else {
-                        IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
+                        IXRInterface *xr = CC_GET_XR_INTERFACE();
                         if (xr) {
                             xr->onRenderResume();
                         }
                     }
                 } else {
-                    IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
+                    IXRInterface *xr = CC_GET_XR_INTERFACE();
                     if (xr) {
                         xr->onRenderResume();
                     }
@@ -307,7 +307,7 @@ public:
                 _hasWindow = false;
                 // The window is going away -- kill the surface
                 CC_LOG_DEBUG("AndroidPlatform: APP_CMD_TERM_WINDOW");
-                IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
+                IXRInterface *xr = CC_GET_XR_INTERFACE();
                 if (xr) {
                     xr->onRenderPause();
                 }

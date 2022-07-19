@@ -46,7 +46,7 @@
 #include "states/GFXGeneralBarrier.h"
 #include "states/GFXSampler.h"
 #include "states/GFXTextureBarrier.h"
-#include "platform/BasePlatform.h"
+#include "application/ApplicationManager.h"
 #include "platform/java/modules/XRInterface.h"
 
 namespace cc {
@@ -216,7 +216,7 @@ QueryPool *Device::createQueryPool(const QueryPoolInfo &info) {
 
 Swapchain *Device::createSwapchain(const SwapchainInfo &info) {
     if (!_xr)
-        _xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
+        _xr = CC_GET_XR_INTERFACE();
     if (_xr) {
         _xr->createXRSwapchains();
         int viewCount = _xr->getXRConfig(xr::XRConfigKey::VIEW_COUNT).getInt();

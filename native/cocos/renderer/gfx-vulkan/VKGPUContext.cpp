@@ -24,7 +24,7 @@
 ****************************************************************************/
 
 #include "VKGPUObjects.h"
-#include "platform/BasePlatform.h"
+#include "application/ApplicationManager.h"
 #include "platform/java/modules/XRInterface.h"
 
 namespace cc {
@@ -120,7 +120,7 @@ bool CCVKGPUContext::initialize() {
         }
     }
 
-    IXRInterface *xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
+    IXRInterface *xr = CC_GET_XR_INTERFACE();
     if(xr) apiVersion = xr->getXRVkApiVersion(apiVersion);
     minorVersion = VK_VERSION_MINOR(apiVersion);
     if (minorVersion < 1) {

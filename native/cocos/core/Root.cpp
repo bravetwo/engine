@@ -74,7 +74,7 @@ void Root::initialize(gfx::Swapchain *swapchain) {
     _swapchain = swapchain;
     _allCameraList.clear();
 
-    _xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
+    _xr = CC_GET_XR_INTERFACE();
     if (_xr) {
         // Xr: _mainWindow, _curWindow, _swapchain invalid.
         // Xr: splash screen use _mainWindow->_swapchain width, height, surfaceTransform. The left and right eyes must be the same.

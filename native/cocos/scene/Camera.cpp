@@ -162,7 +162,7 @@ void Camera::update(bool forceUpdate /*false*/, int xrEye /*-1*/) {
     }
 
     if(!_xr)
-        _xr = BasePlatform::getPlatform()->getInterface<IXRInterface>();
+        _xr = CC_GET_XR_INTERFACE();
     if (_xr && xrEye >= 0) {
         if (_proj == CameraProjection::PERSPECTIVE) {
             _isProjDirty = true;
