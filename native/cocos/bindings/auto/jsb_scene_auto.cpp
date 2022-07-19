@@ -17740,9 +17740,7 @@ bool js_register_scene_Camera(se::Object* obj) // NOLINT(readability-identifier-
     cls->defineProperty("clearColor", _SE(js_scene_Camera_getClearColor_asGetter), _SE(js_scene_Camera_setClearColor_asSetter));
     cls->defineProperty("clearDepth", _SE(js_scene_Camera_getClearDepth_asGetter), _SE(js_scene_Camera_setClearDepth_asSetter));
     cls->defineProperty("clearFlag", _SE(js_scene_Camera_getClearFlag_asGetter), _SE(js_scene_Camera_setClearFlag_asSetter));
-    cls->defineProperty("cameraType", _SE(js_scene_Camera_getCameraType_asGetter), _SE(js_scene_Camera_setCameraType_asSetter));
     cls->defineProperty("clearStencil", _SE(js_scene_Camera_getClearStencil_asGetter), _SE(js_scene_Camera_setClearStencil_asSetter));
-    cls->defineProperty("trackingType", _SE(js_scene_Camera_getTrackingType_asGetter), _SE(js_scene_Camera_setTrackingType_asSetter));
     cls->defineProperty("enabled", _SE(js_scene_Camera_isEnabled_asGetter), _SE(js_scene_Camera_setEnabled_asSetter));
     cls->defineProperty("frustum", _SE(js_scene_Camera_getFrustum_asGetter), _SE(js_scene_Camera_setFrustum_asSetter));
     cls->defineProperty("isWindowSize", _SE(js_scene_Camera_isWindowSize_asGetter), _SE(js_scene_Camera_setWindowSize_asSetter));
@@ -17752,6 +17750,8 @@ bool js_register_scene_Camera(se::Object* obj) // NOLINT(readability-identifier-
     cls->defineProperty("node", _SE(js_scene_Camera_getNode_asGetter), _SE(js_scene_Camera_setNode_asSetter));
     cls->defineProperty("surfaceTransform", _SE(js_scene_Camera_getSurfaceTransform_asGetter), nullptr);
     cls->defineProperty("geometryRenderer", _SE(js_scene_Camera_getGeometryRenderer_asGetter), nullptr);
+    cls->defineProperty("cameraType", _SE(js_scene_Camera_getCameraType_asGetter), _SE(js_scene_Camera_setCameraType_asSetter));
+    cls->defineProperty("trackingType", _SE(js_scene_Camera_getTrackingType_asGetter), _SE(js_scene_Camera_setTrackingType_asSetter));
     cls->defineFunction("attachCamera", _SE(js_scene_Camera_attachCamera));
     cls->defineFunction("attachToScene", _SE(js_scene_Camera_attachToScene));
     cls->defineFunction("changeTargetWindow", _SE(js_scene_Camera_changeTargetWindow));

@@ -62,7 +62,10 @@ enum class XRConfigKey {
     SWAPCHAIN_HEIGHT,
     MULTITHREAD_MODE,
     LOGIC_THREAD_ID,
-    RENDER_THREAD_ID
+    RENDER_THREAD_ID,
+    DEVICE_VENDOR,
+    RUNTIME_VERSION,
+    PRESENT_ENABLE
 };
 
 enum class XRConfigValueType {

@@ -350,14 +350,8 @@ static void dispatchHMDEventInternal(const xr::XRControllerEvent &xrControllerEv
 }
 
 xr::XRVendor XRInterface::getVendor() {
-#if XR_OEM_HUAWEIVR
-    return xr::XRVendor::HUAWEIVR;
-#elif XR_OEM_META
-    return xr::XRVendor::META;
-#elif XR_OEM_PICO
-    return xr::XRVendor::PICO;
-#elif XR_OEM_ROKID
-    return xr::XRVendor::ROKID;
+#if USE_XR
+    return (xr::XRVendor) xr::XrEntry::getInstance()->getXRConfig(cc::xr::XRConfigKey::DEVICE_VENDOR).getInt();
 #endif
     return xr::XRVendor::MONADO;
 }
@@ -379,6 +373,7 @@ void XRInterface::setXRConfig(xr::XRConfigKey key, xr::XRConfigValue value) {
 
 uint32_t XRInterface::getRuntimeVersion() {
 #if USE_XR
+    return xr::XrEntry::getInstance()->getXRConfig(cc::xr::XRConfigKey::RUNTIME_VERSION).getInt();
 #endif
     return 1;
 }
@@ -481,11 +476,7 @@ const xr::XRSwapchain &XRInterface::doGFXDeviceAcquire(gfx::API gfxApi) {
 #if USE_XR
     // CC_LOG_INFO("[XR] doGFXDeviceAcquire.api.%d", gfxApi);
     if (gfxApi == gfx::API::GLES3 || gfxApi == gfx::API::VULKAN) {
-    #ifdef CC_USE_GLES3
-        _acquireSwapchain.glDrawFramebuffer = xr::XrEntry::getInstance()->getXrFrameBuffer();
-    #endif
-        _acquireSwapchain.swapchainImageIndex = xr::XrEntry::getInstance()->getSwapchainImageIndex();
-        return _acquireSwapchain;
+        return xr::XrEntry::getInstance()->acquireXrSwapchain((uint32_t)gfxApi);
     }
 #endif
     return _acquireSwapchain;
@@ -496,7 +487,7 @@ bool XRInterface::isGFXDeviceNeedsPresent(gfx::API gfxApi) {
     // CC_LOG_INFO("[XR] isGFXDeviceNeedsPresent.api.%d", gfxApi);
     // if (gfxApi == gfx::API::GLES3 || gfxApi == gfx::API::VULKAN) {
     // }
-    return false;
+    return xr::XrEntry::getInstance()->getXRConfig(cc::xr::XRConfigKey::PRESENT_ENABLE).getBool();
 #endif
     return true;
 }
@@ -546,12 +537,10 @@ void XRInterface::updateXRSwapchainTypedID(uint32_t index, uint32_t typedID) {
         ENQUEUE_MESSAGE_2(gfx::DeviceAgent::getInstance()->getMessageQueue(),
                           UpdateXRSwapchainTypedID, index, index, typedID, typedID,
                           {
-                              auto &cocosXrSwapchain = xr::XrEntry::getInstance()->getCocosXrSwapchains().at(index);
-                              cocosXrSwapchain.ccSwapchainTypedID = typedID;
+                              xr::XrEntry::getInstance()->updateXrSwapchainInfo(index, typedID);
                           });
     } else {
-        auto &cocosXrSwapchain = xr::XrEntry::getInstance()->getCocosXrSwapchains().at(index);
-        cocosXrSwapchain.ccSwapchainTypedID = typedID;
+        xr::XrEntry::getInstance()->updateXrSwapchainInfo(index, typedID);
     }
     #if XR_OEM_HUAWEIVR
     _eglSurfaceTypeMap[typedID] = index == 0 ? EGLSurfaceType::WINDOW : EGLSurfaceType::NONE;
