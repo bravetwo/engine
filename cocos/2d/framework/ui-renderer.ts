@@ -175,7 +175,6 @@ export class UIRenderer extends Renderer {
     set customMaterial (val) {
         this._customMaterial = val;
         this.updateMaterial();
-        this.renderEntity.setCustomMaterial(val);
     }
 
     /**
@@ -317,7 +316,6 @@ export class UIRenderer extends Renderer {
         this._colorDirty();
         uiRendererManager.addRenderer(this);
         this.markForUpdateRenderData();
-        this.renderEntity.setCustomMaterial(this._customMaterial);
     }
 
     // For Redo, Undo
@@ -448,20 +446,11 @@ export class UIRenderer extends Renderer {
     protected updateMaterial () {
         if (this._customMaterial) {
             this.setMaterial(this._customMaterial, 0);
-            if (this.renderData) {
-                this.renderData.material = this._customMaterial;
-                this.markForUpdateRenderData();
-                this.renderData.passDirty = true;
-            }
             this._blendHash = -1; // a flag to check merge
             return;
         }
         const mat = this._updateBuiltinMaterial();
         this.setMaterial(mat, 0);
-        if (this.renderData) {
-            this.renderData.material = mat;
-            this.markForUpdateRenderData();
-        }
         this._updateBlendFunc();
     }
 
@@ -475,13 +464,14 @@ export class UIRenderer extends Renderer {
             this._assembler.updateColor(this);
             // Need update rendFlag when opacity changes from 0 to !0 or 0 to !0
             this._renderFlag = this._canRender();
+            this.setEntityEnabled(this._renderFlag);
         }
     }
 
     // for common
     public static setEntityColorDirtyRecursively (node: Node, dirty: boolean) {
         const render = node._uiProps.uiComp as UIRenderer;
-        if (render) {
+        if (render && render.color) { // exclude UIMeshRenderer which has not color
             render._renderEntity.colorDirty = dirty;
             render._renderEntity.color = render.color;// necessity to be considering
         }
@@ -505,6 +495,12 @@ export class UIRenderer extends Renderer {
     public setEntityOpacity (opacity: number) {
         if (JSB) {
             this._renderEntity.localOpacity = opacity;
+        }
+    }
+
+    public setEntityEnabled (enabled: boolean) {
+        if (JSB) {
+            this._renderEntity.enabled = enabled;
         }
     }
 

@@ -54,7 +54,7 @@ public:
     void uploadBuffers();
     void reset();
 
-    void addRootNode(Node* node);
+    void syncRootNodesToNative(ccstd::vector<Node*>&& rootNodes);
     void releaseDescriptorSetCache(gfx::Texture* texture, gfx::Sampler* sampler);
 
     UIMeshBuffer* getMeshBuffer(uint32_t accId, uint32_t bufferId);
@@ -74,7 +74,6 @@ private:
     bool _isInit = false;
 
     inline void fillIndexBuffers(RenderDrawInfo* drawInfo) { // NOLINT(readability-convert-member-functions-to-static)
-        uint32_t vertexOffset = drawInfo->getVertexOffset();
         uint16_t* ib = drawInfo->getIDataBuffer();
 
         UIMeshBuffer* buffer = drawInfo->getMeshBuffer();
@@ -95,17 +94,12 @@ private:
         uint8_t stride = drawInfo->getStride();
         uint32_t size = drawInfo->getVbCount() * stride;
         float* vbBuffer = drawInfo->getVbBuffer();
-
-        Vec3 temp;
-        uint32_t offset = 0;
         for (int i = 0; i < size; i += stride) {
             Render2dLayout* curLayout = drawInfo->getRender2dLayout(i);
-            temp.transformMat4(curLayout->position, matrix);
-
-            offset = i;
-            vbBuffer[offset++] = temp.x;
-            vbBuffer[offset++] = temp.y;
-            vbBuffer[offset++] = temp.z;
+            // make sure that the layout of Vec3 is three consecutive floats
+            static_assert(sizeof(Vec3) == 3 * sizeof(float));
+            // cast to reduce value copy instructions
+            reinterpret_cast<Vec3*>(vbBuffer + i)->transformMat4(curLayout->position, matrix);
         }
     }
 
