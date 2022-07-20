@@ -1,12 +1,13 @@
 import { ccclass, help, menu, displayOrder, serializable, tooltip, type, executeInEditMode} from 'cc.decorator';
 import { UITransform } from '../../2d/framework/ui-transform';
-import { Component } from "../../core";
+import { Component, sys } from "../../core";
 import { BoxCollider, Collider, ERigidBodyType } from "../../physics/framework";
 import { XrControlEventType, XrEventHandle, XrUIPressEvent, XrUIPressEventType } from '../event/xr-event-handle';
 
 @ccclass('cc.RaycastChecker')
 @help('i18n:cc.RaycastChecker')
 @menu('XR/UX/RaycastChecker')
+@executeInEditMode
 export class RaycastChecker extends Component {
     @serializable
     private _ignoreReversedUI = false;
@@ -66,8 +67,10 @@ export class RaycastChecker extends Component {
 
     update() {
         // Update node position synchronize collision box position (Note: only update parent node position does not synchronize collision box position)
-        this.node.setWorldPosition(this.node.worldPosition);
-        this.node.setWorldRotation(this.node.worldRotation);
+        if (sys.isXR) {
+            this.node.setWorldPosition(this.node.worldPosition);
+            this.node.setWorldRotation(this.node.worldRotation);
+        }
     }
     
     private _hoverEnter(event: XrEventHandle) {
