@@ -25,6 +25,29 @@ SE_BIND_PROP_GET(js_xr_getter_return_true)
 se::Object* __jsb_cc_xr_XrEntry_proto = nullptr; // NOLINT
 se::Class* __jsb_cc_xr_XrEntry_class = nullptr;  // NOLINT
 
+static bool js_xr_XrEntry_acquireXrSwapchain(se::State& s) // NOLINT(readability-identifier-naming)
+{
+    auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntry>(s);
+    // SE_PRECONDITION2(cobj, false, "Invalid Native Object");
+    if (nullptr == cobj) return true;
+    const auto& args = s.args();
+    size_t argc = args.size();
+    CC_UNUSED bool ok = true;
+    if (argc == 1) {
+        HolderType<unsigned int, false> arg0 = {};
+        ok &= sevalue_to_native(args[0], &arg0, s.thisObject());
+        SE_PRECONDITION2(ok, false, "Error processing arguments");
+        const cc::xr::XRSwapchain& result = cobj->acquireXrSwapchain(arg0.value());
+        ok &= nativevalue_to_se(result, s.rval(), nullptr /*ctx*/);
+        SE_PRECONDITION2(ok, false, "Error processing arguments");
+        SE_HOLD_RETURN_VALUE(result, s.thisObject(), s.rval());
+        return true;
+    }
+    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 1);
+    return false;
+}
+SE_BIND_FUNC(js_xr_XrEntry_acquireXrSwapchain)
+
 static bool js_xr_XrEntry_computeViewProjection(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntry>(s);
@@ -726,6 +749,28 @@ static bool js_xr_XrEntry_setXRStringConfig(se::State& s) // NOLINT(readability-
 }
 SE_BIND_FUNC(js_xr_XrEntry_setXRStringConfig)
 
+static bool js_xr_XrEntry_updateXrSwapchainInfo(se::State& s) // NOLINT(readability-identifier-naming)
+{
+    auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntry>(s);
+    // SE_PRECONDITION2(cobj, false, "Invalid Native Object");
+    if (nullptr == cobj) return true;
+    const auto& args = s.args();
+    size_t argc = args.size();
+    CC_UNUSED bool ok = true;
+    if (argc == 2) {
+        HolderType<unsigned int, false> arg0 = {};
+        HolderType<unsigned int, false> arg1 = {};
+        ok &= sevalue_to_native(args[0], &arg0, s.thisObject());
+        ok &= sevalue_to_native(args[1], &arg1, s.thisObject());
+        SE_PRECONDITION2(ok, false, "Error processing arguments");
+        cobj->updateXrSwapchainInfo(arg0.value(), arg1.value());
+        return true;
+    }
+    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 2);
+    return false;
+}
+SE_BIND_FUNC(js_xr_XrEntry_updateXrSwapchainInfo)
+
 static bool js_xr_XrEntry_waitFrame(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntry>(s);
@@ -779,6 +824,7 @@ bool js_register_xr_XrEntry(se::Object* obj) // NOLINT(readability-identifier-na
 #if CC_DEBUG
     cls->defineStaticProperty("isJSBClass", _SE(js_xr_getter_return_true), nullptr);
 #endif
+    cls->defineFunction("acquireXrSwapchain", _SE(js_xr_XrEntry_acquireXrSwapchain));
     cls->defineFunction("computeViewProjection", _SE(js_xr_XrEntry_computeViewProjection));
     cls->defineFunction("createXrInstance", _SE(js_xr_XrEntry_createXrInstance));
     cls->defineFunction("destroyXrInstance", _SE(js_xr_XrEntry_destroyXrInstance));
@@ -813,6 +859,7 @@ bool js_register_xr_XrEntry(se::Object* obj) // NOLINT(readability-identifier-na
     cls->defineFunction("setXRIntConfig", _SE(js_xr_XrEntry_setXRIntConfig));
     cls->defineFunction("setXRPointerConfig", _SE(js_xr_XrEntry_setXRPointerConfig));
     cls->defineFunction("setXRStringConfig", _SE(js_xr_XrEntry_setXRStringConfig));
+    cls->defineFunction("updateXrSwapchainInfo", _SE(js_xr_XrEntry_updateXrSwapchainInfo));
     cls->defineFunction("waitFrame", _SE(js_xr_XrEntry_waitFrame));
     cls->defineStaticFunction("destroyInstance", _SE(js_xr_XrEntry_destroyInstance_static));
     cls->defineStaticFunction("getInstance", _SE(js_xr_XrEntry_getInstance_static));

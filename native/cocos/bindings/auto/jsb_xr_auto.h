@@ -17,6 +17,7 @@ extern se::Class * __jsb_cc_xr_XrEntry_class; // NOLINT
 
 bool js_register_cc_xr_XrEntry(se::Object *obj); // NOLINT
 
+SE_DECLARE_FUNC(js_xr_XrEntry_acquireXrSwapchain);
 SE_DECLARE_FUNC(js_xr_XrEntry_computeViewProjection);
 SE_DECLARE_FUNC(js_xr_XrEntry_createXrInstance);
 SE_DECLARE_FUNC(js_xr_XrEntry_destroyXrInstance);
@@ -51,6 +52,7 @@ SE_DECLARE_FUNC(js_xr_XrEntry_setXRFloatConfig);
 SE_DECLARE_FUNC(js_xr_XrEntry_setXRIntConfig);
 SE_DECLARE_FUNC(js_xr_XrEntry_setXRPointerConfig);
 SE_DECLARE_FUNC(js_xr_XrEntry_setXRStringConfig);
+SE_DECLARE_FUNC(js_xr_XrEntry_updateXrSwapchainInfo);
 SE_DECLARE_FUNC(js_xr_XrEntry_waitFrame);
 SE_DECLARE_FUNC(js_xr_XrEntry_destroyInstance);
 SE_DECLARE_FUNC(js_xr_XrEntry_getInstance);
