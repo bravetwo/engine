@@ -54,6 +54,7 @@ export class XrInteractor extends Component {
 
     protected _triggerState: boolean = false;
     protected _stateState: boolean = false;
+    protected _activateStateState: boolean = false;
     protected _interactorEvents: InteractorEvents | null = null;
     protected _event = new XrEventHandle("XrInteractor");
     protected _collider: Collider | null = null;
@@ -114,18 +115,18 @@ export class XrInteractor extends Component {
         return false;
     }
 
-    protected _emitSelectEntered() {
+    protected _emitSelectEntered(type: XrControlEventType) {
         if (this._event) {
             this._interactorEvents?.selectEntered(this._event);
         }
-        this._collider?.emit(XrControlEventType.SELECT_ENTERED, this._event);
+        this._collider?.emit(type, this._event);
     }
 
-    private _emitSelectEnd() {
+    private _emitSelectEnd(type: XrControlEventType) {
         if (this._event) {
             this._interactorEvents?.selectExited(this._event);
         }
-        this._collider?.emit(XrControlEventType.SELECT_EXITED, this._event);
+        this._collider?.emit(type, this._event);
         this._collider = null;
     }
 
@@ -141,17 +142,17 @@ export class XrInteractor extends Component {
                 if (!this._judgeTrigger()) {
                     if (this._judgeHit()) {
                         this._triggerState = true;
-                        this._emitSelectEntered();
+                        this._emitSelectEntered(XrControlEventType.SELECT_ENTERED);
                     }
                 }
                 break;
             case SelectActionTrigger_Type.Toggle:
                 if (this._triggerState && this._judgeTrigger()) {
-                    this._emitSelectEnd();
+                    this._emitSelectEnd(XrControlEventType.SELECT_EXITED);
                 } else {
                     if (this._judgeHit()) {
                         this._triggerState = true;
-                        this._emitSelectEntered();
+                        this._emitSelectEntered(XrControlEventType.SELECT_ENTERED);
                     }
                 }
                 break;
@@ -160,7 +161,7 @@ export class XrInteractor extends Component {
                     this._triggerState = true;
                 } else {
                     if (this._judgeHit()) {
-                        this._emitSelectEntered();
+                        this._emitSelectEntered(XrControlEventType.SELECT_ENTERED);
                     }
                 }
                 break;
@@ -175,14 +176,14 @@ export class XrInteractor extends Component {
         switch (this._selectActionTrigger) {
             case SelectActionTrigger_Type.State:
                 if (this._triggerState) {
-                    this._emitSelectEnd();
+                    this._emitSelectEnd(XrControlEventType.SELECT_EXITED);
                     this._triggerState = false;
                 }
                 this._stateState = false;
                 break;
             case SelectActionTrigger_Type.State_Change:
                 if (this._triggerState) {
-                    this._emitSelectEnd();
+                    this._emitSelectEnd(XrControlEventType.SELECT_EXITED);
                     this._triggerState = false;
                 }
                 break;
@@ -190,7 +191,7 @@ export class XrInteractor extends Component {
                 break;
             case SelectActionTrigger_Type.Sticky:
                 if (this._triggerState) {
-                    this._emitSelectEnd();
+                    this._emitSelectEnd(XrControlEventType.SELECT_EXITED);
                     this._triggerState = false;
                 }
                 break;
@@ -202,12 +203,75 @@ export class XrInteractor extends Component {
     public activateStart(event: XrEventHandle) {
         this._event.model = event.model;
         this._event.eventHandle = event.eventHandle;
+        console.log("xr0207 activateStart");
+        switch (this._selectActionTrigger) {
+            case SelectActionTrigger_Type.State:
+                this._activateStateState = true;
+                break;
+            case SelectActionTrigger_Type.State_Change:
+                if (!this._judgeTrigger()) {
+                    if (this._judgeHit()) {
+                        this._triggerState = true;
+                        this._emitSelectEntered(XrControlEventType.ACTIVATED);
+                    }
+                }
+                break;
+            case SelectActionTrigger_Type.Toggle:
+                if (this._triggerState && this._judgeTrigger()) {
+                    this._emitSelectEnd(XrControlEventType.SELECT_EXITED);
+                } else {
+                    if (this._judgeHit()) {
+                        this._triggerState = true;
+                        this._emitSelectEntered(XrControlEventType.ACTIVATED);
+                    }
+                }
+                break;
+            case SelectActionTrigger_Type.Sticky:
+                if (this._judgeTrigger()) {
+                    this._triggerState = true;
+                } else {
+                    if (this._judgeHit()) {
+                        this._emitSelectEntered(XrControlEventType.ACTIVATED);
+                    }
+                }
+                break;
+            default:
+                break;
+        }
+
         this._collider?.emit(XrControlEventType.ACTIVATED, this._event);
     }
 
     public activateEnd(event: XrEventHandle) {
         this._event.model = event.model;
         this._event.eventHandle = event.eventHandle;
+        console.log("xr0207 activateEnd");
+        switch (this._selectActionTrigger) {
+            case SelectActionTrigger_Type.State:
+                if (this._triggerState) {
+                    this._emitSelectEnd(XrControlEventType.DEACTIVITED);
+                    this._triggerState = false;
+                }
+                this._activateStateState = false;
+                break;
+            case SelectActionTrigger_Type.State_Change:
+                if (this._triggerState) {
+                    this._emitSelectEnd(XrControlEventType.DEACTIVITED);
+                    this._triggerState = false;
+                }
+                break;
+            case SelectActionTrigger_Type.Toggle:
+                break;
+            case SelectActionTrigger_Type.Sticky:
+                if (this._triggerState) {
+                    this._emitSelectEnd(XrControlEventType.DEACTIVITED);
+                    this._triggerState = false;
+                }
+                break;
+            default:
+                break;
+        }
+
         this._collider?.emit(XrControlEventType.DEACTIVITED, this._event);
     }
 

@@ -162,7 +162,7 @@ export class DirectInteractor extends XrInteractor {
 
     update(deltaTime: number) {
         // Raised each time when SelectActionType is STATE
-        if (this._directHitCollider && this._selectActionTrigger === SelectActionTrigger_Type.State && this._stateState) {
+        if (this._directHitCollider && this._selectActionTrigger === SelectActionTrigger_Type.State && (this._stateState || this._activateStateState)) {
             // Check whether the collision box has an XrInteractable
             const xrInteractable = this._directHitCollider?.getComponent(XrInteractable);
             if (xrInteractable) {
@@ -172,20 +172,24 @@ export class DirectInteractor extends XrInteractor {
                     this._event.triggerId = this.uuid;
                     this._collider = this._directHitCollider;
                     this._triggerState = true;
-                    this._emitSelectEntered();
+                    if (this._stateState) {
+                        this._emitSelectEntered(XrControlEventType.SELECT_ENTERED);
+                    } else {
+                        this._emitSelectEntered(XrControlEventType.ACTIVATED);
+                    }
                     this._directHitCollider = null;
                 }
             }
         }
     }
 
-    public activateStart() {
-        this._directHitCollider?.emit(XrControlEventType.ACTIVATED, this._event);
-    }
+    // public activateStart() {
+    //     this._directHitCollider?.emit(XrControlEventType.ACTIVATED, this._event);
+    // }
 
-    public activateEnd() {
-        this._directHitCollider?.emit(XrControlEventType.DEACTIVITED, this._event);
-    }
+    // public activateEnd() {
+    //     this._directHitCollider?.emit(XrControlEventType.DEACTIVITED, this._event);
+    // }
 
     public uiPressEnter() {
         this._directHitCollider?.emit(XrControlEventType.UIPRESS_ENTERED, this._event);

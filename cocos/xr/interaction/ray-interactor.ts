@@ -427,7 +427,7 @@ export class RayInteractor extends XrInteractor {
     private _interactionHit(closestResult: PhysicsRayResult, xrInteractable: IXrInteractable) {
         this._handleHoverEnter(closestResult);
         // Raised each time when SelectActionType is STATE
-        if (this._selectActionTrigger === SelectActionTrigger_Type.State && this._stateState) {
+        if (this._selectActionTrigger === SelectActionTrigger_Type.State && (this._stateState || this._activateStateState)) {
             // Determines if the object has been triggered
             if (!this._judgeTrigger()) {
                 this._beTriggerNode = xrInteractable;
@@ -435,7 +435,11 @@ export class RayInteractor extends XrInteractor {
                 this._event.hitPoint = closestResult.hitPoint;
                 this._event.triggerId = this.uuid;
                 this._triggerState = true;
-                this._emitSelectEntered();
+                if (this._stateState) {
+                    this._emitSelectEntered(XrControlEventType.SELECT_ENTERED);
+                } else {
+                    this._emitSelectEntered(XrControlEventType.ACTIVATED);
+                }
             }
         }
     }
@@ -512,14 +516,13 @@ export class RayInteractor extends XrInteractor {
         this.reticle?.setWorldScale(new Vec3(this._orginalScale).multiplyScalar(Vec3.distance(this._line.positions[0], this._line.positions[1])));
     }
 
+    // public activateStart() {
+    //     this._rayHitCollider?.emit(XrControlEventType.ACTIVATED, this._event);
+    // }
 
-    public activateStart() {
-        this._rayHitCollider?.emit(XrControlEventType.ACTIVATED, this._event);
-    }
-
-    public activateEnd() {
-        this._rayHitCollider?.emit(XrControlEventType.DEACTIVITED, this._event);
-    }
+    // public activateEnd() {
+    //     this._rayHitCollider?.emit(XrControlEventType.DEACTIVITED, this._event);
+    // }
 
     public uiPressEnter() {
         if(this._judgeUIHit()) {
