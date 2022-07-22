@@ -5,7 +5,8 @@
         android:required="false"
         android:version="1" />
 
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="org.khronos.openxr.permission.OPENXR" />
     <uses-permission android:name="org.khronos.openxr.permission.OPENXR_SYSTEM" />
     <queries>
@@ -15,11 +16,13 @@
     <application>
         <activity
             android:name="com.cocos.game.AppActivity">
+            <meta-data android:name="com.android.graphics.developerdriver.enable" android:value="true"/>
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
                 <category android:name="org.khronos.openxr.intent.category.IMMERSIVE_HMD" />
+                <category android:name="com.qti.intent.category.SNAPDRAGON_VR"/>
             </intent-filter>
         </activity>
     </application>
