@@ -380,23 +380,18 @@ uint32_t XRInterface::getRuntimeVersion() {
 
 void XRInterface::initialize(void *javaVM, void *activity) {
 #if USE_XR
-    #if CC_USE_VULKAN
-    _graphicsApiName = GraphicsApiVulkan_1_1;
-        #if XR_OEM_PICO
-    _graphicsApiName = GraphicsApiVulkan_1_0;
-        #endif
-    #elif CC_USE_GLES3
-    _graphicsApiName = GraphicsApiOpenglES;
-    #endif
-
-    CC_LOG_INFO("[XR] initialize vm.%p,aty.%p | %s | %d", javaVM, activity, _graphicsApiName.c_str(), (int)gettid());
+    CC_LOG_INFO("[XR] initialize vm.%p,aty.%p | %d", javaVM, activity,  (int)gettid());
     xr::XrEntry::getInstance()->initPlatformData(javaVM, activity);
     xr::XrEntry::getInstance()->setGamepadCallback(&dispatchGamepadEventInternal);
     xr::XrEntry::getInstance()->setHandleCallback(&dispatchHandleEventInternal);
     xr::XrEntry::getInstance()->setHMDCallback(&dispatchHMDEventInternal);
     xr::XrEntry::getInstance()->setXRConfig(xr::XRConfigKey::LOGIC_THREAD_ID, (int)gettid());
     #if XR_OEM_PICO
-    xr::XrEntry::getInstance()->createXrInstance(_graphicsApiName.c_str());
+    std::string graphicsApiName = GraphicsApiOpenglES;
+#if CC_USE_VULKAN
+    graphicsApiName = GraphicsApiVulkan_1_0;
+#endif
+    xr::XrEntry::getInstance()->createXrInstance(graphicsApiName.c_str());
     #endif
 #endif
 }
@@ -447,7 +442,8 @@ void XRInterface::preGFXDeviceInitialize(gfx::API gfxApi) {
 
     if (gfxApi == gfx::API::GLES3 || gfxApi == gfx::API::VULKAN) {
     #if !XR_OEM_PICO
-        xr::XrEntry::getInstance()->createXrInstance(_graphicsApiName.c_str());
+        std::string graphicsApiName = gfxApi == gfx::API::GLES3 ? GraphicsApiOpenglES : GraphicsApiVulkan_1_1;
+        xr::XrEntry::getInstance()->createXrInstance(graphicsApiName.c_str());
     #endif
     }
 #endif

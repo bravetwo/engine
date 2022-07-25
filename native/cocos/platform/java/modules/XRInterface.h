@@ -91,7 +91,6 @@ public:
     virtual void bindXREyeWithRenderWindow(void *window, xr::XREye eye) override;
 
 private:
-    std::string _graphicsApiName;
 #if CC_USE_VULKAN
     PFN_vkGetInstanceProcAddr _vkGetInstanceProcAddr{nullptr};
     VkPhysicalDevice _vkPhysicalDevice{nullptr};
