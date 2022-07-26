@@ -24,7 +24,7 @@
  THE SOFTWARE.
 */
 
-import { EDITOR, HTML5, JSB, NATIVE, PREVIEW, RUNTIME_BASED, TEST } from 'internal:constants';
+import { BUILD, DEBUG, EDITOR, HTML5, JSB, NATIVE, PREVIEW, RUNTIME_BASED, TEST } from 'internal:constants';
 import { systemInfo } from 'pal/system-info';
 import { findCanvas, loadJsFile } from 'pal/env';
 import { Pacer } from 'pal/pacer';
@@ -673,6 +673,9 @@ export class Game extends EventTarget {
                 return this.onPreBaseInitDelegate.dispatch();
             })
             .then(() => {
+                if (DEBUG) {
+                    console.time('Init Base');
+                }
                 const debugMode = config.debugMode || debug.DebugMode.NONE;
                 debug._resetDebugSetting(debugMode);
                 sys.init();
@@ -680,6 +683,10 @@ export class Game extends EventTarget {
             })
             .then(() => settings.init(config.settingsPath, config.overrideSettings))
             .then(() => {
+                if (DEBUG) {
+                    console.timeEnd('Init Base');
+                }
+
                 if (sys.isXR) {
                     const xrMSAA = settings.querySettings(Settings.Category.RENDERING, 'msaa') ?? 1;
                     const xrRenderingScale = settings.querySettings(Settings.Category.RENDERING, 'renderingScale') ?? 1.0;
@@ -697,6 +704,9 @@ export class Game extends EventTarget {
                 return this.onPreInfrastructureInitDelegate.dispatch();
             })
             .then(() => {
+                if (DEBUG) {
+                    console.time('Init Infrastructure');
+                }
                 macro.init();
                 const adapter = findCanvas();
                 if (adapter) {
@@ -711,6 +721,9 @@ export class Game extends EventTarget {
                 builtinResMgr.init();
                 Layers.init();
                 this.initPacer();
+                if (DEBUG) {
+                    console.timeEnd('Init Infrastructure');
+                }
             })
             .then(() => {
                 this.emit(Game.EVENT_POST_INFRASTRUCTURE_INIT);
@@ -722,9 +735,17 @@ export class Game extends EventTarget {
                 this.emit(Game.EVENT_PRE_SUBSYSTEM_INIT);
                 return this.onPreSubsystemInitDelegate.dispatch();
             })
-            .then(() => director.init())
-            .then(() => builtinResMgr.loadBuiltinAssets())
             .then(() => {
+                if (DEBUG) {
+                    console.time('Init SubSystem');
+                }
+                director.init();
+                return builtinResMgr.loadBuiltinAssets();
+            })
+            .then(() => {
+                if (DEBUG) {
+                    console.timeEnd('Init SubSystem');
+                }
                 this.emit(Game.EVENT_POST_SUBSYSTEM_INIT);
                 return this.onPostSubsystemInitDelegate.dispatch();
             })
@@ -740,6 +761,9 @@ export class Game extends EventTarget {
                 return this.onPreProjectInitDelegate.dispatch();
             })
             .then(() => {
+                if (DEBUG) {
+                    console.time('Init Project');
+                }
                 const jsList = settings.querySettings<string[]>(Settings.Category.PLUGINS, 'jsList');
                 let promise = Promise.resolve();
                 if (jsList) {
@@ -760,9 +784,14 @@ export class Game extends EventTarget {
             .then(() => this._loadProjectBundles())
             .then(() => this._setupRenderPipeline())
             .then(() => this._loadPreloadAssets())
-            .then(() => builtinResMgr.compileBuiltinMaterial())
-            .then(() => SplashScreen.instance.init())
             .then(() => {
+                builtinResMgr.compileBuiltinMaterial();
+                return SplashScreen.instance.init();
+            })
+            .then(() => {
+                if (DEBUG) {
+                    console.timeEnd('Init Project');
+                }
                 this.emit(Game.EVENT_POST_PROJECT_INIT);
                 return this.onPostProjectInitDelegate.dispatch();
             })

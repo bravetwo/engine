@@ -123,6 +123,9 @@ public:
     template <typename ExecuteMethod>
     void registerOnAcquireCallback(ExecuteMethod &&execute);
 
+    inline void setOptions(const DeviceOptions &opts) { _options = opts; }
+    inline const DeviceOptions &getOptions() const { return _options; }
+
 protected:
     static Device *instance;
 
@@ -168,6 +171,7 @@ protected:
     API _api{API::UNKNOWN};
     DeviceCaps _caps;
     BindingMappingInfo _bindingMappingInfo;
+    DeviceOptions _options;
 
     bool _multithreadedCommandRecording{true};
 
