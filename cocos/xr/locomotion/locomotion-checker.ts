@@ -46,7 +46,7 @@ import { Node } from '../../core/scene-graph/node';
 @executeInEditMode
 export class LocomotionChecker extends Component {
     @serializable
-    protected _timeout = 10;
+    protected _timeout = 0;
     @serializable
     protected _xrAgent: Node | null = null;
 

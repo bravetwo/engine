@@ -463,6 +463,13 @@ export class GrabInteractable extends XrInteractable {
 
         const rigidBody = this.node.getComponent(RigidBody);
         if (rigidBody) {
+            if (this._curGrabTime < this._attachEaseInTime) {
+                rigidBody.setLinearVelocity(Vec3.ZERO);
+                rigidBody.setAngularVelocity(Vec3.ZERO);
+                rigidBody.type = ERigidBodyType.DYNAMIC;
+                rigidBody.useGravity = true;
+                return;
+            }
             if (this._throwOnDetach) {
                 if (this._throwSimulationMode === ThrowSimulationMode_Type.CurveComputation) {
                     rigidBody.setLinearVelocity(this.GetSmoothedVelocityValue(this._throwVelocityFrames).multiplyScalar(this._throwVelocityScale));

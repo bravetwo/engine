@@ -203,7 +203,6 @@ export class XrInteractor extends Component {
     public activateStart(event: XrEventHandle) {
         this._event.model = event.model;
         this._event.eventHandle = event.eventHandle;
-        console.log("xr0207 activateStart");
         switch (this._selectActionTrigger) {
             case SelectActionTrigger_Type.State:
                 this._activateStateState = true;
@@ -245,7 +244,6 @@ export class XrInteractor extends Component {
     public activateEnd(event: XrEventHandle) {
         this._event.model = event.model;
         this._event.eventHandle = event.eventHandle;
-        console.log("xr0207 activateEnd");
         switch (this._selectActionTrigger) {
             case SelectActionTrigger_Type.State:
                 if (this._triggerState) {
