@@ -42,7 +42,8 @@ import { sys } from '../../core/platform/sys';
 import { legacyCC } from '../../core/global-exports';
 import { NodeEventType } from '../../core/scene-graph/node-event';
 import { XrUIPressEventType } from '../../xr/event/xr-event-handle';
-import { xrKeyboardInput, XRKeyboardInputField } from '../../xr';
+// import { xrKeyboardEventInput, XRKeyboardInputField } from '../../xr';
+import { xrKeyboardEventInput } from '../../xr';
 import { InputEventType } from '../../input/types/event-enum';
 
 const LEFT_PADDING = 2;
@@ -60,6 +61,8 @@ enum EventType {
     EDITING_DID_ENDED = 'editing-did-ended',
     TEXT_CHANGED = 'text-changed',
     EDITING_RETURN = 'editing-return',
+    XR_EDITING_DID_BEGAN = 'xr-editing-did-began',
+    XR_EDITING_DID_ENDED = 'xr-editing-did-ended',
 }
 /**
  * @en
@@ -390,7 +393,7 @@ export class EditBox extends Component {
     protected  _maxLength = 20;
 
     private _isLabelVisible = false;
-    private _xrKeyBoardInputField: XRKeyboardInputField | null = null;
+    // private _xrKeyBoardInputField: XRKeyboardInputField | null = null;
 
     public __preload () {
         this._init();
@@ -405,8 +408,8 @@ export class EditBox extends Component {
             this._impl.onEnable();
         }
         if (sys.isXR) {
-            this._xrKeyBoardInputField = this.node.getComponent(XRKeyboardInputField);
-            this._xrKeyBoardInputField?.setMaxContextLength(this._maxLength);
+            // this._xrKeyBoardInputField = this.node.getComponent(XRKeyboardInputField);
+            // this._xrKeyBoardInputField?.setMaxContextLength(this._maxLength);
         }
     }
 
@@ -702,7 +705,7 @@ export class EditBox extends Component {
         this.node.on(NodeEventType.TOUCH_END, this._onTouchEnded, this);
 
         this.node.on(XrUIPressEventType.XRUI_UNCLICK, this._xrUnClick, this);
-        xrKeyboardInput.on(InputEventType.XR_KEYBOARD_INPUT, this._xrKeyBoardInput, this);
+        xrKeyboardEventInput.on(InputEventType.XR_KEYBOARD_INPUT, this._xrKeyBoardInput, this);
     }
 
     protected _unregisterEvent () {
@@ -710,7 +713,7 @@ export class EditBox extends Component {
         this.node.off(NodeEventType.TOUCH_END, this._onTouchEnded, this);
 
         this.node.off(XrUIPressEventType.XRUI_UNCLICK, this._xrUnClick, this);
-        xrKeyboardInput.off(InputEventType.XR_KEYBOARD_INPUT, this._xrKeyBoardInput, this);
+        xrKeyboardEventInput.off(InputEventType.XR_KEYBOARD_INPUT, this._xrKeyBoardInput, this);
     }
 
     private _onBackgroundSpriteFrameChanged () {
@@ -775,21 +778,24 @@ export class EditBox extends Component {
     }
 
     protected _xrUnClick() {
-        if (this._xrKeyBoardInputField?.show()) {
-            xrKeyboardInput.on(InputEventType.KEY_UP, this._xrKeyBoardUp, this);
-            xrKeyboardInput.emit(InputEventType.XR_KEYBOARD_INIT);
-        }
+        this.node.emit(EventType.XR_EDITING_DID_BEGAN, this._maxLength);
+        // if (this._xrKeyBoardInputField?.show()) {
+        //     xrKeyboardEventInput.on(InputEventType.KEY_UP, this._xrKeyBoardUp, this);
+        //     xrKeyboardEventInput.emit(InputEventType.XR_KEYBOARD_INIT);
+        // }
     }
 
     protected _xrKeyBoardInput(str: string) {
+        console.log("xr0209 _xrKeyBoardInput : " + str);
         this.string = str;
     }
 
     protected _xrKeyBoardUp(event: EventKeyboard) {
-        if (event.keyCode === KeyCode.ENTER) {
-            this._xrKeyBoardInputField?.hide();
-            xrKeyboardInput.off(InputEventType.KEY_UP, this._xrKeyBoardUp, this);
-        }
+        // this.node.emit(EventType.XR_EDITING_DID_ENDED , this);
+        // if (event.keyCode === KeyCode.ENTER) {
+        //     this._xrKeyBoardInputField?.hide();
+        //     xrKeyboardEventInput.off(InputEventType.KEY_UP, this._xrKeyBoardUp, this);
+        // }
     }
 }
 
