@@ -31,7 +31,7 @@ import { SpriteFrame } from '../../2d/assets/sprite-frame';
 import { Component } from '../../core/components/component';
 import { EventHandler as ComponentEventHandler } from '../../core/components/component-event-handler';
 import { Color, Size, Vec3 } from '../../core/math';
-import { EventKeyboard, EventTouch, KeyCode } from '../../input/types';
+import { EventTouch } from '../../input/types';
 import { Node } from '../../core/scene-graph/node';
 import { Label, VerticalTextAlignment } from '../../2d/components/label';
 import { Sprite } from '../../2d/components/sprite';
@@ -42,9 +42,7 @@ import { sys } from '../../core/platform/sys';
 import { legacyCC } from '../../core/global-exports';
 import { NodeEventType } from '../../core/scene-graph/node-event';
 import { XrKeyboardEventType, XrUIPressEventType } from '../../xr/event/xr-event-handle';
-// import { xrKeyboardEventInput, XRKeyboardInputField } from '../../xr';
 import { xrKeyboardEventInput } from '../../xr';
-import { InputEventType } from '../../input/types/event-enum';
 
 const LEFT_PADDING = 2;
 
