@@ -524,6 +524,14 @@ const std::vector<cc::xr::XRSwapchain> &XRInterface::getXRSwapchains() {
 }
 
 gfx::Format XRInterface::getXRSwapchainFormat() {
+     int swapchainFormat = xr::XrEntry::getInstance()->getXRConfig(xr::XRConfigKey::SWAPCHAIN_FORMAT).getInt();
+     if(swapchainFormat == VK_FORMAT_R8G8B8A8_SRGB || swapchainFormat == GL_SRGB_ALPHA_EXT) {
+         return gfx::Format::SRGB8_A8;
+     } else if(swapchainFormat == VK_FORMAT_R8G8B8A8_UNORM || swapchainFormat == GL_RGBA8) {
+         return gfx::Format::RGBA8;
+     } else if(swapchainFormat == VK_FORMAT_B8G8R8A8_UNORM || swapchainFormat == GL_BGRA8_EXT) {
+         return gfx::Format::BGRA8;
+     }
     return gfx::Format::SRGB8_A8;
 }
 
