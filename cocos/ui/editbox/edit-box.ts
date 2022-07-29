@@ -41,7 +41,7 @@ import { InputFlag, InputMode, KeyboardReturnType } from './types';
 import { sys } from '../../core/platform/sys';
 import { legacyCC } from '../../core/global-exports';
 import { NodeEventType } from '../../core/scene-graph/node-event';
-import { XrUIPressEventType } from '../../xr/event/xr-event-handle';
+import { XrKeyboardEventType, XrUIPressEventType } from '../../xr/event/xr-event-handle';
 // import { xrKeyboardEventInput, XRKeyboardInputField } from '../../xr';
 import { xrKeyboardEventInput } from '../../xr';
 import { InputEventType } from '../../input/types/event-enum';
@@ -705,7 +705,7 @@ export class EditBox extends Component {
         this.node.on(NodeEventType.TOUCH_END, this._onTouchEnded, this);
 
         this.node.on(XrUIPressEventType.XRUI_UNCLICK, this._xrUnClick, this);
-        xrKeyboardEventInput.on(InputEventType.XR_KEYBOARD_INPUT, this._xrKeyBoardInput, this);
+        xrKeyboardEventInput.on(XrKeyboardEventType.XR_KEYBOARD_INPUT, this._xrKeyBoardInput, this);
     }
 
     protected _unregisterEvent () {
@@ -713,7 +713,7 @@ export class EditBox extends Component {
         this.node.off(NodeEventType.TOUCH_END, this._onTouchEnded, this);
 
         this.node.off(XrUIPressEventType.XRUI_UNCLICK, this._xrUnClick, this);
-        xrKeyboardEventInput.off(InputEventType.XR_KEYBOARD_INPUT, this._xrKeyBoardInput, this);
+        xrKeyboardEventInput.off(XrKeyboardEventType.XR_KEYBOARD_INPUT, this._xrKeyBoardInput, this);
     }
 
     private _onBackgroundSpriteFrameChanged () {
@@ -779,23 +779,10 @@ export class EditBox extends Component {
 
     protected _xrUnClick() {
         this.node.emit(EventType.XR_EDITING_DID_BEGAN, this._maxLength);
-        // if (this._xrKeyBoardInputField?.show()) {
-        //     xrKeyboardEventInput.on(InputEventType.KEY_UP, this._xrKeyBoardUp, this);
-        //     xrKeyboardEventInput.emit(InputEventType.XR_KEYBOARD_INIT);
-        // }
     }
 
     protected _xrKeyBoardInput(str: string) {
-        console.log("xr0209 _xrKeyBoardInput : " + str);
         this.string = str;
-    }
-
-    protected _xrKeyBoardUp(event: EventKeyboard) {
-        // this.node.emit(EventType.XR_EDITING_DID_ENDED , this);
-        // if (event.keyCode === KeyCode.ENTER) {
-        //     this._xrKeyBoardInputField?.hide();
-        //     xrKeyboardEventInput.off(InputEventType.KEY_UP, this._xrKeyBoardUp, this);
-        // }
     }
 }
 
