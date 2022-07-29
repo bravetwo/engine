@@ -23,7 +23,7 @@
  THE SOFTWARE.
 */
 
-import { JSB } from 'internal:constants';
+import { DEBUG, JSB } from 'internal:constants';
 import { director } from '../../core/director';
 import { Material } from '../../core/assets/material';
 import { TextureBase } from '../../core/assets/texture-base';
@@ -40,6 +40,7 @@ import { RenderDrawInfo, RenderDrawInfoType } from './render-draw-info';
 import { StencilManager } from './stencil-manager';
 import { Batcher2D } from './batcher-2d';
 import { RenderEntity, RenderEntityType } from './render-entity';
+import { assert } from '../../core';
 
 /**
  * @deprecated since v3.5.0, this is an engine private interface that will be removed in the future.
@@ -291,9 +292,6 @@ export class RenderData extends BaseRenderData {
     }
     set textureHash (val: number) {
         this._textureHash = val;
-        if (this._renderDrawInfo) {
-            this._renderDrawInfo.setTextureHash(val);
-        }
     }
 
     protected _blendHash = -1;
@@ -335,6 +333,7 @@ export class RenderData extends BaseRenderData {
     private _height = 0;
     private _frame: SpriteFrame | TextureBase | null = null;
     protected _accessor: StaticVBAccessor = null!;
+    get accessor () { return this._accessor; }
 
     public vertexRow = 1;
     public vertexCol = 1;
@@ -382,20 +381,19 @@ export class RenderData extends BaseRenderData {
             this._renderDrawInfo.setAccId(this._accessor.id);
             super.setRenderDrawInfoAttributes();
             this._renderDrawInfo.setTexture(this.frame ? this.frame.getGFXTexture() : null);
-            this._renderDrawInfo.setTextureHash(this.textureHash);
             this._renderDrawInfo.setSampler(this.frame ? this.frame.getGFXSampler() : null);
         }
     }
-
+    /**
+     * @internal
+     */
     public fillDrawInfoAttributes (drawInfo: RenderDrawInfo) {
         if (JSB) {
             if (!drawInfo) {
                 return;
             }
-
-            drawInfo.setAccId(this._accessor.id);
             drawInfo.setDrawInfoType(this._drawInfoType);
-            drawInfo.setBufferId(this.chunk.bufferId);
+            drawInfo.setAccAndBuffer(this._accessor.id, this.chunk.bufferId);
             drawInfo.setVertexOffset(this.chunk.vertexOffset);
             drawInfo.setIndexOffset(this.chunk.meshBuffer.indexOffset);
             drawInfo.setVB(this.chunk.vb);
@@ -499,7 +497,6 @@ export class RenderData extends BaseRenderData {
 
             if (this._renderDrawInfo) {
                 this._renderDrawInfo.setTexture(this.frame ? this.frame.getGFXTexture() : null);
-                this._renderDrawInfo.setTextureHash(this.textureHash);
                 this._renderDrawInfo.setSampler(this.frame ? this.frame.getGFXSampler() : null);
             }
         }
@@ -513,24 +510,11 @@ export class RenderData extends BaseRenderData {
 
         // Hack Do not update pre frame
         if (JSB && this.multiOwner === false) {
-            // for sync vData and iData address to native
-            //this.setRenderDrawInfoAttributes();
-            // sync shared buffer to native
-            this.copyRenderDataToSharedBuffer();
-        }
-    }
-
-    copyRenderDataToSharedBuffer () {
-        if (JSB) {
-            const entity = this._renderDrawInfo;
-            const sharedBuffer = entity.render2dBuffer;
-
-            if (sharedBuffer.length < this.floatStride * this._data.length) {
-                console.error('Vertex count doesn\'t match.');
-                return;
+            if (DEBUG) {
+                assert(this._renderDrawInfo.render2dBuffer.length === this._floatStride * this._data.length, 'Vertex count doesn\'t match.');
             }
-
-            entity.fillRender2dBuffer(this._data);
+            // sync shared buffer to native
+            this._renderDrawInfo.fillRender2dBuffer(this._data);
         }
     }
 

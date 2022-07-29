@@ -49,6 +49,7 @@ enum class RenderDrawInfoType: uint8_t {
     COMP,
     MODEL,
     IA,
+    SUB_NODE,
 };
 
 struct LocalDSBF {
@@ -149,14 +150,6 @@ public:
         _texture = texture;
     }
 
-    inline uint32_t getTextureHash() const {
-        return _drawInfoAttrs._textureHash;
-    }
-
-    inline void setTextureHash(uint32_t textureHash) {
-        _drawInfoAttrs._textureHash = textureHash;
-    }
-
     inline gfx::Sampler* getSampler() const {
         return _sampler;
     }
@@ -193,8 +186,12 @@ public:
         }
     }
 
-    inline Node* getSubNode() const { return _subNode; }
+    inline Node* getSubNode() const {
+        CC_ASSERT(_drawInfoAttrs._drawInfoType == RenderDrawInfoType::SUB_NODE); 
+        return _subNode; 
+    }
     inline void setSubNode(Node* node) {
+        CC_ASSERT(_drawInfoAttrs._drawInfoType == RenderDrawInfoType::SUB_NODE);
         _subNode = node;
     }
 
@@ -238,9 +235,10 @@ private:
         uint32_t _indexOffset{0};
         uint32_t _vbCount{0};
         uint32_t _ibCount{0};
-        uint32_t _textureHash{0};
         ccstd::hash_t _dataHash{0};
     } _drawInfoAttrs{};
+
+    uint16_t _nextFreeIAHandle{0};
 
     bindings::NativeMemorySharedToScriptActor _attrSharedBufferActor;
     // weak reference
@@ -267,7 +265,6 @@ private:
     };
     gfx::InputAssemblerInfo* _iaInfo{nullptr};
     ccstd::vector<gfx::InputAssembler*>* _iaPool{nullptr};
-    uint16_t _nextFreeIAHandle{0};
     LocalDSBF* _localDSBF{nullptr};
 };
 } // namespace cc

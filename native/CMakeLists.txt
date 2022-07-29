@@ -121,6 +121,11 @@ if(USE_JOB_SYSTEM_TASKFLOW AND USE_JOB_SYSTEM_TBB)
     set(USE_JOB_SYSTEM_TBB      OFF)
 endif()
 
+if(OHOS AND USE_JOB_SYSTEM_TBB)
+    message(WARNING "JobSystem tbb is not supported by HarmonyOS")
+    set(USE_JOB_SYSTEM_TBB      OFF)
+endif()
+
 if(USE_JOB_SYSTEM_TASKFLOW)
     set(CMAKE_CXX_STANDARD 17)
     if(IOS AND "${TARGET_IOS_VERSION}" VERSION_LESS "12.0")
@@ -498,8 +503,6 @@ endif()
 cocos_source_files(
     cocos/platform/interfaces/OSInterface.cpp
     cocos/platform/interfaces/OSInterface.h
-    cocos/platform/interfaces/OSInterfaceManager.cpp
-    cocos/platform/interfaces/OSInterfaceManager.h
 )
 
 ############ platform : Interface definition

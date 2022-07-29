@@ -39,6 +39,7 @@
 #if CC_SWAPPY_ENABLED
     #include "swappy/swappyVk.h"
     #include "swappy/swappy_common.h"
+    #include "platform/android/AndroidPlatform.h"
 #endif
 
 namespace cc {
@@ -236,6 +237,7 @@ void CCVKSwapchain::doInit(const SwapchainInfo &info) {
     int32_t fps = cc::BasePlatform::getPlatform()->getFps();
 
     uint64_t frameRefreshIntervalNS;
+    auto *platform = static_cast<AndroidPlatform *>(cc::BasePlatform::getPlatform());
     SwappyVk_initAndGetRefreshCycleDuration(static_cast<JNIEnv *>(platform->getEnv()),
                                             static_cast<jobject>(platform->getActivity()),
                                             gpuContext->physicalDevice,
