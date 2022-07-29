@@ -401,34 +401,7 @@ export enum InputEventType {
      * @en The event type for hmd pose input
      * @zh 头戴显示器姿态输入事件
      */
-    HMD_POSE_INPUT = 'hmd-pose-input',
-
-    /**
-     * @en
-     * The event type for XR keyboard case switching event
-     *
-     * @zh
-     * XR键盘大小写切换事件
-     */
-     XR_CAPS_LOCK = 'xr-caps-lock',
-
-    /**
-     * @en
-     * The event type for XR keyboard initialization event
-     *
-     * @zh
-     * XR键盘初始化事件
-     */
-     XR_KEYBOARD_INIT = 'xr-keyboard-init',
-
-     /**
-     * @en
-     * The event type for XR keyboard input event
-     *
-     * @zh
-     * XR键盘input事件
-     */
-     XR_KEYBOARD_INPUT = 'xr-keyboard-input'
+    HMD_POSE_INPUT = 'hmd-pose-input'
 }
 
 export type SystemEventTypeUnion = SystemEventType | NodeEventType | InputEventType | string;
