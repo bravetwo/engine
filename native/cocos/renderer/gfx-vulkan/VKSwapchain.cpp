@@ -91,11 +91,6 @@ void CCVKSwapchain::doInit(const SwapchainInfo &info) {
 
     Format colorFmt = Format::BGRA8;
     Format depthStencilFmt = Format::DEPTH_STENCIL;
-    if(_xr) {
-#ifdef VK_USE_PLATFORM_ANDROID_KHR
-        colorFmt               = Format::SRGB8_A8;
-#endif
-    }
 
     if (_gpuSwapchain->vkSurface != VK_NULL_HANDLE) {
         VkSurfaceCapabilitiesKHR surfaceCapabilities{};
@@ -213,7 +208,9 @@ void CCVKSwapchain::doInit(const SwapchainInfo &info) {
         _gpuSwapchain->createInfo.clipped = VK_TRUE; // Setting clipped to VK_TRUE allows the implementation to discard rendering outside of the surface area
     }
     ///////////////////// Texture Creation /////////////////////
-
+    if (_xr) {
+        colorFmt = _xr->getXRSwapchainFormat();
+    }
     _colorTexture = ccnew CCVKTexture;
     _depthStencilTexture = ccnew CCVKTexture;
 
