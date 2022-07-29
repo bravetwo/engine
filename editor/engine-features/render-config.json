@@ -57,8 +57,7 @@
             "default": ["xr"],
             "label": "i18n:ENGINE.features.xr.label",
             "description": "i18n:ENGINE.features.xr.description",
-            "category": "xr",
-            "wechatPlugin": true
+            "wechatPlugin": false
         },
         "ui": {
             "default": ["ui"],
