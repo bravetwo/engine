@@ -83,7 +83,7 @@ public:
     int getUpdatedPlanesCount() const;
     //void updatePlanesInfo() const;
     float* getAddedPlanesInfo() const;
-    int* getRemovedPlanesInfo() const;
+    float* getRemovedPlanesInfo() const;
     float* getUpdatedPlanesInfo() const;
 
     // scene mesh reconstruction

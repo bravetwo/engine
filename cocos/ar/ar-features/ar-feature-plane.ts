@@ -79,10 +79,10 @@ export class ARFeaturePlaneDetection extends ARFeature {
 
     readonly onAddEvent = new FeatureEvent<ARPlane[]>();
     readonly onUpdateEvent = new FeatureEvent<ARPlane[]>();
-    readonly onRemoveEvent = new FeatureEvent<number[]>();
+    readonly onRemoveEvent = new FeatureEvent<ARPlane[]>();
     private _addedPlanes : ARPlane[];
     private _updatedPlanes : ARPlane[];
-    private _removedPlanes : number[];
+    private _removedPlanes : ARPlane[];
 
     private _planesParent : Node | null = null;
 
@@ -196,8 +196,9 @@ export class ARFeaturePlaneDetection extends ARFeature {
         //let planes = this._session.node;
         //*
         this.removedPlanesInfo = armodule.getRemovedPlanesInfo();
-        //this._removedPlanes.length = 0;
-        this._removedPlanes = this.removedPlanesInfo;
+        this._removedPlanes.length = 0;
+        //this._removedPlanes = this.removedPlanesInfo;
+        this.assembleInfos(this.removedPlanesInfo, this._removedPlanes);
         if(this._removedPlanes.length > 0)
                 this.onRemoveEvent.trigger(this._removedPlanes);
 

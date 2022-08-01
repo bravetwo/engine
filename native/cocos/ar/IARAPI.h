@@ -38,9 +38,10 @@ class IARAPI {
 public:
     virtual ~IARAPI()     = default;
     virtual void config(int featureMask) = 0;
-    virtual int getSupportMask() = 0;
+    virtual uint32_t getSupportMask() = 0;
     virtual void start() = 0;
     virtual void start(void *context) = 0;
+    virtual void start(void *env, void *context) = 0;
     virtual void resume() = 0;
     virtual void resume(void *context) = 0;
     virtual void pause() = 0;
@@ -68,7 +69,7 @@ public:
 
     //virtual void updatePlanesInfo() = 0;
     virtual float* getAddedPlanesInfo() = 0;
-    virtual int* getRemovedPlanesInfo() = 0;
+    virtual float* getRemovedPlanesInfo() = 0;
     virtual float* getUpdatedPlanesInfo() = 0;
     virtual int getInfoLength() = 0;
 

@@ -194,7 +194,7 @@ static bool js_ar_ARModule_setPlaneMaxTrackingNumber(se::State& s)
     return false;
 }
 SE_BIND_FUNC(js_ar_ARModule_setPlaneMaxTrackingNumber)
-
+/*
 static bool js_ar_ARModule_updatePlanesInfo(se::State& s)
 {
     cc::ar::ARModule* cobj = (cc::ar::ARModule*)s.nativeThisObject();
@@ -211,7 +211,7 @@ static bool js_ar_ARModule_updatePlanesInfo(se::State& s)
     return false;
 }
 SE_BIND_FUNC(js_ar_ARModule_updatePlanesInfo)
-
+//*/
 static bool js_ar_ARModule_getAddedPlanesInfo(se::State& s)
 {
     cc::ar::ARModule* cobj = (cc::ar::ARModule*)s.nativeThisObject();
@@ -241,9 +241,9 @@ static bool js_ar_ARModule_getRemovedPlanesInfo(se::State& s)
     const auto& args = s.args();
     size_t argc = args.size();
     if (argc == 0) {
-        int* buffer = cobj->getRemovedPlanesInfo();
+        float* buffer = cobj->getRemovedPlanesInfo();
         int len = cobj->getInfoLength();
-        se::Object* planesInfo = se::Object::createTypedArray(se::Object::TypedArrayType::UINT32, buffer, 4 * len);
+        se::Object* planesInfo = se::Object::createTypedArray(se::Object::TypedArrayType::FLOAT32, buffer, 4 * len);
         s.rval().setObject(planesInfo);
         return true;
     }
@@ -858,7 +858,7 @@ SE_BIND_FUNC(js_ar_ARModule_enableFaceTracking)
 
 static bool js_ar_ARModule_getAddedFacesInfo(se::State& s)
 {
-    cc::ar::ARModule* cobj = (cc::ar::ARModule*)s.nativeThisObject();
+    auto* cobj = static_cast<cc::ar::ARModule*>(s.nativeThisObject());
     SE_PRECONDITION2(cobj, false, "js_ar_ARModule_getAddedFacesInfo : Invalid Native Object");
 
     const auto& args = s.args();
@@ -951,7 +951,7 @@ bool register_all_ar_manual(se::Object *obj) {
     __jsb_cc_ar_ARModule_proto->defineFunction("enablePlane", _SE(js_ar_ARModule_enablePlane));
     __jsb_cc_ar_ARModule_proto->defineFunction("setPlaneDetectionMode", _SE(js_ar_ARModule_setPlaneDetectionMode));
     __jsb_cc_ar_ARModule_proto->defineFunction("setPlaneMaxTrackingNumber", _SE(js_ar_ARModule_setPlaneMaxTrackingNumber));
-    __jsb_cc_ar_ARModule_proto->defineFunction("updatePlanesInfo", _SE(js_ar_ARModule_updatePlanesInfo));
+    //__jsb_cc_ar_ARModule_proto->defineFunction("updatePlanesInfo", _SE(js_ar_ARModule_updatePlanesInfo));
     __jsb_cc_ar_ARModule_proto->defineFunction("getAddedPlanesInfo", _SE(js_ar_ARModule_getAddedPlanesInfo));
     __jsb_cc_ar_ARModule_proto->defineFunction("getRemovedPlanesInfo", _SE(js_ar_ARModule_getRemovedPlanesInfo));
     __jsb_cc_ar_ARModule_proto->defineFunction("getUpdatedPlanesInfo", _SE(js_ar_ARModule_getUpdatedPlanesInfo));

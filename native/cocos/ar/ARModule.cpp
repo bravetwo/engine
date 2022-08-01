@@ -88,7 +88,10 @@ void ARModule::start() {
 #if CC_PLATFORM == CC_PLATFORM_ANDROID
     auto *platform = cc::BasePlatform::getPlatform();
     auto *androidPlatform = static_cast<cc::AndroidPlatform *>(platform);
-    _impl->start(androidPlatform->getActivity());
+    auto *env = cc::AndroidPlatform::getEnv();
+    auto *activity = androidPlatform->getActivity();
+    //_impl->start(androidPlatform->getActivity());
+    _impl->start(env, activity);
 #endif
 #else
     _impl->start();
@@ -195,7 +198,7 @@ float* ARModule::getAddedPlanesInfo() const {
     return _impl->getAddedPlanesInfo();
 }
 
-int* ARModule::getRemovedPlanesInfo() const {
+float* ARModule::getRemovedPlanesInfo() const {
     return _impl->getRemovedPlanesInfo();
 }
 float* ARModule::getUpdatedPlanesInfo() const {
