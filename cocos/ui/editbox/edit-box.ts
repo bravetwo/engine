@@ -38,11 +38,9 @@ import { Sprite } from '../../2d/components/sprite';
 import { EditBoxImpl } from './edit-box-impl';
 import { EditBoxImplBase } from './edit-box-impl-base';
 import { InputFlag, InputMode, KeyboardReturnType } from './types';
-import { sys } from '../../core/platform/sys';
 import { legacyCC } from '../../core/global-exports';
 import { NodeEventType } from '../../core/scene-graph/node-event';
 import { XrKeyboardEventType, XrUIPressEventType } from '../../xr/event/xr-event-handle';
-import { xrKeyboardEventInput } from '../../xr';
 
 const LEFT_PADDING = 2;
 
@@ -391,7 +389,6 @@ export class EditBox extends Component {
     protected  _maxLength = 20;
 
     private _isLabelVisible = false;
-    // private _xrKeyBoardInputField: XRKeyboardInputField | null = null;
 
     public __preload () {
         this._init();
@@ -404,10 +401,6 @@ export class EditBox extends Component {
         this._ensureBackgroundSprite();
         if (this._impl) {
             this._impl.onEnable();
-        }
-        if (sys.isXR) {
-            // this._xrKeyBoardInputField = this.node.getComponent(XRKeyboardInputField);
-            // this._xrKeyBoardInputField?.setMaxContextLength(this._maxLength);
         }
     }
 
@@ -703,7 +696,7 @@ export class EditBox extends Component {
         this.node.on(NodeEventType.TOUCH_END, this._onTouchEnded, this);
 
         this.node.on(XrUIPressEventType.XRUI_UNCLICK, this._xrUnClick, this);
-        xrKeyboardEventInput.on(XrKeyboardEventType.XR_KEYBOARD_INPUT, this._xrKeyBoardInput, this);
+        this.node.on(XrKeyboardEventType.XR_KEYBOARD_INPUT, this._xrKeyBoardInput, this);
     }
 
     protected _unregisterEvent () {
@@ -711,7 +704,7 @@ export class EditBox extends Component {
         this.node.off(NodeEventType.TOUCH_END, this._onTouchEnded, this);
 
         this.node.off(XrUIPressEventType.XRUI_UNCLICK, this._xrUnClick, this);
-        xrKeyboardEventInput.off(XrKeyboardEventType.XR_KEYBOARD_INPUT, this._xrKeyBoardInput, this);
+        this.node.off(XrKeyboardEventType.XR_KEYBOARD_INPUT, this._xrKeyBoardInput, this);
     }
 
     private _onBackgroundSpriteFrameChanged () {
@@ -776,7 +769,7 @@ export class EditBox extends Component {
     }
 
     protected _xrUnClick() {
-        this.node.emit(EventType.XR_EDITING_DID_BEGAN, this._maxLength);
+        this.node.emit(EventType.XR_EDITING_DID_BEGAN, this._maxLength, this.string);
     }
 
     protected _xrKeyBoardInput(str: string) {
