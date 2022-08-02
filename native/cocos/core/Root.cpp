@@ -263,6 +263,15 @@ public:
     bool isOcclusionQueryEnabled() const override {
         return pipeline->isOcclusionQueryEnabled();
     }
+
+    void resetRenderQueue(bool reset) override {
+        pipeline->resetRenderQueue(reset);
+    }
+
+    bool isResetRenderQueue() override {
+        return pipeline->isResetRenderQueue();
+    }
+
     pipeline::RenderPipeline *pipeline = nullptr;
 };
 
