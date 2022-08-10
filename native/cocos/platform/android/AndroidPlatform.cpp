@@ -497,7 +497,7 @@ void gameControllerStatusCallback(const int32_t controllerIndex,
 AndroidPlatform::~AndroidPlatform() = default;
 
 int AndroidPlatform::init() {
-#if USE_XR
+#if CC_USE_XR
     registerInterface(std::make_shared<XRInterface>());
 #endif
     IXRInterface *xr = getInterface<IXRInterface>();

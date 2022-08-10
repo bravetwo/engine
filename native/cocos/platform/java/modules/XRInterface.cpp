@@ -44,7 +44,7 @@
     #include "renderer/gfx-gles3/GLES3GPUObjects.h"
 #endif
 
-#if USE_XR
+#if CC_USE_XR
     #include "Xr.h"
 #endif
 #include "application/ApplicationManager.h"
@@ -107,7 +107,7 @@ static void dispatchGamepadEventInternal(const xr::XRControllerEvent &xrControll
                         break;
                     case xr::XRClick::Type::HOME:
                         CC_LOG_INFO("[XRInterface] exit when home click in rokid.");
-#if USE_XR
+#if CC_USE_XR
                         xr::XrEntry::getInstance()->destroyXrInstance();
                         xr::XrEntry::destroyInstance();
 #endif
@@ -350,14 +350,14 @@ static void dispatchHMDEventInternal(const xr::XRControllerEvent &xrControllerEv
 }
 
 xr::XRVendor XRInterface::getVendor() {
-#if USE_XR
+#if CC_USE_XR
     return (xr::XRVendor) xr::XrEntry::getInstance()->getXRConfig(cc::xr::XRConfigKey::DEVICE_VENDOR).getInt();
 #endif
     return xr::XRVendor::MONADO;
 }
 
 xr::XRConfigValue XRInterface::getXRConfig(xr::XRConfigKey key) {
-#if USE_XR
+#if CC_USE_XR
     return xr::XrEntry::getInstance()->getXRConfig(key);
 #endif
     cc::xr::XRConfigValue configValue;
@@ -365,21 +365,21 @@ xr::XRConfigValue XRInterface::getXRConfig(xr::XRConfigKey key) {
 }
 
 void XRInterface::setXRConfig(xr::XRConfigKey key, xr::XRConfigValue value) {
-#if USE_XR
+#if CC_USE_XR
     CC_LOG_INFO("[XR] setConfigParameterI %d", key);
     xr::XrEntry::getInstance()->setXRConfig(key, value);
 #endif
 }
 
 uint32_t XRInterface::getRuntimeVersion() {
-#if USE_XR
+#if CC_USE_XR
     return xr::XrEntry::getInstance()->getXRConfig(cc::xr::XRConfigKey::RUNTIME_VERSION).getInt();
 #endif
     return 1;
 }
 
 void XRInterface::initialize(void *javaVM, void *activity) {
-#if USE_XR
+#if CC_USE_XR
     CC_LOG_INFO("[XR] initialize vm.%p,aty.%p | %d", javaVM, activity,  (int)gettid());
     xr::XrEntry::getInstance()->initPlatformData(javaVM, activity);
     xr::XrEntry::getInstance()->setGamepadCallback(&dispatchGamepadEventInternal);
@@ -398,7 +398,7 @@ void XRInterface::initialize(void *javaVM, void *activity) {
 
 // render thread lifecycle
 void XRInterface::onRenderPause() {
-#if USE_XR
+#if CC_USE_XR
     if (!_renderPaused) {
         _renderPaused = true;
         _renderResumed = false;
@@ -409,7 +409,7 @@ void XRInterface::onRenderPause() {
 }
 
 void XRInterface::onRenderResume() {
-#if USE_XR
+#if CC_USE_XR
     if (!_renderResumed) {
         _renderResumed = true;
         _renderPaused = false;
@@ -420,7 +420,7 @@ void XRInterface::onRenderResume() {
 }
 
 void XRInterface::onRenderDestroy() {
-#if USE_XR
+#if CC_USE_XR
     CC_LOG_INFO("[XR] onRenderDestroy");
     xr::XrEntry::getInstance()->destroyXrInstance();
     xr::XrEntry::destroyInstance();
@@ -435,7 +435,7 @@ void XRInterface::onRenderDestroy() {
 
 // gfx
 void XRInterface::preGFXDeviceInitialize(gfx::API gfxApi) {
-#if USE_XR
+#if CC_USE_XR
     CC_LOG_INFO("[XR] preGFXDeviceInitialize.api.%d | Multi Thread.%d", gfxApi, gfx::DeviceAgent::getInstance() ? 1 : 0);
     setXRConfig(xr::XRConfigKey::MULTITHREAD_MODE, gfx::DeviceAgent::getInstance() ? true : false);
     xr::XrEntry::getInstance()->setXRConfig(xr::XRConfigKey::RENDER_THREAD_ID, (int)gettid());
@@ -450,7 +450,7 @@ void XRInterface::preGFXDeviceInitialize(gfx::API gfxApi) {
 }
 
 void XRInterface::postGFXDeviceInitialize(gfx::API gfxApi) {
-#if USE_XR
+#if CC_USE_XR
     CC_LOG_INFO("[XR] postGFXDeviceInitialize.api.%d", gfxApi);
     if (gfxApi == gfx::API::GLES3) {
     #if CC_USE_GLES3
@@ -469,7 +469,7 @@ void XRInterface::postGFXDeviceInitialize(gfx::API gfxApi) {
 }
 
 const xr::XRSwapchain &XRInterface::doGFXDeviceAcquire(gfx::API gfxApi) {
-#if USE_XR
+#if CC_USE_XR
     // CC_LOG_INFO("[XR] doGFXDeviceAcquire.api.%d", gfxApi);
     if (gfxApi == gfx::API::GLES3 || gfxApi == gfx::API::VULKAN) {
         return xr::XrEntry::getInstance()->acquireXrSwapchain((uint32_t)gfxApi);
@@ -479,7 +479,7 @@ const xr::XRSwapchain &XRInterface::doGFXDeviceAcquire(gfx::API gfxApi) {
 }
 
 bool XRInterface::isGFXDeviceNeedsPresent(gfx::API gfxApi) {
-#if USE_XR
+#if CC_USE_XR
     // CC_LOG_INFO("[XR] isGFXDeviceNeedsPresent.api.%d", gfxApi);
     // if (gfxApi == gfx::API::GLES3 || gfxApi == gfx::API::VULKAN) {
     // }
@@ -489,7 +489,7 @@ bool XRInterface::isGFXDeviceNeedsPresent(gfx::API gfxApi) {
 }
 
 void XRInterface::postGFXDevicePresent(gfx::API gfxApi) {
-#if USE_XR
+#if CC_USE_XR
     // CC_LOG_INFO("[XR] postGFXDevicePresent.api.%d", gfxApi);
     if (gfxApi == gfx::API::GLES3 || gfxApi == gfx::API::VULKAN) {
     }
@@ -497,7 +497,7 @@ void XRInterface::postGFXDevicePresent(gfx::API gfxApi) {
 }
 
 void XRInterface::createXRSwapchains() {
-#if USE_XR
+#if CC_USE_XR
     CC_LOG_INFO("[XR] createXRSwapchains");
     if (gfx::DeviceAgent::getInstance()) {
         ENQUEUE_MESSAGE_0(gfx::DeviceAgent::getInstance()->getMessageQueue(),
@@ -515,7 +515,7 @@ void XRInterface::createXRSwapchains() {
 }
 
 const std::vector<cc::xr::XRSwapchain> &XRInterface::getXRSwapchains() {
-#if USE_XR
+#if CC_USE_XR
     CC_LOG_INFO("[XR] getXRSwapchains");
     if (_xrSwapchains.size() == 0)
         _xrSwapchains = xr::XrEntry::getInstance()->getCocosXrSwapchains();
@@ -524,7 +524,7 @@ const std::vector<cc::xr::XRSwapchain> &XRInterface::getXRSwapchains() {
 }
 
 gfx::Format XRInterface::getXRSwapchainFormat() {
-#if USE_XR
+#if CC_USE_XR
      int swapchainFormat = xr::XrEntry::getInstance()->getXRConfig(xr::XRConfigKey::SWAPCHAIN_FORMAT).getInt();
 #if CC_USE_GLES3
     if(swapchainFormat == GL_SRGB_ALPHA_EXT) {
@@ -550,7 +550,7 @@ gfx::Format XRInterface::getXRSwapchainFormat() {
 }
 
 void XRInterface::updateXRSwapchainTypedID(uint32_t index, uint32_t typedID) {
-#if USE_XR
+#if CC_USE_XR
     if (gfx::DeviceAgent::getInstance()) {
         ENQUEUE_MESSAGE_2(gfx::DeviceAgent::getInstance()->getMessageQueue(),
                           UpdateXRSwapchainTypedID, index, index, typedID, typedID,
@@ -572,7 +572,7 @@ void XRInterface::updateXRSwapchainTypedID(uint32_t index, uint32_t typedID) {
 // vulkan
 #ifdef CC_USE_VULKAN
 uint32_t XRInterface::getXRVkApiVersion(uint32_t engineVkApiVersion) {
-    #if USE_XR
+    #if CC_USE_XR
     return xr::XrEntry::getInstance()->getXrVkApiVersion(engineVkApiVersion);
     #else
     return engineVkApiVersion;
@@ -584,7 +584,7 @@ void XRInterface::initializeVulkanData(const PFN_vkGetInstanceProcAddr &addr) {
 }
 
 VkInstance XRInterface::createXRVulkanInstance(const VkInstanceCreateInfo &instInfo) {
-    #if USE_XR
+    #if CC_USE_XR
     _vkInstance = xr::XrEntry::getInstance()->xrVkCreateInstance(instInfo, _vkGetInstanceProcAddr);
     _vkPhysicalDevice = xr::XrEntry::getInstance()->getXrVkGraphicsDevice(_vkInstance);
     return _vkInstance;
@@ -594,7 +594,7 @@ VkInstance XRInterface::createXRVulkanInstance(const VkInstanceCreateInfo &instI
 }
 
 VkDevice XRInterface::createXRVulkanDevice(const VkDeviceCreateInfo *deviceInfo) {
-    #if USE_XR
+    #if CC_USE_XR
     VK_CHECK(xr::XrEntry::getInstance()->xrVkCreateDevice(deviceInfo, _vkGetInstanceProcAddr, _vkPhysicalDevice, &_vkDevice));
     #endif
     return _vkDevice;
@@ -605,7 +605,7 @@ VkPhysicalDevice XRInterface::getXRVulkanGraphicsDevice() {
 }
 
 void XRInterface::getXRSwapchainVkImages(std::vector<VkImage> &vkImages, uint32_t ccSwapchainTypedID) {
-    #if USE_XR
+    #if CC_USE_XR
     xr::XrEntry::getInstance()->getSwapchainImages(vkImages, ccSwapchainTypedID);
     #endif
 }
@@ -615,7 +615,7 @@ void XRInterface::getXRSwapchainVkImages(std::vector<VkImage> &vkImages, uint32_
 // gles
 #ifdef CC_USE_GLES3
 void XRInterface::initializeGLESData(PFNGLES3WLOADPROC gles3wLoadFuncProc, gfx::GLES3GPUContext *gpuContext) {
-    #if USE_XR
+    #if CC_USE_XR
     _gles3wLoadFuncProc = gles3wLoadFuncProc;
     _gles3GPUContext = gpuContext;
     void *eglDisplay = gpuContext->eglDisplay;
@@ -626,13 +626,13 @@ void XRInterface::initializeGLESData(PFNGLES3WLOADPROC gles3wLoadFuncProc, gfx::
 }
 
 void XRInterface::attachGLESFramebufferTexture2D() {
-    #if USE_XR
+    #if CC_USE_XR
     xr::XrEntry::getInstance()->attachXrFramebufferTexture2D();
     #endif
 }
 
 EGLSurfaceType XRInterface::acquireEGLSurfaceType(uint32_t typedID) {
-    #if USE_XR
+    #if CC_USE_XR
     if (_eglSurfaceTypeMap.count(typedID) > 0) {
         return _eglSurfaceTypeMap[typedID];
     }
@@ -644,7 +644,7 @@ EGLSurfaceType XRInterface::acquireEGLSurfaceType(uint32_t typedID) {
 
 // stereo render loop
 bool XRInterface::platformLoopStart() {
-#if USE_XR
+#if CC_USE_XR
     // CC_LOG_INFO("[XR] platformLoopStart");
     return xr::XrEntry::getInstance()->platformLoopStart();
 #else
@@ -653,7 +653,7 @@ bool XRInterface::platformLoopStart() {
 }
 
 bool XRInterface::beginRenderFrame() {
-#if USE_XR
+#if CC_USE_XR
     if (IS_ENABLE_XR_LOG) CC_LOG_INFO("[XR] beginRenderFrame.%d", _committedFrame);
     if (gfx::DeviceAgent::getInstance()) {
         static uint64_t frameId = 0;
@@ -680,7 +680,7 @@ bool XRInterface::beginRenderFrame() {
 }
 
 bool XRInterface::isRenderAllowable() {
-#if USE_XR
+#if CC_USE_XR
     return xr::XrEntry::getInstance()->isRenderAllowable();
 #else
     return false;
@@ -688,7 +688,7 @@ bool XRInterface::isRenderAllowable() {
 }
 
 bool XRInterface::beginRenderEyeFrame(uint32_t eye) {
-#if USE_XR
+#if CC_USE_XR
     if (IS_ENABLE_XR_LOG) CC_LOG_INFO("[XR] beginRenderEyeFrame %d", eye);
     if (gfx::DeviceAgent::getInstance()) {
         ENQUEUE_MESSAGE_1(gfx::DeviceAgent::getInstance()->getMessageQueue(),
@@ -705,7 +705,7 @@ bool XRInterface::beginRenderEyeFrame(uint32_t eye) {
 }
 
 bool XRInterface::endRenderEyeFrame(uint32_t eye) {
-#if USE_XR
+#if CC_USE_XR
     if (IS_ENABLE_XR_LOG) CC_LOG_INFO("[XR] endRenderEyeFrame %d", eye);
     if (gfx::DeviceAgent::getInstance()) {
         ENQUEUE_MESSAGE_1(gfx::DeviceAgent::getInstance()->getMessageQueue(),
@@ -722,7 +722,7 @@ bool XRInterface::endRenderEyeFrame(uint32_t eye) {
 }
 
 bool XRInterface::endRenderFrame() {
-#if USE_XR
+#if CC_USE_XR
     if (IS_ENABLE_XR_LOG) CC_LOG_INFO("[XR] endRenderFrame.%d",
                                       cc::ApplicationManager::getInstance()->getCurrentAppSafe()->getEngine()->getTotalFrames());
 
@@ -745,7 +745,7 @@ bool XRInterface::endRenderFrame() {
 }
 
 bool XRInterface::platformLoopEnd() {
-#if USE_XR
+#if CC_USE_XR
     return xr::XrEntry::getInstance()->platformLoopEnd();
 #else
     return false;
@@ -754,7 +754,7 @@ bool XRInterface::platformLoopEnd() {
 // stereo render loop
 
 ccstd::vector<float> XRInterface::getHMDViewPosition(uint32_t eye, int trackingType) {
-#if USE_XR
+#if CC_USE_XR
     return xr::XrEntry::getInstance()->getHMDViewPosition(eye, trackingType);
 #else
     ccstd::vector<float> res;
@@ -764,7 +764,7 @@ ccstd::vector<float> XRInterface::getHMDViewPosition(uint32_t eye, int trackingT
 }
 
 ccstd::vector<float> XRInterface::getXRViewProjectionData(uint32_t eye, float near, float far) {
-#if USE_XR
+#if CC_USE_XR
     return xr::XrEntry::getInstance()->computeViewProjection(eye, near, far, 1.0F);
 #else
     ccstd::vector<float> res;

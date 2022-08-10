@@ -118,7 +118,7 @@ protected:
     MessageQueue *_mainMessageQueue{nullptr};
 
     uint32_t _currentIndex = 0U;
-#if USE_XR
+#if CC_USE_XR
     Semaphore _frameBoundarySemaphore{0};
 #else
     Semaphore _frameBoundarySemaphore{MAX_CPU_FRAME_AHEAD};
