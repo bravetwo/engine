@@ -371,7 +371,8 @@ void Root::frameMove(float deltaTime, int32_t totalFrames) {
         if (_xr->isRenderAllowable()) {
             auto swapchains = gfx::Device::getInstance()->getSwapchains();
             bool isSceneUpdated = false;
-            for (int xrEye = 0; xrEye < 2; xrEye++) {
+            int viewCount = _xr->getXRConfig(xr::XRConfigKey::VIEW_COUNT).getInt();
+            for (int xrEye = 0; xrEye < viewCount; xrEye++) {
                 _xr->beginRenderEyeFrame(xrEye);
 
                 for (auto *camera : _allCameraList) {
