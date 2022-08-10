@@ -551,7 +551,7 @@ void CCVKDevice::doDestroy() {
         }
         cmdFuncCCVKDestroySampler(_gpuDevice, &_gpuDevice->defaultSampler);
 
-        if (!_xr && _gpuDevice->memoryAllocator != VK_NULL_HANDLE) {
+        if (_gpuDevice->memoryAllocator != VK_NULL_HANDLE) {
             VmaStats stats;
             vmaCalculateStats(_gpuDevice->memoryAllocator, &stats);
             CC_LOG_INFO("Total device memory leaked: %d bytes.", stats.total.usedBytes);
