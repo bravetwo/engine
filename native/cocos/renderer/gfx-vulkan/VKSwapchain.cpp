@@ -59,8 +59,7 @@ void CCVKSwapchain::doInit(const SwapchainInfo &info) {
     const auto *gpuContext = CCVKDevice::getInstance()->gpuContext();
     _gpuSwapchain = ccnew CCVKGPUSwapchain;
     gpuDevice->swapchains.insert(_gpuSwapchain);
-    if (!_xr)
-        _xr = BasePlatform::getPlatform()->getInterface<cc::IXRInterface>();
+    _xr = CC_GET_XR_INTERFACE();
 
     createVkSurface();
 
