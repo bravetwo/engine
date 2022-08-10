@@ -259,8 +259,8 @@ void Camera::changeTargetWindow(RenderWindow *window) {
             }
         } else {
             // hmd/left/right camera to xr window
-            if (_cameraType < Root::getInstance()->getWindows().size()) {
-                const auto &win = Root::getInstance()->getWindows().at(_cameraType);
+            if ((uint32_t)_cameraType < Root::getInstance()->getWindows().size()) {
+                const auto &win = Root::getInstance()->getWindows().at((uint32_t)_cameraType);
                 bindTargetWindow(win);
             }
         }

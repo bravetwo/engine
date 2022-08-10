@@ -376,8 +376,8 @@ void Root::frameMove(float deltaTime, int32_t totalFrames) {
                 _xr->beginRenderEyeFrame(xrEye);
 
                 for (auto *camera : _allCameraList) {
-                    if (camera->getTrackingType() != scene::NO_TRACKING) {
-                        const auto &viewPosition = _xr->getHMDViewPosition(xrEye, camera->getTrackingType());
+                    if (camera->getTrackingType() != cc::scene::TrackingType::NO_TRACKING) {
+                        const auto &viewPosition = _xr->getHMDViewPosition(xrEye, (uint32_t) camera->getTrackingType());
                         camera->setNodePosition({viewPosition[0], viewPosition[1], viewPosition[2]});
                     }
                 }
@@ -422,13 +422,13 @@ void Root::frameMove(float deltaTime, int32_t totalFrames) {
                         }
                         isSceneUpdated = true;
                         // only one eye enable culling (without other cameras)
-                        if (_cameraList.size() == 1 && _cameraList[0]->getTrackingType() != scene::NO_TRACKING) {
+                        if (_cameraList.size() == 1 && _cameraList[0]->getTrackingType() != cc::scene::TrackingType::NO_TRACKING) {
                             _cameraList[0]->setCullingEnable(true);
                             _pipelineRuntime->resetRenderQueue(true);
                         }
                     } else {
                         // another eye disable culling (without other cameras)
-                        if (_cameraList.size() == 1 && _cameraList[0]->getTrackingType() != scene::NO_TRACKING) {
+                        if (_cameraList.size() == 1 && _cameraList[0]->getTrackingType() != cc::scene::TrackingType::NO_TRACKING) {
                             _cameraList[0]->setCullingEnable(false);
                             _pipelineRuntime->resetRenderQueue(false);
                         }
