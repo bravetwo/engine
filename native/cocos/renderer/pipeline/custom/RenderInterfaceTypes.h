@@ -111,7 +111,7 @@ public:
     virtual bool isOcclusionQueryEnabled() const = 0;
 
 	virtual void resetRenderQueue(bool reset) {}
-    virtual bool isResetRenderQueue() { return true; }
+    virtual bool isRenderQueueReset() const { return true; }
 };
 
 class Setter {

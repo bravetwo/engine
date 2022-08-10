@@ -268,8 +268,8 @@ public:
         pipeline->resetRenderQueue(reset);
     }
 
-    bool isResetRenderQueue() override {
-        return pipeline->isResetRenderQueue();
+    bool isRenderQueueReset() const override {
+        return pipeline->isRenderQueueReset();
     }
 
     pipeline::RenderPipeline *pipeline = nullptr;

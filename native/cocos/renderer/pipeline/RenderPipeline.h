@@ -136,7 +136,8 @@ public:
     }
 
     inline void resetRenderQueue(bool reset) { _resetRenderQueue = reset; }
-    inline bool isResetRenderQueue() { return _resetRenderQueue; }
+    inline bool isRenderQueueReset() const { return _resetRenderQueue; }
+
 protected:
     static RenderPipeline *instance;
 
