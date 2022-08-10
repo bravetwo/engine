@@ -82,6 +82,7 @@ Camera::Camera(gfx::Device *device)
         assignMat4(correctionMatrices[static_cast<int>(gfx::SurfaceTransform::ROTATE_180)], -1, 0, 0, 0, 0, -ySign);
         assignMat4(correctionMatrices[static_cast<int>(gfx::SurfaceTransform::ROTATE_270)], 0, -1, 0, 0, ySign, 0);
     }
+    _xr = CC_GET_XR_INTERFACE();
 }
 
 Camera::~Camera() = default;
@@ -161,8 +162,6 @@ void Camera::update(bool forceUpdate /*false*/, int xrEye /*-1*/) {
         return;
     }
 
-    if(!_xr)
-        _xr = CC_GET_XR_INTERFACE();
     if (_xr && xrEye >= 0) {
         if (_proj == CameraProjection::PERSPECTIVE) {
             _isProjDirty = true;

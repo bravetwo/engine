@@ -61,6 +61,7 @@ bool Device::initialize(const DeviceInfo &info) {
     static_assert(sizeof(void *) == 8, "pointer size assumption broken");
 #endif
 
+    _xr = CC_GET_XR_INTERFACE();
     bool result = doInit(info);
 
     CC_SAFE_ADD_REF(_cmdBuff);

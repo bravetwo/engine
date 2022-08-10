@@ -96,8 +96,7 @@ CCVKDevice::~CCVKDevice() {
 }
 
 bool CCVKDevice::doInit(const DeviceInfo & /*info*/) {
-    if (!_xr)
-        _xr = CC_GET_XR_INTERFACE();
+    _xr = CC_GET_XR_INTERFACE();
     if (_xr)
         _xr->preGFXDeviceInitialize(_api);
     _gpuContext = ccnew CCVKGPUContext;

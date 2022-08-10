@@ -74,8 +74,7 @@ GLES3Device::~GLES3Device() {
 }
 
 bool GLES3Device::doInit(const DeviceInfo & /*info*/) {
-    if (!_xr)
-        _xr = CC_GET_XR_INTERFACE();
+    _xr = CC_GET_XR_INTERFACE();
     if(_xr) _xr->preGFXDeviceInitialize(_api);
     _gpuContext = ccnew GLES3GPUContext;
     _gpuStateCache = ccnew GLES3GPUStateCache;

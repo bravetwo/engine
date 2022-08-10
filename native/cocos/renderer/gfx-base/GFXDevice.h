@@ -219,8 +219,6 @@ QueryPool *Device::createQueryPool(const QueryPoolInfo &info) {
 }
 
 Swapchain *Device::createSwapchain(const SwapchainInfo &info) {
-    if (!_xr)
-        _xr = CC_GET_XR_INTERFACE();
     if (_xr) {
         _xr->createXRSwapchains();
         int viewCount = _xr->getXRConfig(xr::XRConfigKey::VIEW_COUNT).getInt();

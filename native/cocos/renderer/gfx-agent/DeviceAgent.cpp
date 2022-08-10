@@ -67,7 +67,7 @@ bool DeviceAgent::doInit(const DeviceInfo &info) {
     if (!_actor->initialize(info)) {
         return false;
     }
-
+    _xr = CC_GET_XR_INTERFACE();
     _api = _actor->getGfxAPI();
     _deviceName = _actor->getDeviceName();
     _queue = ccnew QueueAgent(_actor->getQueue());
@@ -145,8 +145,6 @@ void DeviceAgent::acquire(Swapchain *const *swapchains, uint32_t count) {
 }
 
 void DeviceAgent::present() {
-    if (!_xr)
-        _xr = CC_GET_XR_INTERFACE();
     if (_xr) {
         ENQUEUE_MESSAGE_1(
             _mainMessageQueue, DevicePresent,
