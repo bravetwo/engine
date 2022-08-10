@@ -61,7 +61,7 @@
     #include "cocos/bindings/manual/jsb_audio_manual.h"
 #endif
 
-#if USE_XR
+#if CC_USE_XR
     #include "cocos/bindings/auto/jsb_xr_auto.h"
 #endif
 
@@ -157,7 +157,7 @@ bool jsb_register_all_modules() {
     se->addRegisterCallback(register_all_audio_manual);
 #endif
 
-#if USE_XR
+#if CC_USE_XR
     se->addRegisterCallback(register_all_xr);
 #endif
 

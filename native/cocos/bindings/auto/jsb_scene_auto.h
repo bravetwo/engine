@@ -534,7 +534,6 @@ extern se::Class * __jsb_cc_scene_Camera_class; // NOLINT
 
 bool js_register_cc_scene_Camera(se::Object *obj); // NOLINT
 
-SE_DECLARE_FUNC(js_scene_Camera_attachCamera);
 SE_DECLARE_FUNC(js_scene_Camera_attachToScene);
 SE_DECLARE_FUNC(js_scene_Camera_changeTargetWindow);
 SE_DECLARE_FUNC(js_scene_Camera_destroy);
@@ -543,7 +542,7 @@ SE_DECLARE_FUNC(js_scene_Camera_detachFromScene);
 SE_DECLARE_FUNC(js_scene_Camera_getAspect);
 SE_DECLARE_FUNC(js_scene_Camera_initGeometryRenderer);
 SE_DECLARE_FUNC(js_scene_Camera_initialize);
-SE_DECLARE_FUNC(js_scene_Camera_isCullingEnable);
+SE_DECLARE_FUNC(js_scene_Camera_isCullingEnabled);
 SE_DECLARE_FUNC(js_scene_Camera_resize);
 SE_DECLARE_FUNC(js_scene_Camera_setCullingEnable);
 SE_DECLARE_FUNC(js_scene_Camera_setFixedSize);

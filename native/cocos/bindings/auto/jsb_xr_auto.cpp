@@ -1,7 +1,7 @@
 
 // clang-format off
 #include "cocos/bindings/auto/jsb_xr_auto.h"
-#if (USE_XR > 0)
+#if (CC_USE_XR > 0)
 #include "cocos/bindings/manual/jsb_conversions.h"
 #include "cocos/bindings/manual/jsb_global.h"
 #include "Xr.h"
@@ -889,5 +889,5 @@ bool register_all_xr(se::Object* obj)    // NOLINT
     return true;
 }
 
-#endif //#if (USE_XR > 0)
+#endif //#if (CC_USE_XR > 0)
 // clang-format on

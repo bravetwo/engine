@@ -1,7 +1,7 @@
 // clang-format off
 #pragma once
 
-#if (USE_XR > 0)
+#if (CC_USE_XR > 0)
 #include <type_traits>
 #include "cocos/bindings/jswrapper/SeApi.h"
 #include "cocos/bindings/manual/jsb_conversions.h"
@@ -56,5 +56,5 @@ SE_DECLARE_FUNC(js_xr_XrEntry_updateXrSwapchainInfo);
 SE_DECLARE_FUNC(js_xr_XrEntry_waitFrame);
 SE_DECLARE_FUNC(js_xr_XrEntry_destroyInstance);
 SE_DECLARE_FUNC(js_xr_XrEntry_getInstance);
-#endif //#if (USE_XR > 0)
+#endif //#if (CC_USE_XR > 0)
 // clang-format on

@@ -347,7 +347,7 @@ static bool js_render_PipelineRuntime_getShadingScale(se::State& s) // NOLINT(re
 }
 SE_BIND_FUNC_AS_PROP_GET(js_render_PipelineRuntime_getShadingScale)
 
-static bool js_render_PipelineRuntime_isResetRenderQueue(se::State& s) // NOLINT(readability-identifier-naming)
+static bool js_render_PipelineRuntime_isRenderQueueReset(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::render::PipelineRuntime>(s);
     // SE_PRECONDITION2(cobj, false, "Invalid Native Object");
@@ -356,7 +356,7 @@ static bool js_render_PipelineRuntime_isResetRenderQueue(se::State& s) // NOLINT
     size_t argc = args.size();
     CC_UNUSED bool ok = true;
     if (argc == 0) {
-        bool result = cobj->isResetRenderQueue();
+        bool result = cobj->isRenderQueueReset();
         ok &= nativevalue_to_se(result, s.rval(), nullptr /*ctx*/);
         SE_PRECONDITION2(ok, false, "Error processing arguments");
         SE_HOLD_RETURN_VALUE(result, s.thisObject(), s.rval());
@@ -365,7 +365,7 @@ static bool js_render_PipelineRuntime_isResetRenderQueue(se::State& s) // NOLINT
     SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 0);
     return false;
 }
-SE_BIND_FUNC(js_render_PipelineRuntime_isResetRenderQueue)
+SE_BIND_FUNC(js_render_PipelineRuntime_isRenderQueueReset)
 
 static bool js_render_PipelineRuntime_onGlobalPipelineStateChanged(se::State& s) // NOLINT(readability-identifier-naming)
 {
@@ -551,7 +551,7 @@ bool js_register_render_PipelineRuntime(se::Object* obj) // NOLINT(readability-i
     cls->defineFunction("getMacroBool", _SE(js_render_PipelineRuntime_getMacroBool));
     cls->defineFunction("getMacroInt", _SE(js_render_PipelineRuntime_getMacroInt));
     cls->defineFunction("getMacroString", _SE(js_render_PipelineRuntime_getMacroString));
-    cls->defineFunction("isResetRenderQueue", _SE(js_render_PipelineRuntime_isResetRenderQueue));
+    cls->defineFunction("isRenderQueueReset", _SE(js_render_PipelineRuntime_isRenderQueueReset));
     cls->defineFunction("onGlobalPipelineStateChanged", _SE(js_render_PipelineRuntime_onGlobalPipelineStateChanged));
     cls->defineFunction("render", _SE(js_render_PipelineRuntime_render));
     cls->defineFunction("resetRenderQueue", _SE(js_render_PipelineRuntime_resetRenderQueue));

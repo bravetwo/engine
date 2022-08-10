@@ -887,7 +887,6 @@ bool js_register_cc_gfx_Device(se::Object *obj); // NOLINT
 
 SE_DECLARE_FUNC(js_gfx_Device_acquire);
 SE_DECLARE_FUNC(js_gfx_Device_bindingMappingInfo);
-SE_DECLARE_FUNC(js_gfx_Device_checkReleaseSwapchains);
 SE_DECLARE_FUNC(js_gfx_Device_createCommandBuffer);
 SE_DECLARE_FUNC(js_gfx_Device_createDescriptorSet);
 SE_DECLARE_FUNC(js_gfx_Device_createDescriptorSetLayout);
@@ -901,6 +900,7 @@ SE_DECLARE_FUNC(js_gfx_Device_createRenderPass);
 SE_DECLARE_FUNC(js_gfx_Device_createShader);
 SE_DECLARE_FUNC(js_gfx_Device_createSwapchain);
 SE_DECLARE_FUNC(js_gfx_Device_destroy);
+SE_DECLARE_FUNC(js_gfx_Device_destroySwapchains);
 SE_DECLARE_FUNC(js_gfx_Device_flushCommands);
 SE_DECLARE_FUNC(js_gfx_Device_getBufferBarrier);
 SE_DECLARE_FUNC(js_gfx_Device_getFormatFeatures);

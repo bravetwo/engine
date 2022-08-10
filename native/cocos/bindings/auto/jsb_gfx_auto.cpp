@@ -22667,22 +22667,6 @@ static bool js_gfx_Device_bindingMappingInfo(se::State& s) // NOLINT(readability
 }
 SE_BIND_FUNC(js_gfx_Device_bindingMappingInfo)
 
-static bool js_gfx_Device_checkReleaseSwapchains(se::State& s) // NOLINT(readability-identifier-naming)
-{
-    auto* cobj = SE_THIS_OBJECT<cc::gfx::Device>(s);
-    // SE_PRECONDITION2(cobj, false, "Invalid Native Object");
-    if (nullptr == cobj) return true;
-    const auto& args = s.args();
-    size_t argc = args.size();
-    if (argc == 0) {
-        cobj->checkReleaseSwapchains();
-        return true;
-    }
-    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 0);
-    return false;
-}
-SE_BIND_FUNC(js_gfx_Device_checkReleaseSwapchains)
-
 static bool js_gfx_Device_createCommandBuffer(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::gfx::Device>(s);
@@ -22986,6 +22970,22 @@ static bool js_gfx_Device_destroy(se::State& s) // NOLINT(readability-identifier
     return false;
 }
 SE_BIND_FUNC(js_gfx_Device_destroy)
+
+static bool js_gfx_Device_destroySwapchains(se::State& s) // NOLINT(readability-identifier-naming)
+{
+    auto* cobj = SE_THIS_OBJECT<cc::gfx::Device>(s);
+    // SE_PRECONDITION2(cobj, false, "Invalid Native Object");
+    if (nullptr == cobj) return true;
+    const auto& args = s.args();
+    size_t argc = args.size();
+    if (argc == 0) {
+        cobj->destroySwapchains();
+        return true;
+    }
+    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 0);
+    return false;
+}
+SE_BIND_FUNC(js_gfx_Device_destroySwapchains)
 
 static bool js_gfx_Device_flushCommands(se::State& s) // NOLINT(readability-identifier-naming)
 {
@@ -23522,7 +23522,6 @@ bool js_register_gfx_Device(se::Object* obj) // NOLINT(readability-identifier-na
     cls->defineProperty("capabilities", _SE(js_gfx_Device_getCapabilities_asGetter), nullptr);
     cls->defineFunction("acquire", _SE(js_gfx_Device_acquire));
     cls->defineFunction("bindingMappingInfo", _SE(js_gfx_Device_bindingMappingInfo));
-    cls->defineFunction("checkReleaseSwapchains", _SE(js_gfx_Device_checkReleaseSwapchains));
     cls->defineFunction("createCommandBuffer", _SE(js_gfx_Device_createCommandBuffer));
     cls->defineFunction("createDescriptorSet", _SE(js_gfx_Device_createDescriptorSet));
     cls->defineFunction("createDescriptorSetLayout", _SE(js_gfx_Device_createDescriptorSetLayout));
@@ -23536,6 +23535,7 @@ bool js_register_gfx_Device(se::Object* obj) // NOLINT(readability-identifier-na
     cls->defineFunction("createShader", _SE(js_gfx_Device_createShader));
     cls->defineFunction("createSwapchain", _SE(js_gfx_Device_createSwapchain));
     cls->defineFunction("destroy", _SE(js_gfx_Device_destroy));
+    cls->defineFunction("destroySwapchains", _SE(js_gfx_Device_destroySwapchains));
     cls->defineFunction("flushCommands", _SE(js_gfx_Device_flushCommands));
     cls->defineFunction("getBufferBarrier", _SE(js_gfx_Device_getBufferBarrier));
     cls->defineFunction("getFormatFeatures", _SE(js_gfx_Device_getFormatFeatures));
