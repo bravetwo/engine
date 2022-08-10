@@ -77,7 +77,7 @@ public:
     inline Swapchain *createSwapchain(const SwapchainInfo &info);
     inline const ccstd::vector<Swapchain *> &getSwapchains() { return _swapchains; }
     void removeSwapchain(Swapchain *swapchain);
-    void checkReleaseSwapchains();
+    void destroySwapchains();
     inline Buffer *createBuffer(const BufferInfo &info);
     inline Buffer *createBuffer(const BufferViewInfo &info);
     inline Texture *createTexture(const TextureInfo &info);

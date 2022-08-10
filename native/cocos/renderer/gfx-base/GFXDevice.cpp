@@ -91,8 +91,7 @@ void Device::destroy() {
     _bufferBarriers.clear();
 
     if (_xr) {
-        // check swapchains release
-        checkReleaseSwapchains();
+        destroySwapchains();
     }
 
     doDestroy();
@@ -156,8 +155,9 @@ void Device::removeSwapchain(Swapchain *swapchain) {
     }
 }
 
-void Device::checkReleaseSwapchains() {
+void Device::destroySwapchains() {
     if(!_xr) return;
+    // xr has two swapchains, one release from ts, another one we need release manually
     if (!_swapchains.empty()) {
         auto it = _swapchains.begin();
         while (it != _swapchains.end()) {
