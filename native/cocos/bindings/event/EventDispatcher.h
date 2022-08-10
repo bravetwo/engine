@@ -160,7 +160,7 @@ struct ControllerInfo {
         ButtonInfo(StickKeyCode key, bool isPress) : key(key), isPress(isPress) {}
     };
 
-    int napdId;
+    int napdId{0};
     std::vector<AxisInfo> axisInfos;
     std::vector<ButtonInfo> buttonInfos;
 };
