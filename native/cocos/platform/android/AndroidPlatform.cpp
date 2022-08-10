@@ -520,6 +520,7 @@ int AndroidPlatform::init() {
             IXRInterface *xr = getInterface<IXRInterface>();
             bool isXRInstanceCreated = xr && xr->getXRConfig(xr::XRConfigKey::INSTANCE_CREATED).getBool();
             if (!isXRInstanceCreated) {
+                // xr will not sleep,  -1 we will block forever waiting for events.
                 _loopTimeOut = -1;
                 _isLowFrequencyLoopEnabled = false;
             }
