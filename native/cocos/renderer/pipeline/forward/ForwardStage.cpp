@@ -96,7 +96,7 @@ void ForwardStage::destroy() {
 }
 
 void ForwardStage::dispenseRenderObject2Queues() {
-	if(!_pipeline->isResetRenderQueue()) return;
+    if (!_pipeline->isRenderQueueReset()) return;
 
     _instancedQueue->clear();
     _batchedQueue->clear();
