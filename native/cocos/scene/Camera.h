@@ -116,14 +116,14 @@ enum class CameraShutter {
     D4000,
 };
 
-enum CameraType {
+enum class CameraType {
     DEFAULT = -1,
     LEFT_CAMERA = 0,
     RIGHT_CAMERA = 1,
     MAIN = 2,
 };
 
-enum TrackingType {
+enum class TrackingType {
     NO_TRACKING = 0,
     POSITION_AND_ROTATION = 1,
     POSITION = 2,
@@ -172,7 +172,6 @@ public:
     void syncCameraEditor(const Camera &camera);
     void update(bool forceUpdate = false, int xrEye = -1); // for lazy eval situations like the in-editor preview
     void changeTargetWindow(RenderWindow *window);
-    void attachCamera(RenderWindow *window);
     void setNodePosition(const Vec3 &position);
 
     /**
@@ -349,10 +348,11 @@ public:
     inline const TrackingType &getTrackingType() const { return _trackingType; }
     inline void setTrackingType(const TrackingType &type) { _trackingType = type; }
 
-	inline bool isCullingEnable() const { return _isCullingEnabled; }
+    inline bool isCullingEnabled() const { return _isCullingEnabled; }
     inline void setCullingEnable(bool val) { _isCullingEnabled = val; }
 protected:
     void setExposure(float ev100);
+    void bindTargetWindow(RenderWindow *window);
 
 private:
     void updateExposure();
@@ -365,7 +365,7 @@ private:
     IntrusivePtr<Node> _node;
     ccstd::string _name;
     bool _enabled{false};
-	bool _isCullingEnabled{true};
+    bool _isCullingEnabled{true};
     CameraProjection _proj{CameraProjection::UNKNOWN};
     float _aspect{0.F};
     float _orthoHeight{10.0F};
@@ -399,8 +399,8 @@ private:
     uint32_t _height{0};
     gfx::ClearFlagBit _clearFlag{gfx::ClearFlagBit::NONE};
     float _clearDepth{1.0F};
-    CameraType _cameraType = CameraType::DEFAULT;
-    TrackingType _trackingType = TrackingType::NO_TRACKING;
+    CameraType _cameraType{CameraType::DEFAULT};
+    TrackingType _trackingType{TrackingType::NO_TRACKING};
 
 #if CC_USE_GEOMETRY_RENDERER
     IntrusivePtr<pipeline::GeometryRenderer> _geometryRenderer;

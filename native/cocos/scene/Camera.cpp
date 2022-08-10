@@ -242,35 +242,35 @@ void Camera::changeTargetWindow(RenderWindow *window) {
         _xr= BasePlatform::getPlatform()->getInterface<class IXRInterface>();
     if (_xr) {
         if (_cameraType == CameraType::MAIN || _cameraType == CameraType::DEFAULT) {
-            auto windows = Root::getInstance()->getWindows();
+            const auto &windows = Root::getInstance()->getWindows();
             if (window) {
                 // detach camera from other window
                 for (const auto &win : windows) {
                     win->detachCamera(this);
                 }
                 // add camera to rt window
-                attachCamera(window);
+                bindTargetWindow(window);
             } else {
                 // add ui camera(without rt) or hmd camera or other camera(without rt) to xr window
                 for (int i = 0, size = windows.size(); i < size; i++) {
                     // 0,1 is left+right eye xr window
-                    if (i <= 1) attachCamera(windows[i]);
+                    if (i <= 1) bindTargetWindow(windows[i]);
                 }
             }
         } else {
             // hmd/left/right camera to xr window
             if (_cameraType < Root::getInstance()->getWindows().size()) {
                 const auto &win = Root::getInstance()->getWindows().at(_cameraType);
-                attachCamera(win);
+                bindTargetWindow(win);
             }
         }
     } else {
         RenderWindow *win = window ? window : Root::getInstance()->getMainWindow();
-        attachCamera(win);
+        bindTargetWindow(win);
     }
 }
 
-void Camera::attachCamera(RenderWindow *win) {
+void Camera::bindTargetWindow(RenderWindow *win) {
     if (win) {
         win->attachCamera(this);
         _window = win;
