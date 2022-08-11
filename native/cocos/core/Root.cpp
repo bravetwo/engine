@@ -78,51 +78,15 @@ void Root::initialize(gfx::Swapchain *swapchain) {
     if (_xr) {
         // Xr: _mainWindow, _curWindow, _swapchain invalid.
         // Xr: splash screen use _mainWindow->_swapchain width, height, surfaceTransform. The left and right eyes must be the same.
-        auto swapchains = gfx::Device::getInstance()->getSwapchains();
-        for (int i = 0, size = swapchains.size(); i < size; i++) {
-            const auto &swapchain = swapchains[i];
-            gfx::RenderPassInfo renderPassInfo;
-
-            gfx::ColorAttachment colorAttachment;
-            colorAttachment.format = swapchain->getColorTexture()->getFormat();
-            renderPassInfo.colorAttachments.emplace_back(colorAttachment);
-
-            auto &depthStencilAttachment = renderPassInfo.depthStencilAttachment;
-            depthStencilAttachment.format = swapchain->getDepthStencilTexture()->getFormat();
-            depthStencilAttachment.depthStoreOp = gfx::StoreOp::DISCARD;
-            depthStencilAttachment.stencilStoreOp = gfx::StoreOp::DISCARD;
-
-            scene::IRenderWindowInfo info;
-            info.title = ccstd::string{"rootMainWindow"};
-            info.width = swapchain->getWidth();
-            info.height = swapchain->getHeight();
-            info.renderPassInfo = renderPassInfo;
-            info.swapchain = swapchain;
-            _mainWindow = createWindow(info);
-
+        const ccstd::vector<gfx::Swapchain *> &swapchainArray = gfx::Device::getInstance()->getSwapchains();
+        for (int i = 0, size = swapchainArray.size(); i < size; i++) {
+            gfx::Swapchain *swapchainItem = swapchainArray[i];
+            _mainWindow = createMainWindow(swapchainItem);
             _curWindow = _mainWindow;
             _xr->bindXREyeWithRenderWindow(_mainWindow, (xr::XREye)i);
         }
     } else {
-        gfx::RenderPassInfo renderPassInfo;
-
-        gfx::ColorAttachment colorAttachment;
-        colorAttachment.format = swapchain->getColorTexture()->getFormat();
-        renderPassInfo.colorAttachments.emplace_back(colorAttachment);
-
-        auto &depthStencilAttachment = renderPassInfo.depthStencilAttachment;
-        depthStencilAttachment.format = swapchain->getDepthStencilTexture()->getFormat();
-        depthStencilAttachment.depthStoreOp = gfx::StoreOp::DISCARD;
-        depthStencilAttachment.stencilStoreOp = gfx::StoreOp::DISCARD;
-
-        scene::IRenderWindowInfo info;
-        info.title = ccstd::string{"rootMainWindow"};
-        info.width = swapchain->getWidth();
-        info.height = swapchain->getHeight();
-        info.renderPassInfo = renderPassInfo;
-        info.swapchain = swapchain;
-        _mainWindow = createWindow(info);
-
+        _mainWindow = createMainWindow(swapchain);
         _curWindow = _mainWindow;
     }
     // TODO(minggo):
@@ -353,6 +317,73 @@ void Root::resetCumulativeTime() {
     _cumulativeTime = 0;
 }
 
+void Root::frameMoveBegin() {
+    for (const auto &scene : _scenes) {
+        scene->removeBatches();
+    }
+
+    if (_batcher != nullptr) {
+        _batcher->update();
+    }
+
+    //
+    _cameraList.clear();
+}
+
+void Root::frameMoveProcess(bool isNeedUpdateScene, int32_t totalFrames, const ccstd::vector<IntrusivePtr<scene::RenderWindow>> &windows) {
+    for (const auto &window : windows) {
+        xr::XREye wndXREye = _xr ? _xr->getXREyeByRenderWindow(window) : xr::XREye::NONE;
+        window->extractRenderCameras(_cameraList, (int) wndXREye);
+    }
+
+    if (_pipelineRuntime != nullptr && !_cameraList.empty()) {
+        _swapchains.clear();
+        _swapchains.emplace_back(_swapchain);
+        _device->acquire(_swapchains);
+        // NOTE: c++ doesn't have a Director, so totalFrames need to be set from JS
+        uint32_t stamp = totalFrames;
+
+        if (_batcher != nullptr) {
+            _batcher->uploadBuffers();
+        }
+
+        if (isNeedUpdateScene) {
+            for (const auto &scene : _scenes) {
+                scene->update(stamp);
+            }
+        }
+
+        CC_PROFILER_UPDATE;
+    }
+}
+
+void Root::frameMoveEnd() {
+    if (_pipelineRuntime != nullptr && !_cameraList.empty()) {
+        _eventProcessor->emit(EventTypesToJS::DIRECTOR_BEFORE_COMMIT, this);
+
+        std::stable_sort(_cameraList.begin(), _cameraList.end(), [](const auto *a, const auto *b) {
+            return a->getPriority() < b->getPriority();
+        });
+#if !defined(CC_SERVER_MODE)
+
+    #if CC_USE_GEOMETRY_RENDERER
+        for (auto *camera : _cameraList) {
+            if (camera->getGeometryRenderer()) {
+                camera->getGeometryRenderer()->update();
+            }
+        }
+    #endif
+
+        _pipelineRuntime->render(_cameraList);
+#endif
+        _device->present();
+    }
+
+    if (_batcher != nullptr) {
+        _batcher->reset();
+    }
+}
+
 void Root::frameMove(float deltaTime, int32_t totalFrames) {
     CCObject::deferredDestroy();
 
@@ -368,157 +399,11 @@ void Root::frameMove(float deltaTime, int32_t totalFrames) {
     }
 
     if (_xr) {
-        if (_xr->isRenderAllowable()) {
-            auto swapchains = gfx::Device::getInstance()->getSwapchains();
-            bool isSceneUpdated = false;
-            int viewCount = _xr->getXRConfig(xr::XRConfigKey::VIEW_COUNT).getInt();
-            for (int xrEye = 0; xrEye < viewCount; xrEye++) {
-                _xr->beginRenderEyeFrame(xrEye);
-
-                for (auto *camera : _allCameraList) {
-                    if (camera->getTrackingType() != cc::scene::TrackingType::NO_TRACKING) {
-                        const auto &viewPosition = _xr->getHMDViewPosition(xrEye, (uint32_t) camera->getTrackingType());
-                        camera->setNodePosition({viewPosition[0], viewPosition[1], viewPosition[2]});
-                    }
-                }
-
-                for (const auto &scene : _scenes) {
-                    scene->removeBatches();
-                }
-
-                if (_batcher != nullptr) {
-                    _batcher->update();
-                }
-
-                //
-                _cameraList.clear();
-
-                for (int i = 0, size = _windows.size(); i < size; i++) {
-                    // _windows contain : left eye window, right eye window, other rt window
-                    xr::XREye wndXREye = _xr->getXREyeByRenderWindow(_windows[i]);
-                    if (wndXREye == static_cast<xr::XREye>(xrEye)) {
-                        _windows[i]->extractRenderCameras(_cameraList, xrEye);
-                    } else if (wndXREye == xr::XREye::NONE) {
-                        _windows[i]->extractRenderCameras(_cameraList, -1);
-                    }
-                }
-
-                if (_pipelineRuntime != nullptr && !_cameraList.empty()) {
-                    _swapchains.clear();
-                    _swapchains.emplace_back(swapchains[xrEye]);
-                    _device->acquire(_swapchains);
-                    // NOTE: c++ doesn't have a Director, so totalFrames need to be set from JS
-                    uint32_t stamp = totalFrames;
-
-                    if (_batcher != nullptr) {
-                        _batcher->uploadBuffers();
-                    }
-
-                    bool sceneNeedUpdate = xrEye == 0 || (xrEye == 1 && !isSceneUpdated);
-                    if (sceneNeedUpdate) {
-                        // consume 2ms
-                        for (const auto &scene : _scenes) {
-                            scene->update(stamp);
-                        }
-                        isSceneUpdated = true;
-                        // only one eye enable culling (without other cameras)
-                        if (_cameraList.size() == 1 && _cameraList[0]->getTrackingType() != cc::scene::TrackingType::NO_TRACKING) {
-                            _cameraList[0]->setCullingEnable(true);
-                            _pipelineRuntime->resetRenderQueue(true);
-                        }
-                    } else {
-                        // another eye disable culling (without other cameras)
-                        if (_cameraList.size() == 1 && _cameraList[0]->getTrackingType() != cc::scene::TrackingType::NO_TRACKING) {
-                            _cameraList[0]->setCullingEnable(false);
-                            _pipelineRuntime->resetRenderQueue(false);
-                        }
-                    }
-                    CC_PROFILER_UPDATE;
-
-                    _eventProcessor->emit(EventTypesToJS::DIRECTOR_BEFORE_COMMIT, this);
-
-                    std::stable_sort(_cameraList.begin(), _cameraList.end(), [](const auto *a, const auto *b) {
-                        return a->getPriority() < b->getPriority();
-                    });
-#if !defined(CC_SERVER_MODE)
-
-                #if CC_USE_GEOMETRY_RENDERER
-                    for (auto *camera : _cameraList) {
-                        if (camera->getGeometryRenderer()) {
-                            camera->getGeometryRenderer()->update();
-                        }
-                    }
-                #endif
-
-                    _pipelineRuntime->render(_cameraList);
-#endif
-                    _device->present();
-                }
-
-                if (_batcher != nullptr) {
-                    _batcher->reset();
-                }
-
-                _xr->endRenderEyeFrame(xrEye);
-            }
-        } else {
-            CC_LOG_WARNING("[XR] isRenderAllowable is false !!!");
-        }
+        doXRFrameMove(totalFrames);
     } else {
-        for (const auto &scene : _scenes) {
-            scene->removeBatches();
-        }
-
-        if (_batcher != nullptr) {
-            _batcher->update();
-        }
-
-        //
-        _cameraList.clear();
-        for (const auto &window : _windows) {
-            window->extractRenderCameras(_cameraList);
-        }
-
-        if (_pipelineRuntime != nullptr && !_cameraList.empty()) {
-            _swapchains.clear();
-            _swapchains.emplace_back(_swapchain);
-            _device->acquire(_swapchains);
-            // NOTE: c++ doesn't have a Director, so totalFrames need to be set from JS
-            uint32_t stamp = totalFrames;
-
-            if (_batcher != nullptr) {
-                _batcher->uploadBuffers();
-            }
-
-            for (const auto &scene : _scenes) {
-                scene->update(stamp);
-            }
-
-            CC_PROFILER_UPDATE;
-
-            _eventProcessor->emit(EventTypesToJS::DIRECTOR_BEFORE_COMMIT, this);
-
-            std::stable_sort(_cameraList.begin(), _cameraList.end(), [](const auto *a, const auto *b) {
-                return a->getPriority() < b->getPriority();
-            });
-#if !defined(CC_SERVER_MODE)
-
-        #if CC_USE_GEOMETRY_RENDERER
-            for (auto *camera : _cameraList) {
-                if (camera->getGeometryRenderer()) {
-                    camera->getGeometryRenderer()->update();
-                }
-            }
-        #endif
-
-            _pipelineRuntime->render(_cameraList);
-#endif
-            _device->present();
-        }
-
-        if (_batcher != nullptr) {
-            _batcher->reset();
-        }
+        frameMoveBegin();
+        frameMoveProcess(true, totalFrames, _windows);
+        frameMoveEnd();
     }
 }
 
@@ -599,6 +484,79 @@ void Root::destroyScenes() {
         CC_SAFE_DESTROY(scene);
     }
     _scenes.clear();
+}
+
+scene::RenderWindow *Root::createMainWindow(gfx::Swapchain *swapchain) {
+    gfx::RenderPassInfo renderPassInfo;
+
+    gfx::ColorAttachment colorAttachment;
+    colorAttachment.format = swapchain->getColorTexture()->getFormat();
+    renderPassInfo.colorAttachments.emplace_back(colorAttachment);
+
+    auto &depthStencilAttachment = renderPassInfo.depthStencilAttachment;
+    depthStencilAttachment.format = swapchain->getDepthStencilTexture()->getFormat();
+    depthStencilAttachment.depthStoreOp = gfx::StoreOp::DISCARD;
+    depthStencilAttachment.stencilStoreOp = gfx::StoreOp::DISCARD;
+
+    scene::IRenderWindowInfo info;
+    info.title = ccstd::string{"rootMainWindow"};
+    info.width = swapchain->getWidth();
+    info.height = swapchain->getHeight();
+    info.renderPassInfo = renderPassInfo;
+    info.swapchain = swapchain;
+    return createWindow(info);
+}
+
+void Root::doXRFrameMove(int32_t totalFrames) {
+    if (_xr->isRenderAllowable()) {
+        auto swapchains = gfx::Device::getInstance()->getSwapchains();
+        bool isSceneUpdated = false;
+        int viewCount = _xr->getXRConfig(xr::XRConfigKey::VIEW_COUNT).getInt();
+        for (int xrEye = 0; xrEye < viewCount; xrEye++) {
+            _xr->beginRenderEyeFrame(xrEye);
+
+            for (auto *camera : _allCameraList) {
+                if (camera->getTrackingType() != cc::scene::TrackingType::NO_TRACKING) {
+                    const auto &viewPosition = _xr->getHMDViewPosition(xrEye, (uint32_t)camera->getTrackingType());
+                    camera->setNodePosition({viewPosition[0], viewPosition[1], viewPosition[2]});
+                }
+            }
+
+            frameMoveBegin();
+
+            ccstd::vector<IntrusivePtr<scene::RenderWindow>> xrWindows;
+            for (const auto &window : _windows) {
+                xr::XREye wndXREye = _xr->getXREyeByRenderWindow(window);
+                if (wndXREye == static_cast<xr::XREye>(xrEye) || wndXREye == xr::XREye::NONE) {
+                    xrWindows.emplace_back(window);
+                }
+            }
+            bool isNeedUpdateScene = xrEye == 0 || (xrEye == 1 && !isSceneUpdated);
+            frameMoveProcess(isNeedUpdateScene, totalFrames, xrWindows);
+
+            if (_pipelineRuntime != nullptr && !_cameraList.empty()) {
+                if (isNeedUpdateScene) {
+                    isSceneUpdated = true;
+                    // only one eye enable culling (without other cameras)
+                    if (_cameraList.size() == 1 && _cameraList[0]->getTrackingType() != cc::scene::TrackingType::NO_TRACKING) {
+                        _cameraList[0]->setCullingEnable(true);
+                        _pipelineRuntime->resetRenderQueue(true);
+                    }
+                } else {
+                    // another eye disable culling (without other cameras)
+                    if (_cameraList.size() == 1 && _cameraList[0]->getTrackingType() != cc::scene::TrackingType::NO_TRACKING) {
+                        _cameraList[0]->setCullingEnable(false);
+                        _pipelineRuntime->resetRenderQueue(false);
+                    }
+                }
+            }
+
+            frameMoveEnd();
+            _xr->endRenderEyeFrame(xrEye);
+        }
+    } else {
+        CC_LOG_WARNING("[XR] isRenderAllowable is false !!!");
+    }
 }
 
 } // namespace cc
