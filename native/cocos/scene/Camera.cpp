@@ -157,21 +157,9 @@ void Camera::syncCameraEditor(const Camera &camera) {
 #endif
 }
 
-void Camera::update(bool forceUpdate /*false*/, int xrEye /*-1*/) {
+void Camera::update(bool forceUpdate /*false*/) {
     if (!_node) {
         return;
-    }
-
-    if (_xr && xrEye >= 0) {
-        if (_proj == CameraProjection::PERSPECTIVE) {
-            _isProjDirty = true;
-        }
-        if (_cameraType == CameraType::MAIN || _cameraType == CameraType::DEFAULT) {
-            auto win = Root::getInstance()->getWindows().at(xrEye);
-            if (win) {
-                _window = win;
-            }
-        }
     }
 
     bool viewProjDirty = false;
@@ -196,23 +184,8 @@ void Camera::update(bool forceUpdate /*false*/, int xrEye /*-1*/) {
         const float projectionSignY = _device->getCapabilities().clipSpaceSignY;
         // Only for rendertexture processing
         if (_proj == CameraProjection::PERSPECTIVE) {
-            if (xrEye < 0 || _cameraType == CameraType::DEFAULT) {
-                Mat4::createPerspective(_fov, _aspect, _nearClip, _farClip,
-                                        _fovAxis == CameraFOVAxis::VERTICAL, _device->getCapabilities().clipSpaceMinZ, projectionSignY, static_cast<int>(orientation), &_matProj);
-            } else if (_xr) {
-                if (_xr->getXRConfig(xr::XRConfigKey::SESSION_RUNNING).getBool()) {
-                    // xr flow
-                    const auto &projFloat = _xr->getXRViewProjectionData(xrEye, _nearClip, _farClip);
-                    int i = 0;
-                    for (auto value : projFloat) {
-                        _matProj.m[i] = value;
-                        i++;
-                    }
-                } else {
-                    Mat4::createPerspective(_fov, _aspect, _nearClip, _farClip,
-                                            _fovAxis == CameraFOVAxis::VERTICAL, _device->getCapabilities().clipSpaceMinZ, projectionSignY, static_cast<int>(orientation), &_matProj);
-                }
-            }
+            Mat4::createPerspective(_fov, _aspect, _nearClip, _farClip,
+                                    _fovAxis == CameraFOVAxis::VERTICAL, _device->getCapabilities().clipSpaceMinZ, projectionSignY, static_cast<int>(orientation), &_matProj);
         } else {
             const float x = _orthoHeight * _aspect;
             const float y = _orthoHeight;
@@ -223,6 +196,17 @@ void Camera::update(bool forceUpdate /*false*/, int xrEye /*-1*/) {
         _matProjInv = _matProj.getInversed();
         viewProjDirty = true;
         _isProjDirty = false;
+    }
+
+    if (_xr) {
+        xr::XREye wndXREye = _xr->getXREyeByRenderWindow(_window);
+        if (wndXREye != xr::XREye::NONE && _proj == CameraProjection::PERSPECTIVE && _xr->getXRConfig(xr::XRConfigKey::SESSION_RUNNING).getBool()) {
+            // xr flow
+            const auto &projFloat = _xr->getXRViewProjectionData((uint32_t)wndXREye, _nearClip, _farClip);
+            std::memcpy(_matProj.m, projFloat.data(), sizeof(float) * 16);
+            _matProjInv = _matProj.getInversed();
+            viewProjDirty = true;
+        }
     }
 
     // view-projection

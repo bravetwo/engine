@@ -775,6 +775,7 @@ ccstd::vector<float> XRInterface::getXRViewProjectionData(uint32_t eye, float ne
 
 // renderwindow
 xr::XREye XRInterface::getXREyeByRenderWindow(void *window) {
+    if (!window) return xr::XREye::NONE;
     if (_xrWindowMap.count(window) > 0) {
         return _xrWindowMap[window];
     } else {

@@ -9068,16 +9068,7 @@ static bool js_scene_RenderWindow_extractRenderCameras(se::State& s) // NOLINT(r
         cobj->extractRenderCameras(arg0.value());
         return true;
     }
-    if (argc == 2) {
-        HolderType<std::vector<cc::scene::Camera *>, true> arg0 = {};
-        HolderType<int, false> arg1 = {};
-        ok &= sevalue_to_native(args[0], &arg0, s.thisObject());
-        ok &= sevalue_to_native(args[1], &arg1, s.thisObject());
-        SE_PRECONDITION2(ok, false, "Error processing arguments");
-        cobj->extractRenderCameras(arg0.value(), arg1.value());
-        return true;
-    }
-    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 2);
+    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 1);
     return false;
 }
 SE_BIND_FUNC(js_scene_RenderWindow_extractRenderCameras)
@@ -17665,16 +17656,7 @@ static bool js_scene_Camera_update(se::State& s) // NOLINT(readability-identifie
         cobj->update(arg0.value());
         return true;
     }
-    if (argc == 2) {
-        HolderType<bool, false> arg0 = {};
-        HolderType<int, false> arg1 = {};
-        ok &= sevalue_to_native(args[0], &arg0, s.thisObject());
-        ok &= sevalue_to_native(args[1], &arg1, s.thisObject());
-        SE_PRECONDITION2(ok, false, "Error processing arguments");
-        cobj->update(arg0.value(), arg1.value());
-        return true;
-    }
-    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 2);
+    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 1);
     return false;
 }
 SE_BIND_FUNC(js_scene_Camera_update)

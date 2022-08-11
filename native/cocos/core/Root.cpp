@@ -332,8 +332,7 @@ void Root::frameMoveBegin() {
 
 void Root::frameMoveProcess(bool isNeedUpdateScene, int32_t totalFrames, const ccstd::vector<IntrusivePtr<scene::RenderWindow>> &windows) {
     for (const auto &window : windows) {
-        xr::XREye wndXREye = _xr ? _xr->getXREyeByRenderWindow(window) : xr::XREye::NONE;
-        window->extractRenderCameras(_cameraList, (int) wndXREye);
+        window->extractRenderCameras(_cameraList);
     }
 
     if (_pipelineRuntime != nullptr && !_cameraList.empty()) {
@@ -529,8 +528,18 @@ void Root::doXRFrameMove(int32_t totalFrames) {
                 xr::XREye wndXREye = _xr->getXREyeByRenderWindow(window);
                 if (wndXREye == static_cast<xr::XREye>(xrEye) || wndXREye == xr::XREye::NONE) {
                     xrWindows.emplace_back(window);
+                    // one camera add to left/right render window, so we need update camera's cur window
+                    if(wndXREye == static_cast<xr::XREye>(xrEye)) {
+                        const ccstd::vector<IntrusivePtr<scene::Camera>> &cams = window->getCameras();
+                        for (auto &cam : cams) {
+                            if (cam->getCameraType() == scene::CameraType::MAIN || cam->getCameraType() == scene::CameraType::DEFAULT) {
+                                cam->setWindow(window);
+                            }
+                        }
+                    }
                 }
             }
+
             bool isNeedUpdateScene = xrEye == 0 || (xrEye == 1 && !isSceneUpdated);
             frameMoveProcess(isNeedUpdateScene, totalFrames, xrWindows);
 
