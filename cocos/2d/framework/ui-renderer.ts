@@ -366,6 +366,7 @@ export class UIRenderer extends Renderer {
         if (!this.renderData) {
             return;
         }
+        this.renderData.removeRenderDrawInfo(this);
         RenderData.remove(this.renderData);
         this._renderData = null;
     }
@@ -444,7 +445,6 @@ export class UIRenderer extends Renderer {
         const render = node._uiProps.uiComp as UIRenderer;
         if (render && render.color) { // exclude UIMeshRenderer which has not color
             render._renderEntity.colorDirty = dirty;
-            render._renderEntity.color = render.color;// necessity to be considering
         }
         for (let i = 0; i < node.children.length; i++) {
             UIRenderer.setEntityColorDirtyRecursively(node.children[i], dirty);
