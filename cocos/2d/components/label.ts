@@ -676,14 +676,14 @@ export class Label extends UIRenderer {
     protected _fontAtlas: FontAtlas | null = null;
     protected _letterTexture: LetterRenderTexture | null = null;
 
-    protected _contextWidth = 0;
+    protected _contentWidth = 0;
 
-    get contextWidth() {
-        return this._contextWidth;
+    get contentWidth() {
+        return this._contentWidth;
     }
 
-    set contextWidth (val) {
-        this._contextWidth = val;
+    set contentWidth (val) {
+        this._contentWidth = val;
     }
 
     constructor () {

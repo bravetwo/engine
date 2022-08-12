@@ -120,7 +120,7 @@ export const ttfUtils =  {
             this.updateUVs(comp); // Empty
             comp.renderData.vertDirty = false;
             // comp.markForUpdateRenderData(false);
-            comp.contextWidth = _nodeContentSize.width;
+            comp.contentWidth = _nodeContentSize.width;
 
             _context = null;
             _canvas = null;

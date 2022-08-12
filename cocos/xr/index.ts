@@ -29,4 +29,3 @@
  */
 
 export * from './event/xr-event-handle';
-export * from './ux/xr-keyboard-handle';
