@@ -17377,26 +17377,6 @@ static bool js_scene_Camera_setNode(se::State& s) // NOLINT(readability-identifi
 }
 SE_BIND_FUNC_AS_PROP_SET(js_scene_Camera_setNode)
 
-static bool js_scene_Camera_setNodePosition(se::State& s) // NOLINT(readability-identifier-naming)
-{
-    auto* cobj = SE_THIS_OBJECT<cc::scene::Camera>(s);
-    // SE_PRECONDITION2(cobj, false, "Invalid Native Object");
-    if (nullptr == cobj) return true;
-    const auto& args = s.args();
-    size_t argc = args.size();
-    CC_UNUSED bool ok = true;
-    if (argc == 1) {
-        HolderType<cc::Vec3, true> arg0 = {};
-        ok &= sevalue_to_native(args[0], &arg0, s.thisObject());
-        SE_PRECONDITION2(ok, false, "Error processing arguments");
-        cobj->setNodePosition(arg0.value());
-        return true;
-    }
-    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 1);
-    return false;
-}
-SE_BIND_FUNC(js_scene_Camera_setNodePosition)
-
 static bool js_scene_Camera_setOrthoHeight(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::scene::Camera>(s);
@@ -17784,7 +17764,6 @@ bool js_register_scene_Camera(se::Object* obj) // NOLINT(readability-identifier-
     cls->defineFunction("resize", _SE(js_scene_Camera_resize));
     cls->defineFunction("setCullingEnable", _SE(js_scene_Camera_setCullingEnable));
     cls->defineFunction("setFixedSize", _SE(js_scene_Camera_setFixedSize));
-    cls->defineFunction("setNodePosition", _SE(js_scene_Camera_setNodePosition));
     cls->defineFunction("setViewportInOrientedSpace", _SE(js_scene_Camera_setViewportInOrientedSpace));
     cls->defineFunction("update", _SE(js_scene_Camera_update));
     cls->defineStaticFunction("getStandardExposureValue", _SE(js_scene_Camera_getStandardExposureValue_static));

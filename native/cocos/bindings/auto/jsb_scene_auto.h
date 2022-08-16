@@ -547,7 +547,6 @@ SE_DECLARE_FUNC(js_scene_Camera_isCullingEnabled);
 SE_DECLARE_FUNC(js_scene_Camera_resize);
 SE_DECLARE_FUNC(js_scene_Camera_setCullingEnable);
 SE_DECLARE_FUNC(js_scene_Camera_setFixedSize);
-SE_DECLARE_FUNC(js_scene_Camera_setNodePosition);
 SE_DECLARE_FUNC(js_scene_Camera_setViewportInOrientedSpace);
 SE_DECLARE_FUNC(js_scene_Camera_update);
 SE_DECLARE_FUNC(js_scene_Camera_getStandardExposureValue);
