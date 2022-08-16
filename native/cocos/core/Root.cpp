@@ -72,7 +72,6 @@ Root::~Root() {
 
 void Root::initialize(gfx::Swapchain *swapchain) {
     _swapchain = swapchain;
-    _allCameraList.clear();
 
     _xr = CC_GET_XR_INTERFACE();
     if (_xr) {
@@ -117,7 +116,7 @@ void Root::resize(uint32_t width, uint32_t height) {
     for (const auto &window : _windows) {
         if (window->getSwapchain()) {
             if (_xr) {
-                // xr, window's width and height should not change
+                // xr, window's width and height should not change by device
                 width = window->getWidth();
                 height = window->getHeight();
             }
@@ -142,7 +141,7 @@ public:
     void render(const ccstd::vector<scene::Camera *> &cameras) override {
         pipeline->render(cameras);
     }
-    gfx::Device* getDevice() const override {
+    gfx::Device *getDevice() const override {
         return pipeline->getDevice();
     }
     const MacroRecord &getMacros() const override {
@@ -157,7 +156,7 @@ public:
     gfx::DescriptorSet *getDescriptorSet() const override {
         return pipeline->getDescriptorSet();
     }
-    ccstd::vector<gfx::CommandBuffer*> getCommandBuffers() const override {
+    ccstd::vector<gfx::CommandBuffer *> getCommandBuffers() const override {
         return pipeline->getCommandBuffers();
     }
     pipeline::PipelineSceneData *getPipelineSceneData() const override {
@@ -181,9 +180,9 @@ public:
     void setShadingScale(float scale) override {
         pipeline->setShadingScale(scale);
     }
-    const ccstd::string& getMacroString(const ccstd::string& name) const override {
+    const ccstd::string &getMacroString(const ccstd::string &name) const override {
         static const ccstd::string EMPTY_STRING;
-        const auto& macros = pipeline->getMacros();
+        const auto &macros = pipeline->getMacros();
         auto iter = macros.find(name);
         if (iter == macros.end()) {
             return EMPTY_STRING;
@@ -191,7 +190,7 @@ public:
         return ccstd::get<ccstd::string>(iter->second);
     }
     int32_t getMacroInt(const ccstd::string &name) const override {
-        const auto& macros = pipeline->getMacros();
+        const auto &macros = pipeline->getMacros();
         auto iter = macros.find(name);
         if (iter == macros.end()) {
             return 0;
@@ -199,7 +198,7 @@ public:
         return ccstd::get<int32_t>(iter->second);
     }
     bool getMacroBool(const ccstd::string &name) const override {
-        const auto& macros = pipeline->getMacros();
+        const auto &macros = pipeline->getMacros();
         auto iter = macros.find(name);
         if (iter == macros.end()) {
             return false;
@@ -472,10 +471,8 @@ void Root::destroyLight(scene::Light *light) { // NOLINT(readability-convert-mem
     light->destroy();
 }
 
-scene::Camera *Root::createCamera() {
-    auto *camera = ccnew scene::Camera(_device);
-    _allCameraList.emplace_back(camera);
-    return camera;
+scene::Camera *Root::createCamera() const {
+    return ccnew scene::Camera(_device);
 }
 
 void Root::destroyScenes() {
@@ -508,20 +505,30 @@ scene::RenderWindow *Root::createMainWindow(gfx::Swapchain *swapchain) {
 
 void Root::doXRFrameMove(int32_t totalFrames) {
     if (_xr->isRenderAllowable()) {
-        auto swapchains = gfx::Device::getInstance()->getSwapchains();
+        const auto &swapchains = gfx::Device::getInstance()->getSwapchains();
         bool isSceneUpdated = false;
         int viewCount = _xr->getXRConfig(xr::XRConfigKey::VIEW_COUNT).getInt();
         for (int xrEye = 0; xrEye < viewCount; xrEye++) {
             _xr->beginRenderEyeFrame(xrEye);
 
-            for (auto *camera : _allCameraList) {
+            ccstd::vector<IntrusivePtr<scene::Camera>> allCameras;
+            for (const auto &window : _windows) {
+                const ccstd::vector<IntrusivePtr<scene::Camera>> &wndCams = window->getCameras();
+                allCameras.insert(allCameras.end(), wndCams.begin(), wndCams.end());
+            }
+
+            // when choose PreEyeCamera, only hmd has PoseTracker,
+            // draw left eye change hmd node's position to -ipd/2 | draw right eye  change hmd node's position to ipd/2
+            for (const auto &camera : allCameras) {
                 if (camera->getTrackingType() != cc::scene::TrackingType::NO_TRACKING) {
-                    const auto &viewPosition = _xr->getHMDViewPosition(xrEye, (uint32_t)camera->getTrackingType());
-                    camera->setNodePosition({viewPosition[0], viewPosition[1], viewPosition[2]});
+                    const auto &viewPosition = _xr->getHMDViewPosition(xrEye, static_cast<int>(camera->getTrackingType()));
+                    Node *camNode = camera->getNode();
+                    if (camNode) {
+                        camNode->setPosition({viewPosition[0], viewPosition[1], viewPosition[2]});
+                    }
                 }
             }
 
-            const ccstd::vector<gfx::Swapchain *> &swapchains = gfx::Device::getInstance()->getSwapchains();
             _swapchain = swapchains[xrEye];
 
             frameMoveBegin();
@@ -532,9 +539,9 @@ void Root::doXRFrameMove(int32_t totalFrames) {
                 if (wndXREye == static_cast<xr::XREye>(xrEye) || wndXREye == xr::XREye::NONE) {
                     xrWindows.emplace_back(window);
                     // one camera add to left/right render window, so we need update camera's cur window
-                    if(wndXREye == static_cast<xr::XREye>(xrEye)) {
+                    if (wndXREye == static_cast<xr::XREye>(xrEye)) {
                         const ccstd::vector<IntrusivePtr<scene::Camera>> &cams = window->getCameras();
-                        for (auto &cam : cams) {
+                        for (const auto &cam : cams) {
                             if (cam->getCameraType() == scene::CameraType::MAIN || cam->getCameraType() == scene::CameraType::DEFAULT) {
                                 cam->setWindow(window);
                             }

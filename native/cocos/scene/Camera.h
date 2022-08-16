@@ -172,7 +172,6 @@ public:
     void syncCameraEditor(const Camera &camera);
     void update(bool forceUpdate = false); // for lazy eval situations like the in-editor preview
     void changeTargetWindow(RenderWindow *window);
-    void setNodePosition(const Vec3 &position);
 
     /**
      * transform a screen position (in oriented space) to a world space ray

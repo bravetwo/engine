@@ -160,7 +160,7 @@ public:
 
     void destroyLight(scene::Light *light);
 
-    scene::Camera *createCamera();
+    scene::Camera *createCamera() const;
     /**
      * @zh
      * GFX 设备
@@ -304,7 +304,6 @@ private:
 
     // Cache ccstd::vector to avoid allocate every frame in frameMove
     ccstd::vector<scene::Camera *> _cameraList;
-    ccstd::vector<scene::Camera *>  _allCameraList;
     ccstd::vector<gfx::Swapchain *> _swapchains;
     //
 };
