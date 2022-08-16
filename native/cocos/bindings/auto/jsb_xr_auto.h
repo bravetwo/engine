@@ -12,8 +12,8 @@ bool register_all_xr(se::Object *obj);                   // NOLINT
 JSB_REGISTER_OBJECT_TYPE(cc::xr::XrEntry);
 
 
-extern se::Object *__jsb_cc_xr_XrEntry_proto; // NOLINT
-extern se::Class * __jsb_cc_xr_XrEntry_class; // NOLINT
+extern se::Object *__jsb_cc_xr_XrEntry_proto;   // NOLINT
+extern se::Class *__jsb_cc_xr_XrEntry_class;    // NOLINT
 
 bool js_register_cc_xr_XrEntry(se::Object *obj); // NOLINT
 
@@ -24,6 +24,7 @@ SE_DECLARE_FUNC(js_xr_XrEntry_destroyXrInstance);
 SE_DECLARE_FUNC(js_xr_XrEntry_frameEnd);
 SE_DECLARE_FUNC(js_xr_XrEntry_frameStart);
 SE_DECLARE_FUNC(js_xr_XrEntry_getCocosXrSwapchains);
+SE_DECLARE_FUNC(js_xr_XrEntry_getCurrentXrSwapchain);
 SE_DECLARE_FUNC(js_xr_XrEntry_getHMDViewPosition);
 SE_DECLARE_FUNC(js_xr_XrEntry_getSwapchainImageIndex);
 SE_DECLARE_FUNC(js_xr_XrEntry_getXRBoolConfig);
@@ -52,7 +53,6 @@ SE_DECLARE_FUNC(js_xr_XrEntry_setXRFloatConfig);
 SE_DECLARE_FUNC(js_xr_XrEntry_setXRIntConfig);
 SE_DECLARE_FUNC(js_xr_XrEntry_setXRPointerConfig);
 SE_DECLARE_FUNC(js_xr_XrEntry_setXRStringConfig);
-SE_DECLARE_FUNC(js_xr_XrEntry_updateXrSwapchainInfo);
 SE_DECLARE_FUNC(js_xr_XrEntry_waitFrame);
 SE_DECLARE_FUNC(js_xr_XrEntry_destroyInstance);
 SE_DECLARE_FUNC(js_xr_XrEntry_getInstance);
