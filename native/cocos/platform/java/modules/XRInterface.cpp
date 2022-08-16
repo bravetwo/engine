@@ -386,6 +386,15 @@ void XRInterface::initialize(void *javaVM, void *activity) {
     xr::XrEntry::getInstance()->setHandleCallback(&dispatchHandleEventInternal);
     xr::XrEntry::getInstance()->setHMDCallback(&dispatchHMDEventInternal);
     xr::XrEntry::getInstance()->setXRConfig(xr::XRConfigKey::LOGIC_THREAD_ID, (int)gettid());
+    xr::XrEntry::getInstance()->setXRConfigCallback([this](xr::XRConfigKey key, xr::XRConfigValue value) {
+        if (IS_ENABLE_XR_LOG) CC_LOG_INFO("XRConfigCallback.%d", key);
+        if (key == xr::XRConfigKey::RENDER_EYE_FRAME_LEFT || key == xr::XRConfigKey::RENDER_EYE_FRAME_RIGHT) {
+            if (value.getInt() == 0)
+                this->beginRenderEyeFrame(key == xr::XRConfigKey::RENDER_EYE_FRAME_LEFT ? 0 : 1);
+            if (value.getInt() == 1)
+                this->endRenderEyeFrame(key == xr::XRConfigKey::RENDER_EYE_FRAME_LEFT ? 0 : 1);
+        }
+    });
     #if XR_OEM_PICO
     std::string graphicsApiName = GraphicsApiOpenglES;
 #if CC_USE_VULKAN
@@ -549,19 +558,10 @@ gfx::Format XRInterface::getXRSwapchainFormat() {
     return gfx::Format::BGRA8;
 }
 
-void XRInterface::updateXRSwapchainTypedID(uint32_t index, uint32_t typedID) {
+void XRInterface::updateXRSwapchainTypedID(uint32_t typedID) {
 #if CC_USE_XR
-    if (gfx::DeviceAgent::getInstance()) {
-        ENQUEUE_MESSAGE_2(gfx::DeviceAgent::getInstance()->getMessageQueue(),
-                          UpdateXRSwapchainTypedID, index, index, typedID, typedID,
-                          {
-                              xr::XrEntry::getInstance()->updateXrSwapchainInfo(index, typedID);
-                          });
-    } else {
-        xr::XrEntry::getInstance()->updateXrSwapchainInfo(index, typedID);
-    }
     #if XR_OEM_HUAWEIVR
-    _eglSurfaceTypeMap[typedID] = index == 0 ? EGLSurfaceType::WINDOW : EGLSurfaceType::NONE;
+    _eglSurfaceTypeMap[typedID] = EGLSurfaceType::WINDOW;
     #else
     _eglSurfaceTypeMap[typedID] = EGLSurfaceType::PBUFFER;
     #endif
@@ -604,9 +604,9 @@ VkPhysicalDevice XRInterface::getXRVulkanGraphicsDevice() {
     return _vkPhysicalDevice;
 }
 
-void XRInterface::getXRSwapchainVkImages(std::vector<VkImage> &vkImages, uint32_t ccSwapchainTypedID) {
+void XRInterface::getXRSwapchainVkImages(std::vector<VkImage> &vkImages, uint32_t eye) {
     #if CC_USE_XR
-    xr::XrEntry::getInstance()->getSwapchainImages(vkImages, ccSwapchainTypedID);
+    xr::XrEntry::getInstance()->getSwapchainImages(vkImages, eye);
     #endif
 }
 #endif

@@ -76,8 +76,6 @@ public:
     inline QueryPool *createQueryPool(const QueryPoolInfo &info);
     inline Swapchain *createSwapchain(const SwapchainInfo &info);
     inline const ccstd::vector<Swapchain *> &getSwapchains() { return _swapchains; }
-    void removeSwapchain(Swapchain *swapchain);
-    void destroySwapchains();
     inline Buffer *createBuffer(const BufferInfo &info);
     inline Buffer *createBuffer(const BufferViewInfo &info);
     inline Texture *createTexture(const TextureInfo &info);
@@ -155,6 +153,7 @@ protected:
     virtual DescriptorSetLayout *createDescriptorSetLayout() = 0;
     virtual PipelineLayout *createPipelineLayout() = 0;
     virtual PipelineState *createPipelineState() = 0;
+    virtual void createXRSwapchain(const SwapchainInfo &info);
 
     virtual Sampler *createSampler(const SamplerInfo &info) { return ccnew Sampler(info); }
     virtual GeneralBarrier *createGeneralBarrier(const GeneralBarrierInfo &info) { return ccnew GeneralBarrier(info); }
@@ -220,20 +219,7 @@ QueryPool *Device::createQueryPool(const QueryPoolInfo &info) {
 
 Swapchain *Device::createSwapchain(const SwapchainInfo &info) {
     if (_xr) {
-        _xr->createXRSwapchains();
-        int viewCount = _xr->getXRConfig(xr::XRConfigKey::VIEW_COUNT).getInt();
-        int swapChainWidth = _xr->getXRConfig(xr::XRConfigKey::SWAPCHAIN_WIDTH).getInt();
-        int swapChainHeight = _xr->getXRConfig(xr::XRConfigKey::SWAPCHAIN_HEIGHT).getInt();
-        for (int i = 0; i < viewCount; i++) {
-            Swapchain *res = createSwapchain();
-            _xr->updateXRSwapchainTypedID(i, res->getTypedID());
-            SwapchainInfo swapchain_info;
-            swapchain_info.copy(info);
-            swapchain_info.width = swapChainWidth;
-            swapchain_info.height = swapChainHeight;
-            res->initialize(swapchain_info);
-            _swapchains.push_back(res);
-        }
+        createXRSwapchain(info);
         return _swapchains.at(0);
     } else {
         Swapchain *res = createSwapchain();

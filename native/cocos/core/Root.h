@@ -273,7 +273,6 @@ public:
     inline CallbacksInvoker *getEventProcessor() const { return _eventProcessor; }
 
 private:
-    scene::RenderWindow *createMainWindow(gfx::Swapchain *swapchain);
     void frameMoveBegin();
     void frameMoveProcess(bool isNeedUpdateScene, int32_t totalFrames, const ccstd::vector<IntrusivePtr<scene::RenderWindow>> &windows);
     void frameMoveEnd();

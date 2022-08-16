@@ -138,8 +138,8 @@ struct ICameraInfo {
     RenderWindow *window{nullptr};
     uint32_t priority{0};
     ccstd::optional<ccstd::string> pipeline;
-    CameraType cameraType;
-    TrackingType trackingType;
+    CameraType cameraType{CameraType::DEFAULT};
+    TrackingType trackingType{TrackingType::NO_TRACKING};
 };
 
 class Camera : public RefCounted {
@@ -351,7 +351,6 @@ public:
     inline void setCullingEnable(bool val) { _isCullingEnabled = val; }
 protected:
     void setExposure(float ev100);
-    void bindTargetWindow(RenderWindow *window);
 
 private:
     void updateExposure();
