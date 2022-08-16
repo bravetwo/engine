@@ -521,6 +521,9 @@ void Root::doXRFrameMove(int32_t totalFrames) {
                 }
             }
 
+            const ccstd::vector<gfx::Swapchain *> &swapchains = gfx::Device::getInstance()->getSwapchains();
+            _swapchain = swapchains[xrEye];
+
             frameMoveBegin();
 
             ccstd::vector<IntrusivePtr<scene::RenderWindow>> xrWindows;
