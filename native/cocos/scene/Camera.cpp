@@ -270,14 +270,6 @@ void Camera::bindTargetWindow(RenderWindow *win) {
     }
 }
 
-void Camera::setNodePosition(const Vec3 &position) {
-    if (!_node) {
-        return;
-    }
-
-    _node->setPosition(position);
-}
-
 void Camera::initGeometryRenderer() {
 #if CC_USE_GEOMETRY_RENDERER
     if (!_geometryRenderer) {
