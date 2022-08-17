@@ -533,8 +533,8 @@ void Root::doXRFrameMove(int32_t totalFrames) {
             while (camIter != _cameraList.end()) {
                 scene::Camera *cam = *camIter;
                 bool isMismatchedCam =
-                    ((xr::XREye)xrEye == xr::XREye::LEFT && cam->getCameraType() == scene::CameraType::RIGHT_CAMERA) ||
-                    ((xr::XREye)xrEye == xr::XREye::RIGHT && cam->getCameraType() == scene::CameraType::LEFT_CAMERA);
+                    ((xr::XREye)xrEye == xr::XREye::LEFT && cam->getCameraType() == scene::CameraType::RIGHT_EYE) ||
+                    ((xr::XREye)xrEye == xr::XREye::RIGHT && cam->getCameraType() == scene::CameraType::LEFT_EYE);
                 if (isMismatchedCam) {
                     // currently is left eye loop, so right camera do not need active
                     camIter = _cameraList.erase(camIter);

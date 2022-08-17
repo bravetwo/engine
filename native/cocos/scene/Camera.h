@@ -118,8 +118,8 @@ enum class CameraShutter {
 
 enum class CameraType {
     DEFAULT = -1,
-    LEFT_CAMERA = 0,
-    RIGHT_CAMERA = 1,
+    LEFT_EYE = 0,
+    RIGHT_EYE = 1,
     MAIN = 2,
 };
 
