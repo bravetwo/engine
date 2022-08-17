@@ -993,5 +993,5 @@ module.exports = {
         minPos: 'The minimum position of the world bounding box.',
         maxPos: 'The maximum position of the world bounding box.',
         depth: 'The depth of octree.',
-    }
+    },
 };

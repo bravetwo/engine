@@ -199,7 +199,7 @@ struct XRClick : public XRControllerInfo {
     : type(type),
       isPress(isPress) {}
 
-    virtual XREventType getXREventType() const override {
+    XREventType getXREventType() const override {
         return XREventType::CLICK;
     }
 };
@@ -226,7 +226,7 @@ struct XRStick : public XRControllerInfo {
       x(x),
       y(y) {}
 
-    virtual XREventType getXREventType() const override {
+    XREventType getXREventType() const override {
         return XREventType::STICK;
     }
 };
@@ -253,7 +253,7 @@ struct XRGrab : public XRControllerInfo {
       isActive(true),
       value(value) {}
 
-    virtual XREventType getXREventType() const override {
+    XREventType getXREventType() const override {
         return XREventType::GRAB;
     }
 };
@@ -287,7 +287,7 @@ struct XRPose : public XRControllerInfo {
     XRPose(Type type, float position[3], float quaternion[4])
     : type(type), isActive(true), px(position[0]), py(position[1]), pz(position[2]), qx(quaternion[0]), qy(quaternion[1]), qz(quaternion[2]), qw(quaternion[3]) {}
 
-    virtual XREventType getXREventType() const override {
+    XREventType getXREventType() const override {
         return XREventType::POSE;
     }
 };

@@ -23,7 +23,7 @@
  THE SOFTWARE.
  ****************************************************************************/
 
-#include "scene/Camera.h"
+#include "Camera.h"
 #include "core/Root.h"
 #include "core/platform/Debug.h"
 #include "core/scene-graph/Node.h"
@@ -202,7 +202,7 @@ void Camera::update(bool forceUpdate /*false*/) {
         xr::XREye wndXREye = _xr->getXREyeByRenderWindow(_window);
         if (wndXREye != xr::XREye::NONE && _proj == CameraProjection::PERSPECTIVE && _xr->getXRConfig(xr::XRConfigKey::SESSION_RUNNING).getBool()) {
             // xr flow
-            const auto &projFloat = _xr->getXRViewProjectionData((uint32_t)wndXREye, _nearClip, _farClip);
+            const auto &projFloat = _xr->getXRViewProjectionData(static_cast<uint32_t>(wndXREye), _nearClip, _farClip);
             std::memcpy(_matProj.m, projFloat.data(), sizeof(float) * 16);
             _matProjInv = _matProj.getInversed();
             viewProjDirty = true;

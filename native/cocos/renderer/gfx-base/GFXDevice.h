@@ -221,12 +221,11 @@ Swapchain *Device::createSwapchain(const SwapchainInfo &info) {
     if (_xr) {
         createXRSwapchain(info);
         return _swapchains.at(0);
-    } else {
-        Swapchain *res = createSwapchain();
-        res->initialize(info);
-        _swapchains.push_back(res);
-        return res;
     }
+    Swapchain *res = createSwapchain();
+    res->initialize(info);
+    _swapchains.push_back(res);
+    return res;
 }
 
 Buffer *Device::createBuffer(const BufferInfo &info) {

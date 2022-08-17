@@ -508,7 +508,7 @@ void Root::doXRFrameMove(int32_t totalFrames) {
                 if (camera->getTrackingType() != cc::scene::TrackingType::NO_TRACKING) {
                     Node *camNode = camera->getNode();
                     if (camNode) {
-                        const auto &viewPosition = _xr->getHMDViewPosition(xrEye, (uint32_t)camera->getTrackingType());
+                        const auto &viewPosition = _xr->getHMDViewPosition(xrEye, static_cast<int>camera->getTrackingType());
                         camNode->setPosition({viewPosition[0], viewPosition[1], viewPosition[2]});
                     }
                 }

@@ -974,5 +974,5 @@ module.exports = {
         minPos: '世界包围盒最小顶点的坐标',
         maxPos: '世界包围盒最大顶点的坐标',
         depth: '八叉树深度',
-    }
+    },
 };

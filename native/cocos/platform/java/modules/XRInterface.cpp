@@ -360,6 +360,7 @@ xr::XRConfigValue XRInterface::getXRConfig(xr::XRConfigKey key) {
 #if CC_USE_XR
     return xr::XrEntry::getInstance()->getXRConfig(key);
 #endif
+    CC_UNUSED_PARAM(key);
     cc::xr::XRConfigValue configValue;
     return configValue;
 }
@@ -368,6 +369,9 @@ void XRInterface::setXRConfig(xr::XRConfigKey key, xr::XRConfigValue value) {
 #if CC_USE_XR
     CC_LOG_INFO("[XR] setConfigParameterI %d", key);
     xr::XrEntry::getInstance()->setXRConfig(key, value);
+#else
+    CC_UNUSED_PARAM(key);
+    CC_UNUSED_PARAM(value);
 #endif
 }
 
@@ -402,6 +406,9 @@ void XRInterface::initialize(void *javaVM, void *activity) {
 #endif
     xr::XrEntry::getInstance()->createXrInstance(graphicsApiName.c_str());
     #endif
+#else
+    CC_UNUSED_PARAM(javaVM);
+    CC_UNUSED_PARAM(activity);
 #endif
 }
 
@@ -455,6 +462,8 @@ void XRInterface::preGFXDeviceInitialize(gfx::API gfxApi) {
         xr::XrEntry::getInstance()->createXrInstance(graphicsApiName.c_str());
     #endif
     }
+#else
+    CC_UNUSED_PARAM(gfxApi);
 #endif
 }
 
@@ -474,6 +483,8 @@ void XRInterface::postGFXDeviceInitialize(gfx::API gfxApi) {
         cc::xr::XrEntry::getInstance()->initXrSession(_vkInstance, _vkPhysicalDevice, _vkDevice, vkQueueFamilyIndex);
     #endif
     }
+#else
+    CC_UNUSED_PARAM(gfxApi);
 #endif
 }
 
@@ -483,11 +494,14 @@ const xr::XRSwapchain &XRInterface::doGFXDeviceAcquire(gfx::API gfxApi) {
     if (gfxApi == gfx::API::GLES3 || gfxApi == gfx::API::VULKAN) {
         return xr::XrEntry::getInstance()->acquireXrSwapchain((uint32_t)gfxApi);
     }
+#else
+    CC_UNUSED_PARAM(gfxApi);
 #endif
     return _acquireSwapchain;
 }
 
 bool XRInterface::isGFXDeviceNeedsPresent(gfx::API gfxApi) {
+    CC_UNUSED_PARAM(gfxApi);
 #if CC_USE_XR
     // CC_LOG_INFO("[XR] isGFXDeviceNeedsPresent.api.%d", gfxApi);
     // if (gfxApi == gfx::API::GLES3 || gfxApi == gfx::API::VULKAN) {
@@ -502,6 +516,8 @@ void XRInterface::postGFXDevicePresent(gfx::API gfxApi) {
     // CC_LOG_INFO("[XR] postGFXDevicePresent.api.%d", gfxApi);
     if (gfxApi == gfx::API::GLES3 || gfxApi == gfx::API::VULKAN) {
     }
+#else
+    CC_UNUSED_PARAM(gfxApi);
 #endif
 }
 
@@ -565,6 +581,8 @@ void XRInterface::updateXRSwapchainTypedID(uint32_t typedID) {
     #else
     _eglSurfaceTypeMap[typedID] = EGLSurfaceType::PBUFFER;
     #endif
+#else
+    CC_UNUSED_PARAM(typedID);
 #endif
 }
 // gfx
@@ -572,11 +590,11 @@ void XRInterface::updateXRSwapchainTypedID(uint32_t typedID) {
 // vulkan
 #ifdef CC_USE_VULKAN
 uint32_t XRInterface::getXRVkApiVersion(uint32_t engineVkApiVersion) {
-    #if CC_USE_XR
+#if CC_USE_XR
     return xr::XrEntry::getInstance()->getXrVkApiVersion(engineVkApiVersion);
-    #else
+#else
     return engineVkApiVersion;
-    #endif
+#endif
 }
 
 void XRInterface::initializeVulkanData(const PFN_vkGetInstanceProcAddr &addr) {
@@ -584,19 +602,22 @@ void XRInterface::initializeVulkanData(const PFN_vkGetInstanceProcAddr &addr) {
 }
 
 VkInstance XRInterface::createXRVulkanInstance(const VkInstanceCreateInfo &instInfo) {
-    #if CC_USE_XR
+#if CC_USE_XR
     _vkInstance = xr::XrEntry::getInstance()->xrVkCreateInstance(instInfo, _vkGetInstanceProcAddr);
     _vkPhysicalDevice = xr::XrEntry::getInstance()->getXrVkGraphicsDevice(_vkInstance);
     return _vkInstance;
-    #else
+#else
+    CC_UNUSED_PARAM(instInfo);
     return nullptr;
-    #endif
+#endif
 }
 
 VkDevice XRInterface::createXRVulkanDevice(const VkDeviceCreateInfo *deviceInfo) {
-    #if CC_USE_XR
+#if CC_USE_XR
     VK_CHECK(xr::XrEntry::getInstance()->xrVkCreateDevice(deviceInfo, _vkGetInstanceProcAddr, _vkPhysicalDevice, &_vkDevice));
-    #endif
+#else
+    CC_UNUSED_PARAM(deviceInfo);
+#endif
     return _vkDevice;
 }
 
@@ -605,9 +626,12 @@ VkPhysicalDevice XRInterface::getXRVulkanGraphicsDevice() {
 }
 
 void XRInterface::getXRSwapchainVkImages(std::vector<VkImage> &vkImages, uint32_t eye) {
-    #if CC_USE_XR
+#if CC_USE_XR
     xr::XrEntry::getInstance()->getSwapchainImages(vkImages, eye);
-    #endif
+#else
+    CC_UNUSED_PARAM(vkImages);
+    CC_UNUSED_PARAM(ccSwapchainTypedID);
+#endif
 }
 #endif
 // vulkan
@@ -615,28 +639,33 @@ void XRInterface::getXRSwapchainVkImages(std::vector<VkImage> &vkImages, uint32_
 // gles
 #ifdef CC_USE_GLES3
 void XRInterface::initializeGLESData(PFNGLES3WLOADPROC gles3wLoadFuncProc, gfx::GLES3GPUContext *gpuContext) {
-    #if CC_USE_XR
+#if CC_USE_XR
     _gles3wLoadFuncProc = gles3wLoadFuncProc;
     _gles3GPUContext = gpuContext;
     void *eglDisplay = gpuContext->eglDisplay;
     void *eglConfig = gpuContext->eglConfig;
     void *eglDefaultContext = gpuContext->eglDefaultContext;
     CC_LOG_INFO("[XR] initializeGLESData.egl.%p/%p/%p", eglDisplay, eglConfig, eglDefaultContext);
-    #endif
+#else
+    CC_UNUSED_PARAM(gles3wLoadFuncProc);
+    CC_UNUSED_PARAM(gpuContext);
+#endif
 }
 
 void XRInterface::attachGLESFramebufferTexture2D() {
-    #if CC_USE_XR
+#if CC_USE_XR
     xr::XrEntry::getInstance()->attachXrFramebufferTexture2D();
-    #endif
+#endif
 }
 
 EGLSurfaceType XRInterface::acquireEGLSurfaceType(uint32_t typedID) {
-    #if CC_USE_XR
+#if CC_USE_XR
     if (_eglSurfaceTypeMap.count(typedID) > 0) {
         return _eglSurfaceTypeMap[typedID];
     }
-    #endif
+#else
+    CC_UNUSED_PARAM(typedID);
+#endif
     return EGLSurfaceType::WINDOW;
 }
 #endif
@@ -700,6 +729,8 @@ bool XRInterface::beginRenderEyeFrame(uint32_t eye) {
     } else {
         xr::XrEntry::getInstance()->renderLoopStart(eye);
     }
+#else
+    CC_UNUSED_PARAM(eye);
 #endif
     return true;
 }
@@ -717,6 +748,8 @@ bool XRInterface::endRenderEyeFrame(uint32_t eye) {
     } else {
         xr::XrEntry::getInstance()->renderLoopEnd(eye);
     }
+#else
+    CC_UNUSED_PARAM(eye);
 #endif
     return true;
 }
@@ -757,6 +790,8 @@ ccstd::vector<float> XRInterface::getHMDViewPosition(uint32_t eye, int trackingT
 #if CC_USE_XR
     return xr::XrEntry::getInstance()->getHMDViewPosition(eye, trackingType);
 #else
+    CC_UNUSED_PARAM(eye);
+    CC_UNUSED_PARAM(trackingType);
     ccstd::vector<float> res;
     res.reserve(3);
     return res;
@@ -767,6 +802,9 @@ ccstd::vector<float> XRInterface::getXRViewProjectionData(uint32_t eye, float ne
 #if CC_USE_XR
     return xr::XrEntry::getInstance()->computeViewProjection(eye, near, far, 1.0F);
 #else
+    CC_UNUSED_PARAM(eye);
+    CC_UNUSED_PARAM(near);
+    CC_UNUSED_PARAM(far);
     ccstd::vector<float> res;
     res.reserve(16);
     return res;
@@ -775,12 +813,13 @@ ccstd::vector<float> XRInterface::getXRViewProjectionData(uint32_t eye, float ne
 
 // renderwindow
 xr::XREye XRInterface::getXREyeByRenderWindow(void *window) {
-    if (!window) return xr::XREye::NONE;
-    if (_xrWindowMap.count(window) > 0) {
-        return _xrWindowMap[window];
-    } else {
+    if (!window) {
         return xr::XREye::NONE;
     }
+    if (_xrWindowMap.count(window) > 0) {
+        return _xrWindowMap[window];
+    }
+    return xr::XREye::NONE;
 }
 
 void XRInterface::bindXREyeWithRenderWindow(void *window, xr::XREye eye) {
@@ -790,5 +829,4 @@ void XRInterface::bindXREyeWithRenderWindow(void *window, xr::XREye eye) {
         _xrWindowMap.emplace(std::make_pair(window, eye));
     }
 }
-
 } // namespace cc
