@@ -142,7 +142,7 @@ BufferBarrier *Device::getBufferBarrier(const BufferBarrierInfo &info) {
 }
 
 
-void Device::createXRSwapchain(const SwapchainInfo &info) {
+Swapchain *Device::createXRSwapchain(const SwapchainInfo &info) {
     _xr->createXRSwapchains();
     int swapChainWidth = _xr->getXRConfig(xr::XRConfigKey::SWAPCHAIN_WIDTH).getInt();
     int swapChainHeight = _xr->getXRConfig(xr::XRConfigKey::SWAPCHAIN_HEIGHT).getInt();
@@ -154,6 +154,7 @@ void Device::createXRSwapchain(const SwapchainInfo &info) {
     swapchain_info.height = swapChainHeight;
     res->initialize(swapchain_info);
     _swapchains.push_back(res);
+    return res;
 }
 
 } // namespace gfx

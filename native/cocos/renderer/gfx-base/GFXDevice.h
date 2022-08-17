@@ -153,7 +153,7 @@ protected:
     virtual DescriptorSetLayout *createDescriptorSetLayout() = 0;
     virtual PipelineLayout *createPipelineLayout() = 0;
     virtual PipelineState *createPipelineState() = 0;
-    virtual void createXRSwapchain(const SwapchainInfo &info);
+    virtual Swapchain *createXRSwapchain(const SwapchainInfo &info);
 
     virtual Sampler *createSampler(const SamplerInfo &info) { return ccnew Sampler(info); }
     virtual GeneralBarrier *createGeneralBarrier(const GeneralBarrierInfo &info) { return ccnew GeneralBarrier(info); }
@@ -219,8 +219,7 @@ QueryPool *Device::createQueryPool(const QueryPoolInfo &info) {
 
 Swapchain *Device::createSwapchain(const SwapchainInfo &info) {
     if (_xr) {
-        createXRSwapchain(info);
-        return _swapchains.at(0);
+        return createXRSwapchain(info);
     }
     Swapchain *res = createSwapchain();
     res->initialize(info);
