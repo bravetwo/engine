@@ -332,7 +332,7 @@ declare module 'pal/input' {
 
     type HMDCallback = (res: import('cocos/input/types').EventHMD) => void;
     /**
-     * Class designed for handle input.
+     * Class designed for HMD input.
      */
     export class HMDInputDevice {
         /**
