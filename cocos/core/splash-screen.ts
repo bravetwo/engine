@@ -290,41 +290,41 @@ export class SplashScreen {
                     xr.XrEntry.getInstance().renderLoopStart(xrEye);
                 }
 
-        device.acquire([swapchain]);
-        // record command
-        const cmdBuff = this.cmdBuff;
-        const framebuffer = this.framebuffer;
-        const renderArea = this.renderArea;
+                device.acquire([swapchain]);
+                // record command
+                const cmdBuff = this.cmdBuff;
+                const framebuffer = this.framebuffer;
+                const renderArea = this.renderArea;
 
-        renderArea.width = swapchain.width;
-        renderArea.height = swapchain.height;
+                renderArea.width = swapchain.width;
+                renderArea.height = swapchain.height;
 
-        cmdBuff.begin();
-        cmdBuff.beginRenderPass(framebuffer.renderPass, framebuffer, renderArea, this.clearColors, 1.0, 0);
+                cmdBuff.begin();
+                cmdBuff.beginRenderPass(framebuffer.renderPass, framebuffer, renderArea, this.clearColors, 1.0, 0);
 
-        const logoPass = this.logoMat.passes[0];
-        const logoPso = PipelineStateManager.getOrCreatePipelineState(device, logoPass, this.shader, framebuffer.renderPass, this.quadAssmebler);
+                const logoPass = this.logoMat.passes[0];
+                const logoPso = PipelineStateManager.getOrCreatePipelineState(device, logoPass, this.shader, framebuffer.renderPass, this.quadAssmebler);
 
-        cmdBuff.bindPipelineState(logoPso);
-        cmdBuff.bindDescriptorSet(SetIndex.MATERIAL, logoPass.descriptorSet);
-        cmdBuff.bindInputAssembler(this.quadAssmebler);
-        cmdBuff.draw(this.quadAssmebler);
+                cmdBuff.bindPipelineState(logoPso);
+                cmdBuff.bindDescriptorSet(SetIndex.MATERIAL, logoPass.descriptorSet);
+                cmdBuff.bindInputAssembler(this.quadAssmebler);
+                cmdBuff.draw(this.quadAssmebler);
 
-        if (this.settings.displayWatermark && this.watermarkMat) {
-            const wartermarkPass = this.watermarkMat.passes[0];
-            const watermarkPso = PipelineStateManager.getOrCreatePipelineState(device,
-                wartermarkPass, this.shader, framebuffer.renderPass, this.quadAssmebler);
-            cmdBuff.bindPipelineState(watermarkPso);
-            cmdBuff.bindDescriptorSet(SetIndex.MATERIAL, wartermarkPass.descriptorSet);
-            cmdBuff.bindInputAssembler(this.quadAssmebler);
-            cmdBuff.draw(this.quadAssmebler);
-        }
+                if (this.settings.displayWatermark && this.watermarkMat) {
+                    const wartermarkPass = this.watermarkMat.passes[0];
+                    const watermarkPso = PipelineStateManager.getOrCreatePipelineState(device,
+                        wartermarkPass, this.shader, framebuffer.renderPass, this.quadAssmebler);
+                    cmdBuff.bindPipelineState(watermarkPso);
+                    cmdBuff.bindDescriptorSet(SetIndex.MATERIAL, wartermarkPass.descriptorSet);
+                    cmdBuff.bindInputAssembler(this.quadAssmebler);
+                    cmdBuff.draw(this.quadAssmebler);
+                }
 
-        cmdBuff.endRenderPass();
-        cmdBuff.end();
-        device.flushCommands([cmdBuff]);
-        device.queue.submit([cmdBuff]);
-        device.present();
+                cmdBuff.endRenderPass();
+                cmdBuff.end();
+                device.flushCommands([cmdBuff]);
+                device.queue.submit([cmdBuff]);
+                device.present();
 
                 if (sys.isXR) {
                     xr.XrEntry.getInstance().renderLoopEnd(xrEye);
