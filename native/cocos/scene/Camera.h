@@ -341,11 +341,11 @@ public:
 
     void detachCamera();
 
-    inline const CameraType &getCameraType() const { return _cameraType; }
-    inline void setCameraType(const CameraType &type) { _cameraType = type; }
+    inline CameraType getCameraType() const { return _cameraType; }
+    inline void setCameraType(CameraType type) { _cameraType = type; }
 
-    inline const TrackingType &getTrackingType() const { return _trackingType; }
-    inline void setTrackingType(const TrackingType &type) { _trackingType = type; }
+    inline TrackingType getTrackingType() const { return _trackingType; }
+    inline void setTrackingType(TrackingType type) { _trackingType = type; }
 
     inline bool isCullingEnabled() const { return _isCullingEnabled; }
     inline void setCullingEnable(bool val) { _isCullingEnabled = val; }
