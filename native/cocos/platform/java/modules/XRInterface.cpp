@@ -191,6 +191,14 @@ static void dispatchHandleEventInternal(const xr::XRControllerEvent &xrControlle
             case xr::XREventType::CLICK: {
                 auto *xrClick = static_cast<xr::XRClick *>(xrControllerEvent.xrControllerInfos.at(i).get());
                 switch (xrClick->type) {
+                    case xr::XRClick::Type::MENU:
+#if !XR_OEM_SEED
+                        controllerInfo->buttonInfos.emplace_back(ControllerInfo::ButtonInfo(StickKeyCode::MENU, xrClick->isPress));
+#else
+                        CC_LOG_INFO("[XRInterface] exit when menu click in seed.");
+                        CC_CURRENT_APPLICATION_SAFE()->close();
+#endif
+                        break;
                     case xr::XRClick::Type::TRIGGER_LEFT:
                         controllerInfo->buttonInfos.emplace_back(ControllerInfo::ButtonInfo(StickKeyCode::L3, xrClick->isPress));
                         break;

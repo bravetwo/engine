@@ -35,6 +35,7 @@ public class InstantActivity extends CocosActivity {
 
     static {
         System.loadLibrary("sxrapi");
+        System.loadLibrary("seedcontroller");
     }
 
     @Override

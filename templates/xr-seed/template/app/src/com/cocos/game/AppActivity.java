@@ -35,6 +35,7 @@ public class AppActivity extends CocosActivity {
 
     static {
         System.loadLibrary("sxrapi");
+        System.loadLibrary("seedcontroller");
     }
 
     @Override
