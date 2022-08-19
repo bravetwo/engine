@@ -327,7 +327,7 @@ export class SplashScreen {
                 device.present();
 
                 if (sys.isXR) {
-                    xr.entry.getInstance().renderLoopEnd(xrEye);
+                    xr.entry.renderLoopEnd(xrEye);
                 }
             }
         }
