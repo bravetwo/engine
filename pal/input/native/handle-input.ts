@@ -161,7 +161,10 @@ export class HandleInputDevice {
         };
     }
 
-    public on (eventType: InputEventType, callback: HandleCallback, target?: any) {
+    /**
+     * @engineInternal
+     */
+    public _on (eventType: InputEventType, callback: HandleCallback, target?: any) {
         this._eventTarget.on(eventType, callback, target);
     }
 
