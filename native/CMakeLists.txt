@@ -1784,7 +1784,6 @@ cocos_source_files(
     cocos/core/Any.h
     cocos/core/ArrayBuffer.h
 
-    cocos/core/CoreModuleHeader.h
     cocos/core/DataView.h
     cocos/core/DataView.cpp
     # cocos/core/Director.cpp
@@ -1951,12 +1950,6 @@ cocos_source_files(
     cocos/core/event/EventTypesToJS.cpp
     # cocos/core/event/Event.cpp
     # cocos/core/event/Event.h
-    cocos/core/event/EventModuleHeader.h
-    cocos/core/event/EventTarget.cpp
-    cocos/core/event/EventTarget.h
-    cocos/core/event/EventTargetFactory.cpp
-    cocos/core/event/EventTargetFactory.h
-
     # cocos/core/scene-graph/Find.cpp
     # cocos/core/scene-graph/Find.h
     cocos/core/scene-graph/Layers.h
