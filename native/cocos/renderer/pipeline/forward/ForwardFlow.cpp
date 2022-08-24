@@ -49,6 +49,8 @@ bool ForwardFlow::initialize(const RenderFlowInfo &info) {
     RenderFlow::initialize(info);
 
     if (_stages.empty()) {
+        _isResourceOwner = true;
+
         #if USE_AR_MODULE
             auto *arStage = ccnew ARStage;
             arStage->initialize(ARStage::getInitializeInfo());
