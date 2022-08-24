@@ -40,13 +40,11 @@ public:
     virtual void config(int featureMask) = 0;
     virtual uint32_t getSupportMask() = 0;
     virtual void start() = 0;
-    virtual void start(void *context) = 0;
     virtual void start(void *env, void *context) = 0;
     virtual void resume() = 0;
-    virtual void resume(void *context) = 0;
+    virtual void resume(void *env, void *context) = 0;
     virtual void pause() = 0;
     virtual void update() = 0;
-    // -1: not started, 0: arkit, 1: arcore, 2: arengine
     virtual int getAPIState() = 0;
 
     virtual Pose getCameraPose() = 0;

@@ -30,7 +30,7 @@
 #include "platform/interfaces/modules/Device.h"
 #include "renderer/gfx-base/GFXDef-common.h"
 
-#define USE_AR_NDK
+//#define USE_AR_NDK
 
 #if CC_PLATFORM == CC_PLATFORM_ANDROID
 //#include "ar/android/ARAndroidAPIImpl.h"
