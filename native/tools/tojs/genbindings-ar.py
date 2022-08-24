@@ -13,23 +13,6 @@ else:
     import ConfigParser as configparser
 
 defaultSections = [
-    'cocos',
-    'video',
-    'webview',
-    'audio' ,
-    'extension',
-    'network',
-    'gfx',
-    'pipeline',
-    'render',
-    'spine',
-    'editor_support',
-    'dragonbones',
-    'physics',
-    'scene',
-    'geometry',
-    'assets',
-    '2d',
     'ar'
 ]
 

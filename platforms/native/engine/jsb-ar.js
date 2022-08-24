@@ -32,10 +32,6 @@ class ARModuleNative extends ARModule {
         this._native.onPause();
     }
 
-    beforeUpdate() {
-        this._native.beforeUpdate();
-    }
-
     update() {
         this._native.update();
     }
@@ -64,45 +60,6 @@ class ARModuleNative extends ARModule {
         return this._native.getMainLightColor();
     }
 
-    enablePlane (enable) {
-        this._native.enablePlane(enable);
-    }
-
-    setPlaneDetectionMode (mode) {
-        this._native.setPlaneDetectionMode(mode);
-    }
-
-    setPlaneMaxTrackingNumber (count) {
-        this._native.setPlaneMaxTrackingNumber(count);
-    }
-
-    updatePlanesInfo () {
-        return this._native.updatePlanesInfo();
-    }
-
-    getAddedPlanesInfo () {
-        return this._native.getAddedPlanesInfo();
-    }
-
-    getRemovedPlanesInfo () {
-        return this._native.getRemovedPlanesInfo();
-    }
-
-    getUpdatedPlanesInfo () {
-        return this._native.getUpdatedPlanesInfo();
-    }
-
-    getAddedPlanesCount () {
-        return this._native.getAddedPlanesCount();
-    }
-
-    getRemovedPlanesCount () {
-        return this._native.getRemovedPlanesCount();
-    }
-
-    getUpdatedPlanesCount () {
-        return this._native.getUpdatedPlanesCount();
-    }
 
     tryHitAttachAnchor (planeIndex) {
         return this._native.tryHitAttachAnchor(planeIndex);
@@ -123,6 +80,32 @@ class ARModuleNative extends ARModule {
     getHitId () {
         return this._native.getHitId();
     }
+
+
+    enablePlane (enable) {
+        this._native.enablePlane(enable);
+    }
+
+    setPlaneDetectionMode (mode) {
+        this._native.setPlaneDetectionMode(mode);
+    }
+
+    setPlaneMaxTrackingNumber (count) {
+        this._native.setPlaneMaxTrackingNumber(count);
+    }
+
+    getAddedPlanesInfo () {
+        return this._native.getAddedPlanesInfo();
+    }
+
+    getUpdatedPlanesInfo () {
+        return this._native.getUpdatedPlanesInfo();
+    }
+
+    getRemovedPlanesInfo () {
+        return this._native.getRemovedPlanesInfo();
+    }
+    
 
     enableSceneMesh (enable) {
         this._native.enableSceneMesh(enable);
@@ -149,6 +132,7 @@ class ARModuleNative extends ARModule {
         this._native.endRequireSceneMesh();
     }
 
+
     enableImageTracking(enable) {
         this._native.enableImageTracking(enable);
     }
@@ -156,7 +140,7 @@ class ARModuleNative extends ARModule {
         this._native.addImageToLib(imageName);
     }
     setMaxTrackingNumber(number) {
-        this._native.setMaxTrackingNumber(number);
+        this._native.setImageMaxTrackingNumber(number);
     }
     getAddedImagesInfo() {
         return this._native.getAddedImagesInfo();
@@ -167,6 +151,7 @@ class ARModuleNative extends ARModule {
     getRemovedImagesInfo() {
         return this._native.getRemovedImagesInfo();
     }
+
 
     enableObjectTracking(enable) {
         this._native.enableObjectTracking(enable);
@@ -183,6 +168,7 @@ class ARModuleNative extends ARModule {
     getRemovedObjectsInfo() {
         return this._native.getRemovedObjectsInfo();
     }
+
 
     enableFaceTracking(enable) {
         this._native.enableFaceTracking(enable);

@@ -23,9 +23,12 @@
  THE SOFTWARE.
 ****************************************************************************/
 
+#include <stdint.h>
 #include <memory>
 
 #include "ar/ARModule.h"
+#include "platform/interfaces/modules/Device.h"
+#include "renderer/gfx-base/GFXDef-common.h"
 
 #define USE_AR_NDK
 
@@ -119,22 +122,26 @@ void ARModule::setCameraTextureName(int id) {
     _impl->setCameraTextureName(id);
 }
 
-// jsb manual
-float* ARModule::getCameraPose() const {
+
+Pose ARModule::getCameraPose() const {
     return _impl->getCameraPose();
 }
 
-float* ARModule::getCameraViewMatrix() const {
+Matrix ARModule::getCameraViewMatrix() const {
     return _impl->getCameraViewMatrix();
 }
 
-float* ARModule::getCameraProjectionMatrix() const {
+Matrix ARModule::getCameraProjectionMatrix() const {
     return _impl->getCameraProjectionMatrix();
 }
 
-// jsb skip
-float* ARModule::getCameraTexCoords() const {
+
+TexCoords ARModule::getCameraTexCoords() const {
     return _impl->getCameraTexCoords();
+}
+
+void ARModule::setDisplayGeometry(uint32_t rotation, uint32_t width, uint32_t height) const {
+    _impl->setDisplayGeometry(rotation, width, height);
 }
 
 void* ARModule::getCameraTextureRef() const {
@@ -143,8 +150,6 @@ void* ARModule::getCameraTextureRef() const {
 uint8_t* ARModule::getCameraDepthBuffer() const {
     return _impl->getCameraDepthBuffer();
 }
-
-
 
 int ARModule::getInfoLength() const {
     return _impl->getInfoLength();
@@ -182,18 +187,6 @@ void ARModule::setPlaneMaxTrackingNumber(int count) const {
     return _impl->setPlaneMaxTrackingNumber(count);
 }
 
-int ARModule::getAddedPlanesCount() const {
-    //return _impl->getAddedPlanesCount();
-    return _impl->getInfoLength() / 12;
-}
-int ARModule::getRemovedPlanesCount() const {
-    //return _impl->getRemovedPlanesCount();
-    return _impl->getInfoLength();
-}
-int ARModule::getUpdatedPlanesCount() const {
-    //return _impl->getUpdatedPlanesCount();
-    return _impl->getInfoLength() / 12;
-}
 float* ARModule::getAddedPlanesInfo() const {
     return _impl->getAddedPlanesInfo();
 }
@@ -240,8 +233,8 @@ void ARModule::enableImageTracking(bool enable) const {
 void ARModule::addImageToLib(const std::string& imageName) const {
     _impl->addImageToLib(imageName);
 }
-void ARModule::setMaxTrackingNumber(int number) const {
-    _impl->setMaxTrackingNumber(number);
+void ARModule::setImageMaxTrackingNumber(int number) const {
+    _impl->setImageMaxTrackingNumber(number);
 }
 float* ARModule::getAddedImagesInfo() const {
     return _impl->getAddedImagesInfo();

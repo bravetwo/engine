@@ -27,18 +27,10 @@
 
 #include <memory>
 #include "base/Macros.h"
-
-namespace se {
-
-class Object;
-class HandleObject;
-
-}
+#include "IARAPI.h"
 
 namespace cc {
 namespace ar {
-
-class IARAPI;
 
 class CC_DLL ARModule final {
 public:
@@ -52,39 +44,34 @@ public:
     void start();
     void onResume();
     void onPause();
-    //void beforeUpdate();
     void update();
-    bool checkStart();
     int getAPIState();
 
-    float* getCameraPose() const;
-    float* getCameraViewMatrix() const;
-    float* getCameraProjectionMatrix() const;
-    float* getCameraTexCoords() const;
+    Pose getCameraPose() const;
+    Matrix getCameraViewMatrix() const;
+    Matrix getCameraProjectionMatrix() const;
+    TexCoords getCameraTexCoords() const;
+    void setDisplayGeometry(uint32_t rotation, uint32_t width, uint32_t height) const;
     void setCameraTextureName(int id);
     void* getCameraTextureRef() const;
     uint8_t* getCameraDepthBuffer() const;
 
-    int getInfoLength() const;
-    
     int tryHitAttachAnchor(int trackableId) const;
     float* getAnchorPose(int anchorId) const;
     bool tryHitTest(float xPx, float yPx) const;
     float* getHitResult() const;
     int getHitId() const;
-    
+
+    // for jsb array
+    int getInfoLength() const;
+
     // plane detection
     void enablePlane(bool enable) const;
     void setPlaneDetectionMode(int mode) const;
     void setPlaneMaxTrackingNumber(int count) const;
-    
-    int getAddedPlanesCount() const;
-    int getRemovedPlanesCount() const;
-    int getUpdatedPlanesCount() const;
-    //void updatePlanesInfo() const;
     float* getAddedPlanesInfo() const;
-    float* getRemovedPlanesInfo() const;
     float* getUpdatedPlanesInfo() const;
+    float* getRemovedPlanesInfo() const;
 
     // scene mesh reconstruction
     void enableSceneMesh(bool enable) const;
@@ -98,15 +85,15 @@ public:
 
     // image recognition & tracking
     void enableImageTracking(bool enable) const;
-    void addImageToLib(const std::string& imageName) const;
-    void setMaxTrackingNumber(int number) const;
+    void addImageToLib(const std::string& name) const;
+    void setImageMaxTrackingNumber(int number) const;
     float* getAddedImagesInfo() const;
     float* getUpdatedImagesInfo() const;
     float* getRemovedImagesInfo() const;
 
     // object recognition & tracking
     void enableObjectTracking(bool enable) const;
-    void addObjectToLib(const std::string& imageName) const;
+    void addObjectToLib(const std::string& name) const;
     float* getAddedObjectsInfo() const;
     float* getUpdatedObjectsInfo() const;
     float* getRemovedObjectsInfo() const;

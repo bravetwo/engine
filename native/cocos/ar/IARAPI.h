@@ -36,7 +36,7 @@ using TexCoords = std::array<float, 8>;
 
 class IARAPI {
 public:
-    virtual ~IARAPI()     = default;
+    virtual ~IARAPI() = default;
     virtual void config(int featureMask) = 0;
     virtual uint32_t getSupportMask() = 0;
     virtual void start() = 0;
@@ -45,33 +45,18 @@ public:
     virtual void resume() = 0;
     virtual void resume(void *context) = 0;
     virtual void pause() = 0;
-    //virtual void beforeUpdate() {}
     virtual void update() = 0;
+    // -1: not started, 0: arkit, 1: arcore, 2: arengine
     virtual int getAPIState() = 0;
 
-    virtual float* getCameraPose() = 0;
-    virtual float* getCameraViewMatrix() = 0;
-    virtual float* getCameraProjectionMatrix() = 0;
-    virtual float* getCameraTexCoords() = 0;
+    virtual Pose getCameraPose() = 0;
+    virtual Matrix getCameraViewMatrix() = 0;
+    virtual Matrix getCameraProjectionMatrix() = 0;
+    virtual TexCoords getCameraTexCoords() = 0;
+    virtual void setDisplayGeometry(uint32_t rotation, uint32_t width, uint32_t height) = 0;
     virtual void setCameraTextureName(int id) = 0;
     virtual void* getCameraTextureRef() = 0;
-
     virtual uint8_t* getCameraDepthBuffer() = 0;
-
-    //virtual void setPlaneFeatureEnable(bool isOn) = 0;
-    virtual int getAddedPlanesCount() = 0;
-    virtual int getRemovedPlanesCount() = 0;
-    virtual int getUpdatedPlanesCount() = 0;
-
-    virtual void enablePlane(bool enable) {};
-    virtual void setPlaneDetectionMode(int mode) {};
-    virtual void setPlaneMaxTrackingNumber(int count) {};
-
-    //virtual void updatePlanesInfo() = 0;
-    virtual float* getAddedPlanesInfo() = 0;
-    virtual float* getRemovedPlanesInfo() = 0;
-    virtual float* getUpdatedPlanesInfo() = 0;
-    virtual int getInfoLength() = 0;
 
     virtual int tryHitAttachAnchor(int planeIndex) = 0;
     virtual float* getAnchorPose(int index) = 0;
@@ -81,7 +66,19 @@ public:
     virtual int getRaycastTrackableId() = 0;
     virtual int getRaycastTrackableType() = 0;
 
-    virtual void enableSceneMesh(bool enable) {};
+    // for jsb array
+    virtual int getInfoLength() = 0;
+
+    // plane detection
+    virtual void enablePlane(bool enable) = 0;
+    virtual void setPlaneDetectionMode(int mode) = 0;
+    virtual void setPlaneMaxTrackingNumber(int count) = 0;
+    virtual float* getAddedPlanesInfo() = 0;
+    virtual float* getUpdatedPlanesInfo() = 0;
+    virtual float* getRemovedPlanesInfo() = 0;
+
+    // scene mesh reconstruction
+    virtual void enableSceneMesh(bool enable) = 0;
     virtual float* getAddedSceneMesh() = 0;
     virtual float* getUpdatedSceneMesh() = 0;
     virtual int* getRemovedSceneMesh() = 0;
@@ -90,19 +87,22 @@ public:
     virtual int* getSceneMeshTriangleIndices(int meshRef) = 0;
     virtual void endRequireSceneMesh() = 0;
 
+    // image recognition & tracking
     virtual void enableImageTracking(bool enable) = 0;
-    virtual void addImageToLib(const std::string& imageName) = 0;
-    virtual void setMaxTrackingNumber(int number) = 0;
+    virtual void addImageToLib(const std::string& name) = 0;
+    virtual void setImageMaxTrackingNumber(int number) = 0;
     virtual float* getAddedImagesInfo() = 0;
     virtual float* getUpdatedImagesInfo() = 0;
     virtual float* getRemovedImagesInfo() = 0;
 
+    // object recognition & tracking
     virtual void enableObjectTracking(bool enable) = 0;
-    virtual void addObjectToLib(const std::string& imageName) = 0;
+    virtual void addObjectToLib(const std::string& name) = 0;
     virtual float* getAddedObjectsInfo() = 0;
     virtual float* getUpdatedObjectsInfo() = 0;
     virtual float* getRemovedObjectsInfo() = 0;
 
+    // face detection & tracking
     virtual void enableFaceTracking(bool enable) = 0;
     virtual float* getAddedFacesInfo() = 0;
     virtual float* getUpdatedFacesInfo() = 0;

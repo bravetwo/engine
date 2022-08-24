@@ -23,6 +23,7 @@
  ****************************************************************************/
 
 #include "ARBackground.h"
+#include <stdint.h>
 #include "../forward/ForwardPipeline.h"
 #include "GLES2/gl2.h"
 #include "gfx-base/GFXCommandBuffer.h"
@@ -35,9 +36,17 @@
 #include "ar/ARModule.h"
 #include "gfx-base/GFXDevice.h"
 #include "scene/Camera.h"
+#include "platform/interfaces/modules/Device.h"
 
 namespace cc {
 namespace pipeline {
+
+const ccstd::unordered_map<IScreen::Orientation, gfx::SurfaceTransform> ORIENTATION_MAP{
+    {IScreen::Orientation::PORTRAIT, gfx::SurfaceTransform::IDENTITY},
+    {IScreen::Orientation::LANDSCAPE_RIGHT, gfx::SurfaceTransform::ROTATE_90},
+    {IScreen::Orientation::PORTRAIT_UPSIDE_DOWN, gfx::SurfaceTransform::ROTATE_180},
+    {IScreen::Orientation::LANDSCAPE_LEFT, gfx::SurfaceTransform::ROTATE_270},
+};
 
 ARBackground::~ARBackground() {
     CC_SAFE_DESTROY(_shader)
@@ -305,6 +314,9 @@ void ARBackground::render(cc::scene::Camera *camera, gfx::RenderPass *renderPass
     if (apiState < 0) return;
 
 #if CC_PLATFORM == CC_PLATFORM_ANDROID
+    auto rotation = ORIENTATION_MAP.at(Device::getDeviceOrientation());
+    armodule->setDisplayGeometry(static_cast<uint32_t>(rotation), camera->getWidth(), camera->getHeight());
+
     if (!_setTexFlag) {
         gfx::SamplerInfo samplerInfo;
         auto *           sampler = _device->getSampler(samplerInfo);
@@ -370,7 +382,7 @@ void ARBackground::render(cc::scene::Camera *camera, gfx::RenderPass *renderPass
     _descriptorSet->update();
 #endif
 
-    auto *const data = armodule->getCameraTexCoords();
+    const auto data = armodule->getCameraTexCoords();
 #if CC_PLATFORM == CC_PLATFORM_ANDROID
     if(apiState > 1) {
         float vertices[] = {-1, -1, data[2], data[3],

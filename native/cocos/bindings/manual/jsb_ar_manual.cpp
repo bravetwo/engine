@@ -32,325 +32,6 @@
 #include "ar/ARModule.h"
 #include "bindings/auto/jsb_ar_auto.h"
 
-static bool js_ar_ARModule_config(se::State& s)
-{
-    cc::ar::ARModule* cobj = (cc::ar::ARModule*)s.nativeThisObject();
-    SE_PRECONDITION2(cobj, false, "js_ar_ARModule_config : Invalid Native Object");
-
-    const auto& args = s.args();
-    size_t argc = args.size();
-    CC_UNUSED bool ok = true;
-    if (argc == 1) {
-        HolderType<int, false> arg0 = {};
-        ok &= sevalue_to_native(args[0], &arg0, s.thisObject());
-        SE_PRECONDITION2(ok, false, "js_ar_ARModule_config : Error processing arguments");
-
-        cobj->config(arg0.value());
-        return true;
-    }
-
-    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 1);
-    return false;
-}
-SE_BIND_FUNC(js_ar_ARModule_config)
-
-static bool js_ar_ARModule_getSupportMask(se::State& s)
-{
-    cc::ar::ARModule* cobj = (cc::ar::ARModule*)s.nativeThisObject();
-    SE_PRECONDITION2(cobj, false, "js_ar_ARModule_getSupportMask : Invalid Native Object");
-
-    const auto& args = s.args();
-    size_t argc = args.size();
-    if (argc == 0) {
-        int result = cobj->getSupportMask();
-        s.rval().setInt32(result);
-        return true;
-    }
-
-    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 0);
-    return false;
-}
-SE_BIND_FUNC(js_ar_ARModule_getSupportMask)
-
-static bool js_ar_ARModule_getCameraPose(se::State& s) // NOLINT(readability-identifier-naming)
-{
-    auto* cobj = SE_THIS_OBJECT<cc::ar::ARModule>(s);
-    SE_PRECONDITION2(cobj, false, "js_ar_ARModule_getCameraPose : Invalid Native Object");
-
-    const auto& args = s.args();
-    size_t argc = args.size();
-    if (argc == 0) {
-        float* buffer = cobj->getCameraPose();
-        se::Object* pose = se::Object::createTypedArray(se::Object::TypedArrayType::FLOAT32, buffer, 28);
-        s.rval().setObject(pose);
-        return true;
-    }
-
-    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 0);
-    return false;
-}
-SE_BIND_FUNC(js_ar_ARModule_getCameraPose)
-
-static bool js_ar_ARModule_getCameraViewMatrix(se::State& s) // NOLINT(readability-identifier-naming)
-{
-    auto* cobj = SE_THIS_OBJECT<cc::ar::ARModule>(s);
-    SE_PRECONDITION2(cobj, false, "js_ar_ARModule_getCameraViewMatrix : Invalid Native Object");
-
-    const auto& args = s.args();
-    size_t argc = args.size();
-    if (argc == 0) {
-        float* buffer = cobj->getCameraViewMatrix();
-        se::Object* viewMatrix = se::Object::createTypedArray(se::Object::TypedArrayType::FLOAT32, buffer, 64);
-        s.rval().setObject(viewMatrix);
-        return true;
-    }
-
-    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 0);
-    return false;
-}
-SE_BIND_FUNC(js_ar_ARModule_getCameraViewMatrix)
-
-static bool js_ar_ARModule_getCameraProjectionMatrix(se::State& s) // NOLINT(readability-identifier-naming)
-{
-    auto* cobj = SE_THIS_OBJECT<cc::ar::ARModule>(s);
-    SE_PRECONDITION2(cobj, false, "js_ar_ARModule_getCameraProjectionMatrix : Invalid Native Object");
-
-    const auto& args = s.args();
-    size_t argc = args.size();
-    if (argc == 0) {
-        float* buffer = cobj->getCameraProjectionMatrix();
-        se::Object* projMatrix = se::Object::createTypedArray(se::Object::TypedArrayType::FLOAT32, buffer, 64);
-        s.rval().setObject(projMatrix);
-        return true;
-    }
-
-    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 0);
-    return false;
-}
-SE_BIND_FUNC(js_ar_ARModule_getCameraProjectionMatrix)
-
-static bool js_ar_ARModule_enablePlane(se::State& s)
-{
-    cc::ar::ARModule* cobj = (cc::ar::ARModule*)s.nativeThisObject();
-    SE_PRECONDITION2(cobj, false, "js_ar_ARModule_enablePlane : Invalid Native Object");
-
-    const auto& args = s.args();
-    size_t argc = args.size();
-    CC_UNUSED bool ok = true;
-    if (argc == 1) {
-        HolderType<bool, false> arg0 = {};
-        ok &= sevalue_to_native(args[0], &arg0, s.thisObject());
-        SE_PRECONDITION2(ok, false, "js_ar_ARModule_enablePlane : Error processing arguments");
-
-        cobj->enablePlane(arg0.value());
-        return true;
-    }
-
-    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 1);
-    return false;
-}
-SE_BIND_FUNC(js_ar_ARModule_enablePlane)
-
-static bool js_ar_ARModule_setPlaneDetectionMode(se::State& s)
-{
-    cc::ar::ARModule* cobj = (cc::ar::ARModule*)s.nativeThisObject();
-    SE_PRECONDITION2(cobj, false, "js_ar_ARModule_setPlaneDetectionMode : Invalid Native Object");
-
-    const auto& args = s.args();
-    size_t argc = args.size();
-    CC_UNUSED bool ok = true;
-    if (argc == 1) {
-        HolderType<int, false> arg0 = {};
-        ok &= sevalue_to_native(args[0], &arg0, s.thisObject());
-        SE_PRECONDITION2(ok, false, "js_ar_ARModule_setPlaneDetectionMode : Error processing arguments");
-
-        cobj->setPlaneDetectionMode(arg0.value());
-        return true;
-    }
-
-    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 1);
-    return false;
-}
-SE_BIND_FUNC(js_ar_ARModule_setPlaneDetectionMode)
-
-static bool js_ar_ARModule_setPlaneMaxTrackingNumber(se::State& s)
-{
-    cc::ar::ARModule* cobj = (cc::ar::ARModule*)s.nativeThisObject();
-    SE_PRECONDITION2(cobj, false, "js_ar_ARModule_setPlaneMaxTrackingNumber : Invalid Native Object");
-
-    const auto& args = s.args();
-    size_t argc = args.size();
-    CC_UNUSED bool ok = true;
-    if (argc == 1) {
-        HolderType<int, false> arg0 = {};
-        ok &= sevalue_to_native(args[0], &arg0, s.thisObject());
-        SE_PRECONDITION2(ok, false, "js_ar_ARModule_setPlaneMaxTrackingNumber : Error processing arguments");
-
-        cobj->setPlaneMaxTrackingNumber(arg0.value());
-        return true;
-    }
-
-    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 1);
-    return false;
-}
-SE_BIND_FUNC(js_ar_ARModule_setPlaneMaxTrackingNumber)
-/*
-static bool js_ar_ARModule_updatePlanesInfo(se::State& s)
-{
-    cc::ar::ARModule* cobj = (cc::ar::ARModule*)s.nativeThisObject();
-    SE_PRECONDITION2(cobj, false, "js_ar_ARModule_updatePlanesInfo : Invalid Native Object");
-
-    const auto& args = s.args();
-    size_t argc = args.size();
-    if (argc == 0) {
-        cobj->updatePlanesInfo();
-        return true;
-    }
-
-    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 0);
-    return false;
-}
-SE_BIND_FUNC(js_ar_ARModule_updatePlanesInfo)
-//*/
-static bool js_ar_ARModule_getAddedPlanesInfo(se::State& s)
-{
-    cc::ar::ARModule* cobj = (cc::ar::ARModule*)s.nativeThisObject();
-    SE_PRECONDITION2(cobj, false, "js_ar_ARModule_getAddedPlanesInfo : Invalid Native Object");
-
-    const auto& args = s.args();
-    size_t argc = args.size();
-    if (argc == 0) {
-        float* buffer = cobj->getAddedPlanesInfo();
-        int len = cobj->getInfoLength();
-        //se::Object* planesInfo = se::Object::createTypedArray(se::Object::TypedArrayType::FLOAT32, buffer, 4 * 5 * 12);
-        se::Object* planesInfo = se::Object::createTypedArray(se::Object::TypedArrayType::FLOAT32, buffer, 4 * len);
-        s.rval().setObject(planesInfo);
-        return true;
-    }
-
-    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 0);
-    return false;
-}
-SE_BIND_FUNC(js_ar_ARModule_getAddedPlanesInfo)
-
-static bool js_ar_ARModule_getRemovedPlanesInfo(se::State& s)
-{
-    cc::ar::ARModule* cobj = (cc::ar::ARModule*)s.nativeThisObject();
-    SE_PRECONDITION2(cobj, false, "js_ar_ARModule_getRemovedPlanesInfo : Invalid Native Object");
-
-    const auto& args = s.args();
-    size_t argc = args.size();
-    if (argc == 0) {
-        float* buffer = cobj->getRemovedPlanesInfo();
-        int len = cobj->getInfoLength();
-        se::Object* planesInfo = se::Object::createTypedArray(se::Object::TypedArrayType::FLOAT32, buffer, 4 * len);
-        s.rval().setObject(planesInfo);
-        return true;
-    }
-
-    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 0);
-    return false;
-}
-SE_BIND_FUNC(js_ar_ARModule_getRemovedPlanesInfo)
-
-static bool js_ar_ARModule_getUpdatedPlanesInfo(se::State& s)
-{
-    cc::ar::ARModule* cobj = (cc::ar::ARModule*)s.nativeThisObject();
-    SE_PRECONDITION2(cobj, false, "js_ar_ARModule_getUpdatedPlanesInfo : Invalid Native Object");
-
-    const auto& args = s.args();
-    size_t argc = args.size();
-    if (argc == 0) {
-        float* buffer = cobj->getUpdatedPlanesInfo();
-        int len = cobj->getInfoLength();
-        //int count = cobj->getAddedPlanesCount();
-        se::Object* planesInfo = se::Object::createTypedArray(se::Object::TypedArrayType::FLOAT32, buffer, 4 * len);
-        s.rval().setObject(planesInfo);
-        return true;
-    }
-
-    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 0);
-    return false;
-}
-SE_BIND_FUNC(js_ar_ARModule_getUpdatedPlanesInfo)
-
-static bool js_ar_ARModule_getAddedPlanesCount(se::State& s)
-{
-    cc::ar::ARModule* cobj = (cc::ar::ARModule*)s.nativeThisObject();
-    SE_PRECONDITION2(cobj, false, "js_ar_ARModule_getAddedPlanesCount : Invalid Native Object");
-
-    const auto& args = s.args();
-    size_t argc = args.size();
-    if (argc == 0) {
-        int result = cobj->getAddedPlanesCount();
-        s.rval().setInt32(result);
-        return true;
-    }
-
-    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 0);
-    return false;
-}
-SE_BIND_FUNC(js_ar_ARModule_getAddedPlanesCount)
-
-static bool js_ar_ARModule_getRemovedPlanesCount(se::State& s)
-{
-    cc::ar::ARModule* cobj = (cc::ar::ARModule*)s.nativeThisObject();
-    SE_PRECONDITION2(cobj, false, "js_ar_ARModule_getRemovedPlanesCount : Invalid Native Object");
-
-    const auto& args = s.args();
-    size_t argc = args.size();
-    if (argc == 0) {
-        int result = cobj->getRemovedPlanesCount();
-        s.rval().setInt32(result);
-        return true;
-    }
-
-    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 0);
-    return false;
-}
-SE_BIND_FUNC(js_ar_ARModule_getRemovedPlanesCount)
-
-static bool js_ar_ARModule_getUpdatedPlanesCount(se::State& s)
-{
-    cc::ar::ARModule* cobj = (cc::ar::ARModule*)s.nativeThisObject();
-    SE_PRECONDITION2(cobj, false, "js_ar_ARModule_getUpdatedPlanesCount : Invalid Native Object");
-
-    const auto& args = s.args();
-    size_t argc = args.size();
-    if (argc == 0) {
-        int result = cobj->getUpdatedPlanesCount();
-        s.rval().setInt32(result);
-        return true;
-    }
-
-    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 0);
-    return false;
-}
-SE_BIND_FUNC(js_ar_ARModule_getUpdatedPlanesCount)
-
-static bool js_ar_ARModule_tryHitAttachAnchor(se::State& s)
-{
-    cc::ar::ARModule* cobj = (cc::ar::ARModule*)s.nativeThisObject();
-    SE_PRECONDITION2(cobj, false, "js_ar_ARModule_tryHitAttachAnchor : Invalid Native Object");
-
-    const auto& args = s.args();
-    size_t argc = args.size();
-    CC_UNUSED bool ok = true;
-    if (argc == 1) {
-        HolderType<int, false> arg0 = {};
-        ok &= sevalue_to_native(args[0], &arg0, s.thisObject());
-        SE_PRECONDITION2(ok, false, "js_ar_ARModule_tryHitAttachAnchor : Error processing arguments");
-
-        int result = cobj->tryHitAttachAnchor(arg0.value());
-        s.rval().setInt32(result);
-        return true;
-    }
-
-    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 1);
-    return false;
-}
-SE_BIND_FUNC(js_ar_ARModule_tryHitAttachAnchor)
-
 static bool js_ar_ARModule_getAnchorPose(se::State& s)
 {
     cc::ar::ARModule* cobj = (cc::ar::ARModule*)s.nativeThisObject();
@@ -375,29 +56,6 @@ static bool js_ar_ARModule_getAnchorPose(se::State& s)
 }
 SE_BIND_FUNC(js_ar_ARModule_getAnchorPose)
 
-static bool js_ar_ARModule_tryHitTest(se::State& s) { // NOLINT(readability-identifier-naming)
-    auto* cobj = SE_THIS_OBJECT<cc::ar::ARModule>(s);
-    SE_PRECONDITION2(cobj, false, "js_ar_ARModule_tryHitTest : Invalid Native Object");
-    const auto& args = s.args();
-    size_t argc = args.size();
-    CC_UNUSED bool ok = true;
-    if (argc == 2) {
-        HolderType<float, false> arg0 = {};
-        ok &= sevalue_to_native(args[0], &arg0, s.thisObject());
-        SE_PRECONDITION2(ok, false, "js_ar_ARModule_tryHitTest : Error processing arguments");
-        HolderType<float, false> arg1 = {};
-        ok &= sevalue_to_native(args[1], &arg1, s.thisObject());
-        SE_PRECONDITION2(ok, false, "js_ar_ARModule_tryHitTest : Error processing arguments");
-
-        bool result = cobj->tryHitTest(arg0.value(), arg1.value());
-        s.rval().setBoolean(result);
-        return true;
-    }
-    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 2);
-    return false;
-}
-SE_BIND_FUNC(js_ar_ARModule_tryHitTest) // NOLINT(readability-identifier-naming)
-
 static bool js_ar_ARModule_getHitResult(se::State& s)
 {
     cc::ar::ARModule* cobj = (cc::ar::ARModule*)s.nativeThisObject();
@@ -417,45 +75,87 @@ static bool js_ar_ARModule_getHitResult(se::State& s)
 }
 SE_BIND_FUNC(js_ar_ARModule_getHitResult)
 
-static bool js_ar_ARModule_getHitId(se::State& s)
+static bool js_ar_ARModule_getAddedPlanesInfo(se::State& s)
 {
     cc::ar::ARModule* cobj = (cc::ar::ARModule*)s.nativeThisObject();
-    SE_PRECONDITION2(cobj, false, "js_ar_ARModule_getHitId : Invalid Native Object");
-
+    //SE_PRECONDITION2(cobj, false, "js_ar_ARModule_getAddedPlanesInfo : Invalid Native Object");
+    if (nullptr == cobj) return true;
     const auto& args = s.args();
     size_t argc = args.size();
+    CC_UNUSED bool ok = true;
     if (argc == 0) {
-        int result = cobj->getHitId();
-        s.rval().setInt32(result);
+        float* result = cobj->getAddedPlanesInfo();
+
+        int len = cobj->getInfoLength();
+        //se::Object* planesInfo = se::Object::createTypedArray(se::Object::TypedArrayType::FLOAT32, buffer, 4 * 5 * 12);
+        se::Object* planesInfo = se::Object::createTypedArray(se::Object::TypedArrayType::FLOAT32, result, 4 * len);
+        s.rval().setObject(planesInfo);
+
+//        ok &= nativevalue_to_se(result, s.rval(), nullptr);
+//        SE_PRECONDITION2(ok, false, "Error processing arguments");
+//        SE_HOLD_RETURN_VALUE(result, s.thisObject(), s.rval());
         return true;
     }
 
     SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 0);
     return false;
 }
-SE_BIND_FUNC(js_ar_ARModule_getHitId)
+SE_BIND_FUNC(js_ar_ARModule_getAddedPlanesInfo)
 
-static bool js_ar_ARModule_enableSceneMesh(se::State& s)
+static bool js_ar_ARModule_getRemovedPlanesInfo(se::State& s)
 {
-    cc::ar::ARModule* cobj = (cc::ar::ARModule*)s.nativeThisObject();
-    SE_PRECONDITION2(cobj, false, "js_ar_ARModule_enableSceneMesh : Invalid Native Object");
-
+    //cc::ar::ARModule* cobj = (cc::ar::ARModule*)s.nativeThisObject();
+    // SE_PRECONDITION2(cobj, false, "js_ar_ARModule_getRemovedPlanesInfo : Invalid Native Object");
+    auto* cobj = SE_THIS_OBJECT<cc::ar::ARModule>(s);
+    if (nullptr == cobj) return true;
     const auto& args = s.args();
     size_t argc = args.size();
     CC_UNUSED bool ok = true;
-    if (argc == 1) {
-        HolderType<bool, false> arg0 = {};
-        ok &= sevalue_to_native(args[0], &arg0, s.thisObject());
-        SE_PRECONDITION2(ok, false, "js_ar_ARModule_enableSceneMesh : Error processing arguments");
+    if (argc == 0) {
+        float* result = cobj->getRemovedPlanesInfo();
 
-        cobj->enableSceneMesh(arg0.value());
+        int len = cobj->getInfoLength();
+        se::Object* planesInfo = se::Object::createTypedArray(se::Object::TypedArrayType::FLOAT32, result, 4 * len);
+        s.rval().setObject(planesInfo);
+
+//        ok &= nativevalue_to_se(result, s.rval(), nullptr);
+//        SE_PRECONDITION2(ok, false, "Error processing arguments");
+//        SE_HOLD_RETURN_VALUE(result, s.thisObject(), s.rval());
         return true;
     }
 
-    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 1);
+    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 0);
     return false;
 }
-SE_BIND_FUNC(js_ar_ARModule_enableSceneMesh)
+SE_BIND_FUNC(js_ar_ARModule_getRemovedPlanesInfo)
+
+static bool js_ar_ARModule_getUpdatedPlanesInfo(se::State& s)
+{
+    cc::ar::ARModule* cobj = (cc::ar::ARModule*)s.nativeThisObject();
+    //SE_PRECONDITION2(cobj, false, "js_ar_ARModule_getUpdatedPlanesInfo : Invalid Native Object");
+    if (nullptr == cobj) return true;
+    const auto& args = s.args();
+    size_t argc = args.size();
+    CC_UNUSED bool ok = true;
+    if (argc == 0) {
+        float* result = cobj->getUpdatedPlanesInfo();
+
+        int len = cobj->getInfoLength();
+        //int count = cobj->getAddedPlanesCount();
+        se::Object* planesInfo = se::Object::createTypedArray(se::Object::TypedArrayType::FLOAT32, result, 4 * len);
+        s.rval().setObject(planesInfo);
+
+//        ok &= nativevalue_to_se(result, s.rval(), nullptr);
+//        SE_PRECONDITION2(ok, false, "Error processing arguments");
+//        SE_HOLD_RETURN_VALUE(result, s.thisObject(), s.rval());
+        return true;
+    }
+
+    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 0);
+    return false;
+}
+SE_BIND_FUNC(js_ar_ARModule_getUpdatedPlanesInfo)
+
 
 static bool js_ar_ARModule_getAddedSceneMesh(se::State& s)
 {
@@ -537,23 +237,6 @@ static bool js_ar_ARModule_requireSceneMesh(se::State& s)
 }
 SE_BIND_FUNC(js_ar_ARModule_requireSceneMesh)
 
-static bool js_ar_ARModule_endRequireSceneMesh(se::State& s)
-{
-    cc::ar::ARModule* cobj = (cc::ar::ARModule*)s.nativeThisObject();
-    SE_PRECONDITION2(cobj, false, "js_ar_ARModule_endRequireSceneMesh : Invalid Native Object");
-
-    const auto& args = s.args();
-    size_t argc = args.size();
-    if (argc == 0) {
-        cobj->endRequireSceneMesh();
-        return true;
-    }
-
-    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 0);
-    return false;
-}
-SE_BIND_FUNC(js_ar_ARModule_endRequireSceneMesh)
-
 static bool js_ar_ARModule_getSceneMeshVertices(se::State& s)
 {
     cc::ar::ARModule* cobj = (cc::ar::ARModule*)s.nativeThisObject();
@@ -603,72 +286,6 @@ static bool js_ar_ARModule_getSceneMeshTriangleIndices(se::State& s)
     return false;
 }
 SE_BIND_FUNC(js_ar_ARModule_getSceneMeshTriangleIndices)
-
-static bool js_ar_ARModule_enableImageTracking(se::State& s)
-{
-    cc::ar::ARModule* cobj = (cc::ar::ARModule*)s.nativeThisObject();
-    SE_PRECONDITION2(cobj, false, "js_ar_ARModule_enableImageTracking : Invalid Native Object");
-
-    const auto& args = s.args();
-    size_t argc = args.size();
-    CC_UNUSED bool ok = true;
-    if (argc == 1) {
-        HolderType<bool, false> arg0 = {};
-        ok &= sevalue_to_native(args[0], &arg0, s.thisObject());
-        SE_PRECONDITION2(ok, false, "js_ar_ARModule_enableImageTracking : Error processing arguments");
-
-        cobj->enableImageTracking(arg0.value());
-        return true;
-    }
-
-    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 1);
-    return false;
-}
-SE_BIND_FUNC(js_ar_ARModule_enableImageTracking)
-
-static bool js_ar_ARModule_addImageToLib(se::State& s)
-{
-    cc::ar::ARModule* cobj = (cc::ar::ARModule*)s.nativeThisObject();
-    SE_PRECONDITION2(cobj, false, "js_ar_ARModule_addImageToLib : Invalid Native Object");
-
-    const auto& args = s.args();
-    size_t argc = args.size();
-    CC_UNUSED bool ok = true;
-    if (argc == 1) {
-        HolderType<std::string, true> arg0 = {};
-        ok &= sevalue_to_native(args[0], &arg0, s.thisObject());
-        SE_PRECONDITION2(ok, false, "js_ar_ARModule_addImageToLib : Error processing arguments");
-
-        cobj->addImageToLib(arg0.value());
-        return true;
-    }
-
-    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 1);
-    return false;
-}
-SE_BIND_FUNC(js_ar_ARModule_addImageToLib)
-
-static bool js_ar_ARModule_setMaxTrackingNumber(se::State& s)
-{
-    cc::ar::ARModule* cobj = (cc::ar::ARModule*)s.nativeThisObject();
-    SE_PRECONDITION2(cobj, false, "js_ar_ARModule_setMaxTrackingNumber : Invalid Native Object");
-
-    const auto& args = s.args();
-    size_t argc = args.size();
-    CC_UNUSED bool ok = true;
-    if (argc == 1) {
-        HolderType<int, false> arg0 = {};
-        ok &= sevalue_to_native(args[0], &arg0, s.thisObject());
-        SE_PRECONDITION2(ok, false, "js_ar_ARModule_setMaxTrackingNumber : Error processing arguments");
-
-        cobj->setMaxTrackingNumber(arg0.value());
-        return true;
-    }
-
-    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 1);
-    return false;
-}
-SE_BIND_FUNC(js_ar_ARModule_setMaxTrackingNumber)
 
 static bool js_ar_ARModule_getAddedImagesInfo(se::State& s)
 {
@@ -730,50 +347,6 @@ static bool js_ar_ARModule_getRemovedImagesInfo(se::State& s)
 }
 SE_BIND_FUNC(js_ar_ARModule_getRemovedImagesInfo)
 
-static bool js_ar_ARModule_enableObjectTracking(se::State& s)
-{
-    cc::ar::ARModule* cobj = (cc::ar::ARModule*)s.nativeThisObject();
-    SE_PRECONDITION2(cobj, false, "js_ar_ARModule_enableObjectTracking : Invalid Native Object");
-
-    const auto& args = s.args();
-    size_t argc = args.size();
-    CC_UNUSED bool ok = true;
-    if (argc == 1) {
-        HolderType<bool, false> arg0 = {};
-        ok &= sevalue_to_native(args[0], &arg0, s.thisObject());
-        SE_PRECONDITION2(ok, false, "js_ar_ARModule_enableObjectTracking : Error processing arguments");
-
-        cobj->enableObjectTracking(arg0.value());
-        return true;
-    }
-
-    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 1);
-    return false;
-}
-SE_BIND_FUNC(js_ar_ARModule_enableObjectTracking)
-
-static bool js_ar_ARModule_addObjectToLib(se::State& s)
-{
-    cc::ar::ARModule* cobj = (cc::ar::ARModule*)s.nativeThisObject();
-    SE_PRECONDITION2(cobj, false, "js_ar_ARModule_addObjectToLib : Invalid Native Object");
-
-    const auto& args = s.args();
-    size_t argc = args.size();
-    CC_UNUSED bool ok = true;
-    if (argc == 1) {
-        HolderType<std::string, true> arg0 = {};
-        ok &= sevalue_to_native(args[0], &arg0, s.thisObject());
-        SE_PRECONDITION2(ok, false, "js_ar_ARModule_addObjectToLib : Error processing arguments");
-
-        cobj->addObjectToLib(arg0.value());
-        return true;
-    }
-
-    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 1);
-    return false;
-}
-SE_BIND_FUNC(js_ar_ARModule_addObjectToLib)
-
 static bool js_ar_ARModule_getAddedObjectsInfo(se::State& s)
 {
     cc::ar::ARModule* cobj = (cc::ar::ARModule*)s.nativeThisObject();
@@ -833,28 +406,6 @@ static bool js_ar_ARModule_getRemovedObjectsInfo(se::State& s)
     return false;
 }
 SE_BIND_FUNC(js_ar_ARModule_getRemovedObjectsInfo)
-
-static bool js_ar_ARModule_enableFaceTracking(se::State& s)
-{
-    cc::ar::ARModule* cobj = (cc::ar::ARModule*)s.nativeThisObject();
-    SE_PRECONDITION2(cobj, false, "js_ar_ARModule_enableFaceTracking : Invalid Native Object");
-
-    const auto& args = s.args();
-    size_t argc = args.size();
-    CC_UNUSED bool ok = true;
-    if (argc == 1) {
-        HolderType<bool, false> arg0 = {};
-        ok &= sevalue_to_native(args[0], &arg0, s.thisObject());
-        SE_PRECONDITION2(ok, false, "js_ar_ARModule_enableFaceTracking : Error processing arguments");
-
-        cobj->enableFaceTracking(arg0.value());
-        return true;
-    }
-
-    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 1);
-    return false;
-}
-SE_BIND_FUNC(js_ar_ARModule_enableFaceTracking)
 
 static bool js_ar_ARModule_getAddedFacesInfo(se::State& s)
 {
@@ -942,52 +493,28 @@ static bool js_ar_ARModule_getFaceBlendShapesOf(se::State& s)
 SE_BIND_FUNC(js_ar_ARModule_getFaceBlendShapesOf)
 
 bool register_all_ar_manual(se::Object *obj) {
-    __jsb_cc_ar_ARModule_proto->defineFunction("config", _SE(js_ar_ARModule_config));
-    __jsb_cc_ar_ARModule_proto->defineFunction("getSupportMask", _SE(js_ar_ARModule_getSupportMask));
-    __jsb_cc_ar_ARModule_proto->defineFunction("getCameraPose", _SE(js_ar_ARModule_getCameraPose));
-    __jsb_cc_ar_ARModule_proto->defineFunction("getCameraViewMatrix", _SE(js_ar_ARModule_getCameraViewMatrix));
-    __jsb_cc_ar_ARModule_proto->defineFunction("getCameraProjectionMatrix", _SE(js_ar_ARModule_getCameraProjectionMatrix));
+    __jsb_cc_ar_ARModule_proto->defineFunction("getAnchorPose", _SE(js_ar_ARModule_getAnchorPose));
+    __jsb_cc_ar_ARModule_proto->defineFunction("getHitResult", _SE(js_ar_ARModule_getHitResult));
 
-    __jsb_cc_ar_ARModule_proto->defineFunction("enablePlane", _SE(js_ar_ARModule_enablePlane));
-    __jsb_cc_ar_ARModule_proto->defineFunction("setPlaneDetectionMode", _SE(js_ar_ARModule_setPlaneDetectionMode));
-    __jsb_cc_ar_ARModule_proto->defineFunction("setPlaneMaxTrackingNumber", _SE(js_ar_ARModule_setPlaneMaxTrackingNumber));
-    //__jsb_cc_ar_ARModule_proto->defineFunction("updatePlanesInfo", _SE(js_ar_ARModule_updatePlanesInfo));
     __jsb_cc_ar_ARModule_proto->defineFunction("getAddedPlanesInfo", _SE(js_ar_ARModule_getAddedPlanesInfo));
     __jsb_cc_ar_ARModule_proto->defineFunction("getRemovedPlanesInfo", _SE(js_ar_ARModule_getRemovedPlanesInfo));
     __jsb_cc_ar_ARModule_proto->defineFunction("getUpdatedPlanesInfo", _SE(js_ar_ARModule_getUpdatedPlanesInfo));
-    __jsb_cc_ar_ARModule_proto->defineFunction("getAddedPlanesCount", _SE(js_ar_ARModule_getAddedPlanesCount));
-    __jsb_cc_ar_ARModule_proto->defineFunction("getRemovedPlanesCount", _SE(js_ar_ARModule_getRemovedPlanesCount));
-    __jsb_cc_ar_ARModule_proto->defineFunction("getUpdatedPlanesCount", _SE(js_ar_ARModule_getUpdatedPlanesCount));
 
-    __jsb_cc_ar_ARModule_proto->defineFunction("tryHitAttachAnchor", _SE(js_ar_ARModule_tryHitAttachAnchor));
-    __jsb_cc_ar_ARModule_proto->defineFunction("getAnchorPose", _SE(js_ar_ARModule_getAnchorPose));
-    __jsb_cc_ar_ARModule_proto->defineFunction("tryHitTest", _SE(js_ar_ARModule_tryHitTest));
-    __jsb_cc_ar_ARModule_proto->defineFunction("getHitResult", _SE(js_ar_ARModule_getHitResult));
-    __jsb_cc_ar_ARModule_proto->defineFunction("getHitId", _SE(js_ar_ARModule_getHitId));
-
-    __jsb_cc_ar_ARModule_proto->defineFunction("enableSceneMesh", _SE(js_ar_ARModule_enableSceneMesh));
     __jsb_cc_ar_ARModule_proto->defineFunction("getAddedSceneMesh", _SE(js_ar_ARModule_getAddedSceneMesh));
     __jsb_cc_ar_ARModule_proto->defineFunction("getUpdatedSceneMesh", _SE(js_ar_ARModule_getUpdatedSceneMesh));
     __jsb_cc_ar_ARModule_proto->defineFunction("getRemovedSceneMesh", _SE(js_ar_ARModule_getRemovedSceneMesh));
     __jsb_cc_ar_ARModule_proto->defineFunction("requireSceneMesh", _SE(js_ar_ARModule_requireSceneMesh));
-    __jsb_cc_ar_ARModule_proto->defineFunction("endRequireSceneMesh", _SE(js_ar_ARModule_endRequireSceneMesh));
     __jsb_cc_ar_ARModule_proto->defineFunction("getSceneMeshVertices", _SE(js_ar_ARModule_getSceneMeshVertices));
     __jsb_cc_ar_ARModule_proto->defineFunction("getSceneMeshTriangleIndices", _SE(js_ar_ARModule_getSceneMeshTriangleIndices));
 
-    __jsb_cc_ar_ARModule_proto->defineFunction("enableImageTracking", _SE(js_ar_ARModule_enableImageTracking));
-    __jsb_cc_ar_ARModule_proto->defineFunction("addImageToLib", _SE(js_ar_ARModule_addImageToLib));
-    __jsb_cc_ar_ARModule_proto->defineFunction("setMaxTrackingNumber", _SE(js_ar_ARModule_setMaxTrackingNumber));
     __jsb_cc_ar_ARModule_proto->defineFunction("getAddedImagesInfo", _SE(js_ar_ARModule_getAddedImagesInfo));
     __jsb_cc_ar_ARModule_proto->defineFunction("getUpdatedImagesInfo", _SE(js_ar_ARModule_getUpdatedImagesInfo));
     __jsb_cc_ar_ARModule_proto->defineFunction("getRemovedImagesInfo", _SE(js_ar_ARModule_getRemovedImagesInfo));
 
-    __jsb_cc_ar_ARModule_proto->defineFunction("enableObjectTracking", _SE(js_ar_ARModule_enableObjectTracking));
-    __jsb_cc_ar_ARModule_proto->defineFunction("addObjectToLib", _SE(js_ar_ARModule_addObjectToLib));
     __jsb_cc_ar_ARModule_proto->defineFunction("getAddedObjectsInfo", _SE(js_ar_ARModule_getAddedObjectsInfo));
     __jsb_cc_ar_ARModule_proto->defineFunction("getUpdatedObjectsInfo", _SE(js_ar_ARModule_getUpdatedObjectsInfo));
     __jsb_cc_ar_ARModule_proto->defineFunction("getRemovedObjectsInfo", _SE(js_ar_ARModule_getRemovedObjectsInfo));
 
-    __jsb_cc_ar_ARModule_proto->defineFunction("enableFaceTracking", _SE(js_ar_ARModule_enableFaceTracking));
     __jsb_cc_ar_ARModule_proto->defineFunction("getAddedFacesInfo", _SE(js_ar_ARModule_getAddedFacesInfo));
     __jsb_cc_ar_ARModule_proto->defineFunction("getUpdatedFacesInfo", _SE(js_ar_ARModule_getUpdatedFacesInfo));
     __jsb_cc_ar_ARModule_proto->defineFunction("getRemovedFacesInfo", _SE(js_ar_ARModule_getRemovedFacesInfo));
