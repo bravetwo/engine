@@ -5,7 +5,7 @@
 #include <type_traits>
 #include "cocos/bindings/jswrapper/SeApi.h"
 #include "cocos/bindings/manual/jsb_conversions.h"
-#include "external/sources/xr/Xr.h"
+#include "cocos/xr/Xr.h"
 
 bool register_all_xr(se::Object *obj);                   // NOLINT
 
