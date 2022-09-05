@@ -23,6 +23,9 @@
  THE SOFTWARE.
 ****************************************************************************/
 
+#include "application/ApplicationManager.h"
+#include "platform/interfaces/modules/IXRInterface.h"
+
 #include "GLES3Swapchain.h"
 #include "GLES3Device.h"
 #include "GLES3GPUObjects.h"

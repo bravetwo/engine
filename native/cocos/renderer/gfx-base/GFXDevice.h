@@ -46,10 +46,9 @@
 #include "states/GFXGeneralBarrier.h"
 #include "states/GFXSampler.h"
 #include "states/GFXTextureBarrier.h"
-#include "application/ApplicationManager.h"
-#include "platform/interfaces/modules/IXRInterface.h"
 
 namespace cc {
+class IXRInterface;
 namespace gfx {
 
 class CC_DLL Device : public RefCounted {

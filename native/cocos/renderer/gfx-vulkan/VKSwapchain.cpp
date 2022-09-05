@@ -31,9 +31,9 @@
 #include "VKRenderPass.h"
 #include "VKTexture.h"
 #include "VKUtils.h"
-#include "platform/BasePlatform.h"
 
 #include "application/ApplicationManager.h"
+#include "platform/interfaces/modules/IXRInterface.h"
 #include "platform/interfaces/modules/ISystemWindow.h"
 
 #if CC_SWAPPY_ENABLED
