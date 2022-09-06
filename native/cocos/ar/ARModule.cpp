@@ -27,10 +27,10 @@
 #include <memory>
 
 #include "ar/ARModule.h"
-#include "platform/interfaces/modules/Device.h"
-#include "renderer/gfx-base/GFXDef-common.h"
+//#include "platform/interfaces/modules/Device.h"
+//#include "renderer/gfx-base/GFXDef-common.h"
 
-//#define USE_AR_NDK
+#define USE_AR_NDK
 
 #if CC_PLATFORM == CC_PLATFORM_ANDROID
 //#include "ar/android/ARAndroidAPIImpl.h"
@@ -196,6 +196,9 @@ float* ARModule::getRemovedPlanesInfo() const {
 }
 float* ARModule::getUpdatedPlanesInfo() const {
     return _impl->getUpdatedPlanesInfo();
+}
+std::vector<ARPlane> ARModule::getAdded() const {
+    return _impl->getAdded();
 }
 #pragma endregion // plane detection
 

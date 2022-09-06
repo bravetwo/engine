@@ -72,6 +72,7 @@ public:
     float* getAddedPlanesInfo() const;
     float* getUpdatedPlanesInfo() const;
     float* getRemovedPlanesInfo() const;
+    std::vector<ARPlane> getAdded() const;
 
     // scene mesh reconstruction
     void enableSceneMesh(bool enable) const;

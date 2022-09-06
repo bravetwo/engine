@@ -222,6 +222,26 @@ static bool js_ar_ARModule_getAPIState(se::State& s) // NOLINT(readability-ident
 }
 SE_BIND_FUNC(js_ar_ARModule_getAPIState)
 
+static bool js_ar_ARModule_getAdded(se::State& s) // NOLINT(readability-identifier-naming)
+{
+    auto* cobj = SE_THIS_OBJECT<cc::ar::ARModule>(s);
+    // SE_PRECONDITION2(cobj, false, "Invalid Native Object");
+    if (nullptr == cobj) return true;
+    const auto& args = s.args();
+    size_t argc = args.size();
+    CC_UNUSED bool ok = true;
+    if (argc == 0) {
+        std::vector<cc::ar::ARPlane> result = cobj->getAdded();
+        ok &= nativevalue_to_se(result, s.rval(), nullptr /*ctx*/);
+        SE_PRECONDITION2(ok, false, "Error processing arguments");
+        SE_HOLD_RETURN_VALUE(result, s.thisObject(), s.rval());
+        return true;
+    }
+    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 0);
+    return false;
+}
+SE_BIND_FUNC(js_ar_ARModule_getAdded)
+
 static bool js_ar_ARModule_getCameraDepthBuffer(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::ar::ARModule>(s);
@@ -434,6 +454,30 @@ static bool js_ar_ARModule_setCameraTextureName(se::State& s) // NOLINT(readabil
 }
 SE_BIND_FUNC(js_ar_ARModule_setCameraTextureName)
 
+static bool js_ar_ARModule_setDisplayGeometry(se::State& s) // NOLINT(readability-identifier-naming)
+{
+    auto* cobj = SE_THIS_OBJECT<cc::ar::ARModule>(s);
+    // SE_PRECONDITION2(cobj, false, "Invalid Native Object");
+    if (nullptr == cobj) return true;
+    const auto& args = s.args();
+    size_t argc = args.size();
+    CC_UNUSED bool ok = true;
+    if (argc == 3) {
+        HolderType<unsigned int, false> arg0 = {};
+        HolderType<unsigned int, false> arg1 = {};
+        HolderType<unsigned int, false> arg2 = {};
+        ok &= sevalue_to_native(args[0], &arg0, s.thisObject());
+        ok &= sevalue_to_native(args[1], &arg1, s.thisObject());
+        ok &= sevalue_to_native(args[2], &arg2, s.thisObject());
+        SE_PRECONDITION2(ok, false, "Error processing arguments");
+        cobj->setDisplayGeometry(arg0.value(), arg1.value(), arg2.value());
+        return true;
+    }
+    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 3);
+    return false;
+}
+SE_BIND_FUNC(js_ar_ARModule_setDisplayGeometry)
+
 static bool js_ar_ARModule_setImageMaxTrackingNumber(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::ar::ARModule>(s);
@@ -624,6 +668,7 @@ bool js_register_ar_ARModule(se::Object* obj) // NOLINT(readability-identifier-n
     cls->defineFunction("enableSceneMesh", _SE(js_ar_ARModule_enableSceneMesh));
     cls->defineFunction("endRequireSceneMesh", _SE(js_ar_ARModule_endRequireSceneMesh));
     cls->defineFunction("getAPIState", _SE(js_ar_ARModule_getAPIState));
+    cls->defineFunction("getAdded", _SE(js_ar_ARModule_getAdded));
     cls->defineFunction("getCameraDepthBuffer", _SE(js_ar_ARModule_getCameraDepthBuffer));
     cls->defineFunction("getCameraPose", _SE(js_ar_ARModule_getCameraPose));
     cls->defineFunction("getCameraProjectionMatrix", _SE(js_ar_ARModule_getCameraProjectionMatrix));
@@ -635,6 +680,7 @@ bool js_register_ar_ARModule(se::Object* obj) // NOLINT(readability-identifier-n
     cls->defineFunction("onPause", _SE(js_ar_ARModule_onPause));
     cls->defineFunction("onResume", _SE(js_ar_ARModule_onResume));
     cls->defineFunction("setCameraTextureName", _SE(js_ar_ARModule_setCameraTextureName));
+    cls->defineFunction("setDisplayGeometry", _SE(js_ar_ARModule_setDisplayGeometry));
     cls->defineFunction("setImageMaxTrackingNumber", _SE(js_ar_ARModule_setImageMaxTrackingNumber));
     cls->defineFunction("setPlaneDetectionMode", _SE(js_ar_ARModule_setPlaneDetectionMode));
     cls->defineFunction("setPlaneMaxTrackingNumber", _SE(js_ar_ARModule_setPlaneMaxTrackingNumber));

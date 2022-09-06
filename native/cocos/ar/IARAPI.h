@@ -25,7 +25,9 @@
 
 #pragma once
 
+#include <cstdint>
 #include <array>
+#include "math/Vec2.h"
 
 namespace cc {
 namespace ar {
@@ -33,6 +35,30 @@ namespace ar {
 using Pose      = std::array<float, 7>;
 using Matrix    = std::array<float, 16>;
 using TexCoords = std::array<float, 8>;
+using Plane = std::array<float, 12>;
+
+enum class APIState : uint32_t {
+    NONE, ARKIT, ARCORE, ARENGINE, WEBXR
+};
+
+enum class ARPlaneDetectionMode : uint32_t {
+    HORIZONTAL_UPWARD = 1 << 0,
+    HORIZONTAL_DOWNWARD = 1 << 1, 
+    VERTICAL = 1 << 2,
+    HORIZONTAL = HORIZONTAL_UPWARD | HORIZONTAL_DOWNWARD,
+    ALL = HORIZONTAL | VERTICAL
+};
+
+struct ARTrackable {
+    uint32_t id;
+    Pose pose;
+};
+
+struct ARPlane : ARTrackable {
+    ARPlaneDetectionMode type;
+    Vec2 extent;
+    Pose center;
+};
 
 class IARAPI {
 public:
@@ -74,6 +100,7 @@ public:
     virtual float* getAddedPlanesInfo() = 0;
     virtual float* getUpdatedPlanesInfo() = 0;
     virtual float* getRemovedPlanesInfo() = 0;
+    virtual std::vector<ARPlane> getAdded() = 0;
 
     // scene mesh reconstruction
     virtual void enableSceneMesh(bool enable) = 0;

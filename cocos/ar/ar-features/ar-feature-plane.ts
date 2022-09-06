@@ -221,9 +221,13 @@ export class ARFeaturePlaneDetection extends ARFeature {
             }
         }
         //*/
+
+        /*
         this.addedPlanesInfo = armodule.getAddedPlanesInfo();
         this._addedPlanes.length = 0;
         this.assembleInfos(this.addedPlanesInfo, this._addedPlanes);
+        */
+        this._addedPlanes = armodule.getAddedPlanesInfo();
         if(this._addedPlanes.length > 0)
                 this.onAddEvent.trigger(this._addedPlanes);
 

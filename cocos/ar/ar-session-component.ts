@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2021 Xiamen Yaji Software Co., Ltd.
+ Copyright (c) 2021-2022 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos2d-x.org
 
@@ -189,7 +189,8 @@ export class ARSession extends Component {
     onBeforeUpdate() {
         //console.log("session before update");
         const instance = ARModuleHelper.getInstance();
-        instance.beforeUpdate();
+        //instance.beforeUpdate();
+        instance.update();
 
         this.featuresMap.forEach((feature, id) => {
             feature.update();
@@ -222,7 +223,7 @@ export class ARSession extends Component {
         //*/
         const instance = ARModuleHelper.getInstance();
 
-        instance.update();
+        //instance.update();
         const pose = instance.getCameraPose();
         if (Math.abs(pose[0]) < 200 && Math.abs(pose[1]) < 200 && Math.abs(pose[2]) < 200) {
             this.targetOrigin.x = pose[0], this.targetOrigin.y = pose[1], this.targetOrigin.z = pose[2];
