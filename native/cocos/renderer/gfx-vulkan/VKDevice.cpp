@@ -813,6 +813,9 @@ QueryPool *CCVKDevice::createQueryPool() {
 }
 
 Swapchain *CCVKDevice::createSwapchain() {
+    if (_xr) {
+        _xr->createXRSwapchains();
+    }
     return ccnew CCVKSwapchain;
 }
 
