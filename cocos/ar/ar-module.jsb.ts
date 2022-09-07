@@ -41,6 +41,15 @@ export class ARModuleX implements IARModule {
 
     protected _nativeObj;
 
+    private _cameraId: string | null = null;
+    get CameraId () {
+        return this._cameraId;
+    }
+    set CameraId (val) {
+        this._nativeObj.setCameraId(val);
+        this._cameraId = val;
+    }
+
     private _configMask = FeatureType.None;
     private _featuresMap = new Map<string, ARFeature>();
 

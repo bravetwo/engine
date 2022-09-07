@@ -22,7 +22,7 @@
  THE SOFTWARE.
 */
 
-import { Prefab, instantiate, Vec3, resources, ccenum, Quat, Vec2 } from '../../core';
+//import { Prefab, instantiate, Vec3, resources, ccenum, Quat, Vec2 } from '../../core';
 import { ccclass, property } from '../../core/data/class-decorator'
 import { ARFeature, ARPose, ARTrackable, FeatureEvent, FeatureType, IFeatureData } from '../ar-feature-base';
 import { ARSession } from '../ar-session-component';
@@ -30,6 +30,10 @@ import { Node } from '../../core/scene-graph/node';
 import { ARModuleHelper } from '../ar-module-helper';
 import { ARFeatureData } from '../ar-feature-data';
 import { ARModuleAdaptor } from '../ar-module-adaptor';
+import { ccenum } from '../../core/value-types/enum';
+import { Quat, Vec2, Vec3 } from '../../core/math';
+import { Prefab } from '../../core/assets/prefab';
+import { resources } from '../../core/asset-manager/bundle';
 
 export enum ARPlaneDetectionMode {
     Horizontal_Upward = 1 << 0,

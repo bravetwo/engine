@@ -22,14 +22,14 @@
  THE SOFTWARE.
 */
 
-import { Prefab, instantiate, Vec3, resources, Material, builtinResMgr, director, Vec4, Quat } from '../../core';
+//import { Prefab, instantiate, Vec3, resources, Material, builtinResMgr, director, Vec4, Quat } from '../../core';
 import { ccclass, menu, property, disallowMultiple, type } from '../../core/data/class-decorator'
 import { ARFeature, ARTrackable, FeatureEvent, FeatureType, IFeatureData } from '../ar-feature-base';
 import { ARSession } from '../ar-session-component';
 import { Node } from '../../core/scene-graph'
 import { createMesh, MeshUtils } from '../../3d/misc/';
 import { ARModuleHelper } from '../ar-module-helper';
-import { Mesh, MeshRenderer, ModelComponent, utils } from '../../3d';
+//import { Mesh, MeshRenderer, ModelComponent, utils } from '../../3d';
 import { Model } from '../../core/renderer/scene';
 import { MorphModel } from '../../3d/models/morph-model';
 import { primitives } from '../../../exports/primitive';
@@ -38,6 +38,14 @@ import { NULL } from '@cocos/physx';
 import { ARFeatureData } from '../ar-feature-data';
 import { MeshCollider } from '../../physics/framework';
 import { ARModuleAdaptor } from '../ar-module-adaptor';
+import { Material } from '../../core/assets/material';
+//import { director } from '../../core/director';
+//import { resources } from '../../core/asset-manager';
+import { Quat, Vec3, Vec4 } from '../../core/math';
+import { MeshRenderer } from '../../3d/framework/mesh-renderer';
+import { Mesh } from '../../3d/assets/mesh';
+import { resources } from '../../core/asset-manager/bundle';
+
 
 export interface ARMesh extends ARTrackable {
     vertices : number[];
@@ -71,7 +79,7 @@ export class ARFeatureSceneMesh extends ARFeature {
     // close all and destroy all while set false
     //private _enable : boolean = true;
 
-    private _meshesParent : Node | null = null;
+    //private _meshesParent : Node | null = null;
 
     private _addedMeshes : ARMesh[] = [];
     private _updatedMeshes : ARMesh[] = [];
@@ -86,9 +94,10 @@ export class ARFeatureSceneMesh extends ARFeature {
     constructor (session : ARModuleAdaptor, config : IFeatureData, jsonObject? : any) {
         super(session, config, jsonObject);
 
-        this._meshesParent = new Node("_MESHES_");
+        //this._meshesParent = new Node("_MESHES_");
         //this._session.node.addChild(this._meshesParent);
-        director.getScene()?.getChildByName("ARManager")?.addChild(this._meshesParent);
+
+        //director.getScene()?.getChildByName("ARManager")?.addChild(this._meshesParent);
 
         if(config) {
             let meshConfig = config as WorldMeshConfig;
@@ -347,7 +356,7 @@ export class ARFeatureSceneMesh extends ARFeature {
                 sceneMeshNode = new Node("scene-mesh");
 
                 //this.session.node.addChild(sceneMeshNode);
-                this._meshesParent?.addChild(sceneMeshNode);
+                //this._meshesParent?.addChild(sceneMeshNode);
 
                 this._meshesNodeMap.set(meshRef, sceneMeshNode);
                 console.log(`add mesh: ${meshRef}`);

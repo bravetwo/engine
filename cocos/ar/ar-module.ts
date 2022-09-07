@@ -22,20 +22,27 @@
  THE SOFTWARE.
 */
 
-import { Quat, Vec3 } from '../core';
-import { ccclass, property } from '../core/data/class-decorator';
 import { ARFeature, ARPose, FeatureType } from './ar-feature-base';
 import { ARFeatureData } from './ar-feature-data';
 import { ARModuleHelper } from './ar-module-helper';
 import * as features from './ar-features';
 import { IARModule } from './ar-module-adaptor';
-import { CocosWebXR } from '../../external/compression/CocosWebXR';
+import { CocosWebXR } from '../../external/compression/CocosWebXR.js';
+import { Quat, Vec3 } from '../core/math';
 
 // WebXR
 export class ARModuleX implements IARModule {
     public static readonly FEATURE_PREFIX = "ARFeature";
 
     private _cocosWebXR: CocosWebXR | null = null;
+
+    private _cameraId: string | null = null;
+    get CameraId () {
+        return this._cameraId;
+    }
+    set CameraId (val) {
+        this._cameraId = val;
+    }
 
     private _configMask = FeatureType.None;
     private _featuresMap = new Map<string, ARFeature>();
@@ -112,8 +119,7 @@ export class ARModuleX implements IARModule {
     }
 
     public getAPIState() : number {
-        // WebXR
-        return 4;
+        return this._cocosWebXR!.getAPIState();
     }
 
     //#region camera

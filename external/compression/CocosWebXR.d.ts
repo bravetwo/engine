@@ -44,7 +44,7 @@ export declare class CocosWebXR {
     getCameraTexCoords() : number[];
     setDisplayGeometry(rotation : number, width : number, height : number) : void;
     setCameraTextureName(id) : void;
-    getCameraTextureRef();
+    getCameraTextureRef() : WebGLTexture;
     getCameraDepthBuffer();
     updateRenderState(gl : WebGLRenderingContext);
     

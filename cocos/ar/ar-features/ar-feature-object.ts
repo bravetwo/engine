@@ -22,7 +22,7 @@
  THE SOFTWARE.
 */
 
-import { Prefab, instantiate, Vec3, resources, Material, builtinResMgr, director, Vec4, Quat } from '../../core';
+//import { Prefab, instantiate, Vec3, resources, Material, builtinResMgr, director, Vec4, Quat } from '../../core';
 import { ccclass, menu, property, disallowMultiple, type } from '../../core/data/class-decorator'
 import { ARFeature, ARPose, FeatureEvent, FeatureType, IFeatureData } from '../ar-feature-base';
 import { ARSession } from '../ar-session-component';
@@ -35,6 +35,7 @@ import { MorphModel } from '../../3d/models/morph-model';
 import { primitives } from '../../../exports/primitive';
 import { PrimitiveMode } from '../../core/gfx';
 import { ARModuleAdaptor } from '../ar-module-adaptor';
+import { Quat, Vec3 } from '../../core/math';
 
 export interface ARTrackingObject {
     anchorId : number;

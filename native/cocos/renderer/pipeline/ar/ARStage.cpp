@@ -80,11 +80,18 @@ void ARStage::destroy() {
 }
 
 void ARStage::render(scene::Camera *camera) {
+    /*
     // UI_3D: 8388608 0x00800000 (1 << 23), ar camera node currently use UI_3D layer
     const Node *camNode = camera->getNode();
     const int flag = (static_cast<int>(camNode->getLayer())) & 0x00800000;
     if(flag == 0) return;
-    //return;
+    */
+    auto *const armodule = cc::ar::ARModule::get();
+    if (!armodule) return;
+    int apiState = armodule->getAPIState();
+    if (apiState < 0) return;
+    const Node *camNode = camera->getNode();
+    if(armodule->getCameraId() != camNode->_id) return;
 
     struct RenderData {
         framegraph::TextureHandle outputTex;

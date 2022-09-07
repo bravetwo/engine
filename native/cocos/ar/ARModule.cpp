@@ -118,6 +118,14 @@ int ARModule::getAPIState() {
     return _impl->getAPIState();
 }
 
+void ARModule::setCameraId(std::string id) {
+    _cameraId = id;
+}
+
+std::string ARModule::getCameraId() const {
+    return _cameraId;
+}
+
 void ARModule::setCameraTextureName(int id) {
     _impl->setCameraTextureName(id);
 }

@@ -262,6 +262,26 @@ static bool js_ar_ARModule_getCameraDepthBuffer(se::State& s) // NOLINT(readabil
 }
 SE_BIND_FUNC(js_ar_ARModule_getCameraDepthBuffer)
 
+static bool js_ar_ARModule_getCameraId(se::State& s) // NOLINT(readability-identifier-naming)
+{
+    auto* cobj = SE_THIS_OBJECT<cc::ar::ARModule>(s);
+    // SE_PRECONDITION2(cobj, false, "Invalid Native Object");
+    if (nullptr == cobj) return true;
+    const auto& args = s.args();
+    size_t argc = args.size();
+    CC_UNUSED bool ok = true;
+    if (argc == 0) {
+        std::string result = cobj->getCameraId();
+        ok &= nativevalue_to_se(result, s.rval(), nullptr /*ctx*/);
+        SE_PRECONDITION2(ok, false, "Error processing arguments");
+        SE_HOLD_RETURN_VALUE(result, s.thisObject(), s.rval());
+        return true;
+    }
+    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 0);
+    return false;
+}
+SE_BIND_FUNC(js_ar_ARModule_getCameraId)
+
 static bool js_ar_ARModule_getCameraPose(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::ar::ARModule>(s);
@@ -433,6 +453,26 @@ static bool js_ar_ARModule_onResume(se::State& s) // NOLINT(readability-identifi
     return false;
 }
 SE_BIND_FUNC(js_ar_ARModule_onResume)
+
+static bool js_ar_ARModule_setCameraId(se::State& s) // NOLINT(readability-identifier-naming)
+{
+    auto* cobj = SE_THIS_OBJECT<cc::ar::ARModule>(s);
+    // SE_PRECONDITION2(cobj, false, "Invalid Native Object");
+    if (nullptr == cobj) return true;
+    const auto& args = s.args();
+    size_t argc = args.size();
+    CC_UNUSED bool ok = true;
+    if (argc == 1) {
+        HolderType<std::string, false> arg0 = {};
+        ok &= sevalue_to_native(args[0], &arg0, s.thisObject());
+        SE_PRECONDITION2(ok, false, "Error processing arguments");
+        cobj->setCameraId(arg0.value());
+        return true;
+    }
+    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 1);
+    return false;
+}
+SE_BIND_FUNC(js_ar_ARModule_setCameraId)
 
 static bool js_ar_ARModule_setCameraTextureName(se::State& s) // NOLINT(readability-identifier-naming)
 {
@@ -670,6 +710,7 @@ bool js_register_ar_ARModule(se::Object* obj) // NOLINT(readability-identifier-n
     cls->defineFunction("getAPIState", _SE(js_ar_ARModule_getAPIState));
     cls->defineFunction("getAdded", _SE(js_ar_ARModule_getAdded));
     cls->defineFunction("getCameraDepthBuffer", _SE(js_ar_ARModule_getCameraDepthBuffer));
+    cls->defineFunction("getCameraId", _SE(js_ar_ARModule_getCameraId));
     cls->defineFunction("getCameraPose", _SE(js_ar_ARModule_getCameraPose));
     cls->defineFunction("getCameraProjectionMatrix", _SE(js_ar_ARModule_getCameraProjectionMatrix));
     cls->defineFunction("getCameraTexCoords", _SE(js_ar_ARModule_getCameraTexCoords));
@@ -679,6 +720,7 @@ bool js_register_ar_ARModule(se::Object* obj) // NOLINT(readability-identifier-n
     cls->defineFunction("getSupportMask", _SE(js_ar_ARModule_getSupportMask));
     cls->defineFunction("onPause", _SE(js_ar_ARModule_onPause));
     cls->defineFunction("onResume", _SE(js_ar_ARModule_onResume));
+    cls->defineFunction("setCameraId", _SE(js_ar_ARModule_setCameraId));
     cls->defineFunction("setCameraTextureName", _SE(js_ar_ARModule_setCameraTextureName));
     cls->defineFunction("setDisplayGeometry", _SE(js_ar_ARModule_setDisplayGeometry));
     cls->defineFunction("setImageMaxTrackingNumber", _SE(js_ar_ARModule_setImageMaxTrackingNumber));

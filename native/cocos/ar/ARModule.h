@@ -26,6 +26,7 @@
 #pragma once
 
 #include <memory>
+#include <string>
 #include "base/Macros.h"
 #include "IARAPI.h"
 
@@ -47,10 +48,13 @@ public:
     void update();
     int getAPIState();
 
+    void setCameraId(std::string id);
+    std::string getCameraId() const;
     Pose getCameraPose() const;
     Matrix getCameraViewMatrix() const;
     Matrix getCameraProjectionMatrix() const;
     TexCoords getCameraTexCoords() const;
+    
     void setDisplayGeometry(uint32_t rotation, uint32_t width, uint32_t height) const;
     void setCameraTextureName(int id);
     void* getCameraTextureRef() const;
@@ -108,6 +112,7 @@ public:
 
 private:
     std::unique_ptr<IARAPI> _impl;
+    std::string _cameraId;
 };
 
 static std::unique_ptr<ARModule> arModuleInstance;

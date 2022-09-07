@@ -1748,7 +1748,7 @@ bool nativevalue_to_se(const cc::ar::ARPlane &from, se::Value &to, se::Object *c
     if (nativevalue_to_se(from.id, tmp, ctx)) obj->setProperty("id", tmp);
     if (nativevalue_to_se(from.pose, tmp, ctx)) obj->setProperty("pose", tmp);
     if (nativevalue_to_se(from.type, tmp, ctx)) obj->setProperty("type", tmp);
-    if (nativevalue_to_se(from.extent, tmp, ctx)) obj->setProperty("extent", tmp);
+    if (nativevalue_to_se(from.extentX, tmp, ctx)) obj->setProperty("extentX", tmp);
     to.setObject(obj);
     return true;
 }

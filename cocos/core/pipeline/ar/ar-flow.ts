@@ -1,13 +1,13 @@
 import { UBOGlobal } from '../define';
-import { ForwardFlowPriority } from '../forward/enum';
+import { ForwardFlowPriority } from '../../../core/pipeline/enum';
 import { RenderFlowTag } from '../pipeline-serialization';
 import { IRenderFlowInfo, RenderFlow } from '../render-flow';
-import { RenderView } from '../render-view';
-import { ARModuleStage } from './ar-module-stage';
-import { ForwardPipeline } from '../forward/forward-pipeline';
-import { sceneCulling } from '../forward/scene-culling';
+//import { RenderView } from '../render-view';
+import { ARModuleStage } from './ar-stage';
+//import { ForwardPipeline } from '../forward/forward-pipeline';
+//import { sceneCulling } from '../forward/scene-culling';
 import { Camera } from '../../renderer/scene';
- 
+
 export class ARModuleFlow extends RenderFlow {
 
     public static initInfo: IRenderFlowInfo = {
@@ -37,6 +37,7 @@ export class ARModuleFlow extends RenderFlow {
 
     public render (camera: Camera) {
 
+        
         /*
         view.camera.update();
         const pipeline = this._pipeline as ForwardPipeline;

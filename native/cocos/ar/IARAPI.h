@@ -27,7 +27,6 @@
 
 #include <cstdint>
 #include <array>
-#include "math/Vec2.h"
 
 namespace cc {
 namespace ar {
@@ -35,11 +34,9 @@ namespace ar {
 using Pose      = std::array<float, 7>;
 using Matrix    = std::array<float, 16>;
 using TexCoords = std::array<float, 8>;
+using Color = std::array<float, 4>;
 using Plane = std::array<float, 12>;
-
-enum class APIState : uint32_t {
-    NONE, ARKIT, ARCORE, ARENGINE, WEBXR
-};
+using LightDir = std::array<float, 3>;
 
 enum class ARPlaneDetectionMode : uint32_t {
     HORIZONTAL_UPWARD = 1 << 0,
@@ -56,8 +53,8 @@ struct ARTrackable {
 
 struct ARPlane : ARTrackable {
     ARPlaneDetectionMode type;
-    Vec2 extent;
-    Pose center;
+    float extentX;
+    float extentZ;
 };
 
 class IARAPI {

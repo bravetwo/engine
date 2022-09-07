@@ -9,14 +9,13 @@ import { RenderFlow } from '../render-flow';
 import { IRenderStageInfo, RenderStage } from '../render-stage';
 import { ForwardPipeline } from '../forward/forward-pipeline';
 import { Orientation } from '../../../../pal/screen-adapter/enum-type';
-import { RenderQueueDesc, RenderQueueSortMode } from '../pipeline-serialization';
-import { opaqueCompareFn, RenderQueue, transparentCompareFn } from '../render-queue';
+//import { RenderQueueDesc, RenderQueueSortMode } from '../pipeline-serialization';
+//import { opaqueCompareFn, RenderQueue, transparentCompareFn } from '../render-queue';
 //import { JSB } from 'internal:constants';
 import { sys } from '../../platform/sys';
-import { ARModuleHelper } from '../../../ar/ar-module-helper';
 import { OS } from '../../../../pal/system-info/enum-type';
 import { Camera } from '../../renderer/scene';
-import { ARModuleX } from '../../../ar/ar-module.jsb';
+import { ARModuleX } from '../../../ar/ar-module';
 import { SurfaceTransform } from '../../gfx';
 
 const orientationMap: Record<Orientation, SurfaceTransform> = {
@@ -163,19 +162,69 @@ export class ARModuleStage extends RenderStage {
         const instance = ARModuleX.getInstance();
         if(!instance) return;
         const state = instance.getAPIState();
+        if(state < 0) return;
 
-        if (sys.os == OS.ANDROID) {
-            this.renderAndroid()
+        if(instance.CameraId != camera.node.uuid) return;
+        if(state == 3) {
+            this.renderWeb();
+
         } else {
-            //this.renderIOS();
+            if (state == 0) {
+                //this.renderIOS();
+            } else {
+                this.renderAndroid();
+            }
         }
     }
 
     private renderWeb () {
-        const instance = ARModuleX.getInstance();
-        if(!instance) return;
+        const armodule = ARModuleX.getInstance()!;
+        const gl = this.gl;
+        armodule.updateRenderState(this.gl);
 
-        instance.updateRenderState(this.gl);
+        gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+        gl.clearColor(0.875, 0.875, 0.875, 1.0);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
+        gl.depthMask(false);
+        gl.linkProgram(this.program);
+        gl.useProgram(this.program);
+
+        // Set texture
+        gl.bindTexture(GL_TEXTURE_EXTERNAL_OES, this.texture);
+        let location = gl.getUniformLocation(this.program, "vMatrix");
+
+        // Set projection matrix
+        gl.uniformMatrix4fv(location, false, this.matProj);
+        location = gl.getUniformLocation(this.program, "vCoordMatrix");
+
+        // Set mapping matrix
+        gl.uniformMatrix4fv(location, false, this.coordMatrix);
+        const size = 2;          // 2 components per iteration
+        const type = gl.FLOAT;   // the data is 32bit floats
+        const normalize = false; // don't normalize the data
+        const stride = 0;        // 0 = move forward size * sizeof(type) each iteration to get the next position
+        
+        // // Set vertices
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
+        gl.enableVertexAttribArray(this.mPosition);
+        gl.vertexAttribPointer(this.mPosition, size, type, normalize, stride, 0);
+
+        // Set texture coordinates
+        // for (let i = 0; i < this.uvs.length; i++) {
+        //     this.uvs[i] = shareData[i];
+        // }
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.texcoordBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, this.uvs, gl.STATIC_DRAW);
+        gl.enableVertexAttribArray(this.mCoord);
+        gl.vertexAttribPointer(this.mCoord, size, type, normalize, stride, 0);
+
+        // Number of vertices.
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        // gl.disableVertexAttribArray(mPosition);
+        // GLES20.glDisableVertexAttribArray(mCoord);
+        gl.depthMask(true);
+        gl.enable(gl.DEPTH_TEST);
     }
 
     private renderAndroid () {
