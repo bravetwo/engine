@@ -64,11 +64,9 @@ namespace cc {
 namespace gfx {
 
 class CC_DLL DeviceManager final {
-#if CC_USE_XR && (!CC_USE_VULKAN || XR_OEM_PICO)
-    static constexpr bool DETACH_DEVICE_THREAD{false};
-#else
+    static bool PLATFORM_SUPPORT_DETACH_DEVICE_THREAD;
+
     static constexpr bool DETACH_DEVICE_THREAD{true};
-#endif
     static constexpr bool FORCE_DISABLE_VALIDATION{false};
     static constexpr bool FORCE_ENABLE_VALIDATION{false};
 
@@ -88,6 +86,9 @@ public:
 #endif
 
 #ifdef CC_USE_VULKAN
+    #if XR_OEM_PICO
+        PLATFORM_SUPPORT_DETACH_DEVICE_THREAD = false;
+    #endif
         if (tryCreate<CCVKDevice>(info, &device)) return device;
 #endif
 
@@ -96,6 +97,9 @@ public:
 #endif
 
 #ifdef CC_USE_GLES3
+    #if CC_USE_XR
+        PLATFORM_SUPPORT_DETACH_DEVICE_THREAD = false;
+    #endif
         if (tryCreate<GLES3Device>(info, &device)) return device;
 #endif
 
@@ -108,8 +112,8 @@ public:
         return nullptr;
     }
 
-    static constexpr bool isDetachDeviceThread() {
-        return DETACH_DEVICE_THREAD;
+    static bool isDetachDeviceThread() {
+        return DETACH_DEVICE_THREAD && PLATFORM_SUPPORT_DETACH_DEVICE_THREAD;
     }
 
     static ccstd::string getGFXName() {
@@ -147,7 +151,7 @@ private:
     static bool tryCreate(const DeviceInfo &info, Device **pDevice) {
         Device *device = ccnew DeviceCtor;
 
-        if (DETACH_DEVICE_THREAD) {
+        if (isDetachDeviceThread()) {
             device = ccnew gfx::DeviceAgent(device);
         }
 
@@ -172,6 +176,7 @@ private:
     static constexpr int CC_DEBUG{0};
 #endif
 };
+bool DeviceManager::PLATFORM_SUPPORT_DETACH_DEVICE_THREAD{true};
 
 } // namespace gfx
 } // namespace cc
