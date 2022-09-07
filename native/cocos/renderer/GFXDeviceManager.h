@@ -64,8 +64,6 @@ namespace cc {
 namespace gfx {
 
 class CC_DLL DeviceManager final {
-    static bool PLATFORM_SUPPORT_DETACH_DEVICE_THREAD;
-
     static constexpr bool DETACH_DEVICE_THREAD{true};
     static constexpr bool FORCE_DISABLE_VALIDATION{false};
     static constexpr bool FORCE_ENABLE_VALIDATION{false};
@@ -87,7 +85,7 @@ public:
 
 #ifdef CC_USE_VULKAN
     #if XR_OEM_PICO
-        PLATFORM_SUPPORT_DETACH_DEVICE_THREAD = false;
+        Device::PLATFORM_SUPPORT_DETACH_DEVICE_THREAD = false;
     #endif
         if (tryCreate<CCVKDevice>(info, &device)) return device;
 #endif
@@ -98,7 +96,7 @@ public:
 
 #ifdef CC_USE_GLES3
     #if CC_USE_XR
-        PLATFORM_SUPPORT_DETACH_DEVICE_THREAD = false;
+        Device::PLATFORM_SUPPORT_DETACH_DEVICE_THREAD = false;
     #endif
         if (tryCreate<GLES3Device>(info, &device)) return device;
 #endif
@@ -113,7 +111,7 @@ public:
     }
 
     static bool isDetachDeviceThread() {
-        return DETACH_DEVICE_THREAD && PLATFORM_SUPPORT_DETACH_DEVICE_THREAD;
+        return DETACH_DEVICE_THREAD && Device::PLATFORM_SUPPORT_DETACH_DEVICE_THREAD;
     }
 
     static ccstd::string getGFXName() {
@@ -176,7 +174,6 @@ private:
     static constexpr int CC_DEBUG{0};
 #endif
 };
-bool DeviceManager::PLATFORM_SUPPORT_DETACH_DEVICE_THREAD{true};
 
 } // namespace gfx
 } // namespace cc
