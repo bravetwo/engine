@@ -85,7 +85,7 @@ public:
 
 #ifdef CC_USE_VULKAN
     #if XR_OEM_PICO
-        Device::PLATFORM_SUPPORT_DETACH_DEVICE_THREAD = false;
+        Device::SUPPORT_DETACH_DEVICE_THREAD = false;
     #endif
         if (tryCreate<CCVKDevice>(info, &device)) return device;
 #endif
@@ -96,7 +96,7 @@ public:
 
 #ifdef CC_USE_GLES3
     #if CC_USE_XR
-        Device::PLATFORM_SUPPORT_DETACH_DEVICE_THREAD = false;
+        Device::SUPPORT_DETACH_DEVICE_THREAD = false;
     #endif
         if (tryCreate<GLES3Device>(info, &device)) return device;
 #endif
@@ -111,7 +111,7 @@ public:
     }
 
     static bool isDetachDeviceThread() {
-        return DETACH_DEVICE_THREAD && Device::PLATFORM_SUPPORT_DETACH_DEVICE_THREAD;
+        return DETACH_DEVICE_THREAD && Device::SUPPORT_DETACH_DEVICE_THREAD;
     }
 
     static ccstd::string getGFXName() {
