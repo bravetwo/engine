@@ -156,11 +156,11 @@ export class ARModuleStage extends RenderStage {
     }
 
     public render (camera: Camera) {
-        //if (!JSB) {
-            //return
-        //}
+
+        //*
         const instance = ARModuleX.getInstance();
         if(!instance) return;
+        
         const state = instance.getAPIState();
         if(state < 0) return;
 
@@ -175,6 +175,8 @@ export class ARModuleStage extends RenderStage {
                 this.renderAndroid();
             }
         }
+        //*/
+        //this.renderAndroid();
     }
 
     private renderWeb () {
@@ -230,16 +232,16 @@ export class ARModuleStage extends RenderStage {
     private renderAndroid () {
         const gl = this.gl;
 
-        //const instance = ARModuleHelper.getInstance();
+        //*
         const instance = ARModuleX.getInstance();
         if(!instance) return;
-
         instance.setCameraTextureName((this.texture as any)._id);
         instance.setDisplayGeometry(orientationMap[screenAdapter.orientation], gl.canvas.width, gl.canvas.height);
         //const shareData = ARModuleHelper.getShareData();
         const shareData = instance.getCameraTexCoords();
+        //*/
         
-        gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+        gl.viewport(0, 0, gl.canvas.width * 0.5, gl.canvas.height * 0.5);
         gl.clearColor(0.875, 0.875, 0.875, 1.0);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
         gl.depthMask(false);
@@ -267,11 +269,6 @@ export class ARModuleStage extends RenderStage {
         gl.vertexAttribPointer(this.mPosition, size, type, normalize, stride, 0);
 
         // Set texture coordinates
-        /*
-        for (let i = 0, j = 40; i < this.uvs.length; i++, j++) {
-            this.uvs[i] = shareData[j];
-        }
-        */
         for (let i = 0; i < this.uvs.length; i++) {
             this.uvs[i] = shareData[i];
         }
