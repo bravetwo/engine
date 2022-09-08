@@ -241,7 +241,7 @@ export class ARModuleStage extends RenderStage {
         const shareData = instance.getCameraTexCoords();
         //*/
         
-        gl.viewport(0, 0, gl.canvas.width * 0.5, gl.canvas.height * 0.5);
+        gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
         gl.clearColor(0.875, 0.875, 0.875, 1.0);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
         gl.depthMask(false);
