@@ -108,6 +108,8 @@ public:
 
     virtual std::vector<float> computeViewProjection(uint32_t index, float nearZ, float farZ, float scaleF) = 0;
 
+    virtual std::vector<float> getEyeFov(uint32_t eye) = 0;
+
     virtual uint32_t getSwapchainImageIndex() = 0;
 
     virtual void setMultisamplesRTT(int num) = 0;
@@ -149,6 +151,11 @@ public:
     virtual std::string getXRStringConfig(int key) = 0;
 
     virtual void *getXRPointerConfig(int key) = 0;
+
+    virtual void getXrPose(cc::xr::XRPose &leftEyePose,
+                         cc::xr::XRPose &rightEyePose,
+                         cc::xr::XRPose &leftControllerPose,
+                         cc::xr::XRPose &rightControllerPose) = 0;
 };
 
 } // namespace xr
