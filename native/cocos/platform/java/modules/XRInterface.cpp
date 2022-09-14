@@ -54,9 +54,8 @@
 const bool IS_ENABLE_XR_LOG = false;
 
 namespace cc {
-ControllerEvent controllerEvent;
-static se::Object *jsPoseEventArray = nullptr;
-static void dispatchGamepadEventInternal(const xr::XRControllerEvent &xrControllerEvent) {
+
+void XRInterface::dispatchGamepadEventInternal(const xr::XRControllerEvent &xrControllerEvent) {
     if (xrControllerEvent.xrControllerInfos.empty()) {
         return;
     }
@@ -166,14 +165,29 @@ static void dispatchGamepadEventInternal(const xr::XRControllerEvent &xrControll
     }
 
     controllerInfo->napdId = 0; // xr only one gamepad connection
-    controllerEvent.controllerInfos.emplace_back(controllerInfo);
-    controllerEvent.type = ControllerEvent::Type::GAMEPAD;
-    static_cast<AndroidPlatform *>(BasePlatform::getPlatform())->dispatchEvent(controllerEvent);
-    controllerEvent.type = ControllerEvent::Type::UNKNOWN;
-    controllerEvent.controllerInfos.clear();
+    _controllerEvent.controllerInfos.emplace_back(controllerInfo);
+    _controllerEvent.type = ControllerEvent::Type::GAMEPAD;
+#if CC_USE_XR_REMOTE_PREVIEW
+    if (_xrRemotePreviewManager) {
+            if (!controllerInfo->buttonInfos.empty()) {
+                for (const auto &btnInfo : controllerInfo->buttonInfos) {
+                    _xrRemotePreviewManager->sendControllerKeyInfo(btnInfo);
+                }
+            }
+
+            if (!controllerInfo->axisInfos.empty()) {
+                for (const auto &axisInfo : controllerInfo->axisInfos) {
+                    _xrRemotePreviewManager->sendControllerKeyInfo(axisInfo);
+                }
+            }
+        }
+#endif
+    static_cast<AndroidPlatform *>(BasePlatform::getPlatform())->dispatchEvent(_controllerEvent);
+    _controllerEvent.type = ControllerEvent::Type::UNKNOWN;
+    _controllerEvent.controllerInfos.clear();
 }
 
-static void dispatchHandleEventInternal(const xr::XRControllerEvent &xrControllerEvent) {
+void XRInterface::dispatchHandleEventInternal(const xr::XRControllerEvent &xrControllerEvent) {
     if (xrControllerEvent.xrControllerInfos.empty()) {
         return;
     }
@@ -302,17 +316,32 @@ static void dispatchHandleEventInternal(const xr::XRControllerEvent &xrControlle
 
     if (!controllerInfo->buttonInfos.empty() || !controllerInfo->axisInfos.empty()) {
         controllerInfo->napdId = 0; // xr only one handle connection
-        controllerEvent.controllerInfos.emplace_back(controllerInfo);
-        controllerEvent.type = ControllerEvent::Type::HANDLE;
-        EventDispatcher::dispatchControllerEvent(controllerEvent);
-        controllerEvent.type = ControllerEvent::Type::UNKNOWN;
-        controllerEvent.controllerInfos.clear();
+        _controllerEvent.controllerInfos.emplace_back(controllerInfo);
+        _controllerEvent.type = ControllerEvent::Type::HANDLE;
+#if CC_USE_XR_REMOTE_PREVIEW
+        if (_xrRemotePreviewManager) {
+            if (!controllerInfo->buttonInfos.empty()) {
+                for (const auto &btnInfo : controllerInfo->buttonInfos) {
+                    _xrRemotePreviewManager->sendControllerKeyInfo(btnInfo);
+                }
+            }
+
+            if (!controllerInfo->axisInfos.empty()) {
+                for (const auto &axisInfo : controllerInfo->axisInfos) {
+                    _xrRemotePreviewManager->sendControllerKeyInfo(axisInfo);
+                }
+            }
+        }
+#endif
+        EventDispatcher::dispatchControllerEvent(_controllerEvent);
+        _controllerEvent.type = ControllerEvent::Type::UNKNOWN;
+        _controllerEvent.controllerInfos.clear();
     } else {
         CC_SAFE_DELETE(controllerInfo);
     }
 }
 
-static void dispatchHMDEventInternal(const xr::XRControllerEvent &xrControllerEvent) {
+void XRInterface::dispatchHMDEventInternal(const xr::XRControllerEvent &xrControllerEvent) {
     if (xrControllerEvent.xrControllerInfos.empty()) {
         return;
     }
@@ -394,9 +423,9 @@ void XRInterface::initialize(void *javaVM, void *activity) {
 #if CC_USE_XR
     CC_LOG_INFO("[XR] initialize vm.%p,aty.%p | %d", javaVM, activity,  (int)gettid());
     xr::XrEntry::getInstance()->initPlatformData(javaVM, activity);
-    xr::XrEntry::getInstance()->setGamepadCallback(&dispatchGamepadEventInternal);
-    xr::XrEntry::getInstance()->setHandleCallback(&dispatchHandleEventInternal);
-    xr::XrEntry::getInstance()->setHMDCallback(&dispatchHMDEventInternal);
+    xr::XrEntry::getInstance()->setGamepadCallback(std::bind(&XRInterface::dispatchGamepadEventInternal, this, std::placeholders::_1));
+    xr::XrEntry::getInstance()->setHandleCallback(std::bind(&XRInterface::dispatchHandleEventInternal, this, std::placeholders::_1));
+    xr::XrEntry::getInstance()->setHMDCallback(std::bind(&XRInterface::dispatchHMDEventInternal, this, std::placeholders::_1));
     xr::XrEntry::getInstance()->setXRConfig(xr::XRConfigKey::LOGIC_THREAD_ID, (int)gettid());
     xr::XrEntry::getInstance()->setXRConfigCallback([this](xr::XRConfigKey key, xr::XRConfigValue value) {
         if (IS_ENABLE_XR_LOG) CC_LOG_INFO("XRConfigCallback.%d", key);
@@ -414,6 +443,10 @@ void XRInterface::initialize(void *javaVM, void *activity) {
 #endif
     xr::XrEntry::getInstance()->createXrInstance(graphicsApiName.c_str());
     #endif
+
+#if CC_USE_XR_REMOTE_PREVIEW
+    _xrRemotePreviewManager = new XRRemotePreviewManager();
+#endif
 #else
     CC_UNUSED_PARAM(javaVM);
     CC_UNUSED_PARAM(activity);
@@ -426,6 +459,11 @@ void XRInterface::onRenderPause() {
     if (!_renderPaused) {
         _renderPaused = true;
         _renderResumed = false;
+#if CC_USE_XR_REMOTE_PREVIEW
+        if(_xrRemotePreviewManager) {
+            _xrRemotePreviewManager->pause();
+        }
+#endif
         CC_LOG_INFO("[XR] onRenderPause");
         xr::XrEntry::getInstance()->pauseXrInstance();
     }
@@ -439,6 +477,11 @@ void XRInterface::onRenderResume() {
         _renderPaused = false;
         CC_LOG_INFO("[XR] onRenderResume");
         xr::XrEntry::getInstance()->resumeXrInstance();
+#if CC_USE_XR_REMOTE_PREVIEW
+        if(_xrRemotePreviewManager) {
+            _xrRemotePreviewManager->resume();
+        }
+#endif
     }
 #endif
 }
@@ -453,6 +496,11 @@ void XRInterface::onRenderDestroy() {
         jsPoseEventArray->decRef();
         jsPoseEventArray = nullptr;
     }
+#if CC_USE_XR_REMOTE_PREVIEW
+    if(_xrRemotePreviewManager) {
+        _xrRemotePreviewManager->stop();
+    }
+#endif
 #endif
 }
 // render thread lifecycle
@@ -683,6 +731,11 @@ EGLSurfaceType XRInterface::acquireEGLSurfaceType(uint32_t typedID) {
 bool XRInterface::platformLoopStart() {
 #if CC_USE_XR
     // CC_LOG_INFO("[XR] platformLoopStart");
+#if CC_USE_XR_REMOTE_PREVIEW
+    if(_xrRemotePreviewManager && !_xrRemotePreviewManager->isStarted()) {
+        _xrRemotePreviewManager->start();
+    }
+#endif
     return xr::XrEntry::getInstance()->platformLoopStart();
 #else
     return false;
@@ -707,8 +760,18 @@ bool XRInterface::beginRenderFrame() {
                               if (IS_ENABLE_XR_LOG) CC_LOG_INFO("[XR] [RT] beginRenderFrame.%lld", frameId);
                               xr::XrEntry::getInstance()->frameStart();
                           });
+#if CC_USE_XR_REMOTE_PREVIEW
+        if (_xrRemotePreviewManager) {
+            _xrRemotePreviewManager->tick();
+        }
+#endif
         return true;
     } else {
+#if CC_USE_XR_REMOTE_PREVIEW
+        if (_xrRemotePreviewManager) {
+            _xrRemotePreviewManager->tick();
+        }
+#endif
         return xr::XrEntry::getInstance()->frameStart();
     }
 #else
@@ -780,6 +843,11 @@ bool XRInterface::endRenderFrame() {
         // CC_LOG_INFO("[XR] endRenderFrame pass presentWait errno %d", errno);
     } else {
         xr::XrEntry::getInstance()->frameEnd();
+#if CC_USE_XR_REMOTE_PREVIEW
+        if(_xrRemotePreviewManager) {
+            _xrRemotePreviewManager->tick();
+        }
+#endif
     }
 #endif
     return true;
@@ -802,6 +870,17 @@ ccstd::vector<float> XRInterface::getHMDViewPosition(uint32_t eye, int trackingT
     CC_UNUSED_PARAM(trackingType);
     ccstd::vector<float> res;
     res.reserve(3);
+    return res;
+#endif
+}
+
+ccstd::vector<float> XRInterface::getXREyeFov(uint32_t eye) {
+#if CC_USE_XR
+    return xr::XrEntry::getInstance()->getEyeFov(eye);
+#else
+    CC_UNUSED_PARAM(eye);
+    ccstd::vector<float> res;
+    res.reserve(4);
     return res;
 #endif
 }

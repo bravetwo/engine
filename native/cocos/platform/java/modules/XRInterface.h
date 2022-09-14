@@ -25,7 +25,15 @@
 
 #pragma once
 
+#include "base/Ptr.h"
 #include "platform/interfaces/modules/IXRInterface.h"
+#if CC_USE_XR_REMOTE_PREVIEW
+#include "xr/XRRemotePreviewManager.h"
+#endif
+namespace se {
+class Object;
+}
+
 namespace cc {
 
 class XRInterface : public IXRInterface {
@@ -86,11 +94,18 @@ public:
 
     ccstd::vector<float> getHMDViewPosition(uint32_t eye, int trackingType) override;
     ccstd::vector<float> getXRViewProjectionData(uint32_t eye, float near, float far) override;
+    ccstd::vector<float> getXREyeFov(uint32_t eye) override;
     // renderwindow
     xr::XREye getXREyeByRenderWindow(void *window) override;
     void bindXREyeWithRenderWindow(void *window, xr::XREye eye) override;
 
 private:
+  void dispatchGamepadEventInternal(const xr::XRControllerEvent &xrControllerEvent);
+  void dispatchHandleEventInternal(const xr::XRControllerEvent &xrControllerEvent);
+  void dispatchHMDEventInternal(const xr::XRControllerEvent &xrControllerEvent);
+  ControllerEvent _controllerEvent;
+  se::Object *jsPoseEventArray{nullptr};
+
 #if CC_USE_VULKAN
     PFN_vkGetInstanceProcAddr _vkGetInstanceProcAddr{nullptr};
     VkPhysicalDevice _vkPhysicalDevice{nullptr};
@@ -109,6 +124,9 @@ private:
     std::unordered_map<void *, xr::XREye> _xrWindowMap;
     std::unordered_map<uint32_t, EGLSurfaceType> _eglSurfaceTypeMap;
     bool _committedFrame{false};
+#if CC_USE_XR_REMOTE_PREVIEW
+    cc::IntrusivePtr<XRRemotePreviewManager> _xrRemotePreviewManager{nullptr};
+#endif
 };
 
 } // namespace cc
