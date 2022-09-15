@@ -388,7 +388,7 @@ void XRInterface::dispatchHMDEventInternal(const xr::XRControllerEvent &xrContro
 
 xr::XRVendor XRInterface::getVendor() {
 #if CC_USE_XR
-    return (xr::XRVendor) xr::XrEntry::getInstance()->getXRConfig(cc::xr::XRConfigKey::DEVICE_VENDOR).getInt();
+    return static_cast<xr::XRVendor>(xr::XrEntry::getInstance()->getXRConfig(cc::xr::XRConfigKey::DEVICE_VENDOR).getInt());
 #endif
     return xr::XRVendor::MONADO;
 }
@@ -426,14 +426,17 @@ void XRInterface::initialize(void *javaVM, void *activity) {
     xr::XrEntry::getInstance()->setGamepadCallback(std::bind(&XRInterface::dispatchGamepadEventInternal, this, std::placeholders::_1));
     xr::XrEntry::getInstance()->setHandleCallback(std::bind(&XRInterface::dispatchHandleEventInternal, this, std::placeholders::_1));
     xr::XrEntry::getInstance()->setHMDCallback(std::bind(&XRInterface::dispatchHMDEventInternal, this, std::placeholders::_1));
-    xr::XrEntry::getInstance()->setXRConfig(xr::XRConfigKey::LOGIC_THREAD_ID, (int)gettid());
+    xr::XrEntry::getInstance()->setXRConfig(xr::XRConfigKey::LOGIC_THREAD_ID, static_cast<int>(gettid()));
     xr::XrEntry::getInstance()->setXRConfigCallback([this](xr::XRConfigKey key, xr::XRConfigValue value) {
         if (IS_ENABLE_XR_LOG) CC_LOG_INFO("XRConfigCallback.%d", key);
         if (key == xr::XRConfigKey::RENDER_EYE_FRAME_LEFT || key == xr::XRConfigKey::RENDER_EYE_FRAME_RIGHT) {
-            if (value.getInt() == 0)
+            if (value.getInt() == 0) {
                 this->beginRenderEyeFrame(key == xr::XRConfigKey::RENDER_EYE_FRAME_LEFT ? 0 : 1);
-            if (value.getInt() == 1)
+            }
+
+            if (value.getInt() == 1) {
                 this->endRenderEyeFrame(key == xr::XRConfigKey::RENDER_EYE_FRAME_LEFT ? 0 : 1);
+            }
         }
     });
     #if XR_OEM_PICO
@@ -509,8 +512,8 @@ void XRInterface::onRenderDestroy() {
 void XRInterface::preGFXDeviceInitialize(gfx::API gfxApi) {
 #if CC_USE_XR
     CC_LOG_INFO("[XR] preGFXDeviceInitialize.api.%d | Multi Thread.%d", gfxApi, gfx::DeviceAgent::getInstance() ? 1 : 0);
-    setXRConfig(xr::XRConfigKey::MULTITHREAD_MODE, gfx::DeviceAgent::getInstance() ? true : false);
-    xr::XrEntry::getInstance()->setXRConfig(xr::XRConfigKey::RENDER_THREAD_ID, (int)gettid());
+    setXRConfig(xr::XRConfigKey::MULTITHREAD_MODE, gfx::DeviceAgent::getInstance() != nullptr);
+    xr::XrEntry::getInstance()->setXRConfig(xr::XRConfigKey::RENDER_THREAD_ID, static_cast<int>(gettid()));
 
     if (gfxApi == gfx::API::GLES3 || gfxApi == gfx::API::VULKAN) {
     #if !XR_OEM_PICO
@@ -548,7 +551,7 @@ const xr::XRSwapchain &XRInterface::doGFXDeviceAcquire(gfx::API gfxApi) {
 #if CC_USE_XR
     // CC_LOG_INFO("[XR] doGFXDeviceAcquire.api.%d", gfxApi);
     if (gfxApi == gfx::API::GLES3 || gfxApi == gfx::API::VULKAN) {
-        return xr::XrEntry::getInstance()->acquireXrSwapchain((uint32_t)gfxApi);
+        return xr::XrEntry::getInstance()->acquireXrSwapchain(static_cast<uint32_t>(gfxApi));
     }
 #else
     CC_UNUSED_PARAM(gfxApi);
@@ -563,8 +566,9 @@ bool XRInterface::isGFXDeviceNeedsPresent(gfx::API gfxApi) {
     // if (gfxApi == gfx::API::GLES3 || gfxApi == gfx::API::VULKAN) {
     // }
     return xr::XrEntry::getInstance()->getXRConfig(cc::xr::XRConfigKey::PRESENT_ENABLE).getBool();
-#endif
+#else
     return true;
+#endif
 }
 
 void XRInterface::postGFXDevicePresent(gfx::API gfxApi) {
@@ -588,7 +592,7 @@ void XRInterface::createXRSwapchains() {
                               xr::XrEntry::getInstance()->setXRConfig(xr::XRConfigKey::RENDER_THREAD_ID, (int)gettid());
                               JniHelper::getEnv();
                               xr::XrEntry::getInstance()->initXrSwapchains();
-                          });
+                          })
     } else {
         xr::XrEntry::getInstance()->initXrSwapchains();
     }
@@ -598,8 +602,9 @@ void XRInterface::createXRSwapchains() {
 const std::vector<cc::xr::XRSwapchain> &XRInterface::getXRSwapchains() {
 #if CC_USE_XR
     CC_LOG_INFO("[XR] getXRSwapchains");
-    if (_xrSwapchains.size() == 0)
+    if (_xrSwapchains.empty()) {
         _xrSwapchains = xr::XrEntry::getInstance()->getCocosXrSwapchains();
+    }
 #endif
     return _xrSwapchains;
 }
@@ -608,23 +613,31 @@ gfx::Format XRInterface::getXRSwapchainFormat() {
 #if CC_USE_XR
      int swapchainFormat = xr::XrEntry::getInstance()->getXRConfig(xr::XRConfigKey::SWAPCHAIN_FORMAT).getInt();
 #if CC_USE_GLES3
-    if(swapchainFormat == GL_SRGB_ALPHA_EXT) {
-        return gfx::Format::SRGB8_A8;
-    } else if(swapchainFormat == GL_RGBA8) {
-        return gfx::Format::RGBA8;
-    } else if(swapchainFormat == GL_BGRA8_EXT) {
-        return gfx::Format::BGRA8;
-    }
+     if (swapchainFormat == GL_SRGB_ALPHA_EXT) {
+         return gfx::Format::SRGB8_A8;
+     }
+
+     if (swapchainFormat == GL_RGBA8) {
+         return gfx::Format::RGBA8;
+     }
+
+     if (swapchainFormat == GL_BGRA8_EXT) {
+         return gfx::Format::BGRA8;
+     }
 #endif
 
 #if CC_USE_VULKAN
-    if(swapchainFormat == VK_FORMAT_R8G8B8A8_SRGB) {
-        return gfx::Format::SRGB8_A8;
-    } else if(swapchainFormat == VK_FORMAT_R8G8B8A8_UNORM) {
-        return gfx::Format::RGBA8;
-    } else if(swapchainFormat == VK_FORMAT_B8G8R8A8_UNORM) {
-        return gfx::Format::BGRA8;
-    }
+     if (swapchainFormat == VK_FORMAT_R8G8B8A8_SRGB) {
+         return gfx::Format::SRGB8_A8;
+     }
+
+     if (swapchainFormat == VK_FORMAT_R8G8B8A8_UNORM) {
+         return gfx::Format::RGBA8;
+     }
+
+     if (swapchainFormat == VK_FORMAT_B8G8R8A8_UNORM) {
+         return gfx::Format::BGRA8;
+     }
 #endif
 #endif
     return gfx::Format::BGRA8;
@@ -759,21 +772,21 @@ bool XRInterface::beginRenderFrame() {
                           {
                               if (IS_ENABLE_XR_LOG) CC_LOG_INFO("[XR] [RT] beginRenderFrame.%lld", frameId);
                               xr::XrEntry::getInstance()->frameStart();
-                          });
-#if CC_USE_XR_REMOTE_PREVIEW
+                          })
+    #if CC_USE_XR_REMOTE_PREVIEW
         if (_xrRemotePreviewManager) {
             _xrRemotePreviewManager->tick();
         }
-#endif
+    #endif
         return true;
-    } else {
-#if CC_USE_XR_REMOTE_PREVIEW
-        if (_xrRemotePreviewManager) {
-            _xrRemotePreviewManager->tick();
-        }
-#endif
-        return xr::XrEntry::getInstance()->frameStart();
     }
+
+    #if CC_USE_XR_REMOTE_PREVIEW
+    if (_xrRemotePreviewManager) {
+        _xrRemotePreviewManager->tick();
+    }
+    #endif
+    return xr::XrEntry::getInstance()->frameStart();
 #else
     return false;
 #endif
@@ -796,9 +809,9 @@ bool XRInterface::beginRenderEyeFrame(uint32_t eye) {
                           {
                               if (IS_ENABLE_XR_LOG) CC_LOG_INFO("[XR] [RT] beginRenderEyeFrame %d", eye);
                               xr::XrEntry::getInstance()->renderLoopStart(eye);
-                          });
+                          })
     } else {
-        xr::XrEntry::getInstance()->renderLoopStart(eye);
+        xr::XrEntry::getInstance()->renderLoopStart(static_cast<int>(eye));
     }
 #else
     CC_UNUSED_PARAM(eye);
@@ -815,9 +828,9 @@ bool XRInterface::endRenderEyeFrame(uint32_t eye) {
                           {
                               if (IS_ENABLE_XR_LOG) CC_LOG_INFO("[XR] [RT] endRenderEyeFrame %d", eye);
                               xr::XrEntry::getInstance()->renderLoopEnd(eye);
-                          });
+                          })
     } else {
-        xr::XrEntry::getInstance()->renderLoopEnd(eye);
+        xr::XrEntry::getInstance()->renderLoopEnd(static_cast<int>(eye));
     }
 #else
     CC_UNUSED_PARAM(eye);
@@ -827,8 +840,10 @@ bool XRInterface::endRenderEyeFrame(uint32_t eye) {
 
 bool XRInterface::endRenderFrame() {
 #if CC_USE_XR
-    if (IS_ENABLE_XR_LOG) CC_LOG_INFO("[XR] endRenderFrame.%d",
-                                      cc::ApplicationManager::getInstance()->getCurrentAppSafe()->getEngine()->getTotalFrames());
+    if (IS_ENABLE_XR_LOG) {
+        CC_LOG_INFO("[XR] endRenderFrame.%d",
+                    cc::ApplicationManager::getInstance()->getCurrentAppSafe()->getEngine()->getTotalFrames());
+    }
 
     if (gfx::DeviceAgent::getInstance()) {
         ENQUEUE_MESSAGE_0(gfx::DeviceAgent::getInstance()->getMessageQueue(),
