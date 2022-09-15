@@ -69,7 +69,8 @@ enum class XRConfigKey {
     RUNTIME_VERSION,
     PRESENT_ENABLE,
     RENDER_EYE_FRAME_LEFT,
-    RENDER_EYE_FRAME_RIGHT
+    RENDER_EYE_FRAME_RIGHT,
+    PASSTHROUGH
 };
 
 enum class XRConfigValueType {
