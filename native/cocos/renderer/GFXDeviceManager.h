@@ -90,6 +90,9 @@ public:
 #endif
 
 #ifdef CC_USE_VULKAN
+    #if XR_OEM_PICO
+        Device::isSupportDetachDeviceThread = false;
+    #endif
         if (tryCreate<CCVKDevice>(info, &device)) return device;
 #endif
 
@@ -98,6 +101,9 @@ public:
 #endif
 
 #ifdef CC_USE_GLES3
+    #if CC_USE_XR
+        Device::isSupportDetachDeviceThread = false;
+    #endif
         if (tryCreate<GLES3Device>(info, &device)) return device;
 #endif
 
@@ -110,8 +116,8 @@ public:
         return nullptr;
     }
 
-    static constexpr bool isDetachDeviceThread() {
-        return DETACH_DEVICE_THREAD;
+    static bool isDetachDeviceThread() {
+        return DETACH_DEVICE_THREAD && Device::isSupportDetachDeviceThread;
     }
 
     static ccstd::string getGFXName() {
@@ -151,7 +157,7 @@ private:
 
         // arcore & arengine currently only supports gles, session update requires gl context 
         #if !(USE_AR_MODULE && CC_PLATFORM == CC_PLATFORM_ANDROID)
-        if (DETACH_DEVICE_THREAD) {
+        if (isDetachDeviceThread()) {
             device = ccnew gfx::DeviceAgent(device);
         }
         #endif
