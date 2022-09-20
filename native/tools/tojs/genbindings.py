@@ -23,15 +23,15 @@ defaultSections = [
     'gfx',
     'pipeline',
     'render',
-    'spine',
-    'editor_support',
-    'dragonbones',
     'physics',
     'scene',
     'geometry',
     'assets',
     '2d',
-    'ar'
+    'ar',
+    'editor_support',
+    'spine',
+    'dragonbones'
 ]
 
 projectRoot = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
