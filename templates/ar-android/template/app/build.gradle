@@ -6,6 +6,9 @@ RES_PATH = RES_PATH.replace("\\", "/")
 COCOS_ENGINE_PATH = COCOS_ENGINE_PATH.replace("\\", "/")
 
 buildDir = "${RES_PATH}/proj/build/$project.name"
+
+configurations { natives }
+
 android {
     compileSdkVersion PROP_COMPILE_SDK_VERSION.toInteger()
     buildToolsVersion PROP_BUILD_TOOLS_VERSION
@@ -27,7 +30,6 @@ android {
             cmake {
                 targets "cocos"
                 arguments "-DRES_DIR=${RES_PATH}", "-DCOCOS_X_PATH=${COCOS_ENGINE_PATH}", "-DANDROID_STL=c++_static", "-DANDROID_TOOLCHAIN=clang", "-DANDROID_ARM_NEON=TRUE", "-DANDROID_LD=gold"
-                cppFlags "-frtti -fexceptions -fsigned-char"
             }
             ndk { abiFilters PROP_APP_ABI.split(':') }
         }
@@ -89,12 +91,14 @@ android {
 }
 
 dependencies {
-    implementation 'com.google.ar:core:1.26.0'
-    implementation 'com.huawei.hms:arenginesdk:3.5.0.4'
+    implementation 'com.google.ar:core:1.32.0'
+    natives 'com.google.ar:core:1.32.0'
+    implementation 'com.huawei.hms:arenginesdk:3.7.0.3'
+    natives 'com.huawei.hms:arenginesdk:3.7.0.3'
+
     implementation fileTree(dir: '../libs', include: ['*.jar','*.aar'])
     implementation fileTree(dir: 'libs', include: ['*.jar','*.aar'])
     implementation fileTree(dir: "${COCOS_ENGINE_PATH}/cocos/platform/android/java/libs", include: ['*.jar'])
-    implementation fileTree(dir: "${COCOS_ENGINE_PATH}/external/android/libs/ar", include: ['*.jar'])
     implementation project(':libservice')
     implementation project(':libcocos')
 }
