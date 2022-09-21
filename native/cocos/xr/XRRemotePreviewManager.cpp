@@ -118,9 +118,7 @@ void XRRemotePreviewManager::onConnection(const std::shared_ptr<WebSocketServerC
         listBegin++;
     }
 
-    connection->setOnConnect([=]() {
-      onClientConnected(connection);
-    });
+    onClientConnected(connection);
 
     connection->setOnClose([=](int closeCode, const ccstd::string &closeReason) {
       onClientDisconnected(closeCode, closeReason);
@@ -154,9 +152,7 @@ void XRRemotePreviewManager::start() {
 
     _webSocketServer->setOnConnection(std::bind(&XRRemotePreviewManager::onConnection, this, std::placeholders::_1));
 
-    WebSocketServer::listenAsync(_webSocketServer, SOCKET_PORT, "127.0.0.1", [](const ccstd::string &error) {
-      CC_LOG_INFO("[XRRemotePreviewManager] listenAsync error:%s", error.c_str());
-    });
+    WebSocketServer::listenAsync(_webSocketServer, SOCKET_PORT, "127.0.0.1",  nullptr);
     CC_LOG_INFO("[XRRemotePreviewManager] listenAsync ready!");
 #endif
     _isStarted = true;
@@ -335,7 +331,7 @@ void XRRemotePreviewManager::pause() {
 void XRRemotePreviewManager::stop() {
     _isStarted = false;
     CC_LOG_INFO("[XRRemotePreviewManager] stop");
-    sendMessage("close");
+    _webSocketServer->closeAsync();
     _webSocketServer = nullptr;
 }
 
