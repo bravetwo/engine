@@ -28,6 +28,7 @@ defaultSections = [
     'geometry',
     'assets',
     '2d',
+    'ar',
     'editor_support',
     'spine',
     'dragonbones'

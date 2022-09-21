@@ -37,6 +37,10 @@
     #include "physics/spec/IWorld.h"
 #endif
 
+#if USE_AR_MODULE
+    #include "ar/IARAPI.h"
+#endif
+
 namespace cc {
 class Data;
 class Vec4;
@@ -642,3 +646,7 @@ bool nativevalue_to_se(const cc::geometry::AABB &from, se::Value &to, se::Object
 bool nativevalue_to_se(const cc::geometry::Sphere &from, se::Value &to, se::Object *ctx);
 
 #endif //USE_PHYSICS_PHYSX
+
+#if USE_AR_MODULE
+bool nativevalue_to_se(const cc::ar::ARPlane &from, se::Value &to, se::Object *ctx);
+#endif //USE_AR_MODULE

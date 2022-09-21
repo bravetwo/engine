@@ -33,7 +33,12 @@ export type EngineFeature =
     | 'profiler'
     | 'marionette'
     | 'animation'
-    | 'skeletal-animation';
+    | 'skeletal-animation'
+    | 'ar'
+    | 'ar-android'
+    | 'ar-auto'
+    | 'ar-core'
+    | 'ar-engine';
 export interface ModuleRenderConfig {
     $schema?: string;
 

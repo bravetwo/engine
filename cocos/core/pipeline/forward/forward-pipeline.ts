@@ -36,6 +36,7 @@ import { Texture2D } from '../../assets/texture-2d';
 import { Camera } from '../../renderer/scene';
 import { errorID } from '../../platform/debug';
 import { PipelineSceneData } from '../pipeline-scene-data';
+import { ARModuleFlow } from '../ar/ar-flow';
 
 const PIPELINE_TYPE = 0;
 
@@ -86,6 +87,12 @@ export class ForwardPipeline extends RenderPipeline {
             errorID(2402);
             return false;
         }
+
+        // armodule
+        const arFlow = new ARModuleFlow();
+        arFlow.initialize(ARModuleFlow.initInfo);
+        this._flows.push(arFlow);
+        arFlow.activate(this);
 
         return true;
     }

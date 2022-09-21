@@ -923,6 +923,26 @@ module.exports = {
             label: "XR",
             description: "Enable the XR function system",
         },
+        ar: {
+            label: "AR Module",
+            description: "AR support.",
+        },
+        ar_android: {
+            label: "AR Android Api",
+            description: "Select Api for ARModule on Android",
+        },
+        ar_auto: {
+            label: "auto adaption",
+            description: "Auto adaptation of ar api on android device.",
+        },
+        ar_core: {
+            label: "use ARCore",
+            description: "For ARCore supported devices.",
+        },
+        ar_engine: {
+            label: "use AREngine",
+            description: "For AREngine supported devices, Huawei and HONOR.",
+        },
         custom_pipeline: {
             label: "Custom Render Pipeline (Experimental)",
             description: "Enable custom render pipeline",

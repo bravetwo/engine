@@ -37,6 +37,12 @@
 //#undef CC_USE_GLES3
 //#undef CC_USE_GLES2
 
+// arengine only supports gles2, arcore supports gles2 and gles3
+// setting the CC_USE_GLES3 off is needed while using USE_AR_AUTO or USE_AR_ENGINE
+#if USE_AR_MODULE && (USE_AR_AUTO || USE_AR_ENGINE)
+#undef CC_USE_GLES3
+#endif
+
 #ifdef CC_USE_NVN
     #include "gfx-nvn/NVNDevice.h"
 #endif
@@ -149,9 +155,12 @@ private:
     static bool tryCreate(const DeviceInfo &info, Device **pDevice) {
         Device *device = ccnew DeviceCtor;
 
+        // arcore & arengine currently only supports gles, session update requires gl context 
+        #if !(USE_AR_MODULE && CC_PLATFORM == CC_PLATFORM_ANDROID)
         if (isDetachDeviceThread()) {
             device = ccnew gfx::DeviceAgent(device);
         }
+        #endif
 
 #if !defined(CC_SERVER_MODE)
         if (CC_DEBUG > 0 && !FORCE_DISABLE_VALIDATION || FORCE_ENABLE_VALIDATION) {
