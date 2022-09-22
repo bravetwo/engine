@@ -51,29 +51,12 @@ export class WebGL2PrimaryCommandBuffer extends WebGL2CommandBuffer {
         clearDepth: number,
         clearStencil: number,
     ) {
-        // const armodule = ARModuleX.getInstance();
-        // if(armodule) {
-        //     const xrGpuFramebuffer = armodule.getXRLayerFrameBuffer()
-        //     console.log("xr gpuFramebuffer", xrGpuFramebuffer);
-        //     if(xrGpuFramebuffer) {
-        //         console.log("use xr gpuFramebuffer...");
-        //         const gpuFramebuffer = xrGpuFramebuffer as IWebGL2GPUFramebuffer;
-        //         WebGL2CmdFuncBeginRenderPass(
-        //             WebGL2DeviceManager.instance,
-        //             (renderPass as WebGL2RenderPass).gpuRenderPass,
-        //             gpuFramebuffer,
-        //             renderArea, clearColors, clearDepth, clearStencil,
-        //         );
-        //     }
-        // }
-        //     else {
         WebGL2CmdFuncBeginRenderPass(
             WebGL2DeviceManager.instance,
             (renderPass as WebGL2RenderPass).gpuRenderPass,
             (framebuffer as WebGL2Framebuffer).gpuFramebuffer,
             renderArea, clearColors, clearDepth, clearStencil,
         );
-        //    }
         this._isInRenderPass = true;
     }
 

@@ -69,9 +69,15 @@ export class CocosWebXR {
         this.framebuffer = null;
 
         this.onXRFrame = (t, frame) => {
+            let session = frame.session;
             let refSpace = this.getSessionReferenceSpace(frame.session);
+
+            //window.cancelAnimationFrame();
+            session.requestAnimationFrame(this.onXRFrame);
+
             this.cameraPose = frame.getViewerPose(refSpace);
             this.framebuffer = frame.session.renderState.baseLayer.framebuffer;
+            //console.log("framebuffer", this.framebuffer);
             frameCallback(t);
         }
     };
@@ -103,12 +109,11 @@ export class CocosWebXR {
             session.isImmersive = true;
             this.session = session;
 
-
-
+            // session start
             session.requestReferenceSpace('local').then((refSpace) => {
                 this.immersiveRefSpace = refSpace;
-                console.log('Session refSpace', this.immersiveRefSpace);
-                //this.session.requestAnimationFrame(this.onXRFrame);
+                //console.log('Session refSpace', this.immersiveRefSpace);
+                this.session.requestAnimationFrame(this.onXRFrame);
             });
         });
     };
@@ -116,13 +121,15 @@ export class CocosWebXR {
     onResume() {};
     onPause() {};
     update() {
+        /*
         if(this.session)
             this.session.requestAnimationFrame(this.onXRFrame);
+        //*/
     };
 
     getSessionReferenceSpace(session) {
         //return session.isImmersive ? this.immersiveRefSpace : this.inlineViewerHelper.referenceSpace;
-        console.log('refSpace', this.immersiveRefSpace);
+        //console.log('refSpace', this.immersiveRefSpace);
         return this.immersiveRefSpace;
     }
 
@@ -143,11 +150,11 @@ export class CocosWebXR {
             let pos = this.cameraPose.transform.position;
             let rot = this.cameraPose.transform.orientation;
             poseArray = [
-                -pos.z, pos.y, pos.x,
+                pos.x, pos.y, pos.z,
                 rot.x, rot.y, rot.z, rot.w
             ];
-            console.log("camera pos:", pos);
-            console.log("camera rot:", rot);
+            //console.log("camera pos:", pos);
+            //console.log("camera rot:", rot);
         }
         
         return poseArray;
@@ -183,6 +190,21 @@ export class CocosWebXR {
     }
     updateRenderState(gl) {
         if(this.session) {
+            /*
+            var x = document.createElement("CANVAS");
+            x.getContext('webgl2', {
+                xrCompatible: true
+            });
+            console.log("x:", x);
+
+            let offscreenCanvas = new OffscreenCanvas(256, 256);
+            let osGL = offscreenCanvas.getContext('webgl2', {
+                xrCompatible: true
+            });
+            console.log("offscreenCanvas:", offscreenCanvas);
+            console.log("osGL:", osGL);
+            */
+
             this.session.updateRenderState({ baseLayer: new XRWebGLLayer(this.session, gl, {
                 alpha: false,
                 antialias: false,
@@ -190,7 +212,7 @@ export class CocosWebXR {
                 framebufferScaleFactor: 0.5,
                 ignoreDepthValues: true,
                 stencil: false
-             })});
+            })});
 
             /*
             this.session.requestReferenceSpace('local').then((refSpace) => {

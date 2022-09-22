@@ -31,6 +31,10 @@ import { CocosWebXR } from '../../external/compression/CocosWebXR.js';
 import { Quat, Vec3 } from '../core/math';
 import { Root } from '../core/root';
 import { legacyCC } from '../core/global-exports';
+import { deviceManager } from '../core/gfx/device-manager';
+import { director } from '../core/director';
+import { game } from '../core';
+//import { director } from '../core';
 
 // WebXR
 export class ARModuleX implements IARModule {
@@ -55,6 +59,8 @@ export class ARModuleX implements IARModule {
     public static getInstance() : ARModuleX | null {
         return this._instance;
     }
+
+    public replaceFrameMoveFlag = false;
 
     // load
     public constructor(featuresDataset : ARFeatureData[]) {
@@ -89,15 +95,26 @@ export class ARModuleX implements IARModule {
 
                 this._cocosWebXR!.config(this._configMask);
                 this.initFeatures();
+                // request session
                 this._cocosWebXR!.start();
                 //ARModuleX._instance = this;
                 this._initFlag = true;
             }
         }, (t : number) => {
-            const root = legacyCC.director.root as Root;
+            //const root = legacyCC.director.root as Root;
             const dt = t - this._lastTime ;
-            console.log("frame callback dt", dt);
-            root.frameMove(dt);
+            //console.log("frame callback dt", dt);
+
+            this.replaceFrameMoveFlag = true;
+            game.stopPacer();
+            director.xrTick(dt);
+
+            //deviceManager.gfxDevice;
+
+            // need shut down cocos tick
+
+            //root.xrFrameMove(dt / 1000);
+
             this._lastTime = t;
         });
         this.createFeatures(featuresDataset);
@@ -195,6 +212,7 @@ export class ARModuleX implements IARModule {
         };
 
         const pose = this._cocosWebXR.getCameraPose();
+        console.log("pose:", pose);
         return {
             position: new Vec3(
                 pose[0],

@@ -53,11 +53,11 @@ export class ForwardFlow extends RenderFlow {
     public initialize (info: IRenderFlowInfo): boolean {
         super.initialize(info);
         if (this._stages.length === 0) {
-
+            //*
             const arStage = new ARBackgroundStage();
             arStage.initialize(ARBackgroundStage.initInfo);
             this._stages.push(arStage);
-
+            //*/
             const forwardStage = new ForwardStage();
             forwardStage.initialize(ForwardStage.initInfo);
             this._stages.push(forwardStage);

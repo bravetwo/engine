@@ -44,6 +44,7 @@ import { IPipelineEvent } from './pipeline/pipeline-event';
 import { settings, Settings } from './settings';
 import { localDescriptorSetLayout_ResizeMaxJoints } from './pipeline/define';
 import { macro } from './platform/macro';
+import { ARModuleX } from '../ar/ar-module';
 
 /**
  * @en Initialization information for the Root
@@ -459,6 +460,72 @@ export class Root {
      * @param deltaTime @en The delta time since last update. @zh 距离上一帧间隔时间
      */
     public frameMove (deltaTime: number) {
+        /*
+        const armodule = ARModuleX.getInstance();
+        if(armodule && armodule.replaceFrameMoveFlag === true) return;
+        */
+
+        this._frameTime = deltaTime;
+
+        /*
+        if (this._fixedFPSFrameTime > 0) {
+
+            const elapsed = this._frameTime * 1000.0;
+            if (this._fixedFPSFrameTime > elapsed) {
+
+                setTimeout(function () {}, this._fixedFPSFrameTime - elapsed);
+            }
+        }
+        */
+
+        ++this._frameCount;
+        this._cumulativeTime += deltaTime;
+        this._fpsTime += deltaTime;
+        if (this._fpsTime > 1.0) {
+            this._fps = this._frameCount;
+            this._frameCount = 0;
+            this._fpsTime = 0.0;
+        }
+        for (let i = 0; i < this._scenes.length; ++i) {
+            this._scenes[i].removeBatches();
+        }
+
+        const windows = this._windows;
+        const cameraList: Camera[] = [];
+        for (let i = 0; i < windows.length; i++) {
+            const window = windows[i];
+            window.extractRenderCameras(cameraList);
+        }
+
+        if (this._pipeline && cameraList.length > 0) {
+            this._device.acquire([deviceManager.swapchain]);
+            const scenes = this._scenes;
+            const stamp = legacyCC.director.getTotalFrames();
+            if (this._batcher) {
+                this._batcher.update();
+                this._batcher.uploadBuffers();
+            }
+
+            for (let i = 0; i < scenes.length; i++) {
+                scenes[i].update(stamp);
+            }
+
+            legacyCC.director.emit(legacyCC.Director.EVENT_BEFORE_COMMIT);
+            cameraList.sort((a: Camera, b: Camera) => a.priority - b.priority);
+
+            for (let i = 0; i < cameraList.length; ++i) {
+                cameraList[i].geometryRenderer?.update();
+            }
+            this._pipeline.render(cameraList);
+            this._device.present();
+        }
+
+        if (this._batcher) this._batcher.reset();
+    }
+
+
+    public xrFrameMove (deltaTime: number) {
+        console.log("xrFrameMove", deltaTime);
         this._frameTime = deltaTime;
 
         /*

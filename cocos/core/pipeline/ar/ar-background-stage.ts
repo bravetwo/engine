@@ -48,6 +48,7 @@ export class ARBackgroundStage extends RenderStage {
 
     private declare _arBackground: ARBackground;
     private _updateStateFlag = false;
+    private _camera: Camera | null = null;
 
     constructor () {
         super();
@@ -75,22 +76,28 @@ export class ARBackgroundStage extends RenderStage {
 
         const state = armodule.getAPIState();
         if(state < 0) return;
+        this._camera = camera;
 
         const pipeline = this._pipeline as ForwardPipeline;
         //const device = pipeline.device;
-        const cmdBuff = pipeline.commandBuffers[0];
+        //const cmdBuff = pipeline.commandBuffers[0];
 
-        pipeline.generateRenderArea(camera, this._renderArea);
+        //pipeline.generateRenderArea(camera, this._renderArea);
 
-        const framebuffer = camera.window.framebuffer;
+        //const framebuffer = camera.window.framebuffer;
 
-        const xrframebuffer = armodule.getXRLayerFrameBuffer() as Framebuffer;
+        //const xrframebuffer = armodule.getXRLayerFrameBuffer() as Framebuffer;
+
+        /*
         const device = pipeline.device as WebGL2Device;
         if(!this._updateStateFlag) {
             const { gl } = device;
+
             armodule.updateRenderState(gl as any);
             this._updateStateFlag = true;
-        }
+        }*/
+
+
         /*
         const renderPass = pipeline.getRenderPass(camera.clearFlag & this._clearFlag, framebuffer);
         cmdBuff.beginRenderPass(renderPass, framebuffer, this._renderArea,
@@ -100,5 +107,27 @@ export class ARBackgroundStage extends RenderStage {
 
         cmdBuff.endRenderPass();
         //*/
+    }
+
+    public blitFramebuffer() {
+        const armodule = ARModuleX.getInstance();
+        if(!armodule) return;
+
+        if(this._camera) {
+            const pipeline = this._pipeline as ForwardPipeline;
+            const device = pipeline.device;
+            const camera = this._camera;
+            const { gl } = device as WebGL2Device;
+            const framebuffer = camera.window.framebuffer;
+            const xrgpuframebuffer = armodule.getXRLayerFrameBuffer();
+            if(xrgpuframebuffer) {
+                gl.bindFramebuffer(gl.READ_FRAMEBUFFER, framebuffer);
+                gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, xrgpuframebuffer);
+
+                gl.blitFramebuffer(0, 0, camera.width, camera.height,
+                                    0, 0, camera.width, camera.height,
+                                    gl.COLOR_BUFFER_BIT, gl.LINEAR);
+            }
+        }
     }
 }
