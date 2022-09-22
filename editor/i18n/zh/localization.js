@@ -900,8 +900,8 @@ module.exports = {
             label: "Marionette 动画系统",
             description: "启用 Marionette 动画系统。",
         },
-        xr: {
-            label: "XR",
+        base_xr: {
+            label: "基础 XR 功能",
             description: "启用 XR 功能系统。",
         },
         custom_pipeline: {

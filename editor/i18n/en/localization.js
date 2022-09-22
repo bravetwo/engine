@@ -919,8 +919,8 @@ module.exports = {
             label: "Marionette Animation System",
             description: "Enable the Marionette animation system",
         },
-        xr: {
-            label: "XR",
+        base_xr: {
+            label: "Basic XR Features",
             description: "Enable the XR function system",
         },
         ar: {
