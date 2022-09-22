@@ -96,7 +96,6 @@
         },
         "audio": { "modules": [ "audio" ] },
         "video": { "modules": [ "video" ] },
-        "xr": { "modules": [ "xr" ] },
         "terrain": { 
             "modules": [ "terrain" ], 
             "dependentAssets": [ "1d08ef62-a503-4ce2-8b9a-46c90873f7d3" ] 
@@ -125,6 +124,7 @@
                 "MARIONETTE": true
             }
         },
+        "xr": { "modules": [ "xr" ] },
         "ar": { "modules": [ "ar" ] },
         "custom-pipeline": { "modules": ["custom-pipeline"] }
     },
