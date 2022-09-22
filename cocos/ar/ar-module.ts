@@ -29,6 +29,8 @@ import * as features from './ar-features';
 import { IARModule } from './ar-module-adaptor';
 import { CocosWebXR } from '../../external/compression/CocosWebXR.js';
 import { Quat, Vec3 } from '../core/math';
+import { Root } from '../core/root';
+import { legacyCC } from '../core/global-exports';
 
 // WebXR
 export class ARModuleX implements IARModule {
@@ -44,8 +46,10 @@ export class ARModuleX implements IARModule {
         this._cameraId = val;
     }
 
+    private _initFlag = false;
     private _configMask = FeatureType.None;
     private _featuresMap = new Map<string, ARFeature>();
+    private _lastTime = 0;
 
     private static _instance : ARModuleX | null;
     public static getInstance() : ARModuleX | null {
@@ -77,19 +81,71 @@ export class ARModuleX implements IARModule {
         this.checkFeaturesSupport(armodule.getSupportMask());
         */
 
-        this._cocosWebXR = new CocosWebXR('immersive-ar');
+        this._cocosWebXR = new CocosWebXR('immersive-ar', () => {
+            console.log("<ARModule> onSupportCallback...");
+
+            if(this._cocosWebXR!.isSupported) {
+                console.log("<onSupportCallback> support WebXR!");
+
+                this._cocosWebXR!.config(this._configMask);
+                this.initFeatures();
+                this._cocosWebXR!.start();
+                //ARModuleX._instance = this;
+                this._initFlag = true;
+            }
+        }, (t : number) => {
+            const root = legacyCC.director.root as Root;
+            const dt = t - this._lastTime ;
+            console.log("frame callback dt", dt);
+            root.frameMove(dt);
+            this._lastTime = t;
+        });
         this.createFeatures(featuresDataset);
+        
+        ARModuleX._instance = this;
+    }
+    /*
+    public onSupportCallback() {
+        console.log("<ARModule> onSupportCallback...");
+
+        if(!this._cocosWebXR)
+            this._cocosWebXR = new CocosWebXR('immersive-ar', this.onSupportCallback);
+
         if(this._cocosWebXR.isSupported) {
+            console.log("<onSupportCallback> support WebXR!");
+
             this._cocosWebXR.config(this._configMask);
             this.initFeatures();
             this._cocosWebXR.start();
+            //ARModuleX._instance = this;
+            this._initFlag = true;
+        }
+    }
+    //*/
+
+    public start() {
+        console.log("<ARModule> start...");
+        /*
+        if(!this._cocosWebXR)
+            this._cocosWebXR = new CocosWebXR('immersive-ar', this.onSupportCallback);
+
+        if(!this._initFlag && this._cocosWebXR.isSupported) {
+            console.log("<start> support WebXR!");
+
+            this._cocosWebXR.config(this._configMask);
+            this.initFeatures();
+            this._cocosWebXR.start();
+            
+
+            //ARModuleX._instance = this;
+            this._initFlag = true;
+            console.log("WebXR start...");
 
         } else {
 
         }
-    }
+        //*/
 
-    public start() {
         this._featuresMap.forEach((feature, id) => {
             feature.start();
         });
@@ -110,8 +166,9 @@ export class ARModuleX implements IARModule {
     }
 
     public update() {
-        const instance = ARModuleHelper.getInstance();
-        instance.update();
+        if(!this._cocosWebXR) return;
+
+        this._cocosWebXR.update();
 
         this._featuresMap.forEach((feature, id) => {
             feature.update();
@@ -132,8 +189,12 @@ export class ARModuleX implements IARModule {
     }
 
     public getCameraPose() : ARPose {
-        const instance = ARModuleHelper.getInstance();
-        const pose = instance.getCameraPose();
+        if(!this._cocosWebXR) return {
+            position: new Vec3(0, 0, 0),
+            rotation: new Quat(0, 0, 0, 1)
+        };
+
+        const pose = this._cocosWebXR.getCameraPose();
         return {
             position: new Vec3(
                 pose[0],
@@ -166,6 +227,14 @@ export class ARModuleX implements IARModule {
 
     public setCameraTextureName(id : number) {
 
+    }
+
+    public getCameraTextureRef() : WebGLTexture {
+        return this._cocosWebXR!.getCameraTextureRef();
+    }
+
+    public getXRLayerFrameBuffer() : WebGLFramebuffer {
+        return this._cocosWebXR!.getXRLayerFrameBuffer();
     }
 
     public updateRenderState(gl : WebGLRenderingContext) {

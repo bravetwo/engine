@@ -27,7 +27,7 @@ import { FeatureType } from "../../cocos/ar/ar-feature-base";
 export declare class CocosWebXR {
     isSupported : boolean;
 
-    constructor(mode : string);
+    constructor(mode : string, callback : Function, frame : Function);
 
     config(featureMask : FeatureType);
     getSupportMask() : number;
@@ -46,6 +46,7 @@ export declare class CocosWebXR {
     setCameraTextureName(id) : void;
     getCameraTextureRef() : WebGLTexture;
     getCameraDepthBuffer();
+    getXRLayerFrameBuffer() : WebGLFramebuffer;
     updateRenderState(gl : WebGLRenderingContext);
     
     // raycast & anchor

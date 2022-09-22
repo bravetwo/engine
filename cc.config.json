@@ -243,7 +243,9 @@
                 "pal/screen-adapter": "pal/screen-adapter/minigame/screen-adapter.ts",
                 "pal/input": "pal/input/minigame/index.ts",
                 "pal/env": "pal/env/runtime/env.ts",
-                "pal/pacer": "pal/pacer/pacer-minigame.ts"
+                "pal/pacer": "pal/pacer/pacer-minigame.ts",
+                "cocos/ar/index.ts": "cocos/ar/index.jsb.ts",
+                "cocos/ar/ar-module.ts": "cocos/ar/ar-module.jsb.ts"
             }
         },
         {

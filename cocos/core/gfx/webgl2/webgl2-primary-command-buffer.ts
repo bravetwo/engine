@@ -39,6 +39,8 @@ import { WebGL2Texture } from './webgl2-texture';
 import { RenderPass } from '../base/render-pass';
 import { WebGL2RenderPass } from './webgl2-render-pass';
 import { WebGL2DeviceManager } from './webgl2-define';
+import { ARModuleX } from '../../../ar/ar-module';
+import { IWebGL2GPUFramebuffer } from './webgl2-gpu-objects';
 
 export class WebGL2PrimaryCommandBuffer extends WebGL2CommandBuffer {
     public beginRenderPass (
@@ -49,12 +51,29 @@ export class WebGL2PrimaryCommandBuffer extends WebGL2CommandBuffer {
         clearDepth: number,
         clearStencil: number,
     ) {
+        // const armodule = ARModuleX.getInstance();
+        // if(armodule) {
+        //     const xrGpuFramebuffer = armodule.getXRLayerFrameBuffer()
+        //     console.log("xr gpuFramebuffer", xrGpuFramebuffer);
+        //     if(xrGpuFramebuffer) {
+        //         console.log("use xr gpuFramebuffer...");
+        //         const gpuFramebuffer = xrGpuFramebuffer as IWebGL2GPUFramebuffer;
+        //         WebGL2CmdFuncBeginRenderPass(
+        //             WebGL2DeviceManager.instance,
+        //             (renderPass as WebGL2RenderPass).gpuRenderPass,
+        //             gpuFramebuffer,
+        //             renderArea, clearColors, clearDepth, clearStencil,
+        //         );
+        //     }
+        // }
+        //     else {
         WebGL2CmdFuncBeginRenderPass(
             WebGL2DeviceManager.instance,
             (renderPass as WebGL2RenderPass).gpuRenderPass,
             (framebuffer as WebGL2Framebuffer).gpuFramebuffer,
             renderArea, clearColors, clearDepth, clearStencil,
         );
+        //    }
         this._isInRenderPass = true;
     }
 

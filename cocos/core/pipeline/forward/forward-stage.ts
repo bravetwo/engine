@@ -27,7 +27,7 @@ import { ccclass, displayOrder, type, serializable } from 'cc.decorator';
 import { SetIndex } from '../define';
 import { getPhaseID } from '../pass-phase';
 import { renderQueueClearFunc, RenderQueue, convertRenderQueue, renderQueueSortFunc } from '../render-queue';
-import { ClearFlagBit, Color, Rect } from '../../gfx';
+import { ClearFlagBit, Color, ColorAttachment, DepthStencilAttachment, deviceManager, Filter, Rect, RenderPassInfo, StoreOp } from '../../gfx';
 import { RenderBatchedQueue } from '../render-batched-queue';
 import { RenderInstancedQueue } from '../render-instanced-queue';
 import { IRenderStageInfo, RenderStage } from '../render-stage';
@@ -41,6 +41,15 @@ import { PlanarShadowQueue } from '../planar-shadow-queue';
 import { UIPhase } from '../ui-phase';
 import { Camera } from '../../renderer/scene';
 import { renderProfiler } from '../pipeline-funcs';
+import { WebGL2CmdFuncBlitFramebuffer } from '../../gfx/webgl2/webgl2-commands';
+import { WebGL2Device } from '../../gfx/webgl2/webgl2-device';
+import { ARModuleX } from '../../../ar/ar-module';
+import { IWebGL2GPUFramebuffer } from '../../gfx/webgl2/webgl2-gpu-objects';
+import { WebGL2Framebuffer } from '../../gfx/webgl2/webgl2-framebuffer';
+import { RenderWindow } from '../../renderer/core/render-window';
+import { legacyCC } from '../../global-exports';
+import { Root } from '../../root';
+//import { ARBackground } from '../ar/ar-background';
 
 const colors: Color[] = [new Color(0, 0, 0, 1)];
 
@@ -83,11 +92,15 @@ export class ForwardStage extends RenderStage {
     private declare _planarQueue: PlanarShadowQueue;
     private declare _uiPhase: UIPhase;
 
+    //private declare _arBackground: ARBackground;
+    private _xrSetFlag = false;
+
     constructor () {
         super();
         this._batchedQueue = new RenderBatchedQueue();
         this._instancedQueue = new RenderInstancedQueue();
         this._uiPhase = new UIPhase();
+        //this._arBackground = new ARBackground();
     }
 
     public initialize (info: IRenderStageInfo): boolean {
@@ -107,6 +120,7 @@ export class ForwardStage extends RenderStage {
         this._additiveLightQueue = new RenderAdditiveLightQueue(this._pipeline as ForwardPipeline);
         this._planarQueue = new PlanarShadowQueue(this._pipeline);
         this._uiPhase.activate(pipeline);
+        //this._arBackground.activate(pipeline);
     }
 
     public destroy () {
@@ -166,6 +180,37 @@ export class ForwardStage extends RenderStage {
             colors[0].w = camera.clearColor.w;
         }
         pipeline.generateRenderArea(camera, this._renderArea);
+
+        //*
+        const armodule = ARModuleX.getInstance();
+        if(armodule && !this._xrSetFlag && armodule.getAPIState() === 3) {
+            const xrgpuframebuffer = armodule.getXRLayerFrameBuffer();
+            if(xrgpuframebuffer) {
+                const root = legacyCC.director.root as Root;
+                const swapchain = deviceManager.swapchain;
+
+                const colorAttachment = new ColorAttachment();
+                colorAttachment.format = swapchain.colorTexture.format;
+                const depthStencilAttachment = new DepthStencilAttachment();
+                depthStencilAttachment.format = swapchain.depthStencilTexture.format;
+                depthStencilAttachment.depthStoreOp = StoreOp.DISCARD;
+                depthStencilAttachment.stencilStoreOp = StoreOp.DISCARD;
+                const renderPassInfo = new RenderPassInfo([colorAttachment], depthStencilAttachment);
+
+                const xrWindow = root.createWindow({
+                    title: 'xrWindow',
+                    width: swapchain.width,
+                    height: swapchain.height,
+                    renderPassInfo,
+                    swapchain,
+                    externalSrc: xrgpuframebuffer
+                });
+                camera.window = xrWindow!;
+                console.log("window", camera.window);
+                this._xrSetFlag = true;
+            }
+        }
+        //*/
 
         const framebuffer = camera.window.framebuffer;
         const renderPass = pipeline.getRenderPass(camera.clearFlag & this._clearFlag, framebuffer);

@@ -56,6 +56,7 @@ import {
     IWebGL2GPUTextureView,
 } from './webgl2-gpu-objects';
 import { max } from '../../math/bits';
+//import { WebGLFramebuffer } from '../webgl/webgl-framebuffer';
 
 const WebGLWraps: GLenum[] = [
     0x2901, // WebGLRenderingContext.REPEAT
@@ -1307,12 +1308,19 @@ export function WebGL2CmdFuncCreateFramebuffer (device: WebGL2Device, gpuFramebu
 
     const { gl } = device;
     const attachments: GLenum[] = [];
-
-    const glFramebuffer = gl.createFramebuffer();
-    if (glFramebuffer) {
-        gpuFramebuffer.glFramebuffer = glFramebuffer;
+    
+    console.log("gpuFramebuffer.glFramebuffer", gpuFramebuffer.glFramebuffer);
+    if(!gpuFramebuffer.glFramebuffer) { // for webxr framebuffer
+        const glFramebuffer = gl.createFramebuffer();
+        if (glFramebuffer) gpuFramebuffer.glFramebuffer = glFramebuffer;
+    }
+    //const glFramebuffer = gl.createFramebuffer();
+    //if (glFramebuffer) {
+    if(gpuFramebuffer.glFramebuffer) {
+        //gpuFramebuffer.glFramebuffer = glFramebuffer;
 
         if (device.stateCache.glFramebuffer !== gpuFramebuffer.glFramebuffer) {
+            console.log("bind gpuFramebuffer.glFramebuffer");
             gl.bindFramebuffer(gl.FRAMEBUFFER, gpuFramebuffer.glFramebuffer);
         }
 

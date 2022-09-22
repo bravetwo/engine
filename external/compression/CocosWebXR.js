@@ -24,24 +24,56 @@
 
 // AR - 'immersive-ar', VR - 'immersive-vr'
 export class CocosWebXR {
-    constructor(mode) {
-        if (navigator.xr) {
-            navigator.xr.isSessionSupported(mode).then((isSupported) => {
-                this.isSupported = isSupported;
-            });
-        }
-
+    constructor(mode, supportCallback, frameCallback) {
+        this.isSupported = false;
+        
         this.mode = mode;
 
         // 'anchors', 'plane-detection'
         this.sessionInit = {
-            requiredFeatures: [],
+            requiredFeatures: [ 'local' ],
             optionalFeatures: [],
+        };
+
+        console.log(navigator.xr);
+        if (navigator.xr) {
+            navigator.xr.isSessionSupported(mode).then((isSupported) => {
+                this.isSupported = isSupported;
+                console.log("navigator.xr is supported", isSupported);
+
+                /*
+                navigator.xr.addEventListener('sessiongranted', (evt) => {
+                    // One could check for the type of session granted.
+                    // Events notifies of session creation after navigation, UA action, or requestSession.
+                    // The session object is provided as part of this event.
+                    //console.log('sessiongranted event', evt.mode);
+                    //if (evt.mode === 'immersive-vr' || evt.mode === 'immersive-ar') {
+                       // set up app state for immersive vr, if that's what the app wants
+                       this.requestSession();
+
+                    //} else {
+                       // notify user that this app only works in immersive vr mode, if desired
+                    //}
+                });
+                //*/
+
+                supportCallback();
+            });
         };
 
         this.session = null;
         this.features = [];
         this.featureSupportMask = 0;
+        this.immersiveRefSpace = null;
+        this.cameraPose = null;
+        this.framebuffer = null;
+
+        this.onXRFrame = (t, frame) => {
+            let refSpace = this.getSessionReferenceSpace(frame.session);
+            this.cameraPose = frame.getViewerPose(refSpace);
+            this.framebuffer = frame.session.renderState.baseLayer.framebuffer;
+            frameCallback(t);
+        }
     };
 
     config(featureMask) {
@@ -49,20 +81,51 @@ export class CocosWebXR {
 
         }
     };
+
     getSupportMask() {
 
     };
+
     start() {
+        console.log("WebXR start...");
+        /*
+        var event = new Event('sessiongranted', { mode : this.mode });
+        navigator.xr.dispatchEvent(event);
+        //*/
+        this.requestSession();
+    };
+
+    requestSession() {
+        console.log('requestSession...');
         navigator.xr.requestSession(this.mode, this.sessionInit).then((session) => {
+        //navigator.xr.requestSession(this.mode).then((session) => {    
             session.mode = this.mode;
             session.isImmersive = true;
             this.session = session;
+
+
+
+            session.requestReferenceSpace('local').then((refSpace) => {
+                this.immersiveRefSpace = refSpace;
+                console.log('Session refSpace', this.immersiveRefSpace);
+                //this.session.requestAnimationFrame(this.onXRFrame);
+            });
         });
     };
 
     onResume() {};
     onPause() {};
-    update() {};
+    update() {
+        if(this.session)
+            this.session.requestAnimationFrame(this.onXRFrame);
+    };
+
+    getSessionReferenceSpace(session) {
+        //return session.isImmersive ? this.immersiveRefSpace : this.inlineViewerHelper.referenceSpace;
+        console.log('refSpace', this.immersiveRefSpace);
+        return this.immersiveRefSpace;
+    }
+
     getAPIState() {
         if(this.session) {
             return 3; 
@@ -71,7 +134,24 @@ export class CocosWebXR {
     };
 
     // camera & background
-    getCameraPose() {};
+    getCameraPose() {
+        let poseArray = [
+            0, 0, 0,
+            0, 0, 0, 1
+        ];
+        if(this.cameraPose) {
+            let pos = this.cameraPose.transform.position;
+            let rot = this.cameraPose.transform.orientation;
+            poseArray = [
+                -pos.z, pos.y, pos.x,
+                rot.x, rot.y, rot.z, rot.w
+            ];
+            console.log("camera pos:", pos);
+            console.log("camera rot:", rot);
+        }
+        
+        return poseArray;
+    };
     getCameraViewMatrix() {};
     getCameraProjectionMatrix() {};
     getCameraTexCoords() {};
@@ -81,11 +161,44 @@ export class CocosWebXR {
     setCameraTextureName(id) {};
     getCameraTextureRef() {
         let layer = this.session.renderState.baseLayer;
-        return layer.colorTexture;
+        if(layer)
+            return layer.colorTexture;
+
+        return null;
     };
     getCameraDepthBuffer() {};
+    getXRLayerFrameBuffer() {
+        /*
+        if(this.session) {
+            if(this.session.renderState) {
+                let layer = this.session.renderState.baseLayer;
+                if(layer) {
+                    console.log("xr framebuffer", layer.framebuffer)
+                    return layer.framebuffer;
+                }
+            }
+        }*/
+        
+        return this.framebuffer;
+    }
     updateRenderState(gl) {
-        session.updateRenderState({ baseLayer: new XRWebGLLayer(this.session, gl) });
+        if(this.session) {
+            this.session.updateRenderState({ baseLayer: new XRWebGLLayer(this.session, gl, {
+                alpha: false,
+                antialias: false,
+                depth: false,
+                framebufferScaleFactor: 0.5,
+                ignoreDepthValues: true,
+                stencil: false
+             })});
+
+            /*
+            this.session.requestReferenceSpace('local').then((refSpace) => {
+                this.immersiveRefSpace = refSpace;
+                console.log('State refSpace', this.immersiveRefSpace);
+                this.session.requestAnimationFrame(this.onXRFrame);
+            });*/
+        }
     };
 
     // raycast & anchor
