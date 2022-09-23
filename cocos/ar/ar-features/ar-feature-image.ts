@@ -22,22 +22,10 @@
  THE SOFTWARE.
 */
 
-//import { Prefab, instantiate, Vec3, resources, Material, builtinResMgr, director, Vec4, Quat } from '../../core';
-import { ccclass, menu, property, disallowMultiple, type } from '../../core/data/class-decorator'
-import { ARFeature, ARPose, ARTrackable, FeatureEvent, FeatureType, IFeatureData } from '../ar-feature-base';
-import { ARSession } from '../ar-session-component';
-import { Node } from '../../core/scene-graph'
-import { createMesh } from '../../3d/misc';
-import { ARModuleHelper } from '../ar-module-helper';
-import { Mesh, MeshRenderer, ModelComponent } from '../../3d';
-import { Model } from '../../core/renderer/scene';
-import { MorphModel } from '../../3d/models/morph-model';
-import { primitives } from '../../../exports/primitive';
-import { PrimitiveMode } from '../../core/gfx';
-import { TERRAIN_NORTH_INDEX } from '../../terrain';
-import { ARFeatureData } from '../ar-feature-data';
-import { ARModuleAdaptor } from '../ar-module-adaptor';
+import { ccclass, property } from '../../core/data/class-decorator'
+import { ARFeature, ARTrackable, FeatureEvent, FeatureType, IFeatureData, ARFeatureData} from '../ar-feature-base';
 import { Quat, Vec3 } from '../../core/math';
+import { ARModuleX } from '../ar-module';
 
 export interface ARImage extends ARTrackable {
     libIndex : number;
@@ -68,14 +56,12 @@ export class ARFeatureImageTracking extends ARFeature {
     private _maxTrackingNumber : number = 1;
 
     private static readonly IMAGE_INFO_SIZE = 9;
-    private _addedImages : ARImage[];
-    private _updatedImages : ARImage[];
-    private _removedImages : ARImage[];
+    private _addedImages : ARImage[] = [];
+    private _updatedImages : ARImage[] = [];
+    private _removedImages : ARImage[] = [];
 
-    //constructor(jsonObject : any, session : ARSession) {
-        //super(jsonObject, session);
-    constructor (session : ARModuleAdaptor, config : IFeatureData);
-    constructor (session : ARModuleAdaptor, config : IFeatureData, jsonObject? : any) {
+    constructor (session : ARModuleX, config : IFeatureData);
+    constructor (session : ARModuleX, config : IFeatureData, jsonObject? : any) {
         super(session, config, jsonObject);
 
         if(config) {
@@ -89,10 +75,6 @@ export class ARFeatureImageTracking extends ARFeature {
             if(jsonObject.maxTrackingNumber)
                 this._maxTrackingNumber = jsonObject.maxTrackingNumber;
         }
-        
-        this._addedImages = new Array();
-        this._updatedImages = new Array();
-        this._removedImages = new Array();
     }
 
     isReady() : boolean {
@@ -101,22 +83,19 @@ export class ARFeatureImageTracking extends ARFeature {
 
     init() {
         super.init();
-        const armodule = ARModuleHelper.getInstance();
 
         this._imageNames.forEach(imageName => {
-            armodule.addImageToLib(imageName);
+            this.session!.addImageToLib(imageName);
         });
-        armodule.setMaxTrackingNumber(this._maxTrackingNumber);
+        this.session!.setImageMaxTrackingNumber(this._maxTrackingNumber);
     }
 
     protected onEnable(): void {
-        const armodule = ARModuleHelper.getInstance();
-        armodule.enableImageTracking(this._enable);
+        this.session!.enableImageTracking(this._enable);
     }
 
     protected onDisable(): void {
-        const armodule = ARModuleHelper.getInstance();
-        armodule.enableImageTracking(this._enable);
+        this.session!.enableImageTracking(this._enable);
     }
 
     update() {
@@ -126,45 +105,42 @@ export class ARFeatureImageTracking extends ARFeature {
     }
 
     private processChanges() {
-        const armodule = ARModuleHelper.getInstance();
-
         let imagesInfo : number[];
-        imagesInfo = armodule.getAddedImagesInfo();
+        imagesInfo = this.session!.getAddedImagesInfo();
         if(imagesInfo.length > 0) {
             console.log("add images:", imagesInfo.length);
-            //this._addedImages = this.assembleInfos(imagesInfo);
             this._addedImages.length = 0;
             this.assembleInfos(imagesInfo, this._addedImages);
             // event
-            if(this._addedImages.length > 0)
+            if(this._addedImages.length > 0){
                 this.onAddEvent.trigger(this._addedImages);
+            }
         }
 
-        imagesInfo = armodule.getUpdatedImagesInfo();
+        imagesInfo = this.session!.getUpdatedImagesInfo();
         if(imagesInfo.length > 0) {
             console.log("update images:", imagesInfo.length);
-            //this._updatedImages = this.assembleInfos(imagesInfo);
             this._updatedImages.length = 0;
             this.assembleInfos(imagesInfo, this._updatedImages);
             // event
-            if(this._updatedImages.length > 0)
+            if(this._updatedImages.length > 0){
                 this.onUpdateEvent.trigger(this._updatedImages);
+            }
         }
 
-        imagesInfo = armodule.getRemovedImagesInfo();
+        imagesInfo = this.session!.getRemovedImagesInfo();
         if(imagesInfo.length > 0) {
             console.log("remove images:", imagesInfo.length);
-            //this._removedImages = this.assembleInfos(imagesInfo);
             this._removedImages.length = 0;
             this.assembleInfos(imagesInfo, this._removedImages);
             // event
-            if(this._removedImages.length > 0)
+            if(this._removedImages.length > 0){
                 this.onRemoveEvent.trigger(this._removedImages);
+            }
         }
     }
 
-    private assembleInfos(src : number[], dst : ARImage[]) {
-        //let images : ARImage[] = new Array();
+    private assembleInfos(src: number[], dst: ARImage[]) {
         if(src) {
             let count = src.length / ARFeatureImageTracking.IMAGE_INFO_SIZE;
             let offset = 0;
@@ -191,7 +167,5 @@ export class ARFeatureImageTracking extends ARFeature {
                 dst.push(image);
             }
         }
-        
-        //return images;
     }
 }

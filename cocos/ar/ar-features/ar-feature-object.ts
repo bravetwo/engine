@@ -25,16 +25,13 @@
 //import { Prefab, instantiate, Vec3, resources, Material, builtinResMgr, director, Vec4, Quat } from '../../core';
 import { ccclass, menu, property, disallowMultiple, type } from '../../core/data/class-decorator'
 import { ARFeature, ARPose, FeatureEvent, FeatureType, IFeatureData } from '../ar-feature-base';
-import { ARSession } from '../ar-session-component';
 import { Node } from '../../core/scene-graph'
 import { createMesh } from '../../3d/misc';
-import { ARModuleHelper } from '../ar-module-helper';
 import { Mesh, MeshRenderer, ModelComponent } from '../../3d';
 import { Model } from '../../core/renderer/scene';
 import { MorphModel } from '../../3d/models/morph-model';
 import { primitives } from '../../../exports/primitive';
 import { PrimitiveMode } from '../../core/gfx';
-import { ARModuleAdaptor } from '../ar-module-adaptor';
 import { Quat, Vec3 } from '../../core/math';
 
 export interface ARTrackingObject {

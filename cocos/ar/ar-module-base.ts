@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2021 Xiamen Yaji Software Co., Ltd.
+ Copyright (c) 2022 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos2d-x.org
 
@@ -22,20 +22,31 @@
  THE SOFTWARE.
 */
 
-import { ccclass } from '../core/data/class-decorator';
-import { legacyCC } from '../core/global-exports';
+export abstract class IARModule {
+    start (): void {};
+    resume (): void {};
+    pause (): void {};
+    update (): void {};
 
-@ccclass('cc.ARModule')
-export abstract class  ARModule {
-    public abstract start (): void;
-    public abstract onResume (): void;
-    public abstract onPause (): void;
-    public abstract update (): void;
+    enablePlane (enable : boolean) {};
+    setPlaneDetectionMode (mode : number) {};
+    setPlaneMaxTrackingNumber (count : number) {};
+    getAddedPlanesInfo(): number[] {return [];};
+    getUpdatedPlanesInfo(): number[]{return [];};
+    getRemovedPlanesInfo(): number[]{return [];};
 
-    public abstract setCameraTextureName (id: number): void;
-    public abstract getCameraPose (): number[];
-    public abstract getCameraViewMatrix (): number[];
-    public abstract getCameraProjectionMatrix (): number[];
+    enableImageTracking (enable : boolean) {};
+    addImageToLib(name: string){};
+    setImageMaxTrackingNumber (count : number) {};
+    getAddedImagesInfo(): number[] {return [];};
+    getUpdatedImagesInfo(): number[]{ return [];};
+    getRemovedImagesInfo(): number[]{return [];};
+
+    enableSceneMesh (enable : boolean) {};
+    getRemovedSceneMesh(): number[]{return [];};
+    getAddedSceneMesh(): number[]{return [];};
+    getUpdatedSceneMesh(): number[]{ return [];};
+    getSceneMeshVertices(meshRef: number) : number[]{return [];};
+    getSceneMeshTriangleIndices(meshRef: number): number[]{return [];};
+    endRequireSceneMesh() {};
 }
-
-legacyCC.ARModule = ARModule;

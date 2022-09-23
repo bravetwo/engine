@@ -24,19 +24,12 @@
 
 declare const jsb: any;
 
-import { Quat, Vec3 } from '../core';
-import { ARFeature, ARPose, FeatureType } from './ar-feature-base';
-import { ARFeatureData } from './ar-feature-data';
+import { Quat, Vec3 , Node} from '../core';
+import { ARFeature, ARPose, FeatureType, ARFeatureData} from './ar-feature-base';
 import * as features from './ar-features';
+import { IARModule } from './ar-module-base';
 
-export interface IARModule {
-    start (): void;
-    resume (): void;
-    pause (): void;
-    update (): void;
-}
-
-export class ARModuleX implements IARModule {
+export class ARModuleX extends IARModule {
     public static readonly FEATURE_PREFIX = "ARFeature";
 
     protected _nativeObj;
@@ -52,7 +45,7 @@ export class ARModuleX implements IARModule {
 
     private _configMask = FeatureType.None;
     private _featuresMap = new Map<string, ARFeature>();
-
+    private anchorsMap = new Map<number, Array<Node>>();
     private static _instance : ARModuleX | null;
     public static getInstance() : ARModuleX | null {
         return this._instance;
@@ -60,6 +53,7 @@ export class ARModuleX implements IARModule {
 
     // load
     public constructor(featuresDataset : ARFeatureData[]) {
+        super();
         this._nativeObj = new jsb.ARModule();
 
         if(!this._nativeObj) {
@@ -221,4 +215,116 @@ export class ARModuleX implements IARModule {
         }
     }
     //#endregion
+
+    tryHitTest (xPx : number, yPx : number) : boolean {
+        return this._nativeObj.tryHitTest(xPx, yPx);
+    }
+
+    getHitResult () : number[] {
+        return this._nativeObj.getHitResult();
+    }
+
+    getHitId () : number {
+        return this._nativeObj.getHitId();
+    }
+
+    tryHitAttachAnchor (planeIndex : number, node : Node) {
+        let tryResult = this._nativeObj.tryHitAttachAnchor(planeIndex);
+        if(tryResult >= 0) {
+            if(this.anchorsMap.has(tryResult)) {
+                let nodes = this.anchorsMap.get(tryResult);
+                nodes?.push(node);
+            } else {
+                let nodes = new Array<Node>();
+                nodes.push(node);
+                this.anchorsMap.set(tryResult, nodes);
+            }
+        }
+    }
+
+    updateAnchors () {
+        this.anchorsMap.forEach((nodes, index) => {
+            let pose = this._nativeObj.getAnchorPose(index);
+            nodes.forEach((node) => {
+                node.setWorldPosition(pose[0], pose[1], pose[2]);
+                node.setWorldRotation(pose[3], pose[4], pose[5], pose[6]);
+            })
+        });
+    }
+
+    enablePlane (enable : boolean) {
+        this._nativeObj.enablePlane(enable);
+    }
+
+    setPlaneDetectionMode (mode : number) {
+        this._nativeObj.setPlaneDetectionMode(mode);
+    }
+
+    setPlaneMaxTrackingNumber (count : number) {
+        this._nativeObj.setPlaneMaxTrackingNumber(count);
+    }
+
+    getAddedPlanesInfo(): number[] {
+        return this._nativeObj.getAddedPlanesInfo();
+    }
+
+    getUpdatedPlanesInfo(): number[]{
+        return this._nativeObj.getUpdatedPlanesInfo();
+    }
+
+    getRemovedPlanesInfo(): number[]{
+        return this._nativeObj.getRemovedPlanesInfo();
+    }
+
+    enableImageTracking (enable : boolean) {
+        this._nativeObj.enableImageTracking(enable);
+    }
+
+    addImageToLib(name: string){
+        this._nativeObj.addImageToLib(name);
+    }
+
+    setImageMaxTrackingNumber (count : number) {
+        this._nativeObj.setImageMaxTrackingNumber(count);
+    }
+
+    getAddedImagesInfo(): number[] {
+        return this._nativeObj.getAddedImagesInfo();
+    }
+
+    getUpdatedImagesInfo(): number[]{
+        return this._nativeObj.getUpdatedImagesInfo();
+    }
+
+    getRemovedImagesInfo(): number[]{
+        return this._nativeObj.getRemovedImagesInfo();
+    }
+
+    enableSceneMesh (enable : boolean) {
+        this._nativeObj.enableSceneMesh(enable);
+    }
+
+    getRemovedSceneMesh(): number[]{
+        return this._nativeObj.getRemovedSceneMesh();
+    }
+
+    getAddedSceneMesh(): number[]{
+        return this._nativeObj.getAddedSceneMesh();
+    }
+
+    getUpdatedSceneMesh(): number[]{
+        return this._nativeObj.getUpdatedSceneMesh();
+    }
+
+    getSceneMeshVertices(meshRef: number) : number[]{
+        return this._nativeObj.getSceneMeshVertices(meshRef);
+    }
+
+    getSceneMeshTriangleIndices(meshRef: number) : number[]{
+        return this._nativeObj.getSceneMeshTriangleIndices(meshRef);
+    }
+
+    endRequireSceneMesh() {
+        this._nativeObj.endRequireSceneMesh();
+    }
 }

@@ -24,20 +24,16 @@
 
 //import { Prefab, instantiate, Vec3, resources, Material, builtinResMgr, director, Vec4, Quat, ccenum } from '../../core';
 import { ccclass, menu, property, disallowMultiple, type } from '../../core/data/class-decorator'
-import { ARFeature, ARTrackable, FeatureEvent, FeatureType, IFeatureData } from '../ar-feature-base';
-import { ARSession } from '../ar-session-component';
+import { ARFeature, ARTrackable, FeatureEvent, FeatureType, IFeatureData, ARFeatureData} from '../ar-feature-base';
 import { Node } from '../../core/scene-graph'
 import { createMesh, MeshUtils } from '../../3d/misc/';
-import { ARModuleHelper } from '../ar-module-helper';
 import { Mesh, MeshRenderer, ModelComponent, utils } from '../../3d';
 import { Model } from '../../core/renderer/scene';
 import { MorphModel } from '../../3d/models/morph-model';
 import { primitives } from '../../../exports/primitive';
 import { PrimitiveMode } from '../../core/gfx';
 import { NULL } from '@cocos/physx';
-import { ARFeatureData } from '../ar-feature-data';
 import { MeshCollider } from '../../physics/framework';
-import { ARModuleAdaptor } from '../ar-module-adaptor';
 import { value } from '../../core/utils/js-typed';
 import { ccenum } from '../../core/value-types/enum';
 import { Quat, Vec3 } from '../../core/math';

@@ -22,16 +22,14 @@
  THE SOFTWARE.
 */
 
-import { ARFeature, ARPose, FeatureType } from './ar-feature-base';
-import { ARFeatureData } from './ar-feature-data';
-import { ARModuleHelper } from './ar-module-helper';
+import { ARFeature, ARPose, FeatureType, ARFeatureData } from './ar-feature-base';
 import * as features from './ar-features';
-import { IARModule } from './ar-module-adaptor';
 import { CocosWebXR } from '../../external/compression/CocosWebXR.js';
 import { Quat, Vec3 } from '../core/math';
+import { IARModule } from './ar-module-base';
 
 // WebXR
-export class ARModuleX implements IARModule {
+export class ARModuleX extends IARModule {
     public static readonly FEATURE_PREFIX = "ARFeature";
 
     private _cocosWebXR: CocosWebXR | null = null;
@@ -46,7 +44,7 @@ export class ARModuleX implements IARModule {
 
     private _configMask = FeatureType.None;
     private _featuresMap = new Map<string, ARFeature>();
-
+  
     private static _instance : ARModuleX | null;
     public static getInstance() : ARModuleX | null {
         return this._instance;
@@ -54,28 +52,8 @@ export class ARModuleX implements IARModule {
 
     // load
     public constructor(featuresDataset : ARFeatureData[]) {
+        super();
         console.log("init ARModule Web...");
-        /*
-        const armodule = ARModuleHelper.getInstance();
-
-        if(!armodule) {
-            console.error("... armodule init failed! ...");
-            return;
-        }
-
-        // create features from json
-        // assembly feature config mask
-        this.createFeatures(featuresDataset);
-        armodule.config(this._configMask);
-
-        // init native features setting feature configs
-        // after mask config and before native session start
-        this.initFeatures();
-        armodule.start();
-
-        // check for feature support, eliminate unsupported features
-        this.checkFeaturesSupport(armodule.getSupportMask());
-        */
 
         this._cocosWebXR = new CocosWebXR('immersive-ar');
         this.createFeatures(featuresDataset);
@@ -100,19 +78,14 @@ export class ARModuleX implements IARModule {
     }
 
     public resume() {
-        const instance = ARModuleHelper.getInstance();
-        instance.onResume();
+      
     }
 
     public pause() {
-        const instance = ARModuleHelper.getInstance();
-        instance.onPause();
+    
     }
 
     public update() {
-        const instance = ARModuleHelper.getInstance();
-        instance.update();
-
         this._featuresMap.forEach((feature, id) => {
             feature.update();
         });
@@ -132,8 +105,7 @@ export class ARModuleX implements IARModule {
     }
 
     public getCameraPose() : ARPose {
-        const instance = ARModuleHelper.getInstance();
-        const pose = instance.getCameraPose();
+        const pose = [0, 0, 0, 0, 0, 0, 0];
         return {
             position: new Vec3(
                 pose[0],
@@ -150,8 +122,7 @@ export class ARModuleX implements IARModule {
     }
 
     public getCameraFov() : number {
-        const instance = ARModuleHelper.getInstance();
-        const matArr = instance.getCameraProjectionMatrix();
+        const matArr = [0, 0, 0, 0, 0, 0, 0];
         const fov = 2 * Math.atan(1 / matArr[5]) * 180 / Math.PI;
         return fov;
     }
@@ -234,4 +205,6 @@ export class ARModuleX implements IARModule {
         }
     }
     //#endregion
+
+    
 }

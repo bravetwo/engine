@@ -23,10 +23,8 @@
 */
 
 import { math } from '../core';
-import { ccclass, menu, property, disallowMultiple, type } from '../core/data/class-decorator'
-import { convertWraps } from '../spine';
-import { ARModuleAdaptor } from './ar-module-adaptor';
-import { ARSession } from './ar-session-component'
+import { ccclass, property } from '../core/data/class-decorator';
+import { ARModuleX } from './ar-module';
 
 interface IFeatureEvent<T> {
     on(handler : {(data? : T) : void }) : void;
@@ -80,6 +78,14 @@ export enum FeatureType {
     FaceTracking = 1 << 4
 }
 
+@ccclass('cc.ARFeatureData')
+export abstract class ARFeatureData implements IFeatureData {
+    @property
+    type: FeatureType = FeatureType.None;
+    @property
+    enable: boolean = true;
+}
+
 export abstract class ARFeature implements IFeature {
     public get name() : string {
         return this._name;
@@ -99,7 +105,7 @@ export abstract class ARFeature implements IFeature {
         }
     }
 
-    public get session() : ARModuleAdaptor {
+    public get session() : ARModuleX | null {
         return this._session;
     }
 
@@ -109,11 +115,11 @@ export abstract class ARFeature implements IFeature {
     protected _enable : boolean = true;
     //protected _support : boolean = false;
 
-    protected _session : ARModuleAdaptor;
+    protected _session : ARModuleX | null = null;
 
-    constructor (session : ARModuleAdaptor, config : IFeatureData);
-    constructor (session : ARModuleAdaptor, config : IFeatureData, jsonObject : any);
-    constructor (session : ARModuleAdaptor, config : IFeatureData | IFeature, jsonObject? : any) {
+    constructor (session : ARModuleX, config : IFeatureData);
+    constructor (session : ARModuleX, config : IFeatureData, jsonObject : any);
+    constructor (session : ARModuleX, config : IFeatureData | IFeature, jsonObject? : any) {
         this._session = session;
         
         if(config) {
