@@ -27,7 +27,7 @@ import { FeatureType } from "../../cocos/ar/ar-feature-base";
 export declare class CocosWebXR {
     isSupported : boolean;
 
-    constructor(mode : string, callback : Function, frame : Function);
+    constructor(mode : string, support : Function, frame : Function);
 
     config(featureMask : FeatureType);
     getSupportMask() : number;

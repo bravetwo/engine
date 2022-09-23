@@ -229,10 +229,13 @@ export class ARModuleX implements IARModule {
     }
 
     public getCameraFov() : number {
-        const instance = ARModuleHelper.getInstance();
-        const matArr = instance.getCameraProjectionMatrix();
-        const fov = 2 * Math.atan(1 / matArr[5]) * 180 / Math.PI;
-        return fov;
+        const matArr = this._cocosWebXR?.getCameraProjectionMatrix();
+        if(matArr) {
+            const fov = 2 * Math.atan(1 / matArr[5]) * 180 / Math.PI;
+            console.log("camera fov", fov);// ? 180
+            return fov;
+        }
+        return 45;
     }
 
     public getCameraTexCoords() : number[] {

@@ -23,7 +23,7 @@
  THE SOFTWARE.
  */
 
- import { ClearFlagBit, Color, Framebuffer, Rect } from '../../gfx';
+ import { ClearFlagBit, Color, ColorAttachment, DepthStencilAttachment, deviceManager, Framebuffer, Rect, RenderPassInfo, StoreOp } from '../../gfx';
 import { IRenderStageInfo, RenderStage } from '../render-stage';
 import { ForwardStagePriority } from '../enum';
 import { ForwardFlow } from '../forward/forward-flow';
@@ -32,6 +32,8 @@ import { Camera } from '../../renderer/scene';
 import { ARBackground } from './ar-background';
 import { ARModuleX } from '../../../ar/ar-module';
 import { WebGL2Device } from '../../gfx/webgl2/webgl2-device';
+import { legacyCC } from '../../global-exports';
+import { Root } from '../../root';
 
 const colors: Color[] = [new Color(0, 0, 0, 1)];
 
@@ -48,6 +50,7 @@ export class ARBackgroundStage extends RenderStage {
 
     private declare _arBackground: ARBackground;
     private _updateStateFlag = false;
+    private _xrWindowSetFlag = false;
     private _camera: Camera | null = null;
 
     constructor () {
@@ -79,7 +82,7 @@ export class ARBackgroundStage extends RenderStage {
         this._camera = camera;
 
         const pipeline = this._pipeline as ForwardPipeline;
-        //const device = pipeline.device;
+        const device = pipeline.device;
         //const cmdBuff = pipeline.commandBuffers[0];
 
         //pipeline.generateRenderArea(camera, this._renderArea);
@@ -87,6 +90,44 @@ export class ARBackgroundStage extends RenderStage {
         //const framebuffer = camera.window.framebuffer;
 
         //const xrframebuffer = armodule.getXRLayerFrameBuffer() as Framebuffer;
+
+        if(!this._xrWindowSetFlag && state === 3) {
+            if(!this._updateStateFlag) {
+                const { gl } = device as WebGL2Device;
+
+                armodule.updateRenderState(gl as any);
+                this._updateStateFlag = true;
+            }
+            //*
+            const xrgpuframebuffer = armodule.getXRLayerFrameBuffer();
+            if(xrgpuframebuffer) {
+                const root = legacyCC.director.root as Root;
+                const swapchain = deviceManager.swapchain;
+
+                const colorAttachment = new ColorAttachment();
+                colorAttachment.format = swapchain.colorTexture.format;
+                const depthStencilAttachment = new DepthStencilAttachment();
+                depthStencilAttachment.format = swapchain.depthStencilTexture.format;
+                depthStencilAttachment.depthStoreOp = StoreOp.DISCARD;
+                depthStencilAttachment.stencilStoreOp = StoreOp.DISCARD;
+                const renderPassInfo = new RenderPassInfo([colorAttachment], depthStencilAttachment);
+
+                const xrWindow = root.createWindow({
+                    title: 'xrWindow',
+                    width: swapchain.width,
+                    height: swapchain.height,
+                    renderPassInfo,
+                    swapchain,
+                    externalSrc: xrgpuframebuffer
+                });
+                camera.window = xrWindow!;
+                console.log("window", camera.window);
+                this._xrWindowSetFlag = true;
+            }
+            //*/
+        } else {
+            
+        }
 
         /*
         const device = pipeline.device as WebGL2Device;

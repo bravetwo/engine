@@ -160,7 +160,12 @@ export class CocosWebXR {
         return poseArray;
     };
     getCameraViewMatrix() {};
-    getCameraProjectionMatrix() {};
+    getCameraProjectionMatrix() {
+        if(this.cameraPose) {
+            return this.cameraPose.views[0].projectionMatrix;
+        }
+        return null;
+    };
     getCameraTexCoords() {};
     setDisplayGeometry(rotation, width, height) {
 
@@ -206,12 +211,12 @@ export class CocosWebXR {
             */
 
             this.session.updateRenderState({ baseLayer: new XRWebGLLayer(this.session, gl, {
-                alpha: false,
-                antialias: false,
-                depth: false,
+                alpha: true,
+                antialias: true,
+                depth: true,
                 framebufferScaleFactor: 0.5,
-                ignoreDepthValues: true,
-                stencil: false
+                ignoreDepthValues: false,
+                stencil: true
             })});
 
             /*

@@ -93,7 +93,7 @@ export class ForwardStage extends RenderStage {
     private declare _uiPhase: UIPhase;
 
     //private declare _arBackground: ARBackground;
-    private _xrSetFlag = false;
+    private _xrWindowSetFlag = false;
     private _updateStateFlag = false;
 
     constructor () {
@@ -182,16 +182,15 @@ export class ForwardStage extends RenderStage {
         }
         pipeline.generateRenderArea(camera, this._renderArea);
 
-        //* for webxr
+        /* for webxr
         const armodule = ARModuleX.getInstance();
-        if(armodule && !this._xrSetFlag && armodule.getAPIState() === 3 && armodule.CameraId === camera.node.uuid) {
+        if(armodule && !this._xrWindowSetFlag && armodule.getAPIState() === 3 && armodule.CameraId === camera.node.uuid) {
             if(!this._updateStateFlag) {
                 const { gl } = device as WebGL2Device;
 
                 armodule.updateRenderState(gl as any);
                 this._updateStateFlag = true;
             }
-            //*
             const xrgpuframebuffer = armodule.getXRLayerFrameBuffer();
             if(xrgpuframebuffer) {
                 const root = legacyCC.director.root as Root;
@@ -215,9 +214,8 @@ export class ForwardStage extends RenderStage {
                 });
                 camera.window = xrWindow!;
                 console.log("window", camera.window);
-                this._xrSetFlag = true;
+                this._xrWindowSetFlag = true;
             }
-            //*/
         }
         //*/
 
