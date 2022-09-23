@@ -41,14 +41,7 @@ import { PlanarShadowQueue } from '../planar-shadow-queue';
 import { UIPhase } from '../ui-phase';
 import { Camera } from '../../renderer/scene';
 import { renderProfiler } from '../pipeline-funcs';
-import { WebGL2CmdFuncBlitFramebuffer } from '../../gfx/webgl2/webgl2-commands';
-import { WebGL2Device } from '../../gfx/webgl2/webgl2-device';
-import { ARModuleX } from '../../../ar/ar-module';
-import { IWebGL2GPUFramebuffer } from '../../gfx/webgl2/webgl2-gpu-objects';
-import { WebGL2Framebuffer } from '../../gfx/webgl2/webgl2-framebuffer';
-import { RenderWindow } from '../../renderer/core/render-window';
-import { legacyCC } from '../../global-exports';
-import { Root } from '../../root';
+
 //import { ARBackground } from '../ar/ar-background';
 
 const colors: Color[] = [new Color(0, 0, 0, 1)];
@@ -93,8 +86,6 @@ export class ForwardStage extends RenderStage {
     private declare _uiPhase: UIPhase;
 
     //private declare _arBackground: ARBackground;
-    private _xrWindowSetFlag = false;
-    private _updateStateFlag = false;
 
     constructor () {
         super();
@@ -223,7 +214,13 @@ export class ForwardStage extends RenderStage {
         const renderPass = pipeline.getRenderPass(camera.clearFlag & this._clearFlag, framebuffer);
         cmdBuff.beginRenderPass(renderPass, framebuffer, this._renderArea,
             colors, camera.clearDepth, camera.clearStencil);
+
+        
+
         cmdBuff.bindDescriptorSet(SetIndex.GLOBAL, pipeline.descriptorSet);
+
+        //this._arBackground.render(camera, renderPass);
+
         this._renderQueues[0].recordCommandBuffer(device, renderPass, cmdBuff);
         this._instancedQueue.recordCommandBuffer(device, renderPass, cmdBuff);
         this._batchedQueue.recordCommandBuffer(device, renderPass, cmdBuff);

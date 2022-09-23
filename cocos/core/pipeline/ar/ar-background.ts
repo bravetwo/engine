@@ -27,6 +27,7 @@ import { IPassInfoFull, Pass, MacroRecord } from '../../renderer';
 import { Root } from '../..';
 import { legacyCC } from '../../global-exports';
 import { WebGL2Device } from '../../gfx/webgl2/webgl2-device';
+import { WebGL2Texture } from '../../gfx/webgl2/webgl2-texture';
 
 const orientationMap: Record<Orientation, SurfaceTransform> = {
     [Orientation.PORTRAIT]: SurfaceTransform.IDENTITY,
@@ -35,26 +36,28 @@ const orientationMap: Record<Orientation, SurfaceTransform> = {
     [Orientation.LANDSCAPE_LEFT]: SurfaceTransform.ROTATE_270,
 };
 
-const vsWeb = `
+const vs = `
     in vec2 a_position;
     in vec2 a_texCoord;
     layout(std140) uniform Mats {
-        uniform mat4 u_MVP;
-        uniform mat4 u_CoordMatrix;
+        mat4 u_MVP;
+        mat4 u_CoordMatrix;
     };
     out vec2 v_texCoord;
     void main(){
         v_texCoord = (u_CoordMatrix * vec4(a_texCoord, 0, 1)).xy;
         gl_Position = u_MVP * vec4(a_position, 0, 1);
     }`;
-const fsWeb = `
+const fs = `
+    #extension GL_OES_EGL_image_external_essl3 : require
     precision mediump float;
     in vec2 v_texCoord;
-    uniform sampler2D u_texture;
+    uniform samplerExternalOES u_texture;
+    //uniform sampler2D u_texture;
     out vec4 o_color;
     void main() {
         o_color = texture(u_texture, v_texCoord);
-        o_color = o_color * vec4(0, 1, 1, 1);
+        //o_color = o_color * vec4(0, 1, 1, 1);
         //o_color = vec4(0, 1, 1, 1);
     }`;
 
@@ -66,6 +69,7 @@ export class ARBackground {
     private declare _pipeline: RenderPipeline;
     private _inputAssemblerInfo: InputAssemblerInfo | null = null;
 
+    private _vertexBuffer: Buffer | null = null;
     private _vertexBuffers: Buffer[] = [];
 
     private _attributes: Attribute[] = [];
@@ -83,7 +87,8 @@ export class ARBackground {
 
     private _texture: Texture | null = null;
 
-    private _updateStateFlag = false;
+    private _setTexFlag = false;
+    private _glTexId = 0;
 
     public activate (pipeline: RenderPipeline) {
         this._pipeline = pipeline;
@@ -111,8 +116,8 @@ export class ARBackground {
 
         // shader
         const stages = [
-            new ShaderStage(ShaderStageFlagBit.VERTEX, vsWeb),
-            new ShaderStage(ShaderStageFlagBit.FRAGMENT, fsWeb)
+            new ShaderStage(ShaderStageFlagBit.VERTEX, vs),
+            new ShaderStage(ShaderStageFlagBit.FRAGMENT, fs)
         ];
         const uniforms = [
             new Uniform("u_MVP", Type.MAT4, 1),
@@ -143,12 +148,12 @@ export class ARBackground {
             1, 1, 1, 1
         ]);
         let bytes = vertices.length * Float32Array.BYTES_PER_ELEMENT;
-        const vertexBuffer = device.createBuffer(new BufferInfo(
+        this._vertexBuffer= device.createBuffer(new BufferInfo(
             BufferUsageBit.VERTEX, MemoryUsageBit.DEVICE, bytes, 4 * Float32Array.BYTES_PER_ELEMENT
         ));
-        vertexBuffer.update(vertices, bytes);
+        this._vertexBuffer.update(vertices, bytes);
         this._vertexBuffers.length = 0;
-        this._vertexBuffers.push(vertexBuffer);
+        this._vertexBuffers.push(this._vertexBuffer);
 
         const indices = new Uint16Array([0, 2, 1, 1, 2, 3]);
         bytes = indices.length * Uint16Array.BYTES_PER_ELEMENT;
@@ -197,71 +202,70 @@ export class ARBackground {
         ));
         this._uniformBuffer.update(mats, bytes);
 
+        // pipeline layout
+        this._pipelineLayout = device.createPipelineLayout(new PipelineLayoutInfo([
+            this._pipeline.descriptorSetLayout, this._descriptorSetLayout 
+        ]));
+
+
+        /*
         this._texture = device.createTexture(new TextureInfo(
-            TextureType.TEX2D, TextureUsageBit.SAMPLED | TextureUsageBit.TRANSFER_SRC, Format.RGBA8,
+            TextureType.TEX2D, 
+            TextureUsageBit.SAMPLED | TextureUsageBit.TRANSFER_SRC, 
+            Format.RGBA8,
             300, 400));
+        const id = ((this._texture as WebGL2Texture).gpuTexture.glTexture as any)._id;
             /*
         this._descriptorSet.bindBuffer(0, this._uniformBuffer);
         this._descriptorSet.bindSampler(1, device.getSampler(new SamplerInfo()));
         this._descriptorSet.bindTexture(1, this._texture);
         this._descriptorSet.update();*/
-
-        // pipeline layout
-        this._pipelineLayout = device.createPipelineLayout(new PipelineLayoutInfo([
-            this._pipeline.descriptorSetLayout, this._descriptorSetLayout 
-        ]));
     }
 
     public render (camera: Camera, renderPass: RenderPass) {
         const armodule = ARModuleX.getInstance();
         /*
         if(!armodule) return;
-        if(armodule.CameraId != camera.node.uuid) return;*/
-
-        const state = armodule!.getAPIState();
-        //if(state < 0) return;
-
-        //*
-        if(state === 3) {
-            this.renderWeb(renderPass, armodule!);
-        }
+        if(armodule.CameraId != camera.node.uuid) return;
         //*/
-        //this.renderWeb(renderPass, armodule!);
-    }
-
-    private renderWeb (renderPass: RenderPass, armodule: ARModuleX) {
         const pipeline = this._pipeline;
         const device = pipeline.device as WebGL2Device;
         const cmdBuff = pipeline.commandBuffers[0];
 
-        //this.inits(device);
+        const rotation = orientationMap[screenAdapter.orientation];
+        armodule!.setDisplayGeometry(rotation, camera.width, camera.height);
 
-        // descriptor set
-        //this._descriptorSet!.bindBuffer(0, this._uniformBuffer!);
-        
+        if (!this._setTexFlag) {
+            const textureInfo = new TextureInfo();
+            textureInfo.usage = TextureUsageBit.SAMPLED | TextureUsageBit.TRANSFER_SRC;
+            textureInfo.format = Format.RGBA8;
+            textureInfo.width = camera.width;
+            textureInfo.height = camera.height;
+            textureInfo.externalRes = 1;
+            const backgroundTex = device.createTexture(textureInfo);
+            armodule!.setCameraTextureName(((backgroundTex as WebGL2Texture).gpuTexture.glTexture as any)._id);
 
-        /*
-        if(!this._updateStateFlag) {
-            const { gl } = device;
-            armodule.updateRenderState(gl as any);
-            this._updateStateFlag = true;
+            this._descriptorSet!.bindBuffer(0, this._uniformBuffer!);
+
+            this._descriptorSet!.bindSampler(1, device.getSampler(new SamplerInfo()));
+            this._descriptorSet!.bindTexture(1, backgroundTex);
+
+            this._descriptorSet!.update();
+    
+            this._setTexFlag = true;
         }
+        //*
+        const coords = armodule!.getCameraTexCoords();
+        const vertices = new Float32Array([
+            -1, -1, coords[0], coords[1],
+            -1, 1, coords[2], coords[3],
+            1, -1, coords[4], coords[5],
+            1, 1, coords[6], coords[7]
+        ]);
+        const bytes = vertices.length * Float32Array.BYTES_PER_ELEMENT;
+        this._vertexBuffer!.update(vertices, bytes);
         //*/
 
-        this._descriptorSet!.bindSampler(1, device.getSampler(new SamplerInfo()));
-        const colorTex = armodule.getCameraTextureRef() as Texture;
-        if(!colorTex) {
-            this._descriptorSet!.bindTexture(1, colorTex);
-        } else {
-            this._descriptorSet!.bindTexture(1, this._texture!);
-        }
-        
-        //this._descriptorSet!.bindTexture(1, this._texture!);
-        this._descriptorSet!.update();
-        //*/
-
-        //const pso = PipelineStateManager.getOrCreatePipelineState(device, pass, this._shader!, renderPass, this._inputAssembler!);
-        
         const psoInfo =  new PipelineStateInfo(
             this._shader!, this._pipelineLayout!, renderPass, 
             new InputState(this._inputAssembler?.attributes),
@@ -273,10 +277,10 @@ export class ARBackground {
         cmdBuff.bindDescriptorSet(SetIndex.MATERIAL, this._descriptorSet!);
         //cmdBuff.bindDescriptorSet(SetIndex.LOCAL, this._descriptorSet!)
         cmdBuff.bindInputAssembler(this._inputAssembler!);
-        const webgl2Device = device as WebGL2Device;
-        const useVAO = webgl2Device.extensions.useVAO;
-        webgl2Device.extensions.useVAO = false;
+        //const webgl2Device = device as WebGL2Device;
+        //const useVAO = webgl2Device.extensions.useVAO;
+        //webgl2Device.extensions.useVAO = false;
         cmdBuff.draw(this._inputAssembler!);
-        webgl2Device.extensions.useVAO = useVAO;
+        //webgl2Device.extensions.useVAO = useVAO;
     }
 }

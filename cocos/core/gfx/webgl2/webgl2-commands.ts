@@ -67,6 +67,8 @@ const WebGLWraps: GLenum[] = [
 
 const _f32v4 = new Float32Array(4);
 
+const GL_TEXTURE_EXTERNAL_OES = 0x8D65; // // ar android external
+
 function CmpF32NotEuqal (a: number, b: number): boolean {
     const c = a - b;
     return (c > 0.000001 || c < -0.000001);
@@ -1035,6 +1037,11 @@ export function WebGL2CmdFuncCreateTexture (device: WebGL2Device, gpuTexture: IW
     gpuTexture.glInternalFmt = GFXFormatToWebGLInternalFormat(gpuTexture.format, gl);
     gpuTexture.glFormat = GFXFormatToWebGLFormat(gpuTexture.format, gl);
     gpuTexture.glType = GFXFormatToWebGLType(gpuTexture.format, gl);
+
+    if (gpuTexture.glTexture) { // ar android external
+        gpuTexture.glTarget = GL_TEXTURE_EXTERNAL_OES;
+        return;
+    }
 
     let w = gpuTexture.width;
     let h = gpuTexture.height;

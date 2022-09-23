@@ -51,7 +51,7 @@ export class ARBackgroundStage extends RenderStage {
     private declare _arBackground: ARBackground;
     private _updateStateFlag = false;
     private _xrWindowSetFlag = false;
-    private _camera: Camera | null = null;
+    //private _camera: Camera | null = null;
 
     constructor () {
         super();
@@ -76,29 +76,22 @@ export class ARBackgroundStage extends RenderStage {
         const armodule = ARModuleX.getInstance();
         if(!armodule) return;
         if(armodule.CameraId != camera.node.uuid) return;
-
+        //*
         const state = armodule.getAPIState();
         if(state < 0) return;
-        this._camera = camera;
+        //*/
 
         const pipeline = this._pipeline as ForwardPipeline;
-        const device = pipeline.device;
-        //const cmdBuff = pipeline.commandBuffers[0];
-
-        //pipeline.generateRenderArea(camera, this._renderArea);
-
-        //const framebuffer = camera.window.framebuffer;
-
-        //const xrframebuffer = armodule.getXRLayerFrameBuffer() as Framebuffer;
-
-        if(!this._xrWindowSetFlag && state === 3) {
+        //*
+        if(!this._xrWindowSetFlag && state === 3) { // webxr
+            const device = pipeline.device;
             if(!this._updateStateFlag) {
                 const { gl } = device as WebGL2Device;
 
                 armodule.updateRenderState(gl as any);
                 this._updateStateFlag = true;
             }
-            //*
+            
             const xrgpuframebuffer = armodule.getXRLayerFrameBuffer();
             if(xrgpuframebuffer) {
                 const root = legacyCC.director.root as Root;
@@ -124,20 +117,22 @@ export class ARBackgroundStage extends RenderStage {
                 console.log("window", camera.window);
                 this._xrWindowSetFlag = true;
             }
-            //*/
-        } else {
             
+        } else { // runtime
+        //*/
+            const cmdBuff = pipeline.commandBuffers[0];
+            const framebuffer = camera.window.framebuffer;
+            const renderPass = pipeline.getRenderPass(camera.clearFlag & this._clearFlag, framebuffer);
+
+            pipeline.generateRenderArea(camera, this._renderArea);
+
+            cmdBuff.beginRenderPass(renderPass, framebuffer, this._renderArea,
+                colors, camera.clearDepth, camera.clearStencil);
+
+            this._arBackground.render(camera, renderPass);
+
+            cmdBuff.endRenderPass();
         }
-
-        /*
-        const device = pipeline.device as WebGL2Device;
-        if(!this._updateStateFlag) {
-            const { gl } = device;
-
-            armodule.updateRenderState(gl as any);
-            this._updateStateFlag = true;
-        }*/
-
 
         /*
         const renderPass = pipeline.getRenderPass(camera.clearFlag & this._clearFlag, framebuffer);
@@ -150,6 +145,7 @@ export class ARBackgroundStage extends RenderStage {
         //*/
     }
 
+    /*
     public blitFramebuffer() {
         const armodule = ARModuleX.getInstance();
         if(!armodule) return;
@@ -171,4 +167,5 @@ export class ARBackgroundStage extends RenderStage {
             }
         }
     }
+    //*/
 }
