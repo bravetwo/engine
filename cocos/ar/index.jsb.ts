@@ -30,4 +30,4 @@ THE SOFTWARE.
 export * from './ar-features';
 export * from './ar-feature-base';
 export * from './ar-module-base';
-export * from './ar-module.jsb';
+export * from './ar-module';
