@@ -132,7 +132,21 @@ export function getContext (canvas: HTMLCanvasElement): WebGL2RenderingContext |
             failIfMajorPerformanceCaveat: false,
         };
 
-        context = canvas.getContext('webgl2', webGLCtxAttribs);
+        // armodule webxr, TODO: need add XR judgement
+        const glAttribs = {
+            alpha: macro.ENABLE_TRANSPARENT_CANVAS,
+            antialias: EDITOR || macro.ENABLE_WEBGL_ANTIALIAS,
+            depth: true,
+            stencil: true,
+            premultipliedAlpha: false,
+            preserveDrawingBuffer: false,
+            powerPreference: 'default',
+            failIfMajorPerformanceCaveat: false,
+            xrCompatible: true
+        };
+
+        //context = canvas.getContext('webgl2', webGLCtxAttribs);
+        context = canvas.getContext('webgl2', glAttribs) as WebGL2RenderingContext;
     } catch (err) {
         return null;
     }

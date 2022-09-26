@@ -44,6 +44,7 @@ import { errorID, error, assertID, warnID, debug } from './platform/debug';
 import { containerManager } from './memop/container-manager';
 import { uiRendererManager } from '../2d/framework/ui-renderer-manager';
 import { deviceManager } from './gfx';
+import { ARModuleX } from '../ar/ar-module';
 
 // ----------------------------------------------------------------------------------------------------------------------
 
@@ -685,6 +686,56 @@ export class Director extends EventTarget {
      * @param dt Delta time in seconds
      */
     public tick (dt: number) {
+        //console.log("tick dt", dt);
+        const armodule = ARModuleX.getInstance();
+        if(armodule && armodule.replaceFrameMoveFlag === true) return;
+
+        if (!this._invalid) {
+            this.emit(Director.EVENT_BEGIN_FRAME);
+            if (!EDITOR || legacyCC.GAME_VIEW) {
+                // @ts-expect-error _frameDispatchEvents is a private method.
+                input._frameDispatchEvents();
+            }
+            // Update
+            if (!this._paused) {
+                this.emit(Director.EVENT_BEFORE_UPDATE);
+                // Call start for new added components
+                this._compScheduler.startPhase();
+                // Update for components
+                this._compScheduler.updatePhase(dt);
+                // Update systems
+                for (let i = 0; i < this._systems.length; ++i) {
+                    this._systems[i].update(dt);
+                }
+                // Late update for components
+                this._compScheduler.lateUpdatePhase(dt);
+                // User can use this event to do things after update
+                this.emit(Director.EVENT_AFTER_UPDATE);
+                // Destroy entities that have been removed recently
+                CCObject._deferredDestroy();
+
+                // Post update systems
+                for (let i = 0; i < this._systems.length; ++i) {
+                    this._systems[i].postUpdate(dt);
+                }
+            }
+
+            this.emit(Director.EVENT_BEFORE_DRAW);
+            uiRendererManager.updateAllDirtyRenderers();
+            this._root!.frameMove(dt);
+            this.emit(Director.EVENT_AFTER_DRAW);
+
+            Node.resetHasChangedFlags();
+            Node.clearNodeArray();
+            containerManager.update(dt);
+            this.emit(Director.EVENT_END_FRAME);
+            this._totalFrames++;
+        }
+    }
+
+    // for webxr, temporary copy of tick
+    public xrTick (dt: number) {
+        console.log("xrTick dt", dt);
         if (!this._invalid) {
             this.emit(Director.EVENT_BEGIN_FRAME);
             if (!EDITOR || legacyCC.GAME_VIEW) {
