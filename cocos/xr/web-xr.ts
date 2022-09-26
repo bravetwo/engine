@@ -21,75 +21,60 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
 */
+const _xr = navigator.xr;
 
-// AR - 'immersive-ar', VR - 'immersive-vr'
-export class CocosWebXR {
-    constructor(mode, supportCallback, frameCallback) {
-        this.isSupported = false;
+declare type XRFrameFunction = (t: number, frame: any) => void;
+
+// 'inline', AR - 'immersive-ar', VR - 'immersive-vr'
+export class WebXR {
+    private _mode = 'inline';
+    private _isSupported = false;
+    private _sessionInit = {
+        requiredFeatures: [ 'local' ],
+        optionalFeatures: [],
+    };
+    private _session: any = null;
+    private _features = [];
+    private _featureSupportMask = 0;
+    private _immersiveRefSpace = null;
+    private _cameraPose: any = null;
+    private _framebuffer = null;
+    private _onXRFrame:XRFrameFunction | null = null;
+
+    constructor(mode: string, supportCallback, frameCallback) {
+        this._mode = mode;
         
-        this.mode = mode;
-
-        // 'anchors', 'plane-detection'
-        this.sessionInit = {
-            requiredFeatures: [ 'local' ],
-            optionalFeatures: [],
-        };
-
-        console.log(navigator.xr);
-        if (navigator.xr) {
-            navigator.xr.isSessionSupported(mode).then((isSupported) => {
-                this.isSupported = isSupported;
+        console.log(_xr);
+        if (_xr) {
+            _xr.isSessionSupported(mode).then((isSupported) => {
+                this._isSupported = isSupported;
                 console.log("navigator.xr is supported", isSupported);
-
-                /*
-                navigator.xr.addEventListener('sessiongranted', (evt) => {
-                    // One could check for the type of session granted.
-                    // Events notifies of session creation after navigation, UA action, or requestSession.
-                    // The session object is provided as part of this event.
-                    //console.log('sessiongranted event', evt.mode);
-                    //if (evt.mode === 'immersive-vr' || evt.mode === 'immersive-ar') {
-                       // set up app state for immersive vr, if that's what the app wants
-                       this.requestSession();
-
-                    //} else {
-                       // notify user that this app only works in immersive vr mode, if desired
-                    //}
-                });
-                //*/
-
                 supportCallback();
             });
         };
 
-        this.session = null;
-        this.features = [];
-        this.featureSupportMask = 0;
-        this.immersiveRefSpace = null;
-        this.cameraPose = null;
-        this.framebuffer = null;
-
-        this.onXRFrame = (t, frame) => {
+        this._onXRFrame = (t, frame) => {
             let session = frame.session;
             let refSpace = this.getSessionReferenceSpace(frame.session);
 
             //window.cancelAnimationFrame();
-            session.requestAnimationFrame(this.onXRFrame);
+            session.requestAnimationFrame(this._onXRFrame);
 
-            this.cameraPose = frame.getViewerPose(refSpace);
-            this.framebuffer = frame.session.renderState.baseLayer.framebuffer;
+            this._cameraPose = frame.getViewerPose(refSpace);
+            this._framebuffer = frame.session.renderState.baseLayer.framebuffer;
             //console.log("framebuffer", this.framebuffer);
             frameCallback(t);
         }
     };
 
+    get isSupported(){
+        return this._isSupported;
+    }
+
     config(featureMask) {
-        if(featureMask & 1 == 1) {
+        if(featureMask) {
 
         }
-    };
-
-    getSupportMask() {
-
     };
 
     start() {
@@ -103,17 +88,16 @@ export class CocosWebXR {
 
     requestSession() {
         console.log('requestSession...');
-        navigator.xr.requestSession(this.mode, this.sessionInit).then((session) => {
-        //navigator.xr.requestSession(this.mode).then((session) => {    
-            session.mode = this.mode;
+        _xr.requestSession(this._mode, this._sessionInit).then((session) => { 
+            session.mode = this._mode;
             session.isImmersive = true;
-            this.session = session;
+            this._session = session;
 
             // session start
             session.requestReferenceSpace('local').then((refSpace) => {
-                this.immersiveRefSpace = refSpace;
+                this._immersiveRefSpace = refSpace;
                 //console.log('Session refSpace', this.immersiveRefSpace);
-                this.session.requestAnimationFrame(this.onXRFrame);
+                this._session.requestAnimationFrame(this._onXRFrame);
             });
         });
     };
@@ -130,11 +114,11 @@ export class CocosWebXR {
     getSessionReferenceSpace(session) {
         //return session.isImmersive ? this.immersiveRefSpace : this.inlineViewerHelper.referenceSpace;
         //console.log('refSpace', this.immersiveRefSpace);
-        return this.immersiveRefSpace;
+        return this._immersiveRefSpace;
     }
 
     getAPIState() {
-        if(this.session) {
+        if(this._session) {
             return 3; 
         }
         return -1;
@@ -146,9 +130,9 @@ export class CocosWebXR {
             0, 0, 0,
             0, 0, 0, 1
         ];
-        if(this.cameraPose) {
-            let pos = this.cameraPose.transform.position;
-            let rot = this.cameraPose.transform.orientation;
+        if(this._cameraPose) {
+            let pos = this._cameraPose.transform.position;
+            let rot = this._cameraPose.transform.orientation;
             poseArray = [
                 pos.x, pos.y, pos.z,
                 rot.x, rot.y, rot.z, rot.w
@@ -161,8 +145,8 @@ export class CocosWebXR {
     };
     getCameraViewMatrix() {};
     getCameraProjectionMatrix() {
-        if(this.cameraPose) {
-            return this.cameraPose.views[0].projectionMatrix;
+        if(this._cameraPose) {
+            return this._cameraPose.views[0].projectionMatrix;
         }
         return null;
     };
@@ -172,7 +156,7 @@ export class CocosWebXR {
     };
     setCameraTextureName(id) {};
     getCameraTextureRef() {
-        let layer = this.session.renderState.baseLayer;
+        let layer = this._session.renderState.baseLayer;
         if(layer)
             return layer.colorTexture;
 
@@ -191,26 +175,11 @@ export class CocosWebXR {
             }
         }*/
         
-        return this.framebuffer;
+        return this._framebuffer;
     }
     updateRenderState(gl) {
-        if(this.session) {
-            /*
-            var x = document.createElement("CANVAS");
-            x.getContext('webgl2', {
-                xrCompatible: true
-            });
-            console.log("x:", x);
-
-            let offscreenCanvas = new OffscreenCanvas(256, 256);
-            let osGL = offscreenCanvas.getContext('webgl2', {
-                xrCompatible: true
-            });
-            console.log("offscreenCanvas:", offscreenCanvas);
-            console.log("osGL:", osGL);
-            */
-
-            this.session.updateRenderState({ baseLayer: new XRWebGLLayer(this.session, gl, {
+        if(this._session) {
+            this._session.updateRenderState({ baseLayer: new XRWebGLLayer(this._session, gl, {
                 alpha: true,
                 antialias: true,
                 depth: true,
