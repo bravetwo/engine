@@ -45,7 +45,7 @@ export class ARModuleX extends IARModule {
     private _configMask = FeatureType.None;
     private _featuresMap = new Map<string, ARFeature>();
   
-    private static _instance : ARModuleX | null;
+    private static _instance : ARModuleX | null = null;
     public static getInstance() : ARModuleX | null {
         return this._instance;
     }
@@ -65,6 +65,7 @@ export class ARModuleX extends IARModule {
         } else {
 
         }
+        ARModuleX._instance = this;
     }
 
     public start() {

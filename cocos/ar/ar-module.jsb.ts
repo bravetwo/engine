@@ -46,7 +46,7 @@ export class ARModuleX extends IARModule {
     private _configMask = FeatureType.None;
     private _featuresMap = new Map<string, ARFeature>();
     private anchorsMap = new Map<number, Array<Node>>();
-    private static _instance : ARModuleX | null;
+    private static _instance : ARModuleX | null = null;
     public static getInstance() : ARModuleX | null {
         return this._instance;
     }
