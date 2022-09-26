@@ -31,6 +31,9 @@ const GL_TEXTURE_EXTERNAL_OES = 0x8D65;
 
 const vsAndroid = 'attribute vec4 vPosition;\n attribute vec2 vCoord;\n uniform mat4 vMatrix;\n uniform mat4 vCoordMatrix;\n varying vec2 textureCoordinate;\n void main(){\n gl_Position = vMatrix*vPosition;\n textureCoordinate = (vCoordMatrix*vec4(vCoord,0,1)).xy;\n }';
 const fsAndroid = '#extension GL_OES_EGL_image_external:require\n precision mediump float;\n varying vec2 textureCoordinate;\n uniform samplerExternalOES vTexture;\n void main() {\n gl_FragColor = texture2D(vTexture, textureCoordinate);\n }';
+
+
+
 const vsIOS = 'attribute vec2 position;\n varying vec2 vUv;\n void main(){\n vUv = position;\n gl_Position = vec4(1.0 - 2.0 * position, 0, 1);\n }';
 const fsIOS = 'precision mediump float;\n uniform sampler2D yMap;\n uniform sampler2D uvMap;\n varying vec2 vUv;\n void main() {\n vec2 textureCoordinate = vec2(vUv.t, vUv.s);\n mat3 colorConversionMatrix = mat3(1.164, 1.164, 1.164, 0.0, -0.213, 2.112, 1.793, -0.533, 0.0);\n mediump vec3 yuv;\n lowp vec3 rgb;\n yuv.x = texture2D(yMap, textureCoordinate).r - (16.0/255.0);\n yuv.yz = texture2D(uvMap, textureCoordinate).ra - vec2(0.5, 0.5);\n rgb = colorConversionMatrix * yuv;\n gl_FragColor = vec4(rgb,1.);\n }';
 function createShader (gl: WebGLRenderingContext, type: number, source: string) {
@@ -156,8 +159,6 @@ export class ARModuleStage extends RenderStage {
     }
 
     public render (camera: Camera) {
-
-        //*
         const instance = ARModuleX.getInstance();
         if(!instance) return;
         
@@ -165,9 +166,9 @@ export class ARModuleStage extends RenderStage {
         if(state < 0) return;
 
         if(instance.CameraId != camera.node.uuid) return;
+        /*
         if(state == 3) {
             this.renderWeb();
-
         } else {
             if (state == 0) {
                 //this.renderIOS();
@@ -176,15 +177,16 @@ export class ARModuleStage extends RenderStage {
             }
         }
         //*/
-        //this.renderAndroid();
+        this.renderAndroid();
+        //this.renderWeb();
     }
 
     private renderWeb () {
-        const armodule = ARModuleX.getInstance()!;
+        //const armodule = ARModuleX.getInstance()!;
         const gl = this.gl;
-        armodule.updateRenderState(this.gl);
+        //armodule.updateRenderState(this.gl);
 
-        gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+        gl.viewport(0, 0, gl.canvas.width * 0.5, gl.canvas.height * 0.5);
         gl.clearColor(0.875, 0.875, 0.875, 1.0);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
         gl.depthMask(false);
@@ -193,6 +195,7 @@ export class ARModuleStage extends RenderStage {
 
         // Set texture
         gl.bindTexture(GL_TEXTURE_EXTERNAL_OES, this.texture);
+        //gl.bindTexture(gl.TEXTURE_2D, armodule.getCameraTextureRef());
         let location = gl.getUniformLocation(this.program, "vMatrix");
 
         // Set projection matrix
@@ -232,16 +235,15 @@ export class ARModuleStage extends RenderStage {
     private renderAndroid () {
         const gl = this.gl;
 
-        //*
+        /*
         const instance = ARModuleX.getInstance();
         if(!instance) return;
         instance.setCameraTextureName((this.texture as any)._id);
         instance.setDisplayGeometry(orientationMap[screenAdapter.orientation], gl.canvas.width, gl.canvas.height);
-        //const shareData = ARModuleHelper.getShareData();
         const shareData = instance.getCameraTexCoords();
         //*/
         
-        gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+        gl.viewport(0, 0, gl.canvas.width * 0.5, gl.canvas.height * 0.5);
         gl.clearColor(0.875, 0.875, 0.875, 1.0);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
         gl.depthMask(false);
@@ -269,9 +271,9 @@ export class ARModuleStage extends RenderStage {
         gl.vertexAttribPointer(this.mPosition, size, type, normalize, stride, 0);
 
         // Set texture coordinates
-        for (let i = 0; i < this.uvs.length; i++) {
-            this.uvs[i] = shareData[i];
-        }
+        // for (let i = 0; i < this.uvs.length; i++) {
+        //     this.uvs[i] = shareData[i];
+        // }
 
         gl.bindBuffer(gl.ARRAY_BUFFER, this.texcoordBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, this.uvs, gl.STATIC_DRAW);

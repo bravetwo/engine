@@ -539,6 +539,11 @@ export class Game extends EventTarget {
         this._pacer?.stop();
     }
 
+    // for webxr
+    public stopPacer() {
+        this._pacer?.stop();
+    }
+
     /**
      * @en Resume the game from pause. This will resume:<br>
      * game logic execution, rendering process, event manager, background music and all audio effects.<br>

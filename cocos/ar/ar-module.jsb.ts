@@ -33,6 +33,7 @@ export class ARModuleX extends IARModule {
     public static readonly FEATURE_PREFIX = "ARFeature";
 
     protected _nativeObj;
+    public replaceFrameMoveFlag = false;
 
     private _cameraId: string | null = null;
     get CameraId () {

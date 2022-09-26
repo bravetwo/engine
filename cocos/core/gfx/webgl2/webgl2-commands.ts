@@ -56,6 +56,7 @@ import {
     IWebGL2GPUTextureView,
 } from './webgl2-gpu-objects';
 import { max } from '../../math/bits';
+//import { WebGLFramebuffer } from '../webgl/webgl-framebuffer';
 
 const WebGLWraps: GLenum[] = [
     0x2901, // WebGLRenderingContext.REPEAT
@@ -65,6 +66,8 @@ const WebGLWraps: GLenum[] = [
 ];
 
 const _f32v4 = new Float32Array(4);
+
+const GL_TEXTURE_EXTERNAL_OES = 0x8D65; // // ar android external
 
 function CmpF32NotEuqal (a: number, b: number): boolean {
     const c = a - b;
@@ -1035,6 +1038,11 @@ export function WebGL2CmdFuncCreateTexture (device: WebGL2Device, gpuTexture: IW
     gpuTexture.glFormat = GFXFormatToWebGLFormat(gpuTexture.format, gl);
     gpuTexture.glType = GFXFormatToWebGLType(gpuTexture.format, gl);
 
+    if (gpuTexture.glTexture) { // ar android external
+        gpuTexture.glTarget = GL_TEXTURE_EXTERNAL_OES;
+        return;
+    }
+
     let w = gpuTexture.width;
     let h = gpuTexture.height;
 
@@ -1307,10 +1315,16 @@ export function WebGL2CmdFuncCreateFramebuffer (device: WebGL2Device, gpuFramebu
 
     const { gl } = device;
     const attachments: GLenum[] = [];
-
-    const glFramebuffer = gl.createFramebuffer();
-    if (glFramebuffer) {
-        gpuFramebuffer.glFramebuffer = glFramebuffer;
+    
+    console.log("gpuFramebuffer.glFramebuffer", gpuFramebuffer.glFramebuffer);
+    if(!gpuFramebuffer.glFramebuffer) { // for webxr framebuffer
+        const glFramebuffer = gl.createFramebuffer();
+        if (glFramebuffer) gpuFramebuffer.glFramebuffer = glFramebuffer;
+    }
+    //const glFramebuffer = gl.createFramebuffer();
+    //if (glFramebuffer) {
+    if(gpuFramebuffer.glFramebuffer) {
+        //gpuFramebuffer.glFramebuffer = glFramebuffer;
 
         if (device.stateCache.glFramebuffer !== gpuFramebuffer.glFramebuffer) {
             gl.bindFramebuffer(gl.FRAMEBUFFER, gpuFramebuffer.glFramebuffer);

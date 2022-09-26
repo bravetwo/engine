@@ -88,12 +88,12 @@ export class ForwardPipeline extends RenderPipeline {
             return false;
         }
 
-        // armodule
+        /*/ armodule
         const arFlow = new ARModuleFlow();
         arFlow.initialize(ARModuleFlow.initInfo);
         this._flows.push(arFlow);
         arFlow.activate(this);
-
+        //*/
         return true;
     }
 
