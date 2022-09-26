@@ -92,7 +92,6 @@ export class WebGL2Framebuffer extends Framebuffer {
             },
         };
 
-        console.log("gpuFramebuffer", this._gpuFramebuffer);
         WebGL2CmdFuncCreateFramebuffer(WebGL2DeviceManager.instance, this._gpuFramebuffer);
     }
 

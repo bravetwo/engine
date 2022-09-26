@@ -13,7 +13,7 @@ import { Orientation } from '../../../../pal/screen-adapter/enum-type';
 //import { opaqueCompareFn, RenderQueue, transparentCompareFn } from '../render-queue';
 //import { JSB } from 'internal:constants';
 import { sys } from '../../platform/sys';
-import { OS } from '../../../../pal/system-info/enum-type';
+import { OS, Platform } from '../../../../pal/system-info/enum-type';
 import { Camera } from '../../renderer/scene';
 import { ARModuleX } from '../../../ar/ar-module';
 import { Attribute, BlendState, Buffer, BufferInfo, BufferUsageBit, CullMode, DepthStencilState, DescriptorSet, DescriptorSetInfo, DescriptorSetLayout, DescriptorSetLayoutBinding, DescriptorSetLayoutInfo, DescriptorType, Device, DrawInfo, DRAW_INFO_SIZE, Format, IndirectBuffer, InputAssembler, InputAssemblerInfo, InputState, MemoryAccessBit, MemoryUsageBit, PipelineLayout, PipelineLayoutInfo, PipelineStateInfo, PolygonMode, RasterizerState, RenderPass, SamplerInfo, ShadeModel, Shader, ShaderInfo, ShaderStage, ShaderStageFlagBit, SurfaceTransform, Texture, TextureFlagBit, TextureInfo, TextureType, TextureUsageBit, Type, Uniform, UniformBlock, UniformSampler, UniformSamplerTexture, UniformStorageBuffer } from '../../gfx';
@@ -49,17 +49,40 @@ const vs = `
         gl_Position = u_MVP * vec4(a_position, 0, 1);
     }`;
 const fs = `
-    #extension GL_OES_EGL_image_external_essl3 : require
+    //#extension GL_OES_EGL_image_external_essl3 : require \n
     precision mediump float;
     in vec2 v_texCoord;
-    uniform samplerExternalOES u_texture;
-    //uniform sampler2D u_texture;
+    //uniform samplerExternalOES u_texture;
+    uniform sampler2D u_texture;
     out vec4 o_color;
     void main() {
         o_color = texture(u_texture, v_texCoord);
         //o_color = o_color * vec4(0, 1, 1, 1);
         //o_color = vec4(0, 1, 1, 1);
     }`;
+
+const vsGLSL1 = `attribute vec2 a_position;
+    attribute vec2 a_texCoord;
+    uniform mat4 u_MVP;
+    uniform mat4 u_CoordMatrix;
+
+    varying vec2 v_texCoord;
+    void main() {
+        v_texCoord = (u_CoordMatrix * vec4(a_texCoord, 0, 1)).xy;
+        gl_Position = u_MVP * vec4(a_position, 0, 1);
+    }`;
+const fsGLSL1 = `#extension GL_OES_EGL_image_external : require
+    precision mediump float;
+
+    varying vec2 v_texCoord;
+    uniform samplerExternalOES u_texture;
+
+    void main() {
+        gl_FragColor = texture2D(u_texture, v_texCoord);
+    }`;
+
+const vsAndroid = 'attribute vec4 vPosition;\n attribute vec2 vCoord;\n uniform mat4 vMatrix;\n uniform mat4 vCoordMatrix;\n varying vec2 textureCoordinate;\n void main(){\n gl_Position = vMatrix*vPosition;\n textureCoordinate = (vCoordMatrix*vec4(vCoord,0,1)).xy;\n }';
+const fsAndroid = '#extension GL_OES_EGL_image_external:require\n precision mediump float;\n varying vec2 textureCoordinate;\n uniform samplerExternalOES vTexture;\n void main() {\n gl_FragColor = texture2D(vTexture, textureCoordinate);\n }';
 
 /**
  * @zh
@@ -104,8 +127,10 @@ export class ARBackground {
 
         const device = pipeline.device;
 
-        this.inits(device);
-        this._descriptorSet!.bindBuffer(0, this._uniformBuffer!);
+        if(sys.platform != Platform.MOBILE_BROWSER && sys.platform != Platform.DESKTOP_BROWSER) {
+            this.inits(device);
+            
+        }
     }
 
     public inits(device : Device) {
@@ -220,6 +245,8 @@ export class ARBackground {
         this._descriptorSet.bindSampler(1, device.getSampler(new SamplerInfo()));
         this._descriptorSet.bindTexture(1, this._texture);
         this._descriptorSet.update();*/
+
+        //this._descriptorSet!.bindBuffer(0, this._uniformBuffer!);
     }
 
     public render (camera: Camera, renderPass: RenderPass) {
@@ -231,6 +258,8 @@ export class ARBackground {
         const pipeline = this._pipeline;
         const device = pipeline.device as WebGL2Device;
         const cmdBuff = pipeline.commandBuffers[0];
+
+        //this.inits(device);
 
         const rotation = orientationMap[screenAdapter.orientation];
         armodule!.setDisplayGeometry(rotation, camera.width, camera.height);
