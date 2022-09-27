@@ -66,13 +66,15 @@ export class ARModuleX extends IARModule {
 
             if(this._webXR!.isSupported) {
                 console.log("<onSupportCallback> support WebXR!");
+                // request session
+                this._webXR!.start();
 
                 this._webXR!.config(this._configMask);
                 this.initFeatures();
-                // request session
-                this._webXR!.start();
     
                 this._initFlag = true;
+
+                this.start();
             }
         }, (t : number) => {
             const dt = t - this._lastTime;
@@ -89,6 +91,9 @@ export class ARModuleX extends IARModule {
     }
 
     public start() {
+        if (!this._initFlag) {
+            return;
+        }
         console.log("<ARModule> start...");
         this._featuresMap.forEach((feature, id) => {
             feature.start();

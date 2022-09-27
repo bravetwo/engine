@@ -74,6 +74,7 @@ export class ARFeaturePlaneDetection extends ARFeature {
     readonly onAddEvent = new FeatureEvent<ARPlane[]>();
     readonly onUpdateEvent = new FeatureEvent<ARPlane[]>();
     readonly onRemoveEvent = new FeatureEvent<ARPlane[]>();
+    
     private _addedPlanes : ARPlane[] = [];
     private _updatedPlanes : ARPlane[] = [];
     private _removedPlanes : ARPlane[] = [];

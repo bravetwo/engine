@@ -45,7 +45,7 @@ export class WebXR {
 
     private _plane: WebXRPlane | null = null;
 
-    constructor(mode: string, supportCallback:() => void, frameCallback:(t: number) => void) {
+    constructor(mode: string, supportCallback: () => void, frameCallback: (t: number) => void) {
         this._mode = mode;
         
         console.log(_xr);
@@ -61,7 +61,7 @@ export class WebXR {
             let session = frame.session;
             let refSpace = this.getSessionReferenceSpace(frame.session);
 
-            this._plane && this._plane.processPlanes(t, frame, this._immersiveRefSpace);
+            this._plane && this._plane.processPlanes(frame, this._immersiveRefSpace);
 
             //window.cancelAnimationFrame();
             session.requestAnimationFrame(this._onXRFrame);
@@ -93,7 +93,7 @@ export class WebXR {
         this.requestSession();
     };
 
-    requestSession() {
+    private requestSession() {
         console.log('requestSession...', this._sessionInit);
         _xr.requestSession(this._mode, this._sessionInit).then((session) => { 
             session.mode = this._mode;
@@ -110,7 +110,7 @@ export class WebXR {
     };
 
     onResume() {
-        
+
     };
     onPause() {
 
@@ -119,7 +119,7 @@ export class WebXR {
        
     };
 
-    getSessionReferenceSpace(session) {
+    private getSessionReferenceSpace(session) {
         return this._immersiveRefSpace;
     }
 
@@ -157,15 +157,13 @@ export class WebXR {
         return null;
     };
     getCameraTexCoords() {};
-    setDisplayGeometry(rotation, width, height) {
-
-    };
+    setDisplayGeometry(rotation, width, height) {};
     setCameraTextureName(id) {};
     getCameraTextureRef() {
         let layer = this._session.renderState.baseLayer;
-        if(layer)
+        if(layer){
             return layer.colorTexture;
-
+        }
         return null;
     };
     getCameraDepthBuffer() {};
@@ -182,13 +180,6 @@ export class WebXR {
                 ignoreDepthValues: false,
                 stencil: true
             })});
-
-            /*
-            this.session.requestReferenceSpace('local').then((refSpace) => {
-                this.immersiveRefSpace = refSpace;
-                console.log('State refSpace', this.immersiveRefSpace);
-                this.session.requestAnimationFrame(this.onXRFrame);
-            });*/
         }
     };
     
@@ -200,9 +191,15 @@ export class WebXR {
     getHitId() {};
 
     // plane detection
-    enablePlane(enable) {};
-    setPlaneDetectionMode(mode) {};
-    setPlaneMaxTrackingNumber(count) {};
+    enablePlane(enable: boolean) {
+        this._plane!.enablePlane(enable);
+    };
+    setPlaneDetectionMode(mode: number) {
+        this._plane!.setPlaneDetectionMode(mode);
+    };
+    setPlaneMaxTrackingNumber(count: number) {
+        this._plane!.setPlaneMaxTrackingNumber(count);
+    };
     getAddedPlanesInfo() {
         return this._plane!.getAddedPlanesInfo();
     };
