@@ -265,15 +265,15 @@ export class ARModuleX extends IARModule {
         this._nativeObj.setPlaneMaxTrackingNumber(count);
     }
 
-    getAddedPlanesInfo(): number[] {
+    getAddedPlanesInfo() {
         return this._nativeObj.getAddedPlanesInfo();
     }
 
-    getUpdatedPlanesInfo(): number[]{
+    getUpdatedPlanesInfo(){
         return this._nativeObj.getUpdatedPlanesInfo();
     }
 
-    getRemovedPlanesInfo(): number[]{
+    getRemovedPlanesInfo(){
         return this._nativeObj.getRemovedPlanesInfo();
     }
 
@@ -328,4 +328,24 @@ export class ARModuleX extends IARModule {
     endRequireSceneMesh() {
         this._nativeObj.endRequireSceneMesh();
     }
+
+    enableFaceTracking (enable : boolean) {
+        this._nativeObj.enableFaceTracking(enable);
+    };
+
+    getRemovedFacesInfo() {
+        return this._nativeObj.getRemovedFacesInfo();
+    };
+
+    getAddedFacesInfo() {
+        return this._nativeObj.getAddedFacesInfo();
+    };
+
+    getUpdatedFacesInfo() { 
+        return this._nativeObj.getUpdatedFacesInfo();
+    };
+
+    getFaceBlendShapesOf(faceRef: number)  {
+        return this._nativeObj.getFaceBlendShapesOf(faceRef);
+    };
 }

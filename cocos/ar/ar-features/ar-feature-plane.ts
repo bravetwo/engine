@@ -29,6 +29,7 @@ import { Quat, Vec2, Vec3 } from '../../core/math';
 import { Prefab } from '../../core/assets/prefab';
 import { resources } from '../../core/asset-manager/bundle';
 import { ARModuleX } from '../ar-module';
+import { sys } from '../../core';
 
 export enum ARPlaneDetectionMode {
     Horizontal_Upward = 1 << 0,
@@ -137,7 +138,28 @@ export class ARFeaturePlaneDetection extends ARFeature {
         if(!this._enable) {
             return;
         }
-        this.processChanges();
+        if (sys.isBrowser) {
+            this.processWebXRChanges();        
+        } else {
+            this.processChanges();
+        }
+    }
+
+    public processWebXRChanges() {
+        this._removedPlanes = this.session!.getRemovedPlanesInfo();
+        if (this._removedPlanes.length > 0) {
+            this.onRemoveEvent.trigger(this._removedPlanes);
+        }
+       
+        this._addedPlanes = this.session!.getAddedPlanesInfo();
+        if (this._addedPlanes.length > 0) {
+            this.onAddEvent.trigger(this._addedPlanes);
+        }
+        
+        this._updatedPlanes = this.session!.getUpdatedPlanesInfo();
+        if(this._updatedPlanes.length > 0){
+            this.onUpdateEvent.trigger(this._updatedPlanes);
+        }
     }
 
     public processChanges() {

@@ -22,17 +22,10 @@
  THE SOFTWARE.
 */
 
-//import { Prefab, instantiate, Vec3, resources, Material, builtinResMgr, director, Vec4, Quat } from '../../core';
-import { ccclass, menu, property, disallowMultiple, type } from '../../core/data/class-decorator'
+import { ccclass } from '../../core/data/class-decorator'
 import { ARFeature, ARPose, FeatureEvent, FeatureType, IFeatureData } from '../ar-feature-base';
-import { Node } from '../../core/scene-graph'
-import { createMesh } from '../../3d/misc';
-import { Mesh, MeshRenderer, ModelComponent } from '../../3d';
-import { Model } from '../../core/renderer/scene';
-import { MorphModel } from '../../3d/models/morph-model';
-import { primitives } from '../../../exports/primitive';
-import { PrimitiveMode } from '../../core/gfx';
 import { Quat, Vec3 } from '../../core/math';
+import { ARModuleX } from '../ar-module';
 
 export interface ARTrackingObject {
     anchorId : number;
@@ -54,24 +47,18 @@ export class ARFeatureObject extends ARFeature {
 
     // TODO: need a ar ref lib editor window to create lib, add image or obj.
     // currently add objs in native project, as ar resources group
-    private _objectNames : string[];
+    private _objectNames : string[] = [];
 
     private static readonly OBJECT_INFO_SIZE = 15;
-    private _addedObjects : ARTrackingObject[];
-    private _updatedObjects : ARTrackingObject[];
-    private _removedObjects : ARTrackingObject[];
+    private _addedObjects : ARTrackingObject[] = [];
+    private _updatedObjects : ARTrackingObject[] = [];
+    private _removedObjects : ARTrackingObject[] = [];
 
-    //constructor(jsonObject : any, session : ARSession) {
-        //super(jsonObject, session);
-    constructor (session : ARModuleAdaptor, config : IFeatureData);
-    constructor (session : ARModuleAdaptor, config : IFeatureData, jsonObject? : any) {
+    constructor (session : ARModuleX, config : IFeatureData);
+    constructor (session : ARModuleX, config : IFeatureData, jsonObject? : any) {
         super(session, config, jsonObject);
 
         this._objectNames = jsonObject.objects;
-
-        this._addedObjects = new Array();
-        this._updatedObjects = new Array();
-        this._removedObjects = new Array();
     }
 
     isReady() : boolean {
@@ -80,21 +67,17 @@ export class ARFeatureObject extends ARFeature {
 
     init() {
         super.init();
-        const armodule = ARModuleHelper.getInstance();
-
         this._objectNames.forEach(name => {
-            armodule.addObjectToLib(name);
+            this.session!.addObjectToLib(name);
         });
     }
 
     protected onEnable(): void {
-        const armodule = ARModuleHelper.getInstance();
-        armodule.enableObjectTracking(this._enable);
+        this.session!.enableObjectTracking(this._enable);
     }
 
     protected onDisable(): void {
-        const armodule = ARModuleHelper.getInstance();
-        armodule.enableObjectTracking(this._enable);
+        this.session!.enableObjectTracking(this._enable);
     }
 
     update() {
@@ -104,10 +87,9 @@ export class ARFeatureObject extends ARFeature {
     }
 
     private processChanges() {
-        const armodule = ARModuleHelper.getInstance();
-
+     
         let objectsInfo : number[];
-        objectsInfo = armodule.getAddedObjectsInfo();
+        objectsInfo = this.session!.getAddedObjectsInfo();
         if(objectsInfo.length > 0) {    
             this._addedObjects.length = 0;
             this.assembleInfos(objectsInfo, this._addedObjects);
@@ -116,7 +98,7 @@ export class ARFeatureObject extends ARFeature {
                 this.onAddEvent.trigger(this._addedObjects);
         }
 
-        objectsInfo = armodule.getUpdatedObjectsInfo();
+        objectsInfo = this.session!.getUpdatedObjectsInfo();
         if(objectsInfo.length > 0) {
             this._updatedObjects.length = 0;
             this.assembleInfos(objectsInfo, this._updatedObjects);
@@ -125,7 +107,7 @@ export class ARFeatureObject extends ARFeature {
                 this.onUpdateEvent.trigger(this._updatedObjects);
         }
 
-        objectsInfo = armodule.getRemovedObjectsInfo();
+        objectsInfo = this.session!.getRemovedObjectsInfo();
         if(objectsInfo.length > 0) {
             this._removedObjects.length = 0;
             this.assembleInfos(objectsInfo, this._removedObjects);

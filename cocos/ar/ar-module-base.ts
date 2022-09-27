@@ -31,9 +31,9 @@ export abstract class IARModule {
     enablePlane (enable : boolean) {};
     setPlaneDetectionMode (mode : number) {};
     setPlaneMaxTrackingNumber (count : number) {};
-    getAddedPlanesInfo(): number[] {return [];};
-    getUpdatedPlanesInfo(): number[]{return [];};
-    getRemovedPlanesInfo(): number[]{return [];};
+    getAddedPlanesInfo(): any[] {return [];};
+    getUpdatedPlanesInfo(): any[] {return [];};
+    getRemovedPlanesInfo(): any[] {return [];};
 
     enableImageTracking (enable : boolean) {};
     addImageToLib(name: string){};
@@ -49,4 +49,16 @@ export abstract class IARModule {
     getSceneMeshVertices(meshRef: number) : number[]{return [];};
     getSceneMeshTriangleIndices(meshRef: number): number[]{return [];};
     endRequireSceneMesh() {};
+
+    enableFaceTracking (enable : boolean) {};
+    getRemovedFacesInfo() {return [];};
+    getAddedFacesInfo() {return [];};
+    getUpdatedFacesInfo() {return [];};
+    getFaceBlendShapesOf(faceRef: number)  {return [];};
+
+    enableObjectTracking (enable : boolean) {};
+    addObjectToLib(name: string){};
+    getAddedObjectsInfo() {return [];};
+    getUpdatedObjectsInfo() {return [];};
+    getRemovedObjectsInfo() {return [];};
 }

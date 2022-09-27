@@ -21,6 +21,8 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
 */
+import { WebXRPlane } from './ar-plane';
+
 const _xr = navigator.xr;
 
 declare type XRFrameFunction = (t: number, frame: any) => void;
@@ -30,7 +32,7 @@ export class WebXR {
     private _mode = 'inline';
     private _isSupported = false;
     private _sessionInit = {
-        requiredFeatures: [ 'local' ],
+        requiredFeatures: ['local'],
         optionalFeatures: [],
     };
     private _session: any = null;
@@ -41,7 +43,9 @@ export class WebXR {
     private _framebuffer = null;
     private _onXRFrame:XRFrameFunction | null = null;
 
-    constructor(mode: string, supportCallback, frameCallback) {
+    private _plane: WebXRPlane | null = null;
+
+    constructor(mode: string, supportCallback:() => void, frameCallback:(t: number) => void) {
         this._mode = mode;
         
         console.log(_xr);
@@ -56,6 +60,8 @@ export class WebXR {
         this._onXRFrame = (t, frame) => {
             let session = frame.session;
             let refSpace = this.getSessionReferenceSpace(frame.session);
+
+            this._plane && this._plane.processPlanes(t, frame, this._immersiveRefSpace);
 
             //window.cancelAnimationFrame();
             session.requestAnimationFrame(this._onXRFrame);
@@ -79,15 +85,16 @@ export class WebXR {
 
     start() {
         console.log("WebXR start...");
-        /*
-        var event = new Event('sessiongranted', { mode : this.mode });
-        navigator.xr.dispatchEvent(event);
-        //*/
+        //根据特性启用
+        if (1) {
+            this._sessionInit.requiredFeatures.push('plane-detection');
+            this._plane = new WebXRPlane();
+        }
         this.requestSession();
     };
 
     requestSession() {
-        console.log('requestSession...');
+        console.log('requestSession...', this._sessionInit);
         _xr.requestSession(this._mode, this._sessionInit).then((session) => { 
             session.mode = this._mode;
             session.isImmersive = true;
@@ -102,18 +109,17 @@ export class WebXR {
         });
     };
 
-    onResume() {};
-    onPause() {};
+    onResume() {
+        
+    };
+    onPause() {
+
+    };
     update() {
-        /*
-        if(this.session)
-            this.session.requestAnimationFrame(this.onXRFrame);
-        //*/
+       
     };
 
     getSessionReferenceSpace(session) {
-        //return session.isImmersive ? this.immersiveRefSpace : this.inlineViewerHelper.referenceSpace;
-        //console.log('refSpace', this.immersiveRefSpace);
         return this._immersiveRefSpace;
     }
 
@@ -164,17 +170,6 @@ export class WebXR {
     };
     getCameraDepthBuffer() {};
     getXRLayerFrameBuffer() {
-        /*
-        if(this.session) {
-            if(this.session.renderState) {
-                let layer = this.session.renderState.baseLayer;
-                if(layer) {
-                    console.log("xr framebuffer", layer.framebuffer)
-                    return layer.framebuffer;
-                }
-            }
-        }*/
-        
         return this._framebuffer;
     }
     updateRenderState(gl) {
@@ -196,7 +191,7 @@ export class WebXR {
             });*/
         }
     };
-
+    
     // raycast & anchor
     tryHitAttachAnchor(trackableId) {};
     getAnchorPose(anchorId) {};
@@ -208,9 +203,15 @@ export class WebXR {
     enablePlane(enable) {};
     setPlaneDetectionMode(mode) {};
     setPlaneMaxTrackingNumber(count) {};
-    getAddedPlanesInfo() {};
-    getUpdatedPlanesInfo() {};
-    getRemovedPlanesInfo() {};
+    getAddedPlanesInfo() {
+        return this._plane!.getAddedPlanesInfo();
+    };
+    getUpdatedPlanesInfo() {
+        return this._plane!.getUpdatedPlanesInfo();
+    };
+    getRemovedPlanesInfo() {
+        return this._plane!.getRemovedPlanesInfo();
+    };
     getAdded() {};
 
     // scene mesh reruction

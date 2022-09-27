@@ -22,21 +22,12 @@
  THE SOFTWARE.
 */
 
-//import { Prefab, instantiate, Vec3, resources, Material, builtinResMgr, director, Vec4, Quat, ccenum } from '../../core';
-import { ccclass, menu, property, disallowMultiple, type } from '../../core/data/class-decorator'
+import { ccclass, property} from '../../core/data/class-decorator'
 import { ARFeature, ARTrackable, FeatureEvent, FeatureType, IFeatureData, ARFeatureData} from '../ar-feature-base';
-import { Node } from '../../core/scene-graph'
-import { createMesh, MeshUtils } from '../../3d/misc/';
-import { Mesh, MeshRenderer, ModelComponent, utils } from '../../3d';
-import { Model } from '../../core/renderer/scene';
-import { MorphModel } from '../../3d/models/morph-model';
-import { primitives } from '../../../exports/primitive';
-import { PrimitiveMode } from '../../core/gfx';
-import { NULL } from '@cocos/physx';
-import { MeshCollider } from '../../physics/framework';
-import { value } from '../../core/utils/js-typed';
 import { ccenum } from '../../core/value-types/enum';
 import { Quat, Vec3 } from '../../core/math';
+import { ARModuleX } from '../ar-module';
+import { callFunc } from '../../tween/actions/action-instant';
 
 export enum ARFaceBlendShapeType {
     Eye_Blink_Left,         //(0)左眼闭合。
@@ -125,7 +116,12 @@ export interface ARFace extends ARTrackable {
 
 @ccclass('cc.FaceTrackingConfig')
 export class FaceTrackingConfig extends ARFeatureData {
-    
+    @property
+    trackingMode : number = 0;
+    @property
+    maxFaceNumber : number = 5;
+    @property
+    trackingNodeList : any[] = [];
 }
 
 @ccclass('cc.ARFeatureFaceTracking')
@@ -144,9 +140,11 @@ export class ARFeatureFaceTracking extends ARFeature {
     readonly onUpdateEvent = new FeatureEvent<ARFace[]>();
     readonly onRemoveEvent = new FeatureEvent<ARFace[]>();
 
-    constructor (session : ARModuleAdaptor, config : IFeatureData);
-    constructor (session : ARModuleAdaptor, config : IFeatureData, jsonObject? : any) {
+    public config : FaceTrackingConfig | null = null; 
+    constructor (session : ARModuleX, config : IFeatureData);
+    constructor (session : ARModuleX, config : IFeatureData, jsonObject? : any) {
         super(session, config, jsonObject);
+        this.config = config as FaceTrackingConfig;
     }
 
     isReady() : boolean {
@@ -159,13 +157,11 @@ export class ARFeatureFaceTracking extends ARFeature {
     }
 
     protected onEnable(): void {
-        const armodule = ARModuleHelper.getInstance();
-        armodule.enableFaceTracking(this._enable);
+        this.session!.enableFaceTracking(this._enable);
     }
 
     protected onDisable(): void {
-        const armodule = ARModuleHelper.getInstance();
-        armodule.enableFaceTracking(this._enable);
+        this.session!.enableFaceTracking(this._enable);
     }
 
     update() {
@@ -175,27 +171,21 @@ export class ARFeatureFaceTracking extends ARFeature {
     }
 
     public processChanges() {
-        const armodule = ARModuleHelper.getInstance();
-
-        let removedfacesInfo: number[];
-        removedfacesInfo = armodule.getRemovedFacesInfo();
+        let removedfacesInfo = this.session!.getRemovedFacesInfo();
         if(removedfacesInfo && removedfacesInfo.length > 0) {
             this._removedFaces.length = 0;
             this.assembleInfos(removedfacesInfo, this._removedFaces);
             this.onRemoveEvent.trigger(this._removedFaces);
         }
 
-        let addedFacesInfo : number[];
-        let updatetdFacesInfo : number[];
-        addedFacesInfo = armodule.getAddedFacesInfo();
-        updatetdFacesInfo = armodule.getUpdatedFacesInfo();
-
+        let addedFacesInfo = this.session!.getAddedFacesInfo();
         if(addedFacesInfo && addedFacesInfo.length > 0) {
             this._addedFaces.length = 0;
             this.assembleInfos(addedFacesInfo, this._addedFaces);
             this.onAddEvent.trigger(this._addedFaces);
         }
 
+        let updatetdFacesInfo = this.session!.getUpdatedFacesInfo();
         if(updatetdFacesInfo && updatetdFacesInfo.length > 0) {
             this._updatedFaces.length = 0;
             this.assembleInfos(updatetdFacesInfo, this._updatedFaces);
@@ -205,7 +195,7 @@ export class ARFeatureFaceTracking extends ARFeature {
 
     private assembleInfos(src : number[], dst : ARFace[]) {
         if(src) {
-            const armodule = ARModuleHelper.getInstance();
+
             let count = src.length / ARFeatureFaceTracking.FACE_INFO_SIZE;
             let offset = 0;
             for (let i = 0; i < count; i++) {
@@ -225,7 +215,7 @@ export class ARFeatureFaceTracking extends ARFeature {
                     src[offset + 7]
                 );
 
-                const blendShapesInfo : number[] = armodule.getFaceBlendShapesOf(ref);
+                const blendShapesInfo : number[] = this.session!.getFaceBlendShapesOf(ref);
                 let blendShapes : ARFaceBlendShape[] = [];
                 
                 const shapesCount = blendShapesInfo.length / 2;

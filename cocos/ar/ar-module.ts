@@ -28,7 +28,7 @@ import { Quat, Vec3 } from '../core/math';
 import { IARModule } from './ar-module-base';
 import { director } from '../core/director';
 import { game } from '../core';
-import { WebXR } from '../xr/web-xr';
+import { WebXR } from '../xr/webxr/web-xr';
 
 // WebXR
 export class ARModuleX extends IARModule {
@@ -71,11 +71,11 @@ export class ARModuleX extends IARModule {
                 this.initFeatures();
                 // request session
                 this._webXR!.start();
-                //ARModuleX._instance = this;
+    
                 this._initFlag = true;
             }
         }, (t : number) => {
-            const dt = t - this._lastTime ;
+            const dt = t - this._lastTime;
 
             this.replaceFrameMoveFlag = true;
             game.stopPacer();
@@ -87,48 +87,9 @@ export class ARModuleX extends IARModule {
         
         ARModuleX._instance = this;
     }
-    /*
-    public onSupportCallback() {
-        console.log("<ARModule> onSupportCallback...");
-
-        if(!this._webXR)
-            this._webXR = new WebXR('immersive-ar', this.onSupportCallback);
-
-        if(this._webXR.isSupported) {
-            console.log("<onSupportCallback> support WebXR!");
-
-            this._webXR.config(this._configMask);
-            this.initFeatures();
-            this._webXR.start();
-            //ARModuleX._instance = this;
-            this._initFlag = true;
-        }
-    }
-    //*/
 
     public start() {
         console.log("<ARModule> start...");
-        /*
-        if(!this._webXR)
-            this._webXR = new WebXR('immersive-ar', this.onSupportCallback);
-
-        if(!this._initFlag && this._webXR.isSupported) {
-            console.log("<start> support WebXR!");
-
-            this._webXR.config(this._configMask);
-            this.initFeatures();
-            this._webXR.start();
-            
-
-            //ARModuleX._instance = this;
-            this._initFlag = true;
-            console.log("WebXR start...");
-
-        } else {
-
-        }
-        //*/
-
         this._featuresMap.forEach((feature, id) => {
             feature.start();
         });
@@ -147,7 +108,7 @@ export class ARModuleX extends IARModule {
     }
 
     public update() {
-        if(!this._webXR) return;
+        if(!this._webXR || !this._initFlag) return;
 
         this._webXR.update();
 
@@ -286,4 +247,29 @@ export class ARModuleX extends IARModule {
         }
     }
     //#endregion
+
+    enablePlane (enable : boolean) {
+        this._webXR!.enablePlane(enable);
+    }
+
+    setPlaneDetectionMode (mode : number) {
+        this._webXR!.setPlaneDetectionMode(mode);
+    }
+
+    setPlaneMaxTrackingNumber (count : number) {
+        this._webXR!.setPlaneMaxTrackingNumber(count);
+    }
+
+    getAddedPlanesInfo() {
+        return this._webXR!.getAddedPlanesInfo();
+    }
+
+    getUpdatedPlanesInfo(){
+        return this._webXR!.getUpdatedPlanesInfo();
+    }
+
+    getRemovedPlanesInfo(){
+        return this._webXR!.getRemovedPlanesInfo();
+    }
+
 }
