@@ -28,6 +28,7 @@ import { Root } from '../..';
 import { legacyCC } from '../../global-exports';
 import { WebGL2Device } from '../../gfx/webgl2/webgl2-device';
 import { WebGL2Texture } from '../../gfx/webgl2/webgl2-texture';
+import { EDITOR } from 'internal:constants';
 
 const orientationMap: Record<Orientation, SurfaceTransform> = {
     [Orientation.PORTRAIT]: SurfaceTransform.IDENTITY,
@@ -48,17 +49,16 @@ const vs = `
         v_texCoord = (u_CoordMatrix * vec4(a_texCoord, 0, 1)).xy;
         gl_Position = u_MVP * vec4(a_position, 0, 1);
     }`;
+// #extension GL_OES_EGL_image_external_essl3:require    
 const fs = `
-    //#extension GL_OES_EGL_image_external_essl3 : require \n
+    #extension GL_OES_EGL_image_external_essl3:require\n
+    #version 300 es
     precision mediump float;
     in vec2 v_texCoord;
-    //uniform samplerExternalOES u_texture;
-    uniform sampler2D u_texture;
+    uniform samplerExternalOES u_texture;
     out vec4 o_color;
     void main() {
         o_color = texture(u_texture, v_texCoord);
-        //o_color = o_color * vec4(0, 1, 1, 1);
-        //o_color = vec4(0, 1, 1, 1);
     }`;
 
 const vsGLSL1 = `attribute vec2 a_position;
@@ -108,7 +108,7 @@ export class ARBackground {
     private _uniformBuffer: Buffer | null = null;
     private _pipelineLayout: PipelineLayout | null = null;
 
-    private _texture: Texture | null = null;
+    private _backgroundTexture: Texture | null = null;
 
     private _setTexFlag = false;
     private _glTexId = 0;
@@ -129,7 +129,7 @@ export class ARBackground {
 
         //console.log("system XR", sys.isXR);
         //if(sys.platform != Platform.MOBILE_BROWSER && sys.platform != Platform.DESKTOP_BROWSER) {
-        if(sys.platform != Platform.MOBILE_BROWSER && sys.platform != Platform.DESKTOP_BROWSER) {
+        if(!EDITOR && sys.platform != Platform.MOBILE_BROWSER && sys.platform != Platform.DESKTOP_BROWSER) {
             console.log("Runtime AR background setup...")
             this.inits(device);
         }
@@ -165,6 +165,7 @@ export class ARBackground {
         const shaderInfo = new ShaderInfo(
             "ARBackGround", stages, this._attributes, blocks, [], samplerTextures, samplers
         );
+        shaderInfo.requireExternal = true;
         this._shader = device.createShader(shaderInfo);
 
         // inputAssembler
@@ -248,7 +249,29 @@ export class ARBackground {
         this._descriptorSet.bindTexture(1, this._texture);
         this._descriptorSet.update();*/
 
+        this._descriptorSet!.bindBuffer(0, this._uniformBuffer!);
+
+        /*
+        const textureInfo = new TextureInfo();
+        textureInfo.usage = TextureUsageBit.SAMPLED | TextureUsageBit.TRANSFER_SRC;
+        textureInfo.format = Format.RGBA8;
+        //textureInfo.width = 1920;//camera.width;
+        //textureInfo.height = 1080;//camera.height;
+        textureInfo.externalRes = 1;
+        this._backgroundTexture = device.createTexture(textureInfo);
+        */
+
+        //armodule!.setCameraTextureName(((backgroundTex as WebGL2Texture).gpuTexture.glTexture as any)._id);
+
         //this._descriptorSet!.bindBuffer(0, this._uniformBuffer!);
+
+        /*
+        this._descriptorSet!.bindSampler(1, device.getSampler(new SamplerInfo()));
+        this._descriptorSet!.bindTexture(1, this._backgroundTexture);
+
+        this._descriptorSet!.update();
+        //*/
+
     }
 
     public render (camera: Camera, renderPass: RenderPass) {
@@ -263,29 +286,49 @@ export class ARBackground {
 
         //this.inits(device);
 
-        const rotation = orientationMap[screenAdapter.orientation];
-        armodule!.setDisplayGeometry(rotation, camera.width, camera.height);
+        //const rotation = orientationMap[screenAdapter.orientation];
+        //armodule!.setDisplayGeometry(rotation, camera.width, camera.height);
 
-        if (!this._setTexFlag) {
-            const textureInfo = new TextureInfo();
-            textureInfo.usage = TextureUsageBit.SAMPLED | TextureUsageBit.TRANSFER_SRC;
-            textureInfo.format = Format.RGBA8;
-            textureInfo.width = camera.width;
-            textureInfo.height = camera.height;
-            textureInfo.externalRes = 1;
-            const backgroundTex = device.createTexture(textureInfo);
-            armodule!.setCameraTextureName(((backgroundTex as WebGL2Texture).gpuTexture.glTexture as any)._id);
-
-            this._descriptorSet!.bindBuffer(0, this._uniformBuffer!);
-
-            this._descriptorSet!.bindSampler(1, device.getSampler(new SamplerInfo()));
-            this._descriptorSet!.bindTexture(1, backgroundTex);
-
-            this._descriptorSet!.update();
-    
-            this._setTexFlag = true;
-        }
         //*
+        if (!this._setTexFlag) {
+            //*
+            //const glTex = armodule!.getCameraTextureRef();
+            //console.log("set gl tex", glTex);
+
+            //if(glTex) {
+                const textureInfo = new TextureInfo();
+                textureInfo.usage = TextureUsageBit.SAMPLED | TextureUsageBit.TRANSFER_SRC;
+                textureInfo.format = Format.RGBA8;
+                textureInfo.width = camera.width;
+                textureInfo.height = camera.height;
+                textureInfo.externalRes = 1;
+                //textureInfo.externalSrc = glTex;
+                this._backgroundTexture = device.createTexture(textureInfo);
+                console.log("bg tex", this._backgroundTexture);
+                //*/
+
+                //*
+                const glTex = (this._backgroundTexture  as WebGL2Texture).gpuTexture.glTexture;
+                const id = (glTex as any)._id;
+                console.log("AR set Tex...", glTex);
+                console.log("AR set Tex id...", id);
+                armodule!.setCameraTextureName(id);
+                //*/
+
+                //this._setTexFlag = true;
+                //*
+                this._descriptorSet!.bindSampler(1, device.getSampler(new SamplerInfo()));
+                this._descriptorSet!.bindTexture(1, this._backgroundTexture);
+
+                this._descriptorSet!.update();
+        
+                this._setTexFlag = true;
+            //}
+            //*/
+        }
+        //*/
+
+        /*
         const coords = armodule!.getCameraTexCoords();
         const vertices = new Float32Array([
             -1, -1, coords[0], coords[1],

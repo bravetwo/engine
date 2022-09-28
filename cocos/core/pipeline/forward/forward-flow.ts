@@ -53,7 +53,7 @@ export class ForwardFlow extends RenderFlow {
     public initialize (info: IRenderFlowInfo): boolean {
         super.initialize(info);
         if (this._stages.length === 0) {
-            //*
+            //* TODO: need add XR Macro judgement
             const arStage = new ARBackgroundStage();
             arStage.initialize(ARBackgroundStage.initInfo);
             this._stages.push(arStage);

@@ -58,6 +58,7 @@ export class WebGL2Shader extends Shader {
             glUniforms: [],
             glBlocks: [],
             glSamplerTextures: [],
+            requireExternal: info.requireExternal, // temporary for ar
         };
 
         for (let i = 0; i < info.stages.length; ++i) {

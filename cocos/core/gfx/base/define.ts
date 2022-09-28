@@ -1156,6 +1156,7 @@ export class TextureInfo {
         public samples: SampleCount = SampleCount.ONE,
         public depth: number = 1,
         public externalRes: number = 0,
+        public externalSrc: WebGLTexture | null = null // for runtime armodule
     ) {}
 
     public copy (info: Readonly<TextureInfo>) {
@@ -1440,6 +1441,7 @@ export class ShaderInfo {
         public textures: UniformTexture[] = [],
         public images: UniformStorageImage[] = [],
         public subpassInputs: UniformInputAttachment[] = [],
+        public requireExternal: boolean = false, // temporary for ar
     ) {}
 
     public copy (info: Readonly<ShaderInfo>) {

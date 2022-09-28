@@ -24,7 +24,8 @@
 
 declare const jsb: any;
 
-import { Quat, Vec3 , Node} from '../core';
+import { Platform } from '../../pal/system-info/enum-type';
+import { Quat, Vec3 , Node, sys} from '../core';
 import { ARFeature, ARPose, FeatureType, ARFeatureData} from './ar-feature-base';
 import * as features from './ar-features';
 import { IARModule } from './ar-module-base';
@@ -40,7 +41,11 @@ export class ARModuleX extends IARModule {
         return this._cameraId;
     }
     set CameraId (val) {
-        this._nativeObj.setCameraId(val);
+        // only for native
+        if(sys.platform === Platform.ANDROID || sys.platform === Platform.IOS) {
+            this._nativeObj.setCameraId(val);
+        }
+
         this._cameraId = val;
     }
 
@@ -61,6 +66,7 @@ export class ARModuleX extends IARModule {
             console.error("... armodule init in native failed! ...");
             return;
         }
+        console.log("armodule native", this._nativeObj);
 
         // create features from json
         // assembly feature config mask
@@ -148,8 +154,14 @@ export class ARModuleX extends IARModule {
         this._nativeObj.setDisplayGeometry(rotation, width, height);
     }
 
-    public setCameraTextureName(id : number) {
+    public setCameraTextureName(id : number) {  
+        console.log("armodule setCameraTextureName::", id);
         this._nativeObj.setCameraTextureName(id);
+    }
+
+    public getCameraTextureRef() {
+        // for runtime, native create glTexture and set to ARCore/AREngine
+        return this._nativeObj.getCameraTextureRef() as WebGLTexture;
     }
 
     public updateRenderState(gl : WebGLRenderingContext) {}

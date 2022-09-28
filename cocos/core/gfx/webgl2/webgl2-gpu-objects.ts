@@ -259,6 +259,7 @@ export interface IWebGL2GPUShader {
     glUniforms: IWebGL2GPUUniform[];
     glBlocks: IWebGL2GPUUniformBlock[];
     glSamplerTextures: IWebGL2GPUUniformSamplerTexture[];
+    requireExternal: boolean; // temporary for ar
 }
 
 export interface IWebGL2GPUDescriptorSetLayout {

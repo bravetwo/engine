@@ -27,7 +27,7 @@ import { ccclass, displayOrder, type, serializable } from 'cc.decorator';
 import { SetIndex } from '../define';
 import { getPhaseID } from '../pass-phase';
 import { renderQueueClearFunc, RenderQueue, convertRenderQueue, renderQueueSortFunc } from '../render-queue';
-import { ClearFlagBit, Color, ColorAttachment, DepthStencilAttachment, deviceManager, Filter, Rect, RenderPassInfo, StoreOp } from '../../gfx';
+import { ClearFlagBit, Color, Rect} from '../../gfx';
 import { RenderBatchedQueue } from '../render-batched-queue';
 import { RenderInstancedQueue } from '../render-instanced-queue';
 import { IRenderStageInfo, RenderStage } from '../render-stage';
@@ -187,49 +187,10 @@ export class ForwardStage extends RenderStage {
         }
         pipeline.generateRenderArea(camera, this._renderArea);
 
-        /* for webxr
-        const armodule = ARModuleX.getInstance();
-        if(armodule && !this._xrWindowSetFlag && armodule.getAPIState() === 3 && armodule.CameraId === camera.node.uuid) {
-            if(!this._updateStateFlag) {
-                const { gl } = device as WebGL2Device;
-
-                armodule.updateRenderState(gl as any);
-                this._updateStateFlag = true;
-            }
-            const xrgpuframebuffer = armodule.getXRLayerFrameBuffer();
-            if(xrgpuframebuffer) {
-                const root = legacyCC.director.root as Root;
-                const swapchain = deviceManager.swapchain;
-
-                const colorAttachment = new ColorAttachment();
-                colorAttachment.format = swapchain.colorTexture.format;
-                const depthStencilAttachment = new DepthStencilAttachment();
-                depthStencilAttachment.format = swapchain.depthStencilTexture.format;
-                depthStencilAttachment.depthStoreOp = StoreOp.DISCARD;
-                depthStencilAttachment.stencilStoreOp = StoreOp.DISCARD;
-                const renderPassInfo = new RenderPassInfo([colorAttachment], depthStencilAttachment);
-
-                const xrWindow = root.createWindow({
-                    title: 'xrWindow',
-                    width: swapchain.width,
-                    height: swapchain.height,
-                    renderPassInfo,
-                    swapchain,
-                    externalSrc: xrgpuframebuffer
-                });
-                camera.window = xrWindow!;
-                console.log("window", camera.window);
-                this._xrWindowSetFlag = true;
-            }
-        }
-        //*/
-
         const framebuffer = camera.window.framebuffer;
         const renderPass = pipeline.getRenderPass(camera.clearFlag & this._clearFlag, framebuffer);
         cmdBuff.beginRenderPass(renderPass, framebuffer, this._renderArea,
             colors, camera.clearDepth, camera.clearStencil);
-
-        
 
         cmdBuff.bindDescriptorSet(SetIndex.GLOBAL, pipeline.descriptorSet);
 

@@ -1038,8 +1038,10 @@ export function WebGL2CmdFuncCreateTexture (device: WebGL2Device, gpuTexture: IW
     gpuTexture.glFormat = GFXFormatToWebGLFormat(gpuTexture.format, gl);
     gpuTexture.glType = GFXFormatToWebGLType(gpuTexture.format, gl);
 
-    if (gpuTexture.glTexture) { // ar android external
+    if (gpuTexture.glTexture) { // ar android external for runtime
         gpuTexture.glTarget = GL_TEXTURE_EXTERNAL_OES;
+        gl.bindTexture(gpuTexture.glTarget, gpuTexture.glTexture);
+        console.log("set oes", gpuTexture.glTexture);
         return;
     }
 
@@ -1316,7 +1318,6 @@ export function WebGL2CmdFuncCreateFramebuffer (device: WebGL2Device, gpuFramebu
     const { gl } = device;
     const attachments: GLenum[] = [];
     
-    console.log("gpuFramebuffer.glFramebuffer", gpuFramebuffer.glFramebuffer);
     if(!gpuFramebuffer.glFramebuffer) { // for webxr framebuffer
         const glFramebuffer = gl.createFramebuffer();
         if (glFramebuffer) gpuFramebuffer.glFramebuffer = glFramebuffer;
@@ -1425,7 +1426,7 @@ export function WebGL2CmdFuncDestroyFramebuffer (device: WebGL2Device, gpuFrameb
 
 export function WebGL2CmdFuncCreateShader (device: WebGL2Device, gpuShader: IWebGL2GPUShader) {
     const { gl } = device;
-
+    console.log("WebGL2", gpuShader);
     for (let k = 0; k < gpuShader.gpuStages.length; k++) {
         const gpuStage = gpuShader.gpuStages[k];
 
@@ -1449,11 +1450,17 @@ export function WebGL2CmdFuncCreateShader (device: WebGL2Device, gpuShader: IWeb
             return;
         }
         }
-
+        console.log("gpuShader.requireExternal", gpuShader.requireExternal);
         const glShader = gl.createShader(glShaderType);
         if (glShader) {
             gpuStage.glShader = glShader;
-            gl.shaderSource(gpuStage.glShader, `#version 300 es\n${gpuStage.source}`);
+            // temporary for ar
+            if(gpuStage.type === ShaderStageFlagBit.FRAGMENT && gpuShader.requireExternal) {
+                console.log("gpuShader src", gpuShader);
+                gl.shaderSource(gpuStage.glShader, gpuStage.source);
+            } else {
+                gl.shaderSource(gpuStage.glShader, `#version 300 es\n${gpuStage.source}`);
+            }
             gl.compileShader(gpuStage.glShader);
 
             if (!gl.getShaderParameter(gpuStage.glShader, gl.COMPILE_STATUS)) {
