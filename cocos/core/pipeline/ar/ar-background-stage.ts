@@ -78,7 +78,7 @@ export class ARBackgroundStage extends RenderStage {
 
         const state = armodule.getAPIState();
         if(state < 0) return;
-
+        
         const pipeline = this._pipeline as ForwardPipeline;
 
         if(state === 3) { // webxr
@@ -118,6 +118,7 @@ export class ARBackgroundStage extends RenderStage {
             }
             
         } else { // runtime
+            //*
             const cmdBuff = pipeline.commandBuffers[0];
             const framebuffer = camera.window.framebuffer;
             const renderPass = pipeline.getRenderPass(camera.clearFlag & this._clearFlag, framebuffer);
@@ -130,6 +131,7 @@ export class ARBackgroundStage extends RenderStage {
             this._arBackground.render(camera, renderPass);
 
             cmdBuff.endRenderPass();
+            //*/
         }
     }
 }

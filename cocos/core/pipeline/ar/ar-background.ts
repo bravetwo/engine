@@ -28,6 +28,7 @@ import { Root } from '../..';
 import { legacyCC } from '../../global-exports';
 import { WebGL2Device } from '../../gfx/webgl2/webgl2-device';
 import { WebGL2Texture } from '../../gfx/webgl2/webgl2-texture';
+import { EDITOR } from 'internal:constants';
 
 const orientationMap: Record<Orientation, SurfaceTransform> = {
     [Orientation.PORTRAIT]: SurfaceTransform.IDENTITY,
@@ -47,42 +48,16 @@ const vs = `
     void main(){
         v_texCoord = (u_CoordMatrix * vec4(a_texCoord, 0, 1)).xy;
         gl_Position = u_MVP * vec4(a_position, 0, 1);
-    }`;
+    }`; 
 const fs = `
-    //#extension GL_OES_EGL_image_external_essl3 : require \n
+    #extension GL_OES_EGL_image_external_essl3:require
     precision mediump float;
     in vec2 v_texCoord;
-    //uniform samplerExternalOES u_texture;
-    uniform sampler2D u_texture;
+    uniform samplerExternalOES u_texture;
     out vec4 o_color;
     void main() {
         o_color = texture(u_texture, v_texCoord);
-        //o_color = o_color * vec4(0, 1, 1, 1);
-        //o_color = vec4(0, 1, 1, 1);
     }`;
-
-const vsGLSL1 = `attribute vec2 a_position;
-    attribute vec2 a_texCoord;
-    uniform mat4 u_MVP;
-    uniform mat4 u_CoordMatrix;
-
-    varying vec2 v_texCoord;
-    void main() {
-        v_texCoord = (u_CoordMatrix * vec4(a_texCoord, 0, 1)).xy;
-        gl_Position = u_MVP * vec4(a_position, 0, 1);
-    }`;
-const fsGLSL1 = `#extension GL_OES_EGL_image_external : require
-    precision mediump float;
-
-    varying vec2 v_texCoord;
-    uniform samplerExternalOES u_texture;
-
-    void main() {
-        gl_FragColor = texture2D(u_texture, v_texCoord);
-    }`;
-
-const vsAndroid = 'attribute vec4 vPosition;\n attribute vec2 vCoord;\n uniform mat4 vMatrix;\n uniform mat4 vCoordMatrix;\n varying vec2 textureCoordinate;\n void main(){\n gl_Position = vMatrix*vPosition;\n textureCoordinate = (vCoordMatrix*vec4(vCoord,0,1)).xy;\n }';
-const fsAndroid = '#extension GL_OES_EGL_image_external:require\n precision mediump float;\n varying vec2 textureCoordinate;\n uniform samplerExternalOES vTexture;\n void main() {\n gl_FragColor = texture2D(vTexture, textureCoordinate);\n }';
 
 /**
  * @zh
@@ -108,28 +83,17 @@ export class ARBackground {
     private _uniformBuffer: Buffer | null = null;
     private _pipelineLayout: PipelineLayout | null = null;
 
-    private _texture: Texture | null = null;
+    private _backgroundTexture: Texture | null = null;
 
     private _setTexFlag = false;
-    private _glTexId = 0;
 
     public activate (pipeline: RenderPipeline) {
         this._pipeline = pipeline;
-        /*
-        this._cmdBuff = this._device!.createCommandBuffer({
-            allocator: this._device!.commandAllocator,
-            type: GFXCommandBufferType.PRIMARY,
-        });
-        //*/
-
-        //this.gl = (pipeline.device as any).gl;
-        //this.init();
-
         const device = pipeline.device;
 
         //console.log("system XR", sys.isXR);
         //if(sys.platform != Platform.MOBILE_BROWSER && sys.platform != Platform.DESKTOP_BROWSER) {
-        if(sys.platform != Platform.MOBILE_BROWSER && sys.platform != Platform.DESKTOP_BROWSER) {
+        if(!EDITOR && sys.platform != Platform.MOBILE_BROWSER && sys.platform != Platform.DESKTOP_BROWSER) {
             console.log("Runtime AR background setup...")
             this.inits(device);
         }
@@ -153,9 +117,6 @@ export class ARBackground {
         const blocks = [
             new UniformBlock(SetIndex.MATERIAL, 0, "Mats", uniforms, 2)
         ];
-        // const buffers = [
-        //     new UniformStorageBuffer(SetIndex.MATERIAL, 0, "Mats", 2, MemoryAccessBit.READ_ONLY)
-        // ]
         const samplerTextures = [
             new UniformSamplerTexture(SetIndex.MATERIAL, 1, "u_texture", Type.SAMPLER2D, 1)
         ];
@@ -169,10 +130,10 @@ export class ARBackground {
 
         // inputAssembler
         const vertices = new Float32Array([
-            -1, -1, 0, 0,
+            -1, -1, 1, 1,
             -1, 1, 0, 1,
             1, -1, 1, 0,
-            1, 1, 1, 1
+            1, 1, 0, 0
         ]);
         let bytes = vertices.length * Float32Array.BYTES_PER_ELEMENT;
         this._vertexBuffer= device.createBuffer(new BufferInfo(
@@ -234,21 +195,7 @@ export class ARBackground {
             this._pipeline.descriptorSetLayout, this._descriptorSetLayout 
         ]));
 
-
-        /*
-        this._texture = device.createTexture(new TextureInfo(
-            TextureType.TEX2D, 
-            TextureUsageBit.SAMPLED | TextureUsageBit.TRANSFER_SRC, 
-            Format.RGBA8,
-            300, 400));
-        const id = ((this._texture as WebGL2Texture).gpuTexture.glTexture as any)._id;
-            /*
-        this._descriptorSet.bindBuffer(0, this._uniformBuffer);
-        this._descriptorSet.bindSampler(1, device.getSampler(new SamplerInfo()));
-        this._descriptorSet.bindTexture(1, this._texture);
-        this._descriptorSet.update();*/
-
-        //this._descriptorSet!.bindBuffer(0, this._uniformBuffer!);
+        this._descriptorSet!.bindBuffer(0, this._uniformBuffer!);
     }
 
     public render (camera: Camera, renderPass: RenderPass) {
@@ -261,10 +208,8 @@ export class ARBackground {
         const device = pipeline.device as WebGL2Device;
         const cmdBuff = pipeline.commandBuffers[0];
 
-        //this.inits(device);
-
-        const rotation = orientationMap[screenAdapter.orientation];
-        armodule!.setDisplayGeometry(rotation, camera.width, camera.height);
+        //const rotation = orientationMap[screenAdapter.orientation];
+        //armodule!.setDisplayGeometry(rotation, camera.width, camera.height);
 
         if (!this._setTexFlag) {
             const textureInfo = new TextureInfo();
@@ -273,18 +218,19 @@ export class ARBackground {
             textureInfo.width = camera.width;
             textureInfo.height = camera.height;
             textureInfo.externalRes = 1;
-            const backgroundTex = device.createTexture(textureInfo);
-            armodule!.setCameraTextureName(((backgroundTex as WebGL2Texture).gpuTexture.glTexture as any)._id);
+            this._backgroundTexture = device.createTexture(textureInfo);
 
-            this._descriptorSet!.bindBuffer(0, this._uniformBuffer!);
+            const glTex = (this._backgroundTexture  as WebGL2Texture).gpuTexture.glTexture;
+            const id = (glTex as any)._id;
+            armodule!.setCameraTextureName(id);
 
             this._descriptorSet!.bindSampler(1, device.getSampler(new SamplerInfo()));
-            this._descriptorSet!.bindTexture(1, backgroundTex);
-
+            this._descriptorSet!.bindTexture(1, this._backgroundTexture);
             this._descriptorSet!.update();
     
             this._setTexFlag = true;
         }
+
         //*
         const coords = armodule!.getCameraTexCoords();
         const vertices = new Float32Array([
@@ -306,12 +252,7 @@ export class ARBackground {
         const pso = device.createPipelineState(psoInfo);
         cmdBuff.bindPipelineState(pso);
         cmdBuff.bindDescriptorSet(SetIndex.MATERIAL, this._descriptorSet!);
-        //cmdBuff.bindDescriptorSet(SetIndex.LOCAL, this._descriptorSet!)
         cmdBuff.bindInputAssembler(this._inputAssembler!);
-        //const webgl2Device = device as WebGL2Device;
-        //const useVAO = webgl2Device.extensions.useVAO;
-        //webgl2Device.extensions.useVAO = false;
         cmdBuff.draw(this._inputAssembler!);
-        //webgl2Device.extensions.useVAO = useVAO;
     }
 }

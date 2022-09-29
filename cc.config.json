@@ -140,6 +140,8 @@
             "test": "context.mode === 'BUILD'",
             "isVirtualModule": false,
             "overrides": {
+                "cocos/ar/index.ts": "cocos/ar/index.jsb.ts",
+                "cocos/ar/ar-module.ts": "cocos/ar/ar-module.jsb.ts"
             }
         },
         {

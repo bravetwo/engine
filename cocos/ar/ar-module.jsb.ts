@@ -24,11 +24,22 @@
 
 declare const jsb: any;
 
+import { screenAdapter } from 'pal/screen-adapter';
 import { Vec2 } from '@cocos/box2d';
-import { Quat, Vec3 , Node, Camera} from '../core';
+import { Orientation } from '../../pal/screen-adapter/enum-type/orientation';
+import { Platform } from '../../pal/system-info/enum-type';
+import { Quat, Vec3 , Node, Camera, sys} from '../core';
+import { SurfaceTransform } from '../core/gfx/base/define';
 import { ARFeature, ARPose, FeatureType, ARFeatureData} from './ar-feature-base';
 import * as features from './ar-features';
 import { IARModule } from './ar-module-base';
+
+const orientationMap: Record<Orientation, SurfaceTransform> = {
+    [Orientation.PORTRAIT]: SurfaceTransform.IDENTITY,
+    [Orientation.LANDSCAPE_RIGHT]: SurfaceTransform.ROTATE_90,
+    [Orientation.PORTRAIT_UPSIDE_DOWN]: SurfaceTransform.ROTATE_180,
+    [Orientation.LANDSCAPE_LEFT]: SurfaceTransform.ROTATE_270,
+};
 
 export class ARModuleX extends IARModule {
     public static readonly FEATURE_PREFIX = "ARFeature";
@@ -41,8 +52,12 @@ export class ARModuleX extends IARModule {
     get CameraId (): string | null {
         return this._cameraId;
     }
-    set CameraId (val: string | null) {
-        this._nativeObj.setCameraId(val);
+    set CameraId (val) {
+        // only for native
+        if(sys.platform === Platform.ANDROID || sys.platform === Platform.IOS) {
+            this._nativeObj.setCameraId(val);
+        }
+
         this._cameraId = val;
     }
     get Camera (): Camera | null {
@@ -69,6 +84,7 @@ export class ARModuleX extends IARModule {
             console.error("... armodule init in native failed! ...");
             return;
         }
+        console.log("armodule native", this._nativeObj);
 
         // create features from json
         // assembly feature config mask
@@ -105,6 +121,9 @@ export class ARModuleX extends IARModule {
     }
 
     public update() {
+        //const rotation = orientationMap[screenAdapter.orientation];
+        //this.setDisplayGeometry(rotation, this._camera!.camera.width, this._camera!.camera.height);
+
         this._nativeObj.update();
 
         this._featuresMap.forEach((feature, id) => {
@@ -156,11 +175,17 @@ export class ARModuleX extends IARModule {
         this._nativeObj.setDisplayGeometry(rotation, width, height);
     }
 
-    public setCameraTextureName(id: number) {
+    public setCameraTextureName(id : number) {  
+        console.log("armodule setCameraTextureName::", id);
         this._nativeObj.setCameraTextureName(id);
     }
 
-    public updateRenderState(gl: WebGLRenderingContext) {}
+    public getCameraTextureRef() {
+        // for runtime, native create glTexture and set to ARCore/AREngine
+        return this._nativeObj.getCameraTextureRef() as WebGLTexture;
+    }
+
+    public updateRenderState(gl : WebGLRenderingContext) {}
     //#endregion
 
     //#region feature

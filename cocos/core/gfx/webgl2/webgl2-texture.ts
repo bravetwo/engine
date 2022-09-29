@@ -80,7 +80,7 @@ export class WebGL2Texture extends Texture {
                 glFormat: 0,
                 glType: 0,
                 glUsage: 0,
-                glTexture: this._info.externalRes > 0 ?  gl.createTexture() : null, // for ar background
+                glTexture: texInfo.externalRes > 0 ? gl.createTexture() : null, // for ar background
                 glRenderbuffer: null,
                 glWrapS: 0,
                 glWrapT: 0,
