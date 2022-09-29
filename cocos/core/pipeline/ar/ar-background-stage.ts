@@ -28,14 +28,29 @@ import { IRenderStageInfo, RenderStage } from '../render-stage';
 import { ForwardStagePriority } from '../enum';
 import { ForwardFlow } from '../forward/forward-flow';
 import { ForwardPipeline } from '../forward/forward-pipeline';
-import { Camera } from '../../renderer/scene';
+import { Camera, CameraProjection } from '../../renderer/scene';
 import { ARBackground } from './ar-background';
 import { ARModuleX } from '../../../ar/ar-module';
 import { WebGL2Device } from '../../gfx/webgl2/webgl2-device';
 import { legacyCC } from '../../global-exports';
 import { Root } from '../../root';
+import { RenderWindow } from '../../renderer/core/render-window';
+import { WebGLFramebuffer } from '../../gfx/webgl/webgl-framebuffer';
 
 const colors: Color[] = [new Color(0, 0, 0, 1)];
+const layerList = {
+    NONE: 0,
+    IGNORE_RAYCAST: (1 << 20),
+    GIZMOS: (1 << 21),
+    EDITOR: (1 << 22),
+    UI_3D: (1 << 23),
+    SCENE_GIZMO: (1 << 24),
+    UI_2D: (1 << 25),
+
+    PROFILER: (1 << 28),
+    DEFAULT: (1 << 30),
+    ALL: 0xffffffff,
+};
 
 export class ARBackgroundStage extends RenderStage {
     public static initInfo: IRenderStageInfo = {
@@ -51,6 +66,11 @@ export class ARBackgroundStage extends RenderStage {
     private declare _arBackground: ARBackground;
     private _updateStateFlag = false;
     private _xrWindowSetFlag = false;
+    private _uiWindowSetFlag = false;
+
+    private _xrWindow : RenderWindow | null = null;
+    private _xrGpuFramebuffer : WebGLFramebuffer | null = null;
+    private _xrWindowSetCount : number = 0;
 
     constructor () {
         super();
@@ -74,14 +94,13 @@ export class ARBackgroundStage extends RenderStage {
     public render (camera: Camera) {
         const armodule = ARModuleX.getInstance();
         if(!armodule) return;
-        if(armodule.CameraId != camera.node.uuid) return;
 
         const state = armodule.getAPIState();
         if(state < 0) return;
         
         const pipeline = this._pipeline as ForwardPipeline;
 
-        if(state === 3) { // webxr
+        if(state === 3) { // webxr need add ui camera process, TODO: Need move to ar-module
             const device = pipeline.device;
             if(!this._updateStateFlag) {
                 const { gl } = device as WebGL2Device;
@@ -89,36 +108,48 @@ export class ARBackgroundStage extends RenderStage {
                 armodule.updateRenderState(gl as any);
                 this._updateStateFlag = true;
             }
-            if(!this._xrWindowSetFlag) {
+
+            if(this._updateStateFlag) {
                 const xrgpuframebuffer = armodule.getXRLayerFrameBuffer();
-                if(xrgpuframebuffer) {
-                    const root = legacyCC.director.root as Root;
-                    const swapchain = deviceManager.swapchain;
+                const viewport = armodule.getViewport();
+                if(!xrgpuframebuffer || !viewport) return;
 
-                    const colorAttachment = new ColorAttachment();
-                    colorAttachment.format = swapchain.colorTexture.format;
-                    const depthStencilAttachment = new DepthStencilAttachment();
-                    depthStencilAttachment.format = swapchain.depthStencilTexture.format;
-                    depthStencilAttachment.depthStoreOp = StoreOp.DISCARD;
-                    depthStencilAttachment.stencilStoreOp = StoreOp.DISCARD;
-                    const renderPassInfo = new RenderPassInfo([colorAttachment], depthStencilAttachment);
+                const root = legacyCC.director.root as Root;
+                const swapchain = deviceManager.swapchain;
 
-                    const xrWindow = root.createWindow({
-                        title: 'xrWindow',
-                        width: swapchain.width,
-                        height: swapchain.height,
-                        renderPassInfo,
-                        swapchain,
-                        externalSrc: xrgpuframebuffer
-                    });
-                    camera.window = xrWindow!;
-                    console.log("window", camera.window);
+                const colorAttachment = new ColorAttachment();
+                colorAttachment.format = swapchain.colorTexture.format;
+                const depthStencilAttachment = new DepthStencilAttachment();
+                depthStencilAttachment.format = swapchain.depthStencilTexture.format;
+                depthStencilAttachment.depthStoreOp = StoreOp.DISCARD;
+                depthStencilAttachment.stencilStoreOp = StoreOp.DISCARD;
+                const renderPassInfo = new RenderPassInfo([colorAttachment], depthStencilAttachment);
+
+                this._xrWindow = root.createWindow({
+                    title: 'xrWindow',
+                    width: viewport.width,
+                    height: viewport.height,
+                    renderPassInfo,
+                    swapchain,
+                    externalSrc: xrgpuframebuffer
+                });
+
+                if(!this._xrWindowSetFlag && (armodule.CameraId == camera.node.uuid)) { 
+                    camera.changeTargetWindow(this._xrWindow);
                     this._xrWindowSetFlag = true;
+                }
+
+                // ui camera process
+                if (!this._uiWindowSetFlag && camera.projectionType == CameraProjection.ORTHO && (camera.visibility & layerList.UI_2D || camera.visibility & layerList.UI_3D)) {
+                    camera.changeTargetWindow(this._xrWindow!);
+                    this._uiWindowSetFlag = true;     
                 }
             }
             
         } else { // runtime
             //*
+            if(armodule.CameraId != camera.node.uuid) return;
+
             const cmdBuff = pipeline.commandBuffers[0];
             const framebuffer = camera.window.framebuffer;
             const renderPass = pipeline.getRenderPass(camera.clearFlag & this._clearFlag, framebuffer);

@@ -44,6 +44,8 @@ export class WebXR {
     private _immersiveRefSpace = null;
     private _cameraPose: any = null;
     private _framebuffer = null;
+    private _baseLayer: any = null;
+    private _viewport: any = null;
 
     private _onXRFrame:XRFrameFunction | null = null;
 
@@ -64,6 +66,8 @@ export class WebXR {
         this._onXRFrame = (t, frame) => {
             let session = frame.session;
             let refSpace = this.getSessionReferenceSpace(frame.session);
+            //const baseLayer = session.renderState.baseLayer;
+            this._baseLayer = session.renderState.baseLayer;
 
             this._plane && this._plane.processPlanes(frame, this._immersiveRefSpace);
 
@@ -72,6 +76,7 @@ export class WebXR {
 
             this._cameraPose = frame.getViewerPose(refSpace);
             this._framebuffer = frame.session.renderState.baseLayer.framebuffer;
+
             //console.log("framebuffer", this.framebuffer);
             frameCallback(t);
         }
@@ -91,8 +96,8 @@ export class WebXR {
         console.log("WebXR start...");
         //根据特性启用
         if (1) {
-            this._sessionInit.requiredFeatures.push('plane-detection');
-            this._plane = new WebXRPlane();
+            //this._sessionInit.requiredFeatures.push('plane-detection');
+            //this._plane = new WebXRPlane();
         }
         this.requestSession();
     };
@@ -211,6 +216,13 @@ export class WebXR {
         }
         return null;
     };
+    getViewport() {
+        // ar
+        if(this._cameraPose && this._baseLayer) {
+            this._viewport = this._baseLayer.getViewport(this._cameraPose.views[0]);
+        }
+        return this._viewport;
+    }
     getCameraDepthBuffer() {};
     getXRLayerFrameBuffer() {
         return this._framebuffer;

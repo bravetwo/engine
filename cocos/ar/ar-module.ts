@@ -181,6 +181,10 @@ export class ARModuleX extends IARModule {
 
     }
 
+    public getViewport() {
+        return this._webXR?.getViewport();
+    }
+
     public setCameraTextureName(id: number) {
 
     }
