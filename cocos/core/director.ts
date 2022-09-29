@@ -735,7 +735,7 @@ export class Director extends EventTarget {
 
     // for webxr, temporary copy of tick
     public xrTick (dt: number) {
-        //console.log("xrTick dt", dt);
+        //console.log("xrTick dt", dt, this._invalid, this._paused);
         if (!this._invalid) {
             this.emit(Director.EVENT_BEGIN_FRAME);
             if (!EDITOR || legacyCC.GAME_VIEW) {

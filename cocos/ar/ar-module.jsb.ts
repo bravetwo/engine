@@ -24,7 +24,8 @@
 
 declare const jsb: any;
 
-import { Quat, Vec3 , Node} from '../core';
+import { Vec2 } from '@cocos/box2d';
+import { Quat, Vec3 , Node, Camera} from '../core';
 import { ARFeature, ARPose, FeatureType, ARFeatureData} from './ar-feature-base';
 import * as features from './ar-features';
 import { IARModule } from './ar-module-base';
@@ -36,12 +37,19 @@ export class ARModuleX extends IARModule {
     public replaceFrameMoveFlag = false;
 
     private _cameraId: string | null = null;
-    get CameraId () {
+    private _camera: Camera | null = null;
+    get CameraId (): string | null {
         return this._cameraId;
     }
-    set CameraId (val) {
+    set CameraId (val: string | null) {
         this._nativeObj.setCameraId(val);
         this._cameraId = val;
+    }
+    get Camera (): Camera | null {
+        return this._camera;
+    }
+    set Camera (val: Camera | null) {
+        this._camera = val;
     }
 
     private _configMask = FeatureType.None;
@@ -53,7 +61,7 @@ export class ARModuleX extends IARModule {
     }
 
     // load
-    public constructor(featuresDataset : ARFeatureData[]) {
+    public constructor(featuresDataset: ARFeatureData[]) {
         super();
         this._nativeObj = new jsb.ARModule();
 
@@ -104,20 +112,20 @@ export class ARModuleX extends IARModule {
         });
     }
 
-    public getAPIState() : number {
+    public getAPIState(): number {
         return this._nativeObj.getAPIState();
     }
 
     //#region camera
-    public setCameraFocus(enable : boolean) {
+    public setCameraFocus(enable: boolean) {
 
     }
 
-    public setCameraClipPlane(near : number, far : number) {
+    public setCameraClipPlane(near: number, far: number) {
 
     }
 
-    public getCameraPose() : ARPose {
+    public getCameraPose(): ARPose {
         const pose = this._nativeObj.getCameraPose();
         return {
             position: new Vec3(
@@ -134,42 +142,42 @@ export class ARModuleX extends IARModule {
         };
     }
 
-    public getCameraFov() : number {
+    public getCameraFov(): number {
         const matArr = this._nativeObj.getCameraProjectionMatrix();
         const fov = 2 * Math.atan(1 / matArr[5]) * 180 / Math.PI;
         return fov;
     }
 
-    public getCameraTexCoords() : number[] {
+    public getCameraTexCoords(): number[] {
         return this._nativeObj.getCameraTexCoords();
     }
 
-    public setDisplayGeometry(rotation : number, width : number, height : number) {
+    public setDisplayGeometry(rotation: number, width: number, height: number) {
         this._nativeObj.setDisplayGeometry(rotation, width, height);
     }
 
-    public setCameraTextureName(id : number) {
+    public setCameraTextureName(id: number) {
         this._nativeObj.setCameraTextureName(id);
     }
 
-    public updateRenderState(gl : WebGLRenderingContext) {}
+    public updateRenderState(gl: WebGLRenderingContext) {}
     //#endregion
 
     //#region feature
-    public tryGetFeature(featureName : string) : ARFeature | null {
+    public tryGetFeature(featureName: string) : ARFeature | null {
         if (this._featuresMap.has(featureName)) {
             return this._featuresMap.get(featureName) as ARFeature;
         }
         return null;
     }
 
-    public setAllFeaturesActive(enable : boolean) {
+    public setAllFeaturesActive(enable: boolean) {
         this._featuresMap.forEach((feature, id) => {
             feature.enable = enable;
         });
     }
 
-    private createFeatures(featuresDataset : ARFeatureData[]) {
+    private createFeatures(featuresDataset: ARFeatureData[]) {
         featuresDataset.forEach(configData => {
             if(configData != null) {
                 let featureClass = ARModuleX.FEATURE_PREFIX + FeatureType[configData.type];
@@ -202,7 +210,7 @@ export class ARModuleX extends IARModule {
         });
     }
 
-    private checkFeaturesSupport(supportMask : number) {
+    private checkFeaturesSupport(supportMask: number) {
         for (let index = 0; index < 8; index++) {
             let configBit = this._configMask & (1 << index);
             if (configBit == 0) continue;
@@ -215,21 +223,21 @@ export class ARModuleX extends IARModule {
             }
         }
     }
+    
     //#endregion
-
-    tryHitTest (xPx : number, yPx : number) : boolean {
-        return this._nativeObj.tryHitTest(xPx, yPx);
+    tryHitTest(touchPoint: Vec2): boolean {
+        return this._nativeObj.tryHitTest(touchPoint.x, touchPoint.y);
     }
 
-    getHitResult () : number[] {
+    getHitResult(): number[] {
         return this._nativeObj.getHitResult();
     }
 
-    getHitId () : number {
+    getHitId(): number {
         return this._nativeObj.getHitId();
     }
 
-    tryHitAttachAnchor (planeIndex : number, node : Node) {
+    tryHitAttachAnchor(planeIndex: number, node: Node) {
         let tryResult = this._nativeObj.tryHitAttachAnchor(planeIndex);
         if(tryResult >= 0) {
             if(this.anchorsMap.has(tryResult)) {
@@ -243,7 +251,7 @@ export class ARModuleX extends IARModule {
         }
     }
 
-    updateAnchors () {
+    updateAnchors() {
         this.anchorsMap.forEach((nodes, index) => {
             let pose = this._nativeObj.getAnchorPose(index);
             nodes.forEach((node) => {
@@ -253,15 +261,15 @@ export class ARModuleX extends IARModule {
         });
     }
 
-    enablePlane (enable : boolean) {
+    enablePlane(enable: boolean) {
         this._nativeObj.enablePlane(enable);
     }
 
-    setPlaneDetectionMode (mode : number) {
+    setPlaneDetectionMode(mode: number) {
         this._nativeObj.setPlaneDetectionMode(mode);
     }
 
-    setPlaneMaxTrackingNumber (count : number) {
+    setPlaneMaxTrackingNumber(count: number) {
         this._nativeObj.setPlaneMaxTrackingNumber(count);
     }
 
@@ -277,7 +285,7 @@ export class ARModuleX extends IARModule {
         return this._nativeObj.getRemovedPlanesInfo();
     }
 
-    enableImageTracking (enable : boolean) {
+    enableImageTracking(enable: boolean) {
         this._nativeObj.enableImageTracking(enable);
     }
 
@@ -285,7 +293,7 @@ export class ARModuleX extends IARModule {
         this._nativeObj.addImageToLib(name);
     }
 
-    setImageMaxTrackingNumber (count : number) {
+    setImageMaxTrackingNumber(count: number) {
         this._nativeObj.setImageMaxTrackingNumber(count);
     }
 
@@ -301,7 +309,7 @@ export class ARModuleX extends IARModule {
         return this._nativeObj.getRemovedImagesInfo();
     }
 
-    enableSceneMesh (enable : boolean) {
+    enableSceneMesh(enable: boolean) {
         this._nativeObj.enableSceneMesh(enable);
     }
 
@@ -317,11 +325,11 @@ export class ARModuleX extends IARModule {
         return this._nativeObj.getUpdatedSceneMesh();
     }
 
-    getSceneMeshVertices(meshRef: number) : number[]{
+    getSceneMeshVertices(meshRef: number): number[]{
         return this._nativeObj.getSceneMeshVertices(meshRef);
     }
 
-    getSceneMeshTriangleIndices(meshRef: number) : number[]{
+    getSceneMeshTriangleIndices(meshRef: number): number[]{
         return this._nativeObj.getSceneMeshTriangleIndices(meshRef);
     }
 
@@ -329,7 +337,7 @@ export class ARModuleX extends IARModule {
         this._nativeObj.endRequireSceneMesh();
     }
 
-    enableFaceTracking (enable : boolean) {
+    enableFaceTracking(enable : boolean) {
         this._nativeObj.enableFaceTracking(enable);
     };
 

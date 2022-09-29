@@ -27,7 +27,7 @@ import * as features from './ar-features';
 import { Quat, Vec3 } from '../core/math';
 import { IARModule } from './ar-module-base';
 import { director } from '../core/director';
-import { game } from '../core';
+import { Camera, game } from '../core';
 import { WebXR } from '../xr/webxr/web-xr';
 
 // WebXR
@@ -37,11 +37,18 @@ export class ARModuleX extends IARModule {
     private _webXR: WebXR | null = null;
 
     private _cameraId: string | null = null;
-    get CameraId () {
+    private _camera: Camera | null = null;
+    get CameraId (): string | null {
         return this._cameraId;
     }
-    set CameraId (val) {
+    set CameraId (val: string | null) {
         this._cameraId = val;
+    }
+    get Camera (): Camera | null {
+        return this._camera;
+    }
+    set Camera (val: Camera | null) {
+        this._camera = val;
     }
 
     private _initFlag = false;
@@ -49,15 +56,15 @@ export class ARModuleX extends IARModule {
     private _featuresMap = new Map<string, ARFeature>();
     private _lastTime = 0;
 
-    private static _instance : ARModuleX | null;
-    public static getInstance() : ARModuleX | null {
+    private static _instance: ARModuleX | null;
+    public static getInstance(): ARModuleX | null {
         return this._instance;
     }
 
     public replaceFrameMoveFlag = false;
 
     // load
-    public constructor(featuresDataset : ARFeatureData[]) {
+    public constructor(featuresDataset: ARFeatureData[]) {
         super();
         console.log("init ARModule Web...");
 
@@ -127,15 +134,15 @@ export class ARModuleX extends IARModule {
     }
 
     //#region camera
-    public setCameraFocus(enable : boolean) {
+    public setCameraFocus(enable: boolean) {
 
     }
 
-    public setCameraClipPlane(near : number, far : number) {
+    public setCameraClipPlane(near: number, far: number) {
 
     }
 
-    public getCameraPose() : ARPose {
+    public getCameraPose(): ARPose {
         if(!this._webXR) return {
             position: new Vec3(0, 0, 0),
             rotation: new Quat(0, 0, 0, 1)
@@ -157,7 +164,7 @@ export class ARModuleX extends IARModule {
         };
     }
 
-    public getCameraFov() : number {
+    public getCameraFov(): number {
         const matArr = this._webXR?.getCameraProjectionMatrix();
         if(matArr) {
             const fov = 2 * Math.atan(1 / matArr[5]) * 180 / Math.PI;
@@ -166,46 +173,46 @@ export class ARModuleX extends IARModule {
         return 45;
     }
 
-    public getCameraTexCoords() : number[] {
+    public getCameraTexCoords(): number[] {
         return new Array();
     }
 
-    public setDisplayGeometry(rotation : number, width : number, height : number) {
+    public setDisplayGeometry(rotation: number, width: number, height: number) {
 
     }
 
-    public setCameraTextureName(id : number) {
+    public setCameraTextureName(id: number) {
 
     }
 
-    public getCameraTextureRef() : WebGLTexture {
+    public getCameraTextureRef(): WebGLTexture {
         return this._webXR!.getCameraTextureRef();
     }
 
-    public getXRLayerFrameBuffer() : WebGLFramebuffer | null {
+    public getXRLayerFrameBuffer(): WebGLFramebuffer | null {
         return this._webXR!.getXRLayerFrameBuffer();
     }
 
-    public updateRenderState(gl : WebGLRenderingContext) {
+    public updateRenderState(gl: WebGLRenderingContext) {
         this._webXR?.updateRenderState(gl);
     }
     //#endregion
 
     //#region feature
-    public tryGetFeature(featureName : string) : ARFeature | null {
+    public tryGetFeature(featureName: string): ARFeature | null {
         if (this._featuresMap.has(featureName)) {
             return this._featuresMap.get(featureName) as ARFeature;
         }
         return null;
     }
 
-    public setAllFeaturesActive(enable : boolean) {
+    public setAllFeaturesActive(enable: boolean) {
         this._featuresMap.forEach((feature, id) => {
             feature.enable = enable;
         });
     }
 
-    private createFeatures(featuresDataset : ARFeatureData[]) {
+    private createFeatures(featuresDataset: ARFeatureData[]) {
         featuresDataset.forEach(configData => {
             if(configData != null) {
                 let featureClass = ARModuleX.FEATURE_PREFIX + FeatureType[configData.type];
@@ -238,7 +245,7 @@ export class ARModuleX extends IARModule {
         });
     }
 
-    private checkFeaturesSupport(supportMask : number) {
+    private checkFeaturesSupport(supportMask: number) {
         for (let index = 0; index < 8; index++) {
             let configBit = this._configMask & (1 << index);
             if (configBit == 0) continue;
@@ -252,16 +259,27 @@ export class ARModuleX extends IARModule {
         }
     }
     //#endregion
+    tryWebXRHitTest(transform): boolean {
+        return this._webXR!.tryWebXRHitTest(transform);
+    }
 
-    enablePlane (enable : boolean) {
+    getHitResult(): number[] {
+        return this._webXR!.getHitResult();
+    }
+
+    getHitId(): number {
+        return this._webXR!.getHitId();
+    }
+
+    enablePlane(enable: boolean) {
         this._webXR!.enablePlane(enable);
     }
 
-    setPlaneDetectionMode (mode : number) {
+    setPlaneDetectionMode(mode: number) {
         this._webXR!.setPlaneDetectionMode(mode);
     }
 
-    setPlaneMaxTrackingNumber (count : number) {
+    setPlaneMaxTrackingNumber(count: number) {
         this._webXR!.setPlaneMaxTrackingNumber(count);
     }
 

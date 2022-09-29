@@ -21,7 +21,10 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
 */
+import { Camera } from '../../core';
+import { InputEventType } from '../../input/types/event-enum';
 import { WebXRPlane } from './ar-plane';
+import { webXRInputEvent, WebXRInputEventType } from './webxr-input-event';
 
 const _xr = navigator.xr;
 
@@ -41,6 +44,7 @@ export class WebXR {
     private _immersiveRefSpace = null;
     private _cameraPose: any = null;
     private _framebuffer = null;
+
     private _onXRFrame:XRFrameFunction | null = null;
 
     private _plane: WebXRPlane | null = null;
@@ -105,9 +109,50 @@ export class WebXR {
                 this._immersiveRefSpace = refSpace;
                 //console.log('Session refSpace', this.immersiveRefSpace);
                 this._session.requestAnimationFrame(this._onXRFrame);
+
+                function onSelectionEvent(event) {
+                    //console.log("yyyyyyyyyyyyyyyyyyyyyyyyyyyy", event);
+                    let source = event.inputSource;
+
+                    if (source.targetRayMode !== "screen") {
+                        return;
+                    }
+                  
+                    let targetRayPose = event.frame.getPose(source.targetRaySpace, refSpace);
+                    if (!targetRayPose) {
+                        return;
+                    }
+                    console.log("targetRayPose =========", event.type, targetRayPose);
+                    switch(event.type) {
+                      case "selectstart":
+                            webXRInputEvent.dispatch(WebXRInputEventType.SELECT_START, {transform : targetRayPose.transform} );
+                            break;
+                      case "select":
+                            webXRInputEvent.dispatch(WebXRInputEventType.SELECT, {transform : targetRayPose.transform} );
+                            break;
+                      case "selectend":
+                            webXRInputEvent.dispatch(WebXRInputEventType.SELECT_END, {transform : targetRayPose.transform} );
+                            break;
+                    }
+                }
+    
+                session.addEventListener("selectstart", onSelectionEvent);
+                session.addEventListener("select", onSelectionEvent);
+                session.addEventListener("selectend", onSelectionEvent);
+
+                session.addEventListener('touchstart', this._createCallback(InputEventType.TOUCH_START));
+                session.addEventListener('touchmove', this._createCallback(InputEventType.TOUCH_MOVE));
+                session.addEventListener('touchend', this._createCallback(InputEventType.TOUCH_END));
+                session.addEventListener('touchcancel', this._createCallback(InputEventType.TOUCH_CANCEL));
             });
         });
     };
+
+    private _createCallback (eventType: InputEventType) {
+        return (event: TouchEvent) => {
+           console.log("========================", event);
+        };
+    }
 
     onResume() {
 
@@ -183,12 +228,16 @@ export class WebXR {
         }
     };
     
-    // raycast & anchor
-    tryHitAttachAnchor(trackableId) {};
-    getAnchorPose(anchorId) {};
-    tryHitTest(xPx, yPx) {};
-    getHitResult() {};
-    getHitId() {};
+    // raycast
+    tryWebXRHitTest(transform: XRRigidTransform): boolean {
+        return this._plane!.tryWebXRHitTest(transform);
+    }
+    getHitResult(): number[] {
+        return this._plane!.getHitResult();
+    }
+    getHitId(): number {
+        return this._plane!.getHitId();
+    }
 
     // plane detection
     enablePlane(enable: boolean) {
