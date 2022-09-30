@@ -21,8 +21,7 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
 */
-import { Camera } from '../../core';
-import { InputEventType } from '../../input/types/event-enum';
+
 import { WebXRPlane } from './ar-plane';
 import { webXRInputEvent, WebXRInputEventType } from './webxr-input-event';
 
@@ -144,20 +143,9 @@ export class WebXR {
                 session.addEventListener("selectstart", onSelectionEvent);
                 session.addEventListener("select", onSelectionEvent);
                 session.addEventListener("selectend", onSelectionEvent);
-
-                session.addEventListener('touchstart', this._createCallback(InputEventType.TOUCH_START));
-                session.addEventListener('touchmove', this._createCallback(InputEventType.TOUCH_MOVE));
-                session.addEventListener('touchend', this._createCallback(InputEventType.TOUCH_END));
-                session.addEventListener('touchcancel', this._createCallback(InputEventType.TOUCH_CANCEL));
             });
         });
     };
-
-    private _createCallback (eventType: InputEventType) {
-        return (event: TouchEvent) => {
-           console.log("========================", event);
-        };
-    }
 
     onResume() {
 

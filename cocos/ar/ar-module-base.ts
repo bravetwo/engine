@@ -22,12 +22,19 @@
  THE SOFTWARE.
 */
 
+import { Vec2 } from "../core";
+
 export abstract class IARModule {
     start (): void {};
     resume (): void {};
     pause (): void {};
     update (): void {};
 
+    tryHitTest(touchPoint: Vec2): boolean {return false;} 
+    tryWebXRHitTest(transform): boolean {return false;}
+    getHitResult(): number[] {return [];}
+    getHitId(): number {return 0;}
+    
     enablePlane (enable : boolean) {};
     setPlaneDetectionMode (mode : number) {};
     setPlaneMaxTrackingNumber (count : number) {};
