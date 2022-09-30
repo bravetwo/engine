@@ -96,8 +96,8 @@ export class WebXR {
         console.log("WebXR start...");
         //根据特性启用
         if (1) {
-            //this._sessionInit.requiredFeatures.push('plane-detection');
-            //this._plane = new WebXRPlane();
+            this._sessionInit.requiredFeatures.push('plane-detection');
+            this._plane = new WebXRPlane();
         }
         this.requestSession();
     };

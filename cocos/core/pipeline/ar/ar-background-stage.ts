@@ -23,7 +23,7 @@
  THE SOFTWARE.
  */
 
- import { ClearFlagBit, Color, ColorAttachment, DepthStencilAttachment, deviceManager, Framebuffer, Rect, RenderPassInfo, StoreOp } from '../../gfx';
+ import { Color, ColorAttachment, DepthStencilAttachment, deviceManager, Rect, RenderPassInfo, StoreOp } from '../../gfx';
 import { IRenderStageInfo, RenderStage } from '../render-stage';
 import { ForwardStagePriority } from '../enum';
 import { ForwardFlow } from '../forward/forward-flow';
@@ -69,8 +69,6 @@ export class ARBackgroundStage extends RenderStage {
     private _uiWindowSetFlag = false;
 
     private _xrWindow : RenderWindow | null = null;
-    private _xrGpuFramebuffer : WebGLFramebuffer | null = null;
-    private _xrWindowSetCount : number = 0;
 
     constructor () {
         super();
@@ -114,28 +112,30 @@ export class ARBackgroundStage extends RenderStage {
                 const viewport = armodule.getViewport();
                 if(!xrgpuframebuffer || !viewport) return;
 
-                const root = legacyCC.director.root as Root;
-                const swapchain = deviceManager.swapchain;
+                if(!this._xrWindow) {
+                    const root = legacyCC.director.root as Root;
+                    const swapchain = deviceManager.swapchain;
 
-                const colorAttachment = new ColorAttachment();
-                colorAttachment.format = swapchain.colorTexture.format;
-                const depthStencilAttachment = new DepthStencilAttachment();
-                depthStencilAttachment.format = swapchain.depthStencilTexture.format;
-                depthStencilAttachment.depthStoreOp = StoreOp.DISCARD;
-                depthStencilAttachment.stencilStoreOp = StoreOp.DISCARD;
-                const renderPassInfo = new RenderPassInfo([colorAttachment], depthStencilAttachment);
+                    const colorAttachment = new ColorAttachment();
+                    colorAttachment.format = swapchain.colorTexture.format;
+                    const depthStencilAttachment = new DepthStencilAttachment();
+                    depthStencilAttachment.format = swapchain.depthStencilTexture.format;
+                    depthStencilAttachment.depthStoreOp = StoreOp.DISCARD;
+                    depthStencilAttachment.stencilStoreOp = StoreOp.DISCARD;
+                    const renderPassInfo = new RenderPassInfo([colorAttachment], depthStencilAttachment);
 
-                this._xrWindow = root.createWindow({
-                    title: 'xrWindow',
-                    width: viewport.width,
-                    height: viewport.height,
-                    renderPassInfo,
-                    swapchain,
-                    externalSrc: xrgpuframebuffer
-                });
+                    this._xrWindow = root.createWindow({
+                        title: 'xrWindow',
+                        width: viewport.width,
+                        height: viewport.height,
+                        renderPassInfo,
+                        swapchain,
+                        externalSrc: xrgpuframebuffer
+                    });
+                }
 
                 if(!this._xrWindowSetFlag && (armodule.CameraId == camera.node.uuid)) { 
-                    camera.changeTargetWindow(this._xrWindow);
+                    camera.changeTargetWindow(this._xrWindow!);
                     this._xrWindowSetFlag = true;
                 }
 
@@ -147,7 +147,6 @@ export class ARBackgroundStage extends RenderStage {
             }
             
         } else { // runtime
-            //*
             if(armodule.CameraId != camera.node.uuid) return;
 
             const cmdBuff = pipeline.commandBuffers[0];
@@ -162,7 +161,6 @@ export class ARBackgroundStage extends RenderStage {
             this._arBackground.render(camera, renderPass);
 
             cmdBuff.endRenderPass();
-            //*/
         }
     }
 }
