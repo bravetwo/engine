@@ -126,7 +126,7 @@ export class WebXR {
                     if (!targetRayPose) {
                         return;
                     }
-                    console.log("targetRayPose =========", event.type, targetRayPose);
+                    //console.log("targetRayPose =========", event.type, targetRayPose);
                     switch(event.type) {
                       case "selectstart":
                             webXRInputEvent.dispatch(WebXRInputEventType.SELECT_START, {transform : targetRayPose.transform} );
@@ -225,9 +225,10 @@ export class WebXR {
                 ignoreDepthValues: false,
                 stencil: true
             })});
+            //console.log("gl ===", gl, gl.canvas);
         }
     };
-    
+
     // raycast
     tryWebXRHitTest(transform: XRRigidTransform): boolean {
         return this._plane!.tryWebXRHitTest(transform);
