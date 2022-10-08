@@ -45,6 +45,7 @@ export class WebXR {
     private _framebuffer = null;
     private _baseLayer: any = null;
     private _viewport: any = null;
+    private _inputSource: any = null;
 
     private _onXRFrame:XRFrameFunction | null = null;
 
@@ -76,6 +77,13 @@ export class WebXR {
             this._cameraPose = frame.getViewerPose(refSpace);
             this._framebuffer = frame.session.renderState.baseLayer.framebuffer;
 
+            if (this._inputSource) {
+                let targetRayPose = frame.getPose(this._inputSource.targetRaySpace, this._immersiveRefSpace);
+                //
+                if (targetRayPose !== null ) {
+                    webXRInputEvent.dispatch(WebXRInputEventType.SELECT_MOVE, {transform : targetRayPose.transform} );
+				}
+            }
             //console.log("framebuffer", this.framebuffer);
             frameCallback(t);
         }
@@ -86,9 +94,7 @@ export class WebXR {
     }
 
     config(featureMask) {
-        if(featureMask) {
-
-        }
+        
     };
 
     start() {
@@ -114,9 +120,11 @@ export class WebXR {
                 //console.log('Session refSpace', this.immersiveRefSpace);
                 this._session.requestAnimationFrame(this._onXRFrame);
 
-                function onSelectionEvent(event) {
-                    //console.log("yyyyyyyyyyyyyyyyyyyyyyyyyyyy", event);
+                let that = this;
+                function onSessionEvent(event) {
+                    console.log("web xr onSessionEvent: ", event);
                     let source = event.inputSource;
+                    that._inputSource = source;
 
                     if (source.targetRayMode !== "screen") {
                         return;
@@ -135,14 +143,35 @@ export class WebXR {
                             webXRInputEvent.dispatch(WebXRInputEventType.SELECT, {transform : targetRayPose.transform} );
                             break;
                       case "selectend":
+                            that._inputSource = null;
                             webXRInputEvent.dispatch(WebXRInputEventType.SELECT_END, {transform : targetRayPose.transform} );
                             break;
                     }
                 }
-    
-                session.addEventListener("selectstart", onSelectionEvent);
-                session.addEventListener("select", onSelectionEvent);
-                session.addEventListener("selectend", onSelectionEvent);
+                
+                function onSessionEnd(event) {
+                    session.removeEventListener('select', onSessionEvent );
+                    session.removeEventListener('selectstart', onSessionEvent);
+                    session.removeEventListener('selectend', onSessionEvent);
+                    session.removeEventListener('squeeze', onSessionEvent);
+                    session.removeEventListener('squeezestart', onSessionEvent);
+                    session.removeEventListener('squeezeend', onSessionEvent);
+                    session.removeEventListener('end', onSessionEnd);
+                    session.removeEventListener('inputsourceschange', onInputSourcesChange);
+                }
+
+                function onInputSourcesChange( event ) {
+                    console.log("web xr onInputSourcesChange: ", event);
+                }
+
+                session.addEventListener('select', onSessionEvent );
+				session.addEventListener('selectstart', onSessionEvent);
+				session.addEventListener('selectend', onSessionEvent);
+                session.addEventListener('squeeze', onSessionEvent);
+				session.addEventListener('squeezestart', onSessionEvent);
+				session.addEventListener('squeezeend', onSessionEvent);
+				session.addEventListener('end', onSessionEnd);
+				session.addEventListener('inputsourceschange', onInputSourcesChange);
             });
         });
     };
