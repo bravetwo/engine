@@ -33,12 +33,14 @@ import { ccenum, EventTarget} from "../../core";
 export enum WebXRInputEventType {
     SELECT_START = "select-start",
     SELECT = "select",
+    SELECT_MOVE = "select-move",
     SELECT_END = "select-end",
 }
 
 interface InputEventMap {
     [WebXRInputEventType.SELECT_START]: (event: any) => void,
     [WebXRInputEventType.SELECT]: (event: any) => void,
+    [WebXRInputEventType.SELECT_MOVE]: (event: any) => void,
     [WebXRInputEventType.SELECT_END]: (event: any) => void,
 }
 
