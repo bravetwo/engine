@@ -34,11 +34,7 @@ export type EngineFeature =
     | 'animation'
     | 'skeletal-animation'
     | 'xr'
-    | 'ar'
-    | 'ar-android'
-    | 'ar-auto'
-    | 'ar-core'
-    | 'ar-engine';
+    | 'ar';
 export interface ModuleRenderConfig {
     $schema?: string;
 

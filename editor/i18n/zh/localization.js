@@ -760,6 +760,10 @@ module.exports = {
                 label: '动画',
                 description: '动画系统。',
             },
+            xr: {
+                label: 'XR',
+                description: 'XR系统。',
+            },
         },
         core: {
             label: "核心功能",
@@ -907,31 +911,15 @@ module.exports = {
         },
         base_xr: {
             label: "基础 XR 功能",
-            description: "启用 XR 功能系统。",
+            description: "基础 XR 功能支持。",
+        },
+        ar: {
+            label: "AR 功能",
+            description: "AR 功能支持。",
         },
         custom_pipeline: {
             label: "自定义渲染管线（实验）",
             description: "启用自定义渲染管线。",
-        },
-        ar: {
-            label: "AR Module",
-            description: "AR 支持。",
-        },
-        ar_android: {
-            label: "AR Android Api",
-            description: "为安卓设备选择 AR Api",
-        },
-        ar_auto: {
-            label: "自动适配",
-            description: "安卓设备自动适配。",
-        },
-        ar_core: {
-            label: "使用 ARCore",
-            description: "适用 ARCore 支持的设备。",
-        },
-        ar_engine: {
-            label: "使用 AREngine",
-            description: "适用 AREngine 支持的设备，HUAWEI 和 HONOR。",
         },
     },
     renderable_2d: {
