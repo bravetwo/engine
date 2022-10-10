@@ -203,9 +203,7 @@
                 "cocos/3d/models/morph-model.ts":"cocos/3d/models/morph-model.jsb.ts",
                 "cocos/3d/models/skinning-model.ts":"cocos/3d/models/skinning-model.jsb.ts",
                 "cocos/3d/models/baked-skinning-model.ts":"cocos/3d/models/baked-skinning-model.jsb.ts",
-                "cocos/3d/misc/create-mesh.ts":"cocos/3d/misc/create-mesh.jsb.ts",
-                "cocos/ar/index.ts": "cocos/ar/index.jsb.ts",
-                "cocos/ar/ar-module.ts": "cocos/ar/ar-module.jsb.ts"
+                "cocos/3d/misc/create-mesh.ts":"cocos/3d/misc/create-mesh.jsb.ts"
             }
         },
         {
@@ -264,9 +262,7 @@
                 "pal/screen-adapter": "pal/screen-adapter/minigame/screen-adapter.ts",
                 "pal/input": "pal/input/minigame/index.ts",
                 "pal/env": "pal/env/runtime/env.ts",
-                "pal/pacer": "pal/pacer/pacer-minigame.ts",
-                "cocos/ar/index.ts": "cocos/ar/index.jsb.ts",
-                "cocos/ar/ar-module.ts": "cocos/ar/ar-module.jsb.ts"
+                "pal/pacer": "pal/pacer/pacer-minigame.ts"
             }
         },
         {
@@ -281,6 +277,13 @@
             "isVirtualModule": false,
             "overrides": {
                 "cocos/core/animation/marionette/runtime-exports.ts": "cocos/core/animation/marionette/index-empty.ts"
+            }
+        },
+        {
+            "test": "context.buildTimeConstants && context.buildTimeConstants.XR_SWITCH === 2",
+            "isVirtualModule": false,
+            "overrides": {
+                "cocos/ar/ar-module.ts": "cocos/ar/ar-module.jsb.ts"
             }
         }
     ],
@@ -485,6 +488,18 @@
             "comment": "Running with webgpu rendering backend.",
             "type": "boolean",
             "value": false,
+            "internal": true
+        },
+        "XR_ENV": {
+            "comment": "Running in environment where using XR.\n- 0 CLOSE\n- 1 XR\n- 2 WEB_XR",
+            "type": "number",
+            "value": 0,
+            "internal": true
+        },
+        "XR_SWITCH": {
+            "comment": "Different switches in the XR environment.\n- 0 OFF\n- 1 VR\n- 2 AR",
+            "type": "number",
+            "value": 0,
             "internal": true
         }
     }
