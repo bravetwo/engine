@@ -38,7 +38,7 @@
 #endif
 
 #if USE_AR_MODULE
-    #include "ar/IARAPI.h"
+    //#include "ar/IARAPI.h"
 #endif
 
 namespace cc {
@@ -580,7 +580,7 @@ bool nativevalue_to_se(const cc::Rect &from, se::Value &to, se::Object *ctx); //
 bool nativevalue_to_se(const cc::gfx::Rect &from, se::Value &to, se::Object *ctx); // NOLINT(readability-identifier-naming)
 
 bool nativevalue_to_se(const cc::gfx::FormatInfo *from, se::Value &to, se::Object *ctx); // NOLINT(readability-identifier-naming
-    
+
 bool nativevalue_to_se(const cc::network::DownloadTask &from, se::Value &to, se::Object * /*ctx*/); // NOLINT(readability-identifier-naming)
 
 inline bool nativevalue_to_se(const ccstd::monostate & /*from*/, se::Value &to, se::Object * /*ctx*/) { // NOLINT(readability-identifier-naming)
@@ -650,5 +650,5 @@ bool nativevalue_to_se(const cc::geometry::Sphere &from, se::Value &to, se::Obje
 #endif //USE_PHYSICS_PHYSX
 
 #if USE_AR_MODULE
-bool nativevalue_to_se(const cc::ar::ARPlane &from, se::Value &to, se::Object *ctx);
+//bool nativevalue_to_se(const cc::ar::ARPlane &from, se::Value &to, se::Object *ctx);
 #endif //USE_AR_MODULE

@@ -1758,14 +1758,14 @@ bool nativevalue_to_se(const cc::geometry::Sphere &from, se::Value &to, se::Obje
 #endif //CC_USE_PHYSICS_PHYSX
 
 #if USE_AR_MODULE
-bool nativevalue_to_se(const cc::ar::ARPlane &from, se::Value &to, se::Object *ctx) {
-    se::HandleObject obj(se::Object::createPlainObject());
-    se::Value tmp;
-    if (nativevalue_to_se(from.id, tmp, ctx)) obj->setProperty("id", tmp);
-    if (nativevalue_to_se(from.pose, tmp, ctx)) obj->setProperty("pose", tmp);
-    if (nativevalue_to_se(from.type, tmp, ctx)) obj->setProperty("type", tmp);
-    if (nativevalue_to_se(from.extentX, tmp, ctx)) obj->setProperty("extentX", tmp);
-    to.setObject(obj);
-    return true;
-}
+//bool nativevalue_to_se(const cc::ar::ARPlane &from, se::Value &to, se::Object *ctx) {
+//    se::HandleObject obj(se::Object::createPlainObject());
+//    se::Value tmp;
+//    if (nativevalue_to_se(from.id, tmp, ctx)) obj->setProperty("id", tmp);
+//    if (nativevalue_to_se(from.pose, tmp, ctx)) obj->setProperty("pose", tmp);
+//    if (nativevalue_to_se(from.type, tmp, ctx)) obj->setProperty("type", tmp);
+//    if (nativevalue_to_se(from.extentX, tmp, ctx)) obj->setProperty("extentX", tmp);
+//    to.setObject(obj);
+//    return true;
+//}
 #endif //USE_AR_MODULE

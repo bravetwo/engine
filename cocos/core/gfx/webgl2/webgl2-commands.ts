@@ -1316,7 +1316,6 @@ export function WebGL2CmdFuncCreateFramebuffer (device: WebGL2Device, gpuFramebu
     const { gl } = device;
     const attachments: GLenum[] = [];
     
-    console.log("gpuFramebuffer.glFramebuffer", gpuFramebuffer.glFramebuffer);
     if(!gpuFramebuffer.glFramebuffer) { // for webxr framebuffer
         const glFramebuffer = gl.createFramebuffer();
         if (glFramebuffer) gpuFramebuffer.glFramebuffer = glFramebuffer;

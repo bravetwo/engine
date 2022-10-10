@@ -24,7 +24,7 @@
 
 import { ARFeature, ARPose, FeatureType, ARFeatureData } from './ar-feature-base';
 import * as features from './ar-features';
-import { Quat, Vec3 } from '../core/math';
+import { Quat, Vec2, Vec3 } from '../core/math';
 import { IARModule } from './ar-module-base';
 import { director } from '../core/director';
 import { Camera, game } from '../core';
@@ -263,6 +263,11 @@ export class ARModuleX extends IARModule {
         }
     }
     //#endregion
+
+    tryHitTest(touchPoint: Vec2): boolean {
+        return false;
+    }
+
     tryWebXRHitTest(transform): boolean {
         return this._webXR!.tryWebXRHitTest(transform);
     }
