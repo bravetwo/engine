@@ -280,7 +280,7 @@
             }
         },
         {
-            "test": "context.buildTimeConstants && context.buildTimeConstants.XR_SWITCH === 2",
+            "test": "context.buildTimeConstants && context.buildTimeConstants.XR_TYPE === 2",
             "isVirtualModule": false,
             "overrides": {
                 "cocos/ar/ar-module.ts": "cocos/ar/ar-module.jsb.ts"
@@ -494,13 +494,13 @@
             "comment": "Running in environment where using XR.\n- 0 CLOSE\n- 1 XR\n- 2 WEB_XR",
             "type": "number",
             "value": 0,
-            "internal": true
+            "internal": false
         },
-        "XR_SWITCH": {
-            "comment": "Different switches in the XR environment.\n- 0 OFF\n- 1 VR\n- 2 AR",
+        "XR_TYPE": {
+            "comment": "Different types in the XR environment.\n- 0 OFF\n- 1 VR\n- 2 AR",
             "type": "number",
             "value": 0,
-            "internal": true
+            "internal": false
         }
     }
 }

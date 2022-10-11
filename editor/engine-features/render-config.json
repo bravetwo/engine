@@ -230,14 +230,14 @@
             "wechatPlugin": false
         },
         "xr": {
-            "default": ["xr"],
+            "default": [],
             "label": "i18n:ENGINE.features.base_xr.label",
             "description": "i18n:ENGINE.features.base_xr.description",
             "wechatPlugin": false,
             "category": "xr"
         },
         "ar": {
-            "default": ["ar"],
+            "default": [],
             "label": "i18n:ENGINE.features.ar.label",
             "description": "i18n:ENGINE.features.ar.description",
             "wechatPlugin": false,
