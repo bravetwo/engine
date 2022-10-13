@@ -24,4 +24,3 @@
  */
 
 export * from './event/xr-event-handle';
-export * from './webxr/webxr-input-event';
