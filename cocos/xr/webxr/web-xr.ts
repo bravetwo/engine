@@ -22,7 +22,8 @@
  THE SOFTWARE.
 */
 
-import { Camera, geometry, Vec2, Vec3 } from '../../core';
+import { geometry, Vec2, Vec3 } from '../../core';
+import { Camera } from '../../render-scene/scene';
 import { WebXRPlane } from './ar-plane';
 
 const _xr = navigator.xr;

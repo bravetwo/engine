@@ -36,7 +36,7 @@ import { Texture2D } from '../../asset/assets/texture-2d';
 import { Camera } from '../../render-scene/scene';
 import { errorID } from '../../core/platform/debug';
 import { PipelineSceneData } from '../pipeline-scene-data';
-import { ARModuleFlow } from '../ar/ar-flow';
+import { ARModuleFlow } from '../xr/ar/ar-flow';
 
 const PIPELINE_TYPE = 0;
 

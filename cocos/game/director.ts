@@ -46,7 +46,7 @@ import { uiRendererManager } from '../2d/framework/ui-renderer-manager';
 import { deviceManager } from '../gfx';
 import { PipelineBuilder } from '../rendering/custom/pipeline';
 import { macro } from '../core/platform/macro';
-import { ARModuleX } from '../ar/ar-module';
+import { ARModuleX } from '../xr/ar/ar-module';
 
 // ----------------------------------------------------------------------------------------------------------------------
 

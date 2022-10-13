@@ -30,7 +30,7 @@
 #include "profiler/Profiler.h"
 
 #if USE_AR_MODULE
-#include "../ar/ARStage.h"
+#include "pipeline/xr/ar/ARStage.h"
 #endif
 
 namespace cc {

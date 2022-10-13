@@ -21,7 +21,7 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
 */
-import { Camera, geometry, math, Quat, Vec2, Vec3 } from "../../core";
+import { geometry, math, Quat, Vec2, Vec3 } from "../../core";
 
 interface ARPose {
     position : math.Vec3;

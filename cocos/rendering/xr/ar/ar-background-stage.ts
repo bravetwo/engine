@@ -23,19 +23,19 @@
  THE SOFTWARE.
  */
 
- import { Color, ColorAttachment, DepthStencilAttachment, deviceManager, Rect, RenderPassInfo, StoreOp } from '../../gfx';
-import { IRenderStageInfo, RenderStage } from '../render-stage';
-import { ForwardStagePriority } from '../enum';
-import { ForwardFlow } from '../forward/forward-flow';
-import { ForwardPipeline } from '../forward/forward-pipeline';
-import { Camera, CameraProjection } from '../../render-scene/scene';
+ import { Color, ColorAttachment, DepthStencilAttachment, deviceManager, Rect, RenderPassInfo, StoreOp } from '../../../gfx';
+import { IRenderStageInfo, RenderStage } from '../../render-stage';
+import { ForwardStagePriority } from '../../enum';
+import { ForwardFlow } from '../../forward/forward-flow';
+import { ForwardPipeline } from '../../forward/forward-pipeline';
+import { Camera, CameraProjection } from '../../../render-scene/scene';
 import { ARBackground } from './ar-background';
-import { ARModuleX } from '../../xr/ar/ar-module';
-import { WebGL2Device } from '../../gfx/webgl2/webgl2-device';
-import { legacyCC } from '../../core/global-exports';
-import { Root } from '../../root';
-import { RenderWindow } from '../../renderer/core/render-window';
-import { WebGLFramebuffer } from '../../gfx/webgl/webgl-framebuffer';
+import { ARModuleX } from '../../../xr/ar/ar-module';
+import { WebGL2Device } from '../../../gfx/webgl2/webgl2-device';
+import { legacyCC } from '../../../core/global-exports';
+import { Root } from '../../../root';
+import { RenderWindow } from '../../../render-scene/core/render-window';
+import { WebGLFramebuffer } from '../../../gfx/webgl/webgl-framebuffer';
 
 const colors: Color[] = [new Color(0, 0, 0, 1)];
 const layerList = {

@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "../RenderStage.h"
+#include "pipeline/RenderStage.h"
 
 namespace cc {
 namespace pipeline {

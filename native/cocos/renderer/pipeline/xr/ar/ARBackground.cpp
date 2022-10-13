@@ -22,9 +22,9 @@
  * THE SOFTWARE.
  ****************************************************************************/
 
-#include "ARBackground.h"
+#include "pipeline/xr/ar/ARBackground.h"
 #include <stdint.h>
-#include "../forward/ForwardPipeline.h"
+#include "pipeline/forward/ForwardPipeline.h"
 #include "GLES2/gl2.h"
 #include "gfx-base/GFXCommandBuffer.h"
 #include "gfx-base/GFXDef-common.h"

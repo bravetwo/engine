@@ -23,7 +23,7 @@
  ****************************************************************************/
 
 #pragma once
-#include "../RenderStage.h"
+#include "pipeline/RenderStage.h"
 #include "gfx-base/GFXPipelineLayout.h"
 #include "gfx-base/GFXPipelineState.h"
 
@@ -31,9 +31,9 @@
 #include "gfx-gles3/GLES3Wrangler.h"
 #endif
 
-#include "renderer/gfx-agent/DeviceAgent.h"
-#include "renderer/gfx-base/GFXDef.h"
-#include "renderer/gfx-base/GFXDevice.h"
+#include "gfx-agent/DeviceAgent.h"
+#include "gfx-base/GFXDef.h"
+#include "gfx-base/GFXDevice.h"
 
 namespace cc {
 namespace pipeline {

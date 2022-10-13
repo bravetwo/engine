@@ -1,12 +1,12 @@
-import { UBOGlobal } from '../define';
-import { ForwardFlowPriority } from '../../../core/pipeline/enum';
-import { RenderFlowTag } from '../pipeline-serialization';
-import { IRenderFlowInfo, RenderFlow } from '../render-flow';
+import { UBOGlobal } from '../../define';
+import { ForwardFlowPriority } from '../../enum';
+import { RenderFlowTag } from '../../pipeline-serialization';
+import { IRenderFlowInfo, RenderFlow } from '../../render-flow';
 //import { RenderView } from '../render-view';
 import { ARModuleStage } from './ar-stage';
 //import { ForwardPipeline } from '../forward/forward-pipeline';
 //import { sceneCulling } from '../forward/scene-culling';
-import { Camera } from '../../renderer/scene';
+import { Camera } from '../../../render-scene/scene';
 
 export class ARModuleFlow extends RenderFlow {
 

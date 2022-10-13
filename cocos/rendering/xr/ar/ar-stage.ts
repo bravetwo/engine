@@ -1,22 +1,18 @@
-/**
- * @category pipeline.ar
- */
-
 //import { GFXCommandBuffer } from '../../gfx/command-buffer';
 //import { GFXCommandBufferType, GFXColor } from '../../gfx/define';
 import { screenAdapter } from 'pal/screen-adapter';
-import { RenderFlow } from '../render-flow';
-import { IRenderStageInfo, RenderStage } from '../render-stage';
-import { ForwardPipeline } from '../forward/forward-pipeline';
+import { RenderFlow } from '../../render-flow';
+import { IRenderStageInfo, RenderStage } from '../../render-stage';
+import { ForwardPipeline } from '../../forward/forward-pipeline';
 import { Orientation } from '../../../../pal/screen-adapter/enum-type';
 //import { RenderQueueDesc, RenderQueueSortMode } from '../pipeline-serialization';
 //import { opaqueCompareFn, RenderQueue, transparentCompareFn } from '../render-queue';
 //import { JSB } from 'internal:constants';
-import { sys } from '../../platform/sys';
+import { sys } from '../../../core/platform/sys';
 import { OS } from '../../../../pal/system-info/enum-type';
-import { Camera } from '../../renderer/scene';
-import { ARModuleX } from '../../../ar/ar-module';
-import { SurfaceTransform } from '../../gfx';
+import { Camera } from '../../../render-scene/scene';
+import { ARModuleX } from '../../../xr/ar/ar-module';
+import { SurfaceTransform } from '../../../gfx';
 
 const orientationMap: Record<Orientation, SurfaceTransform> = {
     [Orientation.PORTRAIT]: SurfaceTransform.IDENTITY,

@@ -2763,13 +2763,13 @@ endif()
 ##### ar module
 if(USE_AR_MODULE)
     cocos_source_files(
-        cocos/ar/ARModule.cpp
-        cocos/ar/ARModule.h
-        cocos/ar/IARAPI.h
-        cocos/renderer/pipeline/ar/ARStage.cpp
-        cocos/renderer/pipeline/ar/ARStage.h
-        cocos/renderer/pipeline/ar/ARBackground.cpp
-        cocos/renderer/pipeline/ar/ARBackground.h
+        cocos/xr/ar/ARModule.cpp
+        cocos/xr/ar/ARModule.h
+        cocos/xr/ar/IARAPI.h
+        cocos/renderer/pipeline/xr/ar/ARStage.cpp
+        cocos/renderer/pipeline/xr/ar/ARStage.h
+        cocos/renderer/pipeline/xr/ar/ARBackground.cpp
+        cocos/renderer/pipeline/xr/ar/ARBackground.h
     )
 endif()
 

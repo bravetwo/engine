@@ -1,33 +1,29 @@
-/**
- * @category pipeline.ar
- */
-
 //import { GFXCommandBuffer } from '../../gfx/command-buffer';
 //import { GFXCommandBufferType, GFXColor } from '../../gfx/define';
 import { screenAdapter } from 'pal/screen-adapter';
-import { RenderFlow } from '../render-flow';
-import { IRenderStageInfo, RenderStage } from '../render-stage';
-import { ForwardPipeline } from '../forward/forward-pipeline';
+import { RenderFlow } from '../../render-flow';
+import { IRenderStageInfo, RenderStage } from '../../render-stage';
+import { ForwardPipeline } from '../../forward/forward-pipeline';
 import { Orientation } from '../../../../pal/screen-adapter/enum-type';
 //import { RenderQueueDesc, RenderQueueSortMode } from '../pipeline-serialization';
 //import { opaqueCompareFn, RenderQueue, transparentCompareFn } from '../render-queue';
 //import { JSB } from 'internal:constants';
-import { sys } from '../../platform/sys';
+import { sys } from '../../../core/platform/sys';
 import { OS, Platform } from '../../../../pal/system-info/enum-type';
-import { Camera } from '../../renderer/scene';
-import { ARModuleX } from '../../../ar/ar-module';
-import { Attribute, BlendState, Buffer, BufferInfo, BufferUsageBit, CullMode, DepthStencilState, DescriptorSet, DescriptorSetInfo, DescriptorSetLayout, DescriptorSetLayoutBinding, DescriptorSetLayoutInfo, DescriptorType, Device, DrawInfo, DRAW_INFO_SIZE, Format, IndirectBuffer, InputAssembler, InputAssemblerInfo, InputState, MemoryAccessBit, MemoryUsageBit, PipelineLayout, PipelineLayoutInfo, PipelineStateInfo, PolygonMode, RasterizerState, RenderPass, SamplerInfo, ShadeModel, Shader, ShaderInfo, ShaderStage, ShaderStageFlagBit, SurfaceTransform, Texture, TextureFlagBit, TextureInfo, TextureType, TextureUsageBit, Type, Uniform, UniformBlock, UniformSampler, UniformSamplerTexture, UniformStorageBuffer } from '../../gfx';
-import { RenderPipeline } from '../render-pipeline';
-import { size } from '../../math/size';
-import { float } from '../../data/decorators';
-import { PipelineStateManager } from '../pipeline-state-manager';
-import { SetIndex } from '../define';
-import { BufferSource } from '../../gfx';
-import { IPassInfoFull, Pass, MacroRecord } from '../../renderer';
-import { Root } from '../..';
-import { legacyCC } from '../../global-exports';
-import { WebGL2Device } from '../../gfx/webgl2/webgl2-device';
-import { WebGL2Texture } from '../../gfx/webgl2/webgl2-texture';
+import { Camera } from '../../../render-scene/scene';
+import { ARModuleX } from '../../../xr/ar/ar-module';
+import { Attribute, BlendState, Buffer, BufferInfo, BufferUsageBit, CullMode, DepthStencilState, DescriptorSet, DescriptorSetInfo, DescriptorSetLayout, DescriptorSetLayoutBinding, DescriptorSetLayoutInfo, DescriptorType, Device, DrawInfo, DRAW_INFO_SIZE, Format, IndirectBuffer, InputAssembler, InputAssemblerInfo, InputState, MemoryAccessBit, MemoryUsageBit, PipelineLayout, PipelineLayoutInfo, PipelineStateInfo, PolygonMode, RasterizerState, RenderPass, SamplerInfo, ShadeModel, Shader, ShaderInfo, ShaderStage, ShaderStageFlagBit, SurfaceTransform, Texture, TextureFlagBit, TextureInfo, TextureType, TextureUsageBit, Type, Uniform, UniformBlock, UniformSampler, UniformSamplerTexture, UniformStorageBuffer } from '../../../gfx';
+import { RenderPipeline } from '../../render-pipeline';
+import { size } from '../../../core/math/size';
+import { float } from '../../../core/data/decorators';
+import { PipelineStateManager } from '../../pipeline-state-manager';
+import { SetIndex } from '../../define';
+import { BufferSource } from '../../../gfx';
+import { IPassInfoFull, Pass, MacroRecord } from '../../../render-scene';
+import { Root } from '../../../root';
+import { legacyCC } from '../../../core/global-exports';
+import { WebGL2Device } from '../../../gfx/webgl2/webgl2-device';
+import { WebGL2Texture } from '../../../gfx/webgl2/webgl2-texture';
 import { EDITOR } from 'internal:constants';
 
 const orientationMap: Record<Orientation, SurfaceTransform> = {

@@ -47,8 +47,8 @@ export { BloomStage } from './deferred/bloom-stage';
 export { PostProcessStage } from './deferred/postprocess-stage';
 export { ShadowFlow } from './shadow/shadow-flow';
 export { ShadowStage } from './shadow/shadow-stage';
-export { ARModuleFlow } from './ar/ar-flow';
-export { ARModuleStage } from './ar/ar-stage';
+export { ARModuleFlow } from './xr/ar/ar-flow';
+export { ARModuleStage } from './xr/ar/ar-stage';
 
 export { InstancedBuffer } from './instanced-buffer';
 export { PipelineStateManager } from './pipeline-state-manager';

@@ -30,7 +30,7 @@ import { ForwardFlowPriority } from '../enum';
 import { ForwardStage } from './forward-stage';
 import { RenderPipeline } from '../render-pipeline';
 import { Camera } from '../../render-scene/scene';
-import { ARBackgroundStage } from '../ar/ar-background-stage';
+import { ARBackgroundStage } from '../xr/ar/ar-background-stage';
 
 /**
  * @en The forward flow in forward render pipeline

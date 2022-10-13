@@ -23,4 +23,4 @@
  THE SOFTWARE.
  */
 
-export * from '../cocos/ar';
+export * from '../cocos/xr/ar';
