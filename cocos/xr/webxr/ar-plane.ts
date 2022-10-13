@@ -402,6 +402,24 @@ export class WebXRPlane {
     }
 
     // raycast
+    tryHitTest(ray: geometry.Ray): boolean {
+        console.log("test hit ", ray);
+
+        const xrRay = new XRRay({ x: ray.o.x, y: ray.o.y, z: ray.o.z, w: 1.0 }, { x: ray.d.x, y: ray.d.y, z: ray.d.z, w: 0.0 });
+        // Perform a JS-side hit test against mathematical (infinte) planes:
+        const hitTestResults = this.hitTest(xrRay);
+        console.log("test hit results ...", hitTestResults);
+        // Filter results down to the ones that fall within plane's polygon:
+        const hitTestFiltered = this.filterHitTestResults(hitTestResults);
+
+        if (hitTestFiltered && hitTestFiltered.length > 0) {
+            this._hitResult = hitTestFiltered[0];
+            console.debug("hit result:", this._hitResult);
+            return true;
+        }
+        return false;
+    }
+
     tryWebXRHitTest(transform: XRRigidTransform): boolean {
         console.log("test hit ");
         const ray = new XRRay(transform);
