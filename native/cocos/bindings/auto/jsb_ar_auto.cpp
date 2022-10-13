@@ -4,8 +4,8 @@
 #if USE_AR_MODULE > 0
 #include "cocos/bindings/manual/jsb_conversions.h"
 #include "cocos/bindings/manual/jsb_global.h"
-#include "ar/IARAPI.h"
-#include "ar/ARModule.h"
+#include "xr/ar/IARAPI.h"
+#include "xr/ar/ARModule.h"
 
 #ifndef JSB_ALLOC
 #define JSB_ALLOC(kls, ...) new (std::nothrow) kls(__VA_ARGS__)

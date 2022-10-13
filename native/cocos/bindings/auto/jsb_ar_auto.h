@@ -5,16 +5,16 @@
 #include <type_traits>
 #include "cocos/bindings/jswrapper/SeApi.h"
 #include "cocos/bindings/manual/jsb_conversions.h"
-#include "cocos/ar/IARAPI.h"
-#include "cocos/ar/ARModule.h"
+#include "cocos/xr/ar/IARAPI.h"
+#include "cocos/xr/ar/ARModule.h"
 
 bool register_all_ar(se::Object *obj);                   // NOLINT
 
 JSB_REGISTER_OBJECT_TYPE(cc::ar::ARModule);
 
 
-extern se::Object *__jsb_cc_ar_ARModule_proto; // NOLINT
-extern se::Class * __jsb_cc_ar_ARModule_class; // NOLINT
+extern se::Object *__jsb_cc_ar_ARModule_proto;   // NOLINT
+extern se::Class *__jsb_cc_ar_ARModule_class;    // NOLINT
 
 bool js_register_cc_ar_ARModule(se::Object *obj); // NOLINT
 
