@@ -37,6 +37,7 @@ conversions:
     "se::": "jsb."
     "cc::framegraph::": "jsb."
     "ccstd::": "jsb."
+    "cc::ar::": "jsb."
   to_native:
     # jsval to int
     int32_t: "ok &= seval_to_int32(${in_value}, (int32_t*)&${out_value})"

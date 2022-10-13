@@ -60,6 +60,7 @@ export class WebGL2Texture extends Texture {
             this.depth, this._info.levelCount) * this._info.layerCount;
 
         if (!this._isTextureView) {
+            const { gl } = WebGL2DeviceManager.instance;
             this._gpuTexture = {
                 type: texInfo.type,
                 format: texInfo.format,
@@ -79,7 +80,7 @@ export class WebGL2Texture extends Texture {
                 glFormat: 0,
                 glType: 0,
                 glUsage: 0,
-                glTexture: null,
+                glTexture: texInfo.externalRes > 0 ? gl.createTexture() : null, // for ar background
                 glRenderbuffer: null,
                 glWrapS: 0,
                 glWrapT: 0,

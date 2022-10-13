@@ -189,6 +189,29 @@ static bool js_xr_XrEntry_getCurrentXrSwapchain(se::State& s) // NOLINT(readabil
 }
 SE_BIND_FUNC(js_xr_XrEntry_getCurrentXrSwapchain)
 
+static bool js_xr_XrEntry_getEyeFov(se::State& s) // NOLINT(readability-identifier-naming)
+{
+    auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntry>(s);
+    // SE_PRECONDITION2(cobj, false, "Invalid Native Object");
+    if (nullptr == cobj) return true;
+    const auto& args = s.args();
+    size_t argc = args.size();
+    CC_UNUSED bool ok = true;
+    if (argc == 1) {
+        HolderType<unsigned int, false> arg0 = {};
+        ok &= sevalue_to_native(args[0], &arg0, s.thisObject());
+        SE_PRECONDITION2(ok, false, "Error processing arguments");
+        std::vector<float> result = cobj->getEyeFov(arg0.value());
+        ok &= nativevalue_to_se(result, s.rval(), nullptr /*ctx*/);
+        SE_PRECONDITION2(ok, false, "Error processing arguments");
+        SE_HOLD_RETURN_VALUE(result, s.thisObject(), s.rval());
+        return true;
+    }
+    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 1);
+    return false;
+}
+SE_BIND_FUNC(js_xr_XrEntry_getEyeFov)
+
 static bool js_xr_XrEntry_getHMDViewPosition(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntry>(s);
@@ -830,6 +853,7 @@ bool js_register_xr_XrEntry(se::Object* obj) // NOLINT(readability-identifier-na
     cls->defineFunction("frameStart", _SE(js_xr_XrEntry_frameStart));
     cls->defineFunction("getCocosXrSwapchains", _SE(js_xr_XrEntry_getCocosXrSwapchains));
     cls->defineFunction("getCurrentXrSwapchain", _SE(js_xr_XrEntry_getCurrentXrSwapchain));
+    cls->defineFunction("getEyeFov", _SE(js_xr_XrEntry_getEyeFov));
     cls->defineFunction("getHMDViewPosition", _SE(js_xr_XrEntry_getHMDViewPosition));
     cls->defineFunction("getSwapchainImageIndex", _SE(js_xr_XrEntry_getSwapchainImageIndex));
     cls->defineFunction("getXRBoolConfig", _SE(js_xr_XrEntry_getXRBoolConfig));

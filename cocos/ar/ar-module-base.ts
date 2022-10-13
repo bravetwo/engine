@@ -1,0 +1,71 @@
+/*
+ Copyright (c) 2022 Xiamen Yaji Software Co., Ltd.
+
+ http://www.cocos2d-x.org
+
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+*/
+
+import { Vec2 } from "../core";
+
+export abstract class IARModule {
+    start (): void {};
+    resume (): void {};
+    pause (): void {};
+    update (): void {};
+
+    tryHitTest(touchPoint: Vec2): boolean {return false;} 
+    tryWebXRHitTest(transform): boolean {return false;}
+    getHitResult(): number[] {return [];}
+    getHitId(): number {return 0;}
+    
+    enablePlane (enable : boolean) {};
+    setPlaneDetectionMode (mode : number) {};
+    setPlaneMaxTrackingNumber (count : number) {};
+    getAddedPlanesInfo(): any[] {return [];};
+    getUpdatedPlanesInfo(): any[] {return [];};
+    getRemovedPlanesInfo(): any[] {return [];};
+
+    enableImageTracking (enable : boolean) {};
+    addImageToLib(name: string){};
+    setImageMaxTrackingNumber (count : number) {};
+    getAddedImagesInfo(): number[] {return [];};
+    getUpdatedImagesInfo(): number[]{ return [];};
+    getRemovedImagesInfo(): number[]{return [];};
+
+    enableSceneMesh (enable : boolean) {};
+    getRemovedSceneMesh(): number[]{return [];};
+    getAddedSceneMesh(): number[]{return [];};
+    getUpdatedSceneMesh(): number[]{ return [];};
+    getSceneMeshVertices(meshRef: number) : number[]{return [];};
+    getSceneMeshTriangleIndices(meshRef: number): number[]{return [];};
+    endRequireSceneMesh() {};
+
+    enableFaceTracking (enable : boolean) {};
+    getRemovedFacesInfo() {return [];};
+    getAddedFacesInfo() {return [];};
+    getUpdatedFacesInfo() {return [];};
+    getFaceBlendShapesOf(faceRef: number)  {return [];};
+
+    enableObjectTracking (enable : boolean) {};
+    addObjectToLib(name: string){};
+    getAddedObjectsInfo() {return [];};
+    getUpdatedObjectsInfo() {return [];};
+    getRemovedObjectsInfo() {return [];};
+}

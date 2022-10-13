@@ -25,6 +25,7 @@ SE_DECLARE_FUNC(js_xr_XrEntry_frameEnd);
 SE_DECLARE_FUNC(js_xr_XrEntry_frameStart);
 SE_DECLARE_FUNC(js_xr_XrEntry_getCocosXrSwapchains);
 SE_DECLARE_FUNC(js_xr_XrEntry_getCurrentXrSwapchain);
+SE_DECLARE_FUNC(js_xr_XrEntry_getEyeFov);
 SE_DECLARE_FUNC(js_xr_XrEntry_getHMDViewPosition);
 SE_DECLARE_FUNC(js_xr_XrEntry_getSwapchainImageIndex);
 SE_DECLARE_FUNC(js_xr_XrEntry_getXRBoolConfig);

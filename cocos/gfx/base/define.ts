@@ -1685,12 +1685,14 @@ export class FramebufferInfo {
         public renderPass: RenderPass = null!,
         public colorTextures: Texture[] = [],
         public depthStencilTexture: Texture | null = null,
+        public externalSrc: any = null // for webxr framebuffer
     ) {}
 
     public copy (info: Readonly<FramebufferInfo>) {
         this.renderPass = info.renderPass;
         this.colorTextures = info.colorTextures.slice();
         this.depthStencilTexture = info.depthStencilTexture;
+        this.externalSrc = info.externalSrc;
         return this;
     }
 }
