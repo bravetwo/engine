@@ -22,7 +22,7 @@
  THE SOFTWARE.
 */
 
-import { Vec2 } from "../core";
+import { Vec2 } from "../../core";
 
 export abstract class IARModule {
     start (): void {};

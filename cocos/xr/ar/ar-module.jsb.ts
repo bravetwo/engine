@@ -24,10 +24,12 @@
 
 declare const jsb: any;
 
-import { Orientation } from '../../pal/screen-adapter/enum-type/orientation';
-import { Platform } from '../../pal/system-info/enum-type';
-import { Quat, Vec3, Vec2, Node, Camera, sys} from '../core';
-import { SurfaceTransform } from '../core/gfx/base/define';
+import { Orientation } from '../../../pal/screen-adapter/enum-type/orientation';
+import { Platform } from '../../../pal/system-info/enum-type';
+import { Quat, Vec3, Vec2, sys} from '../../core';
+import { Node } from '../../scene-graph';
+import { Camera } from '../../render-scene/scene';
+import { SurfaceTransform } from '../../gfx/base/define';
 import { ARFeature, ARPose, FeatureType, ARFeatureData} from './ar-feature-base';
 import * as features from './ar-features';
 import { IARModule } from './ar-module-base';

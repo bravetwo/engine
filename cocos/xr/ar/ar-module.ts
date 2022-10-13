@@ -24,11 +24,12 @@
 
 import { ARFeature, ARPose, FeatureType, ARFeatureData } from './ar-feature-base';
 import * as features from './ar-features';
-import { Quat, Vec2, Vec3 } from '../core/math';
+import { Quat, Vec2, Vec3 } from '../../core/math';
 import { IARModule } from './ar-module-base';
-import { director } from '../core/director';
-import { Camera, game } from '../core';
-import { WebXR } from '../xr/webxr/web-xr';
+import { director } from '../../game/director';
+import { game } from '../../game';
+import { Camera } from '../../render-scene/scene';
+import { WebXR } from '../webxr/web-xr';
 
 // WebXR
 export class ARModuleX extends IARModule {

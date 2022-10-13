@@ -22,8 +22,8 @@
  THE SOFTWARE.
 */
 
-import { math } from '../core';
-import { ccclass, property, type } from '../core/data/class-decorator';
+import { math } from '../../core';
+import { ccclass, property, type } from '../../core/data/class-decorator';
 import { ARModuleX } from './ar-module';
 
 interface IFeatureEvent<T> {

@@ -22,12 +22,12 @@
  THE SOFTWARE.
 */
 
-import { ccclass, property} from '../../core/data/class-decorator'
+import { ccclass, property} from '../../../core/data/class-decorator'
 import { ARFeature, ARTrackable, FeatureEvent, FeatureType, IFeatureData, ARFeatureData} from '../ar-feature-base';
-import { PrimitiveMode } from '../../core/gfx';
-import { Material } from '../../core/assets/material';
-import { Quat, Vec3, Vec4 } from '../../core/math';
-import { resources } from '../../core/asset-manager/bundle';
+import { PrimitiveMode } from '../../../gfx';
+import { Material } from '../../../asset/assets/material';
+import { Quat, Vec3, Vec4 } from '../../../core/math';
+import { resources } from '../../../asset/asset-manager/bundle';
 import { ARModuleX } from '../ar-module';
 
 export interface ARMesh extends ARTrackable {

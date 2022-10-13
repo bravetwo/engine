@@ -22,9 +22,9 @@
  THE SOFTWARE.
 */
 
-import { ccclass, property } from '../../core/data/class-decorator'
+import { ccclass, property } from '../../../core/data/class-decorator'
 import { ARFeature, ARTrackable, FeatureEvent, FeatureType, IFeatureData, ARFeatureData} from '../ar-feature-base';
-import { Quat, Vec3 } from '../../core/math';
+import { Quat, Vec3 } from '../../../core/math';
 import { ARModuleX } from '../ar-module';
 
 export interface ARImage extends ARTrackable {
