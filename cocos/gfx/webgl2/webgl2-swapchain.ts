@@ -144,8 +144,11 @@ export function getContext (canvas: HTMLCanvasElement): WebGL2RenderingContext |
             xrCompatible: true
         };
 
-        //context = canvas.getContext('webgl2', webGLCtxAttribs);
-        context = canvas.getContext('webgl2', glAttribs) as WebGL2RenderingContext;
+        if (globalThis.__globalXR.xrENV === 0) {
+            context = canvas.getContext('webgl2', webGLCtxAttribs);
+        } else {
+            context = canvas.getContext('webgl2', glAttribs) as WebGL2RenderingContext;
+        }
     } catch (err) {
         return null;
     }
