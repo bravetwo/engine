@@ -178,7 +178,6 @@ export class ARModuleX extends IARModule {
     public getCameraFov(): number {
         const matArr = this._nativeObj.getCameraProjectionMatrix();
         const fov = 2 * Math.atan(1 / matArr[5]) * 180 / Math.PI;
-        console.log("cam fov", fov);
         return fov;
     }
 
@@ -190,8 +189,7 @@ export class ARModuleX extends IARModule {
         this._nativeObj.setDisplayGeometry(rotation, width, height);
     }
 
-    public setCameraTextureName(id : number) {  
-        console.log("armodule setCameraTextureName::", id);
+    public setCameraTextureName(id : number) {
         this._nativeObj.setCameraTextureName(id);
     }
 
