@@ -24,11 +24,12 @@
 
 declare const jsb: any;
 
+import { screenAdapter } from 'pal/screen-adapter';
 import { Orientation } from '../../../pal/screen-adapter/enum-type/orientation';
 import { Platform } from '../../../pal/system-info/enum-type';
 import { Quat, Vec3, Vec2, sys} from '../../core';
 import { Node } from '../../scene-graph';
-import { Camera } from '../../render-scene/scene';
+import { Camera } from '../../misc';
 import { SurfaceTransform } from '../../gfx/base/define';
 import { ARFeature, ARPose, FeatureType, ARFeatureData} from './ar-feature-base';
 import * as features from './ar-features';
@@ -75,6 +76,8 @@ export class ARModuleX extends IARModule {
         return this._instance;
     }
 
+    private _setGeoFlag = false;
+
     // load
     public constructor(featuresDataset: ARFeatureData[]) {
         super();
@@ -103,6 +106,13 @@ export class ARModuleX extends IARModule {
     }
 
     public start() {
+        // if(this._camera && !this._setGeoFlag) {
+        //     const rotation = orientationMap[screenAdapter.orientation];
+        //     this.setDisplayGeometry(rotation, this._camera.camera.width, this._camera.camera.height);
+        //     console.log(`set display===> ro:${rotation}, w:${this._camera.camera.width}, h:${this._camera.camera.height}`);
+        //     this._setGeoFlag = true;
+        // }
+
         this._featuresMap.forEach((feature, id) => {
             feature.start();
         });
@@ -121,8 +131,13 @@ export class ARModuleX extends IARModule {
     }
 
     public update() {
-        //const rotation = orientationMap[screenAdapter.orientation];
-        //this.setDisplayGeometry(rotation, this._camera!.camera.width, this._camera!.camera.height);
+        if(this._camera && !this._setGeoFlag) {
+            const rotation = orientationMap[screenAdapter.orientation];
+            this._nativeObj.setDisplayGeometry(rotation, this._camera.camera.width, this._camera.camera.height);
+            console.log(`screen scale ${this._camera.camera.screenScale}`);
+            console.log(`set display===> ro:${rotation}, w:${this._camera.camera.width}, h:${this._camera.camera.height}`);
+            this._setGeoFlag = true;
+        }
 
         this._nativeObj.update();
 
@@ -175,17 +190,16 @@ export class ARModuleX extends IARModule {
         this._nativeObj.setDisplayGeometry(rotation, width, height);
     }
 
-    public setCameraTextureName(id : number) {  
-        console.log("armodule setCameraTextureName::", id);
+    public setCameraTextureName(id : number) {
         this._nativeObj.setCameraTextureName(id);
     }
 
     public getCameraTextureRef() {
-        // for runtime, native create glTexture and set to ARCore/AREngine
         return this._nativeObj.getCameraTextureRef() as WebGLTexture;
     }
 
     public updateRenderState(gl : WebGLRenderingContext) {}
+
     //#endregion
 
     //#region feature
@@ -251,7 +265,14 @@ export class ARModuleX extends IARModule {
     
     //#endregion
     tryHitTest(touchPoint: Vec2): boolean {
-        return this._nativeObj.tryHitTest(touchPoint.x, touchPoint.y);
+        /*
+        if(this._camera && sys.platform === Platform.COCOSPLAY) { // runtime
+            console.log(`rt tryHit   ${touchPoint.x}   ${this._camera.camera.height - touchPoint.y}`);
+            return this._nativeObj.tryHitTest(touchPoint.x, this._camera.camera.height - touchPoint.y);
+        }
+        //*/
+        console.log(`touchPoint   ${touchPoint.x}   ${touchPoint.y}`);
+        return this._nativeObj.tryHitTest(touchPoint.x, this._camera!.camera.height - touchPoint.y);
     }
 
     getHitResult(): number[] {
