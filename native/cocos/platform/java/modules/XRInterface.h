@@ -26,6 +26,7 @@
 #pragma once
 
 #include "base/Ptr.h"
+#include "base/ThreadPool.h"
 #include "platform/interfaces/modules/IXRInterface.h"
 #if CC_USE_XR_REMOTE_PREVIEW
 #include "xr/XRRemotePreviewManager.h"
@@ -100,6 +101,7 @@ public:
     void bindXREyeWithRenderWindow(void *window, xr::XREye eye) override;
 
 private:
+  void loadAssetsImage(const std::string &imageInfo);
   void dispatchGamepadEventInternal(const xr::XRControllerEvent &xrControllerEvent);
   void dispatchHandleEventInternal(const xr::XRControllerEvent &xrControllerEvent);
   void dispatchHMDEventInternal(const xr::XRControllerEvent &xrControllerEvent);
@@ -127,6 +129,7 @@ private:
 #if CC_USE_XR_REMOTE_PREVIEW
     cc::IntrusivePtr<XRRemotePreviewManager> _xrRemotePreviewManager{nullptr};
 #endif
+    LegacyThreadPool *gThreadPool{nullptr};
 };
 
 } // namespace cc

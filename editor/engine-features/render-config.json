@@ -230,43 +230,18 @@
             "wechatPlugin": false
         },
         "xr": {
-            "default": ["xr"],
+            "default": [],
             "label": "i18n:ENGINE.features.base_xr.label",
             "description": "i18n:ENGINE.features.base_xr.description",
             "wechatPlugin": false,
             "category": "xr"
         },
         "ar": {
-            "default": ["ar"],
+            "default": [],
             "label": "i18n:ENGINE.features.ar.label",
-            "description": "i18n:ENGINE.features.ar.description",   
-            "native": "USE_AR_MODULE",
+            "description": "i18n:ENGINE.features.ar.description",
             "wechatPlugin": false,
             "category": "xr"
-        },
-        "ar-android": {
-            "default": ["ar-auto"],
-            "label": "i18n:ENGINE.features.ar_android.label",
-            "description": "i18n:ENGINE.features.ar_android.description",
-            "wechatPlugin": false,
-            "category": "xr",
-            "options": {
-                "ar-auto": {
-                    "label": "i18n:ENGINE.features.ar_auto.label",
-                    "description": "i18n:ENGINE.features.ar_auto.description",
-                    "native": "USE_AR_AUTO"
-                },
-                "ar-core": {
-                    "label": "i18n:ENGINE.features.ar_core.label",
-                    "description": "i18n:ENGINE.features.ar_core.description",
-                    "native": "USE_AR_CORE"
-                },
-                "ar-engine": {
-                    "label": "i18n:ENGINE.features.ar_engine.label",
-                    "description": "i18n:ENGINE.features.ar_engine.description",
-                    "native": "USE_AR_ENGINE"
-                }
-            }
         }
     },
     "categories": {
@@ -281,6 +256,10 @@
         "animation": {
             "label": "i18n:ENGINE.features.categories.animation.label",
             "description": "i18n:ENGINE.features.categories.animation.description"
+        },
+        "xr": {
+            "label": "i18n:ENGINE.features.categories.xr.label",
+            "description": "i18n:ENGINE.features.categories.xr.description"
         }
     }
 }

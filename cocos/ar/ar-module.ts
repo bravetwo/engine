@@ -49,6 +49,7 @@ export class ARModuleX extends IARModule {
     }
     set Camera (val: Camera | null) {
         this._camera = val;
+        this._webXR!.Camera = val;
     }
 
     private _initFlag = false;
@@ -88,7 +89,7 @@ export class ARModuleX extends IARModule {
 
             this.replaceFrameMoveFlag = true;
             game.stopPacer();
-            director.xrTick(dt);
+            director.xrTick(dt/1000);
 
             this._lastTime = t;
         });
@@ -263,13 +264,8 @@ export class ARModuleX extends IARModule {
         }
     }
     //#endregion
-
     tryHitTest(touchPoint: Vec2): boolean {
-        return false;
-    }
-
-    tryWebXRHitTest(transform): boolean {
-        return this._webXR!.tryWebXRHitTest(transform);
+        return this._webXR!.tryHitTest(touchPoint);
     }
 
     getHitResult(): number[] {

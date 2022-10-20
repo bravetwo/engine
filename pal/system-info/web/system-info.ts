@@ -1,4 +1,4 @@
-import { DEBUG, EDITOR, TEST } from 'internal:constants';
+import { DEBUG, EDITOR, PREVIEW, TEST } from 'internal:constants';
 import { IFeatureMap } from 'pal/system-info';
 import { EventTarget } from '../../../cocos/core/event';
 import legacyCC from '../../../predefine';
@@ -194,7 +194,7 @@ class SystemInfo extends EventTarget {
             [Feature.EVENT_ACCELEROMETER]: (window.DeviceMotionEvent !== undefined || window.DeviceOrientationEvent !== undefined),
             // @ts-expect-error undefined webkitGetGamepads
             [Feature.EVENT_GAMEPAD]: (navigator.getGamepads !== undefined || navigator.webkitGetGamepads !== undefined),
-            [Feature.EVENT_HANDLE]: true,
+            [Feature.EVENT_HANDLE]: EDITOR || PREVIEW,
             [Feature.EVENT_HMD]: this.isXR,
         };
 

@@ -779,6 +779,10 @@ module.exports = {
                 label: 'Animation',
                 description: 'Animation System.',
             },
+            xr: {
+                label: 'XR',
+                description: 'XR System.',
+            },
         },
         core: {
             label: "Core",
@@ -925,28 +929,12 @@ module.exports = {
             description: "Enable the Marionette animation system",
         },
         base_xr: {
-            label: "Basic XR Features",
-            description: "Enable the XR function system",
+            label: "Basic XR",
+            description: "Basic XR support.",
         },
         ar: {
-            label: "AR Module",
+            label: "AR",
             description: "AR support.",
-        },
-        ar_android: {
-            label: "AR Android Api",
-            description: "Select Api for ARModule on Android",
-        },
-        ar_auto: {
-            label: "auto adaption",
-            description: "Auto adaptation of ar api on android device.",
-        },
-        ar_core: {
-            label: "use ARCore",
-            description: "For ARCore supported devices.",
-        },
-        ar_engine: {
-            label: "use AREngine",
-            description: "For AREngine supported devices, Huawei and HONOR.",
         },
         custom_pipeline: {
             label: "Custom Render Pipeline (Experimental)",

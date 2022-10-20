@@ -111,16 +111,18 @@ export class WebXRPlane {
     private _hitResult = null;
 
     public processPlanes(frame, immersiveRefSpace) {
-        if (!this._enable) {
+        if (!this._enable || !frame) {
             return;
         }
+        const detectedPlanes = frame.detectedPlanes || frame.worldInformation?.detectedPlanes;
+
         this._removedPlanes.length = 0;
         this._addedPlanes.length = 0;
         this._updatedPlanes.length = 0;
 
-        if (frame.detectedPlanes) {
+        if (detectedPlanes) {
             this.allPlanes.forEach((planeContext, plane) => {
-                if (!frame.detectedPlanes.has(plane)) {
+                if (!detectedPlanes.has(plane)) {
                     // plane was removed
                     this.allPlanes.delete(plane);
                     console.debug("plane was removed, id=" + planeContext.id);
@@ -129,28 +131,28 @@ export class WebXRPlane {
             });
             
             //XRPlane {planeSpace: XRSpace, polygon: Array(18), orientation: 'Horizontal', lastChangedTime: 16623.012}
-            frame.detectedPlanes.forEach(plane => {
+            detectedPlanes.forEach(plane => {
                 const planePose = frame.getPose(plane.planeSpace, immersiveRefSpace);
                 if (planePose) {
                     if (this.allPlanes.has(plane)) {
                         // may have been updated:
                         const planeContext = this.allPlanes.get(plane);
-    
                         if (planeContext.timestamp < plane.lastChangedTime) {
+                            // updated!
                             planeContext.timestamp = plane.lastChangedTime;
+                            planeContext.extent = this.calPolygonSize(plane.polygon);
+                            planeContext.center = {
+                                position: new Vec3(
+                                    planePose.transform.position.x,
+                                    planePose.transform.position.y,
+                                    planePose.transform.position.z
+                                ),
+                                rotation: planePose.transform.orientation
+                            };
+                            planeContext.plane_pose = planePose;
+    
+                            this._updatedPlanes.push(planeContext);
                         }
-                        planeContext.extent = this.calPolygonSize(plane.polygon);
-                        planeContext.center = {
-                            position: new Vec3(
-                                planePose.transform.position.x,
-                                planePose.transform.position.y,
-                                planePose.transform.position.z
-                            ),
-                            rotation: planePose.transform.orientation
-                        };
-                        planeContext.plane_pose = planePose;
-
-                        this._updatedPlanes.push(planeContext);
                     } else {
                         // new plane
                         if (this._addedPlanes.length >= this._planesMaxCount) {
@@ -398,7 +400,26 @@ export class WebXRPlane {
 
         return result;
     }
+
     // raycast
+    tryHitTest(ray: geometry.Ray): boolean {
+        console.log("test hit ", ray);
+
+        const xrRay = new XRRay({ x: ray.o.x, y: ray.o.y, z: ray.o.z, w: 1.0 }, { x: ray.d.x, y: ray.d.y, z: ray.d.z, w: 0.0 });
+        // Perform a JS-side hit test against mathematical (infinte) planes:
+        const hitTestResults = this.hitTest(xrRay);
+        console.log("test hit results ...", hitTestResults);
+        // Filter results down to the ones that fall within plane's polygon:
+        const hitTestFiltered = this.filterHitTestResults(hitTestResults);
+
+        if (hitTestFiltered && hitTestFiltered.length > 0) {
+            this._hitResult = hitTestFiltered[0];
+            console.debug("hit result:", this._hitResult);
+            return true;
+        }
+        return false;
+    }
+
     tryWebXRHitTest(transform: XRRigidTransform): boolean {
         console.log("test hit ");
         const ray = new XRRay(transform);
@@ -413,19 +434,19 @@ export class WebXRPlane {
             console.debug("hit result:", this._hitResult);
             return true;
         }
-
         return false;
     }
+
     getHitResult(): number[] {
         if (this._hitResult) {
             return [
-                this._hitResult.point.x,
-                this._hitResult.point.y,
-                this._hitResult.point.z,
-                this._hitResult.point_on_plane.x,
-                this._hitResult.point_on_plane.y,
-                this._hitResult.point_on_plane.z,
-                this._hitResult.point_on_plane.w
+                this._hitResult.hitMatrix[12],
+                this._hitResult.hitMatrix[13],
+                this._hitResult.hitMatrix[14],
+                0,
+                0,
+                0,
+                0
             ];
         }
         return [0,0,0,0,0,0,0];

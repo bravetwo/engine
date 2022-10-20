@@ -28,6 +28,7 @@
 #include <unistd.h>
 #include <functional>
 #include <unordered_map>
+#include "base/StringUtil.h"
 #include "android/AndroidPlatform.h"
 #include "base/Log.h"
 #include "base/Macros.h"
@@ -49,6 +50,7 @@
 #endif
 #include "application/ApplicationManager.h"
 #include "base/threading/MessageQueue.h"
+#include "platform/Image.h"
 
 // print log
 const bool IS_ENABLE_XR_LOG = false;
@@ -432,6 +434,15 @@ void XRInterface::initialize(void *javaVM, void *activity) {
             if (value.getInt() == 1) {
                 this->endRenderEyeFrame(key == xr::XRConfigKey::RENDER_EYE_FRAME_LEFT ? 0 : 1);
             }
+        } else if(key == xr::XRConfigKey::IMAGE_TRACKING_CANDIDATEIMAGE && value.isString()) {
+            if(!gThreadPool) {
+                gThreadPool = LegacyThreadPool::newSingleThreadPool();
+            }
+
+            std::string imageInfo = value.getString();
+            gThreadPool->pushTask([imageInfo, this](int /*tid*/) {
+                this->loadAssetsImage(imageInfo);
+            });
         }
     });
     #if XR_OEM_PICO
@@ -926,4 +937,55 @@ void XRInterface::bindXREyeWithRenderWindow(void *window, xr::XREye eye) {
         _xrWindowMap.emplace(std::make_pair(window, eye));
     }
 }
+
+void XRInterface::loadAssetsImage(const std::string &imageInfo) {
+    // name|@assets/TrackingImage_SpacesTown.png|0.18|0.26
+    ccstd::vector<ccstd::string> segments = StringUtil::split(imageInfo, "|");
+    std::string imageName = segments.at(0);
+    std::string imagePath = segments.at(1);
+    float physicalSizeX = atof(segments.at(2).c_str());
+    float physicalSizeY = atof(segments.at(3).c_str());
+    Image spaceTownImage;
+    bool res = spaceTownImage.initWithImageFile(imagePath);
+    if (!res) {
+        CC_LOG_ERROR("[XRInterface] loadAssetsImage init failed, %s!!!", imageInfo.c_str());
+        return;
+    }
+    const uint32_t bufferSize = spaceTownImage.getWidth() * spaceTownImage.getHeight() * 3;
+    auto *buffer = new uint8_t[bufferSize];
+    for (int j = 0; j < spaceTownImage.getHeight(); ++j) {
+        for (int i = 0; i < spaceTownImage.getWidth(); ++i) {
+            const int pixel = i + j * spaceTownImage.getWidth();
+            const int pixelFlip = i + (spaceTownImage.getHeight() - j - 1) * spaceTownImage.getWidth();
+
+            const uint8_t *originalPixel = &spaceTownImage.getData()[pixel * 4];
+            uint8_t *convertedPixel = &buffer[pixelFlip * 3];
+            convertedPixel[0] = originalPixel[0];
+            convertedPixel[1] = originalPixel[1];
+            convertedPixel[2] = originalPixel[2];
+        }
+    }
+    uint32_t imageWidth = spaceTownImage.getWidth();
+    uint32_t imageHeight = spaceTownImage.getHeight();
+
+    auto app = CC_CURRENT_APPLICATION();
+    if (!app) {
+        CC_LOG_ERROR("[XRInterface] loadAssetsImage callback failed, application not exist!!!");
+        return;
+    }
+    auto engine = app->getEngine();
+    CC_ASSERT(engine != nullptr);
+    engine->getScheduler()->performFunctionInCocosThread([=]() {
+        xr::XRTrackingImageData candidateImage;
+        candidateImage.friendlyName = imageName;
+        candidateImage.bufferSize = bufferSize;
+        candidateImage.buffer = buffer;
+        candidateImage.pixelSizeWidth = imageWidth;
+        candidateImage.pixelSizeHeight = imageHeight;
+        candidateImage.physicalWidth = physicalSizeX;
+        candidateImage.physicalHeight = physicalSizeY;
+        setXRConfig(xr::XRConfigKey::IMAGE_TRACKING_CANDIDATEIMAGE, static_cast<void *>(&candidateImage));
+    });
+}
+
 } // namespace cc

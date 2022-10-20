@@ -25,10 +25,9 @@
 declare const jsb: any;
 
 import { screenAdapter } from 'pal/screen-adapter';
-import { Vec2 } from '@cocos/box2d';
 import { Orientation } from '../../pal/screen-adapter/enum-type/orientation';
 import { Platform } from '../../pal/system-info/enum-type';
-import { Quat, Vec3 , Node, Camera, sys} from '../core';
+import { Quat, Vec3, Vec2, Node, Camera, sys} from '../core';
 import { SurfaceTransform } from '../core/gfx/base/define';
 import { ARFeature, ARPose, FeatureType, ARFeatureData} from './ar-feature-base';
 import * as features from './ar-features';

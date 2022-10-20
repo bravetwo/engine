@@ -21,13 +21,11 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
 */
-import { Camera } from '../../core';
-import { InputEventType } from '../../input/types/event-enum';
+
+import { Camera, geometry, Vec2, Vec3 } from '../../core';
 import { WebXRPlane } from './ar-plane';
-import { webXRInputEvent, WebXRInputEventType } from './webxr-input-event';
 
 const _xr = navigator.xr;
-
 declare type XRFrameFunction = (t: number, frame: any) => void;
 
 // 'inline', AR - 'immersive-ar', VR - 'immersive-vr'
@@ -46,10 +44,17 @@ export class WebXR {
     private _framebuffer = null;
     private _baseLayer: any = null;
     private _viewport: any = null;
-
+    private _inputSource: any = null;
+    private _gl: any = null;
     private _onXRFrame:XRFrameFunction | null = null;
-
     private _plane: WebXRPlane | null = null;
+    private _camera: Camera | null = null;
+    get Camera (): Camera | null {
+        return this._camera;
+    }
+    set Camera (val: Camera | null) {
+        this._camera = val;
+    }
 
     constructor(mode: string, supportCallback: () => void, frameCallback: (t: number) => void) {
         this._mode = mode;
@@ -77,6 +82,13 @@ export class WebXR {
             this._cameraPose = frame.getViewerPose(refSpace);
             this._framebuffer = frame.session.renderState.baseLayer.framebuffer;
 
+            if (this._inputSource) {
+                let targetRayPose = frame.getPose(this._inputSource.targetRaySpace, this._immersiveRefSpace);
+                if (targetRayPose !== null ) {
+                    const eventInitDict = this.getTouchInit(targetRayPose.transform.position);
+                    this._gl!.canvas.dispatchEvent(new TouchEvent("touchmove", eventInitDict));
+				}
+            }
             //console.log("framebuffer", this.framebuffer);
             frameCallback(t);
         }
@@ -87,15 +99,13 @@ export class WebXR {
     }
 
     config(featureMask) {
-        if(featureMask) {
-
-        }
+        
     };
 
     start() {
         console.log("WebXR start...");
         //根据特性启用
-        if (1) {
+        if (true) {
             this._sessionInit.requiredFeatures.push('plane-detection');
             this._plane = new WebXRPlane();
         }
@@ -115,48 +125,113 @@ export class WebXR {
                 //console.log('Session refSpace', this.immersiveRefSpace);
                 this._session.requestAnimationFrame(this._onXRFrame);
 
-                function onSelectionEvent(event) {
-                    //console.log("yyyyyyyyyyyyyyyyyyyyyyyyyyyy", event);
-                    let source = event.inputSource;
-
-                    if (source.targetRayMode !== "screen") {
-                        return;
-                    }
-                  
-                    let targetRayPose = event.frame.getPose(source.targetRaySpace, refSpace);
-                    if (!targetRayPose) {
-                        return;
-                    }
-                    console.log("targetRayPose =========", event.type, targetRayPose);
-                    switch(event.type) {
-                      case "selectstart":
-                            webXRInputEvent.dispatch(WebXRInputEventType.SELECT_START, {transform : targetRayPose.transform} );
-                            break;
-                      case "select":
-                            webXRInputEvent.dispatch(WebXRInputEventType.SELECT, {transform : targetRayPose.transform} );
-                            break;
-                      case "selectend":
-                            webXRInputEvent.dispatch(WebXRInputEventType.SELECT_END, {transform : targetRayPose.transform} );
-                            break;
-                    }
-                }
-    
-                session.addEventListener("selectstart", onSelectionEvent);
-                session.addEventListener("select", onSelectionEvent);
-                session.addEventListener("selectend", onSelectionEvent);
-
-                session.addEventListener('touchstart', this._createCallback(InputEventType.TOUCH_START));
-                session.addEventListener('touchmove', this._createCallback(InputEventType.TOUCH_MOVE));
-                session.addEventListener('touchend', this._createCallback(InputEventType.TOUCH_END));
-                session.addEventListener('touchcancel', this._createCallback(InputEventType.TOUCH_CANCEL));
+                this.attachController();
             });
         });
     };
 
-    private _createCallback (eventType: InputEventType) {
-        return (event: TouchEvent) => {
-           console.log("========================", event);
+    private attachController(){
+        let that = this;
+        function onSessionEvent(event) {
+            //console.log("web xr onSessionEvent: ", event);
+            switch (event.inputSource.targetRayMode) {
+                case "tracked-pointer":
+                    that.attachTrackedPointerRayMode(event);
+                    break;
+                case "gaze":
+                    that.attachGazeMode(event);
+                    break;
+                case "screen":
+                    that.attachScreenRayMode(event);
+                    break;
+                default:
+                    break;
+            }
+        }
+        
+        function onSessionEnd(event) {
+            that._session.removeEventListener('select', onSessionEvent );
+            that._session.removeEventListener('selectstart', onSessionEvent);
+            that._session.removeEventListener('selectend', onSessionEvent);
+            that._session.removeEventListener('squeeze', onSessionEvent);
+            that._session.removeEventListener('squeezestart', onSessionEvent);
+            that._session.removeEventListener('squeezeend', onSessionEvent);
+            that._session.removeEventListener('end', onSessionEnd);
+            that._session.removeEventListener('inputsourceschange', onInputSourcesChange);
+        }
+
+        function onInputSourcesChange( event ) {
+            //console.log("web xr onInputSourcesChange: ", event);
+        }
+
+        this._session.addEventListener('select', onSessionEvent );
+        this._session.addEventListener('selectstart', onSessionEvent);
+        this._session.addEventListener('selectend', onSessionEvent);
+        this._session.addEventListener('squeeze', onSessionEvent);
+        this._session.addEventListener('squeezestart', onSessionEvent);
+        this._session.addEventListener('squeezeend', onSessionEvent);
+        this._session.addEventListener('end', onSessionEnd);
+        this._session.addEventListener('inputsourceschange', onInputSourcesChange);
+    }
+
+    private getTouchInit(worldPosition){
+        let outPos = new Vec3();
+        this._camera!.worldToScreen(worldPosition, outPos);
+        
+        console.log("screen pos:", outPos);
+
+        let touchInitDict: TouchInit = {
+            identifier: 0,
+            target: this._gl.canvas,
+            clientX: outPos.x,
+            clientY: outPos.y,
+            pageX: outPos.x,
+            pageY: outPos.y,
+            screenX: outPos.x,
+            screenY: outPos.y,
+            force: 1,
+            radiusX: 1,
+            radiusY: 1
         };
+
+        const touch = new Touch(touchInitDict);
+        const touches: Touch[] = [touch];
+        let eventInitDict: TouchEventInit = {
+            touches: touches,
+            targetTouches: touches,
+            changedTouches: touches,
+        };
+        //console.log("eventInitDict:", eventInitDict);
+        return eventInitDict;
+    }
+
+    private attachScreenRayMode(event) {
+        let source = event.inputSource;
+        this._inputSource = source;
+        let targetRayPose = event.frame.getPose(source.targetRaySpace, this._immersiveRefSpace);
+        if (!targetRayPose || !this._camera) {
+            return;
+        }
+        //console.log("targetRayPose =========", event.type, targetRayPose);
+        const eventInitDict = this.getTouchInit(targetRayPose.transform.position);
+  
+        switch(event.type) {
+          case "selectstart":
+                this._gl!.canvas.dispatchEvent(new TouchEvent("touchstart", eventInitDict));
+                break;
+          case "selectend":
+                this._inputSource = null;
+                this._gl!.canvas.dispatchEvent(new TouchEvent("touchend", eventInitDict));
+                break;
+        }
+    }
+
+    private attachGazeMode(event){
+
+    }
+
+    private attachTrackedPointerRayMode(event){
+
     }
 
     onResume() {
@@ -228,6 +303,7 @@ export class WebXR {
         return this._framebuffer;
     }
     updateRenderState(gl) {
+        this._gl = gl;
         if(this._session) {
             this._session.updateRenderState({ baseLayer: new XRWebGLLayer(this._session, gl, {
                 alpha: true,
@@ -237,12 +313,15 @@ export class WebXR {
                 ignoreDepthValues: false,
                 stencil: true
             })});
+            //console.log("gl ===", gl, gl.canvas);
         }
     };
-    
+
     // raycast
-    tryWebXRHitTest(transform: XRRigidTransform): boolean {
-        return this._plane!.tryWebXRHitTest(transform);
+    tryHitTest(touchPoint: Vec2): boolean {
+        let outRay = new geometry.Ray();
+        this._camera!.screenPointToRay(touchPoint.x, touchPoint.y, outRay);
+        return this._plane!.tryHitTest(outRay);
     }
     getHitResult(): number[] {
         return this._plane!.getHitResult();
