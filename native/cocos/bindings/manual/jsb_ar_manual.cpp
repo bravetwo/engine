@@ -29,7 +29,7 @@
 
 #include "bindings/manual/jsb_conversions.h"
 #include "bindings/manual/jsb_global.h"
-#include "xr/ar/ARModule.h"
+#include "ar/ARModule.h"
 #include "bindings/auto/jsb_ar_auto.h"
 
 static bool js_ar_ARModule_getAnchorPose(se::State& s)

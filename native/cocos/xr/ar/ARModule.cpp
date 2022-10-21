@@ -26,7 +26,7 @@
 #include <stdint.h>
 #include <memory>
 
-#include "./ARModule.h"
+#include "ar/ARModule.h"
 
 #define USE_AR_NDK
 

@@ -33,7 +33,7 @@
 #include "pipeline/Define.h"
 #include "pipeline/PipelineStateManager.h"
 
-#include "xr/ar/ARModule.h"
+#include "ar/ARModule.h"
 #include "gfx-base/GFXDevice.h"
 #include "scene/Camera.h"
 #include "platform/interfaces/modules/Device.h"
