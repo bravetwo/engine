@@ -43,6 +43,8 @@ public:
 
     const Texture *getRaw() const override { return _actor->getRaw(); }
 
+    uint32_t getNativeTexturePtr() const override { return _actor->getNativeTexturePtr(); }
+
 protected:
     friend class SwapchainValidator;
 
