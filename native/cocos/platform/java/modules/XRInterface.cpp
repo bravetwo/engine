@@ -946,6 +946,7 @@ void XRInterface::loadAssetsImage(const std::string &imageInfo) {
     float physicalSizeX = atof(segments.at(2).c_str());
     float physicalSizeY = atof(segments.at(3).c_str());
     Image *spaceTownImage = new Image();
+    spaceTownImage->addRef();
     bool res = spaceTownImage->initWithImageFile(imagePath);
     if (!res) {
         CC_LOG_ERROR("[XRInterface] loadAssetsImage init failed, %s!!!", imageInfo.c_str());
