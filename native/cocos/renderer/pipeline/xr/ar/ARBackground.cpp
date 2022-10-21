@@ -33,7 +33,7 @@
 #include "pipeline/Define.h"
 #include "pipeline/PipelineStateManager.h"
 
-#include "ar/ARModule.h"
+#include "xr/ar/ARModule.h"
 #include "gfx-base/GFXDevice.h"
 #include "scene/Camera.h"
 #include "platform/interfaces/modules/Device.h"
@@ -314,8 +314,8 @@ void ARBackground::render(cc::scene::Camera *camera, gfx::RenderPass *renderPass
     if (apiState < 0) return;
 
 #if CC_PLATFORM == CC_PLATFORM_ANDROID
-    auto rotation = ORIENTATION_MAP.at(Device::getDeviceOrientation());
-    armodule->setDisplayGeometry(static_cast<uint32_t>(rotation), camera->getWidth(), camera->getHeight());
+    //auto rotation = ORIENTATION_MAP.at(Device::getDeviceOrientation());
+    //armodule->setDisplayGeometry(static_cast<uint32_t>(rotation), camera->getWidth(), camera->getHeight());
 
     if (!_setTexFlag) {
         gfx::SamplerInfo samplerInfo;

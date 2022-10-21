@@ -26,20 +26,17 @@
 #include <stdint.h>
 #include <memory>
 
-#include "ar/ARModule.h"
-//#include "platform/interfaces/modules/Device.h"
-//#include "renderer/gfx-base/GFXDef-common.h"
+#include "./ARModule.h"
 
 #define USE_AR_NDK
 
 #if CC_PLATFORM == CC_PLATFORM_ANDROID
-//#include "ar/android/ARAndroidAPIImpl.h"
-//using ARAPIImpl = cc::ar::ARAndroidAPIImpl;
 
 #ifdef USE_AR_NDK
 #include "platform/android/AndroidPlatform.h"
 #include "platform/BasePlatform.h"
 #include "ar/ARNDKLib.h"
+//#include "ar/module/ARNDKLib.h"
 using ARAPIImpl = cc::ar::ARNDKLib;
 #else
 #include "ar/ARAndroidLib.h"

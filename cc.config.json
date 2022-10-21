@@ -246,14 +246,14 @@
                 "cocos/3d/models/skinning-model.ts": "cocos/3d/models/skinning-model.jsb.ts",
                 "cocos/3d/models/baked-skinning-model.ts": "cocos/3d/models/baked-skinning-model.jsb.ts",
                 "cocos/3d/misc/create-mesh.ts": "cocos/3d/misc/create-mesh.jsb.ts",
-                "cocos/ar/ar-module.ts": "cocos/ar/ar-module.jsb.ts"
+                "cocos/xr/ar/ar-module.ts": "cocos/xr/ar/ar-module.jsb.ts"
             }
         },
         {
             "test": "context.buildTimeConstants && context.buildTimeConstants.RUNTIME_BASED",
             "isVirtualModule": false,
             "overrides": {
-                "cocos/ar/ar-module.ts": "cocos/ar/ar-module.jsb.ts"
+                "cocos/xr/ar/ar-module.ts": "cocos/xr/ar/ar-module.jsb.ts"
             }
         },
         {

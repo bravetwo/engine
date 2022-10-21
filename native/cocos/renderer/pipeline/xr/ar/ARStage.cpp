@@ -24,7 +24,7 @@
 ****************************************************************************/
 #include "pipeline/xr/ar/ARBackground.h"
 #include "pipeline/xr/ar/ARStage.h"
-#include "ar/ARModule.h"
+#include "xr/ar/ARModule.h"
 //#include "pipeline/BatchedBuffer.h"
 #include "pipeline/Enum.h"
 //#include "pipeline/InstancedBuffer.h"

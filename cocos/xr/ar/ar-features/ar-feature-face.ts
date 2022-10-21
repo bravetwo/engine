@@ -30,76 +30,66 @@ import { ARModuleX } from '../ar-module';
 import { callFunc } from '../../../tween/actions/action-instant';
 
 export enum ARFaceBlendShapeType {
-    Eye_Blink_Left,         //(0)左眼闭合。
-    Eye_Look_Down_Left,     //(1)左上眼皮微下垂。
-    Eye_Look_In_Left,       //(2)左眼内部眼皮向左扩。
-    Eye_Look_Out_Left,      //(3)左眼睑向左扩。
-    Eye_Look_Up_Left,       //(4)左眼上眼皮微上抬。
-    Eye_Squint_Left,        //(5)左下眼睑上抬。
-    Eye_Wide_Left,          //(6)左眼瞪大眼。
-    Eye_Blink_Right,        //(7)闭右眼。
-    Eye_Look_Down_Right,    //(8)右上眼皮微下垂。
-    Eye_Look_In_Right,      //(9)右眼内部眼皮向右扩。
-    Eye_Look_Out_Right,     //(10)右眼睑向右扩。
-    Eye_Look_Up_Right,      //(11)右眼上眼皮微上抬。
-    Eye_Squint_Right,       //(12)右下眼睑上抬。
-    Eye_Wide_Right,         //(13)右眼瞪大眼。
+    None,
 
-    Jaw_Forward,            //(14)下巴朝前。
-    Jaw_Left,               //(15)下巴朝左。
-    Jaw_Right,              //(16)下巴朝右。
-    Jaw_Open,               //(17)张嘴。
+    BrowsDownLeft,          //左眉向下
+    BrowsDownRight,         //右眉向下
+    BrowsUpCenter,          //眉间向上
+    BrowsUpLeft,            //左眉向上
+    BrowsUpRight,           //右眉向上
 
-    Mouth_Funnel,           //18)O型嘴。
-    Mouth_Pucker,           //19)噘嘴。
-    Mouth_Left,             //20)嘴巴向左。
-    Mouth_Right,            //21)嘴巴向右。
-    Mouth_Smile_Left,       //22)左嘴角向左歪。
-    Mouth_Smile_Right,      //23)右嘴角向右歪。
-    Mouth_Frown_Left,       //24)左嘴角下拉。
-    Mouth_Frown_Right,      //25)右嘴角下拉。
-    Mouth_Dimple_Left,      //26)左酒窝上抬。
-    Mouth_Dimple_Right,     //27)右酒窝上抬。
-    Mouth_Stretch_Left,     //28)嘴角向左拉。
-    Mouth_Stretch_Right,    //29)嘴角向右拉。
-    Mouth_Roll_Lower,       //30)下嘴唇向内抿嘴。
-    Mouth_Roll_Upper,       //31)抿上嘴唇。
-    Mouth_Shrug_Lower,      //32)撅下嘴唇。
-    Mouth_Shrug_Upper,      //33)撅上嘴唇。
-    Mouth_Upper_Up,         //34)嘴唇上翻。
-    Mouth_Lower_Down,       //35)下嘴唇朝下。
-    Mouth_Lower_Out,        //36)下嘴唇朝外。
+    CheekSquintLeft,        //左脸颊上抬
+    CheekSquintRight,       //右脸颊上抬
 
-    Brow_Down_Left,         //37)左侧眉毛朝下。
-    Brow_Down_Right,        //38)右侧眉毛朝下。
-    Brow_Inner_Up,          //39)双侧眉毛抬眉。
-    Brow_Outer_Up_Left,     //40)左眉外侧向上抬。
-    Brow_Outer_Up_Right,    //41)右眉外侧向上抬。
+    EyeBlinkLeft,           //左眼闭合
+    EyeBlinkRight,          //右眼闭合
+    EyeDownLeft,            //左上眼皮微下垂
+    EyeDownRight,           //右上眼皮微下垂
+    EyeInLeft,              //左眼内部眼皮向左扩
+    EyeInRight,             //右眼内部眼皮向右扩
+    EyeOpenLeft,            //左眼打开
+    EyeOpenRight,           //右眼打开
+    EyeOutLeft,             //左眼睑向左扩
+    EyeOutRight,            //右眼睑向右扩
+    EyeSquintLeft,          //左下眼睑上抬
+    EyeSquintRight,         //右下眼睑上抬
+    EyeUpLeft,              //左眼上眼皮微上抬
+    EyeUpRight,             //右眼上眼皮微上抬
 
-    Cheek_Puff,             //42)鼓腮。
-    Cheek_Squint_Left,      //43)左脸颊上抬。
-    Cheek_Squint_Right,     //44)右脸颊上抬。
-    Frown_Nose_Mouth_Up,    //45)鼻子上抬。
+    JawLeft,                //下巴朝左
+    JawRight,               //下巴朝右
+    JawOpen,                //张嘴
+  
+    LipsFunnel,             //嘴唇呈O型
+    LipsPucker,             //嘴唇紧闭
+    LowerLipClose,          //下唇向上唇方向且向后移动
+    LowerLipDownLeft,       //左下嘴唇向下
+    LowerLipDownRight,      //右下嘴唇向下
+    LowerLipRaise,          //下唇向上
+    UpperLipClose,          //上唇向下唇方向且向后移动
+    UpperLipRaise,          //上唇向上
+    UpperLipUpLeft,         //左上唇向上
+    UpperLipUpRight,        //右上唇向上
 
-    Tongue_In,              //46)舌头在嘴里上下位置。
-    Tongue_Out_Slight,      //47)舌头直伸。
-    Tongue_Left,            //48)舌头朝左。
-    Tongue_Right,           //49)舌头朝右。
-    Tongue_Up,              //50)舌头朝上。
-    Tongue_Down,            //51)舌头朝下。
-    Tongue_Left_Up,         //52)舌头朝左上。
-    Tongue_Left_Down,       //53)舌头朝左下。
-    Tongue_Right_Up,        //54)舌头朝右上。
-    Tongue_Right_Down,      //55)舌头朝右下。
+    MouthClose,             //嘴唇闭合状态下一起运动
+    MouthDimpleLeft,        //左嘴角向后向左
+    MouthDimpleRight,       //右嘴角向后向右
+    MouthFrownLeft,         //左嘴角下拉
+    MouthFrownRight,        //右嘴角下拉
+    MouthLeft,              //双唇向左
+    MouthRight,             //双唇向右
+    MouthSmileLeft,         //左嘴角向上
+    MouthSmileRight,        //右嘴角向上
+    MouthStretchLeft,       //嘴部左侧向左
+    MouthStretchRight,      //嘴部右侧向右
+    MouthUpLeft,            //嘴部左侧向上
+    MouthUpRight,           //嘴部右侧向上
+  
+    Puff,                   //两侧面颊鼓起(嘟嘴)
+    SneerLeft,              //左鼻孔抬起
+    SneerRight,             //右鼻孔抬起
 
-    Left_Eyeball_Left,      //56)左眼球向左。
-    Left_Eyeball_Right,     //57)左眼球向右。
-    Left_Eyeball_Up,        //58)左眼球向上。
-    Left_Eyeball_Down,      //59)左眼球向下。
-    Right_Eyeball_Left,     //60)右眼球向左。
-    Right_Eyeball_Right,    //61)右眼球向右。
-    Right_Eyeball_Up,       //62)右眼球向上。
-    Right_Eyeball_Down      //63)右眼球向下。
+    Max,
 }
 ccenum(ARFaceBlendShapeType)
 
@@ -182,6 +172,7 @@ export class ARFeatureFaceTracking extends ARFeature {
         if(addedFacesInfo && addedFacesInfo.length > 0) {
             this._addedFaces.length = 0;
             this.assembleInfos(addedFacesInfo, this._addedFaces);
+            console.log(`add face count ${this._addedFaces.length}`)
             this.onAddEvent.trigger(this._addedFaces);
         }
 
