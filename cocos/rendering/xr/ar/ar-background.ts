@@ -55,6 +55,25 @@ const fs = `
         o_color = texture(u_texture, v_texCoord);
     }`;
 
+const vsGLSL1 = `
+    attribute vec2 a_position;
+    attribute vec2 a_texCoord;
+    uniform mat4 u_MVP;
+    uniform mat4 u_CoordMatrix;
+    varying vec2 v_texCoord;
+    void main() {
+        v_texCoord = (u_CoordMatrix * vec4(a_texCoord, 0, 1)).xy;
+        gl_Position = u_MVP * vec4(a_position, 0, 1);
+    }`;
+const fsGLSL1 = `
+    #extension GL_OES_EGL_image_external:require
+    precision mediump float;
+    varying vec2 v_texCoord;
+    uniform samplerExternalOES u_texture;
+    void main() {
+        gl_FragColor = texture2D(u_texture, v_texCoord);
+    }`;
+
 /**
  * @zh
  * AR
@@ -102,9 +121,14 @@ export class ARBackground {
         ];
 
         // shader
+        // const stages = [
+        //     new ShaderStage(ShaderStageFlagBit.VERTEX, vs),
+        //     new ShaderStage(ShaderStageFlagBit.FRAGMENT, fs)
+        // ];
+        // for AREngine background do not support gles3
         const stages = [
-            new ShaderStage(ShaderStageFlagBit.VERTEX, vs),
-            new ShaderStage(ShaderStageFlagBit.FRAGMENT, fs)
+            new ShaderStage(ShaderStageFlagBit.VERTEX, vsGLSL1),
+            new ShaderStage(ShaderStageFlagBit.FRAGMENT, fsGLSL1)
         ];
         const uniforms = [
             new Uniform("u_MVP", Type.MAT4, 1),
@@ -227,17 +251,27 @@ export class ARBackground {
             this._setTexFlag = true;
         }
 
-        //*
         const coords = armodule!.getCameraTexCoords();
-        const vertices = new Float32Array([
-            -1, -1, coords[0], coords[1],
-            -1, 1, coords[2], coords[3],
-            1, -1, coords[4], coords[5],
-            1, 1, coords[6], coords[7]
-        ]);
-        const bytes = vertices.length * Float32Array.BYTES_PER_ELEMENT;
-        this._vertexBuffer!.update(vertices, bytes);
-        //*/
+        const apiState = armodule!.getAPIState();
+        if(apiState > 1) {
+            const vertices = new Float32Array([
+                -1, -1, coords[2], coords[3],
+                -1, 1, coords[0], coords[1],
+                1, -1, coords[6], coords[7],
+                1, 1, coords[4], coords[5]
+            ]);
+            const bytes = vertices.length * Float32Array.BYTES_PER_ELEMENT;
+            this._vertexBuffer!.update(vertices, bytes);
+        } else {
+            const vertices = new Float32Array([
+                -1, -1, coords[0], coords[1],
+                -1, 1, coords[2], coords[3],
+                1, -1, coords[4], coords[5],
+                1, 1, coords[6], coords[7]
+            ]);
+            const bytes = vertices.length * Float32Array.BYTES_PER_ELEMENT;
+            this._vertexBuffer!.update(vertices, bytes);
+        }
 
         const psoInfo =  new PipelineStateInfo(
             this._shader!, this._pipelineLayout!, renderPass, 
