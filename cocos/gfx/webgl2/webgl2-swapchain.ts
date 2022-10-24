@@ -144,7 +144,7 @@ export function getContext (canvas: HTMLCanvasElement): WebGL2RenderingContext |
             xrCompatible: true
         };
 
-        if (globalThis.__globalXR.xrENV === 0) {
+        if (globalThis.__globalXR.xrEnv === 0) {
             context = canvas.getContext('webgl2', webGLCtxAttribs);
         } else {
             context = canvas.getContext('webgl2', glAttribs) as WebGL2RenderingContext;
