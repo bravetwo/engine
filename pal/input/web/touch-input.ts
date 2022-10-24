@@ -81,7 +81,7 @@ export class TouchInputSource {
     }
 
     private _getLocation (touch: globalThis.Touch, canvasRect: Rect): Vec2 {
-        if (globalThis.__globalXR.xrENV === 2) {
+        if (globalThis.__globalXR.xrEnv === 2) {
             return new Vec2(touch.clientX, touch.clientY);
         }
         let x = touch.clientX - canvasRect.x;

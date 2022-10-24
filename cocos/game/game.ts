@@ -827,7 +827,7 @@ export class Game extends EventTarget {
         globalThis.__globalXR = {};
         const globalXR = globalThis.__globalXR;
         // xrENV 0 NONE 1 XR 2 WEB_XR
-        globalXR.xrENV = settings.querySettings(Settings.Category.XR, 'xrENV') ?? 0;
+        globalXR.xrEnv = settings.querySettings(Settings.Category.XR, 'xrEnv') ?? 0;
         // xrType 0 NONE 1 VR 2 AR
         globalXR.xrType = settings.querySettings(Settings.Category.XR, 'xrType') ?? 0;
 
