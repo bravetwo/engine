@@ -17,14 +17,12 @@ extern se::Class *__jsb_cc_xr_XrEntry_class;    // NOLINT
 
 bool js_register_cc_xr_XrEntry(se::Object *obj); // NOLINT
 
-SE_DECLARE_FUNC(js_xr_XrEntry_acquireXrSwapchain);
+SE_DECLARE_FUNC(js_xr_XrEntry_attachXrFramebufferTexture2D);
 SE_DECLARE_FUNC(js_xr_XrEntry_computeViewProjection);
 SE_DECLARE_FUNC(js_xr_XrEntry_createXrInstance);
 SE_DECLARE_FUNC(js_xr_XrEntry_destroyXrInstance);
 SE_DECLARE_FUNC(js_xr_XrEntry_frameEnd);
 SE_DECLARE_FUNC(js_xr_XrEntry_frameStart);
-SE_DECLARE_FUNC(js_xr_XrEntry_getCocosXrSwapchains);
-SE_DECLARE_FUNC(js_xr_XrEntry_getCurrentXrSwapchain);
 SE_DECLARE_FUNC(js_xr_XrEntry_getEyeFov);
 SE_DECLARE_FUNC(js_xr_XrEntry_getHMDViewPosition);
 SE_DECLARE_FUNC(js_xr_XrEntry_getSwapchainImageIndex);
@@ -33,8 +31,8 @@ SE_DECLARE_FUNC(js_xr_XrEntry_getXRFloatConfig);
 SE_DECLARE_FUNC(js_xr_XrEntry_getXRIntConfig);
 SE_DECLARE_FUNC(js_xr_XrEntry_getXRPointerConfig);
 SE_DECLARE_FUNC(js_xr_XrEntry_getXRStringConfig);
+SE_DECLARE_FUNC(js_xr_XrEntry_getXrFrameBuffer);
 SE_DECLARE_FUNC(js_xr_XrEntry_getXrViewCount);
-SE_DECLARE_FUNC(js_xr_XrEntry_initPlatformData);
 SE_DECLARE_FUNC(js_xr_XrEntry_initXrSwapchains);
 SE_DECLARE_FUNC(js_xr_XrEntry_isCreatedXrInstance);
 SE_DECLARE_FUNC(js_xr_XrEntry_isRenderAllowable);
