@@ -52,6 +52,7 @@ SE_DECLARE_FUNC(js_xr_XrEntry_setXRFloatConfig);
 SE_DECLARE_FUNC(js_xr_XrEntry_setXRIntConfig);
 SE_DECLARE_FUNC(js_xr_XrEntry_setXRPointerConfig);
 SE_DECLARE_FUNC(js_xr_XrEntry_setXRStringConfig);
+SE_DECLARE_FUNC(js_xr_XrEntry_setXrFrameBuffer);
 SE_DECLARE_FUNC(js_xr_XrEntry_waitFrame);
 SE_DECLARE_FUNC(js_xr_XrEntry_destroyInstance);
 SE_DECLARE_FUNC(js_xr_XrEntry_getInstance);

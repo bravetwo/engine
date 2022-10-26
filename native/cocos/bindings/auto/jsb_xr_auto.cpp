@@ -743,6 +743,26 @@ static bool js_xr_XrEntry_setXRStringConfig(se::State& s) // NOLINT(readability-
 }
 SE_BIND_FUNC(js_xr_XrEntry_setXRStringConfig)
 
+static bool js_xr_XrEntry_setXrFrameBuffer(se::State& s) // NOLINT(readability-identifier-naming)
+{
+    auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntry>(s);
+    // SE_PRECONDITION2(cobj, false, "Invalid Native Object");
+    if (nullptr == cobj) return true;
+    const auto& args = s.args();
+    size_t argc = args.size();
+    CC_UNUSED bool ok = true;
+    if (argc == 1) {
+        HolderType<unsigned int, false> arg0 = {};
+        ok &= sevalue_to_native(args[0], &arg0, s.thisObject());
+        SE_PRECONDITION2(ok, false, "Error processing arguments");
+        cobj->setXrFrameBuffer(arg0.value());
+        return true;
+    }
+    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 1);
+    return false;
+}
+SE_BIND_FUNC(js_xr_XrEntry_setXrFrameBuffer)
+
 static bool js_xr_XrEntry_waitFrame(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntry>(s);
@@ -831,6 +851,7 @@ bool js_register_xr_XrEntry(se::Object* obj) // NOLINT(readability-identifier-na
     cls->defineFunction("setXRIntConfig", _SE(js_xr_XrEntry_setXRIntConfig));
     cls->defineFunction("setXRPointerConfig", _SE(js_xr_XrEntry_setXRPointerConfig));
     cls->defineFunction("setXRStringConfig", _SE(js_xr_XrEntry_setXRStringConfig));
+    cls->defineFunction("setXrFrameBuffer", _SE(js_xr_XrEntry_setXrFrameBuffer));
     cls->defineFunction("waitFrame", _SE(js_xr_XrEntry_waitFrame));
     cls->defineStaticFunction("destroyInstance", _SE(js_xr_XrEntry_destroyInstance_static));
     cls->defineStaticFunction("getInstance", _SE(js_xr_XrEntry_getInstance_static));
