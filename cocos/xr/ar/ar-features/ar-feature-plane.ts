@@ -140,7 +140,7 @@ export class ARFeaturePlaneDetection extends ARFeature {
         if(!this._enable) {
             return;
         }
-        if (globalThis.__globalXR.xrENV === 2) {
+        if (globalThis.__globalXR.xrEnv === 2) {
             this.processWebXRChanges();        
         } else {
             this.processChanges();

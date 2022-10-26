@@ -23,11 +23,11 @@
 */
 
 import { Vec3 } from '../../core';
-import { Camera } from '../../render-scene/scene';
 import { WebXRPlane } from './ar-plane';
 import { WebXRAnchor } from './ar-anchor';
 import { webXRInputEvent, WebXRInputEventType } from './webxr-input-event';
 import { ARTrackable } from '../ar';
+import { Camera } from '../../misc';
 
 const _xr = navigator.xr;
 declare type XRFrameFunction = (t: number, frame: any) => void;
@@ -67,10 +67,10 @@ export class WebXR {
 
     constructor(mode: string, supportCallback: () => void, frameCallback: (t: number) => void) {
         this._mode = mode;
-        globalThis.__globalXR.xrENV = 2;
-        globalThis.__globalXR.xrType = 2;
-        
-        console.log(_xr);
+        globalThis.__globalXR.xrEnv = 2;
+        globalThis.__globalXR.xrType = mode === 'immersive-ar' ? 2 : (mode === 'immersive-vr' ? 1 : 0);
+
+        console.log(globalThis.__globalXR, _xr);
         if (_xr) {
             _xr.isSessionSupported(mode).then((isSupported) => {
                 this._isSupported = isSupported;
@@ -248,11 +248,11 @@ export class WebXR {
         switch(event.type) {
             case "selectstart":
                 this._gl!.canvas.dispatchEvent(new TouchEvent("touchstart", eventInitDict));
-                webXRInputEvent.dispatch(WebXRInputEventType.SELECT_START, {transform: this._targetRayPose.transform});
+                //webXRInputEvent.dispatch(WebXRInputEventType.SELECT_START, {transform: this._targetRayPose.transform});
                 break;
             case "selectend":
                 this._gl!.canvas.dispatchEvent(new TouchEvent("touchend", eventInitDict));
-                webXRInputEvent.dispatch(WebXRInputEventType.SELECT_END, {transform: this._targetRayPose.transform});
+                //webXRInputEvent.dispatch(WebXRInputEventType.SELECT_END, {transform: this._targetRayPose.transform});
                 this._inputSource = null;
                 break;
         }
