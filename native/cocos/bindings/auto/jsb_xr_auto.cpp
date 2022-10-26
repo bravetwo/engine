@@ -25,28 +25,21 @@ SE_BIND_PROP_GET(js_xr_getter_return_true)
 se::Object* __jsb_cc_xr_XrEntry_proto = nullptr; // NOLINT
 se::Class* __jsb_cc_xr_XrEntry_class = nullptr;  // NOLINT
 
-static bool js_xr_XrEntry_acquireXrSwapchain(se::State& s) // NOLINT(readability-identifier-naming)
+static bool js_xr_XrEntry_attachXrFramebufferTexture2D(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntry>(s);
     // SE_PRECONDITION2(cobj, false, "Invalid Native Object");
     if (nullptr == cobj) return true;
     const auto& args = s.args();
     size_t argc = args.size();
-    CC_UNUSED bool ok = true;
-    if (argc == 1) {
-        HolderType<unsigned int, false> arg0 = {};
-        ok &= sevalue_to_native(args[0], &arg0, s.thisObject());
-        SE_PRECONDITION2(ok, false, "Error processing arguments");
-        const cc::xr::XRSwapchain& result = cobj->acquireXrSwapchain(arg0.value());
-        ok &= nativevalue_to_se(result, s.rval(), nullptr /*ctx*/);
-        SE_PRECONDITION2(ok, false, "Error processing arguments");
-        SE_HOLD_RETURN_VALUE(result, s.thisObject(), s.rval());
+    if (argc == 0) {
+        cobj->attachXrFramebufferTexture2D();
         return true;
     }
-    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 1);
+    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 0);
     return false;
 }
-SE_BIND_FUNC(js_xr_XrEntry_acquireXrSwapchain)
+SE_BIND_FUNC(js_xr_XrEntry_attachXrFramebufferTexture2D)
 
 static bool js_xr_XrEntry_computeViewProjection(se::State& s) // NOLINT(readability-identifier-naming)
 {
@@ -148,46 +141,6 @@ static bool js_xr_XrEntry_frameStart(se::State& s) // NOLINT(readability-identif
     return false;
 }
 SE_BIND_FUNC(js_xr_XrEntry_frameStart)
-
-static bool js_xr_XrEntry_getCocosXrSwapchains(se::State& s) // NOLINT(readability-identifier-naming)
-{
-    auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntry>(s);
-    // SE_PRECONDITION2(cobj, false, "Invalid Native Object");
-    if (nullptr == cobj) return true;
-    const auto& args = s.args();
-    size_t argc = args.size();
-    CC_UNUSED bool ok = true;
-    if (argc == 0) {
-        std::vector<cc::xr::XRSwapchain>& result = cobj->getCocosXrSwapchains();
-        ok &= nativevalue_to_se(result, s.rval(), nullptr /*ctx*/);
-        SE_PRECONDITION2(ok, false, "Error processing arguments");
-        SE_HOLD_RETURN_VALUE(result, s.thisObject(), s.rval());
-        return true;
-    }
-    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 0);
-    return false;
-}
-SE_BIND_FUNC(js_xr_XrEntry_getCocosXrSwapchains)
-
-static bool js_xr_XrEntry_getCurrentXrSwapchain(se::State& s) // NOLINT(readability-identifier-naming)
-{
-    auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntry>(s);
-    // SE_PRECONDITION2(cobj, false, "Invalid Native Object");
-    if (nullptr == cobj) return true;
-    const auto& args = s.args();
-    size_t argc = args.size();
-    CC_UNUSED bool ok = true;
-    if (argc == 0) {
-        const cc::xr::XRSwapchain result = cobj->getCurrentXrSwapchain();
-        ok &= nativevalue_to_se(result, s.rval(), nullptr /*ctx*/);
-        SE_PRECONDITION2(ok, false, "Error processing arguments");
-        SE_HOLD_RETURN_VALUE(result, s.thisObject(), s.rval());
-        return true;
-    }
-    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 0);
-    return false;
-}
-SE_BIND_FUNC(js_xr_XrEntry_getCurrentXrSwapchain)
 
 static bool js_xr_XrEntry_getEyeFov(se::State& s) // NOLINT(readability-identifier-naming)
 {
@@ -372,6 +325,26 @@ static bool js_xr_XrEntry_getXRStringConfig(se::State& s) // NOLINT(readability-
 }
 SE_BIND_FUNC(js_xr_XrEntry_getXRStringConfig)
 
+static bool js_xr_XrEntry_getXrFrameBuffer(se::State& s) // NOLINT(readability-identifier-naming)
+{
+    auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntry>(s);
+    // SE_PRECONDITION2(cobj, false, "Invalid Native Object");
+    if (nullptr == cobj) return true;
+    const auto& args = s.args();
+    size_t argc = args.size();
+    CC_UNUSED bool ok = true;
+    if (argc == 0) {
+        unsigned int result = cobj->getXrFrameBuffer();
+        ok &= nativevalue_to_se(result, s.rval(), nullptr /*ctx*/);
+        SE_PRECONDITION2(ok, false, "Error processing arguments");
+        SE_HOLD_RETURN_VALUE(result, s.thisObject(), s.rval());
+        return true;
+    }
+    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 0);
+    return false;
+}
+SE_BIND_FUNC(js_xr_XrEntry_getXrFrameBuffer)
+
 static bool js_xr_XrEntry_getXrViewCount(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntry>(s);
@@ -391,28 +364,6 @@ static bool js_xr_XrEntry_getXrViewCount(se::State& s) // NOLINT(readability-ide
     return false;
 }
 SE_BIND_FUNC(js_xr_XrEntry_getXrViewCount)
-
-static bool js_xr_XrEntry_initPlatformData(se::State& s) // NOLINT(readability-identifier-naming)
-{
-    auto* cobj = SE_THIS_OBJECT<cc::xr::XrEntry>(s);
-    // SE_PRECONDITION2(cobj, false, "Invalid Native Object");
-    if (nullptr == cobj) return true;
-    const auto& args = s.args();
-    size_t argc = args.size();
-    CC_UNUSED bool ok = true;
-    if (argc == 2) {
-        HolderType<void*, false> arg0 = {};
-        HolderType<void*, false> arg1 = {};
-        ok &= sevalue_to_native(args[0], &arg0, s.thisObject());
-        ok &= sevalue_to_native(args[1], &arg1, s.thisObject());
-        SE_PRECONDITION2(ok, false, "Error processing arguments");
-        cobj->initPlatformData(arg0.value(), arg1.value());
-        return true;
-    }
-    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 2);
-    return false;
-}
-SE_BIND_FUNC(js_xr_XrEntry_initPlatformData)
 
 static bool js_xr_XrEntry_initXrSwapchains(se::State& s) // NOLINT(readability-identifier-naming)
 {
@@ -845,14 +796,12 @@ bool js_register_xr_XrEntry(se::Object* obj) // NOLINT(readability-identifier-na
 #if CC_DEBUG
     cls->defineStaticProperty("isJSBClass", _SE(js_xr_getter_return_true), nullptr);
 #endif
-    cls->defineFunction("acquireXrSwapchain", _SE(js_xr_XrEntry_acquireXrSwapchain));
+    cls->defineFunction("attachXrFramebufferTexture2D", _SE(js_xr_XrEntry_attachXrFramebufferTexture2D));
     cls->defineFunction("computeViewProjection", _SE(js_xr_XrEntry_computeViewProjection));
     cls->defineFunction("createXrInstance", _SE(js_xr_XrEntry_createXrInstance));
     cls->defineFunction("destroyXrInstance", _SE(js_xr_XrEntry_destroyXrInstance));
     cls->defineFunction("frameEnd", _SE(js_xr_XrEntry_frameEnd));
     cls->defineFunction("frameStart", _SE(js_xr_XrEntry_frameStart));
-    cls->defineFunction("getCocosXrSwapchains", _SE(js_xr_XrEntry_getCocosXrSwapchains));
-    cls->defineFunction("getCurrentXrSwapchain", _SE(js_xr_XrEntry_getCurrentXrSwapchain));
     cls->defineFunction("getEyeFov", _SE(js_xr_XrEntry_getEyeFov));
     cls->defineFunction("getHMDViewPosition", _SE(js_xr_XrEntry_getHMDViewPosition));
     cls->defineFunction("getSwapchainImageIndex", _SE(js_xr_XrEntry_getSwapchainImageIndex));
@@ -861,8 +810,8 @@ bool js_register_xr_XrEntry(se::Object* obj) // NOLINT(readability-identifier-na
     cls->defineFunction("getXRIntConfig", _SE(js_xr_XrEntry_getXRIntConfig));
     cls->defineFunction("getXRPointerConfig", _SE(js_xr_XrEntry_getXRPointerConfig));
     cls->defineFunction("getXRStringConfig", _SE(js_xr_XrEntry_getXRStringConfig));
+    cls->defineFunction("getXrFrameBuffer", _SE(js_xr_XrEntry_getXrFrameBuffer));
     cls->defineFunction("getXrViewCount", _SE(js_xr_XrEntry_getXrViewCount));
-    cls->defineFunction("initPlatformData", _SE(js_xr_XrEntry_initPlatformData));
     cls->defineFunction("initXrSwapchains", _SE(js_xr_XrEntry_initXrSwapchains));
     cls->defineFunction("isCreatedXrInstance", _SE(js_xr_XrEntry_isCreatedXrInstance));
     cls->defineFunction("isRenderAllowable", _SE(js_xr_XrEntry_isRenderAllowable));

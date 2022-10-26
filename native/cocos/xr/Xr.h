@@ -30,6 +30,10 @@
 #include <vector>
 #include "XRCommon.h"
 
+#ifndef XR_USE_GRAPHICS_API_OPENGL_ES
+#define XR_USE_GRAPHICS_API_OPENGL_ES 1
+#endif
+
 #ifdef XR_USE_GRAPHICS_API_VULKAN
     #include "vulkan/vulkan_core.h"
 #endif
