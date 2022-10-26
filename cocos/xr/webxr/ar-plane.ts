@@ -21,12 +21,9 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
 */
-import { geometry, math, Quat, Vec2, Vec3 } from "../../core";
+import { Quat, Vec2, Vec3 } from "../../core";
+import { ARPose, ARTrackable} from "../ar/ar-define";
 
-interface ARPose {
-    position : math.Vec3;
-    rotation : math.Quat;
-}
 interface ARPlane {
     id : number;
     pose? : ARPose;
@@ -108,8 +105,7 @@ export class WebXRPlane {
     
     private planeId = 1;
     private allPlanes = new Map();
-    private _hitResult = null;
-
+    private _hitResult:any = null;
     public processPlanes(frame, immersiveRefSpace) {
         if (!this._enable || !frame) {
             return;
@@ -133,12 +129,14 @@ export class WebXRPlane {
             //XRPlane {planeSpace: XRSpace, polygon: Array(18), orientation: 'Horizontal', lastChangedTime: 16623.012}
             detectedPlanes.forEach(plane => {
                 const planePose = frame.getPose(plane.planeSpace, immersiveRefSpace);
-                if (planePose) {
+                const nPlanes = this._addedPlanes.length + this._updatedPlanes.length;
+                if (planePose && nPlanes < this._planesMaxCount) {
                     if (this.allPlanes.has(plane)) {
                         // may have been updated:
                         const planeContext = this.allPlanes.get(plane);
                         if (planeContext.timestamp < plane.lastChangedTime) {
                             // updated!
+                            //console.log("update ======>", plane, planePose);
                             planeContext.timestamp = plane.lastChangedTime;
                             planeContext.extent = this.calPolygonSize(plane.polygon);
                             planeContext.center = {
@@ -155,15 +153,8 @@ export class WebXRPlane {
                         }
                     } else {
                         // new plane
-                        if (this._addedPlanes.length >= this._planesMaxCount) {
-                            return;
-                        }
-                       
-                        // 3 --Horizontal 4 --Vertical 7 --All
-                        if (this._detectionMode === 3 && plane.orientation == 'Horizontal' || 
-                            this._detectionMode === 4 && plane.orientation == 'Vertical' || 
-                            this._detectionMode === 7) {
-                            console.log("==>", plane, planePose);
+                        if (this.checkPlaneOrientation(plane.orientation) ) {
+                            //console.log("add =======>", plane, planePose);
                             const planeContext: ARPlane = {
                                 id: this.planeId,
                                 type: plane.orientation == 'Horizontal' ? 3 : 4,
@@ -185,10 +176,20 @@ export class WebXRPlane {
         
                             this._addedPlanes.push(planeContext);
                         };
-                    } 
+                    }
                 }
             });
         }
+    }
+
+    private checkPlaneOrientation(orientation: string){
+        // 3 --Horizontal 4 --Vertical 7 --All
+        if (this._detectionMode === 3 && orientation == 'Horizontal' || 
+            this._detectionMode === 4 && orientation == 'Vertical' || 
+            this._detectionMode === 7) {
+            return true;
+        }
+        return false;
     }
 
     private calPolygonSize(polygon) {
@@ -401,62 +402,29 @@ export class WebXRPlane {
         return result;
     }
 
-    // raycast
-    tryHitTest(ray: geometry.Ray): boolean {
-        console.log("test hit ", ray);
-
-        const xrRay = new XRRay({ x: ray.o.x, y: ray.o.y, z: ray.o.z, w: 1.0 }, { x: ray.d.x, y: ray.d.y, z: ray.d.z, w: 0.0 });
-        // Perform a JS-side hit test against mathematical (infinte) planes:
-        const hitTestResults = this.hitTest(xrRay);
-        console.log("test hit results ...", hitTestResults);
-        // Filter results down to the ones that fall within plane's polygon:
-        const hitTestFiltered = this.filterHitTestResults(hitTestResults);
-
-        if (hitTestFiltered && hitTestFiltered.length > 0) {
-            this._hitResult = hitTestFiltered[0];
-            console.debug("hit result:", this._hitResult);
-            return true;
-        }
-        return false;
-    }
-
-    tryWebXRHitTest(transform: XRRigidTransform): boolean {
-        console.log("test hit ");
-        const ray = new XRRay(transform);
-        // Perform a JS-side hit test against mathematical (infinte) planes:
-        const hitTestResults = this.hitTest(ray);
-        console.log("test hit results ...", hitTestResults);
-        // Filter results down to the ones that fall within plane's polygon:
-        const hitTestFiltered = this.filterHitTestResults(hitTestResults);
-
-        if (hitTestFiltered && hitTestFiltered.length > 0) {
-            this._hitResult = hitTestFiltered[0];
-            console.debug("hit result:", this._hitResult);
-            return true;
-        }
-        return false;
-    }
-
-    getHitResult(): number[] {
-        if (this._hitResult) {
-            return [
-                this._hitResult.hitMatrix[12],
-                this._hitResult.hitMatrix[13],
-                this._hitResult.hitMatrix[14],
-                0,
-                0,
-                0,
-                0
-            ];
-        }
-        return [0,0,0,0,0,0,0];
-    }
-
-    getHitId(): number {
-        if (this._hitResult) {
-            return this._hitResult.id;
-        }
-        return 0;
+    tryHitTest(xrTransformation: XRRigidTransform): Promise<ARTrackable>  {
+        console.log("test hit ", xrTransformation);
+        return new Promise<ARTrackable>((resolve, reject) => {
+            const ray = new XRRay(xrTransformation);
+            // Perform a JS-side hit test against mathematical (infinte) planes:
+            const hitTestResults = this.hitTest(ray);
+            console.log("test hit results ...", hitTestResults);
+            // Filter results down to the ones that fall within plane's polygon:
+            const hitTestFiltered = this.filterHitTestResults(hitTestResults);
+    
+            if (hitTestFiltered && hitTestFiltered.length > 0) {
+                this._hitResult = hitTestFiltered[0];
+                resolve({
+                    id: this._hitResult.id, 
+                    pose: {
+                        position: new Vec3(this._hitResult.hitMatrix[12],this._hitResult.hitMatrix[13],this._hitResult.hitMatrix[14] ),
+                        rotation: new Quat(0,0,0,0)
+                    }
+                });
+            } else {
+                reject("not hit plane");
+            }
+        });
     }
 
     enablePlane(enable: boolean) {

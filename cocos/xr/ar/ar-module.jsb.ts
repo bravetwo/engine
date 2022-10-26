@@ -31,9 +31,10 @@ import { Quat, Vec3, Vec2, sys} from '../../core';
 import { Node } from '../../scene-graph';
 import { Camera } from '../../misc';
 import { SurfaceTransform } from '../../gfx/base/define';
-import { ARFeature, ARPose, FeatureType, ARFeatureData} from './ar-feature-base';
+import { ARFeature, FeatureType, ARFeatureData} from './ar-feature-base';
 import * as features from './ar-features';
 import { IARModule } from './ar-module-base';
+import { ARPose } from './ar-define';
 
 const orientationMap: Record<Orientation, SurfaceTransform> = {
     [Orientation.PORTRAIT]: SurfaceTransform.IDENTITY,

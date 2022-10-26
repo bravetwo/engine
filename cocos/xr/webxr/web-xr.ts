@@ -22,9 +22,12 @@
  THE SOFTWARE.
 */
 
-import { geometry, Vec2, Vec3 } from '../../core';
+import { Vec3 } from '../../core';
 import { Camera } from '../../render-scene/scene';
 import { WebXRPlane } from './ar-plane';
+import { WebXRAnchor } from './ar-anchor';
+import { webXRInputEvent, WebXRInputEventType } from './webxr-input-event';
+import { ARTrackable } from '../ar';
 
 const _xr = navigator.xr;
 declare type XRFrameFunction = (t: number, frame: any) => void;
@@ -41,14 +44,19 @@ export class WebXR {
     private _features = [];
     private _featureSupportMask = 0;
     private _immersiveRefSpace = null;
+    private _immersiveViewSpace = null;
+    private _hitTestSource = null;
     private _cameraPose: any = null;
     private _framebuffer = null;
     private _baseLayer: any = null;
     private _viewport: any = null;
     private _inputSource: any = null;
+    private _targetRayPose: any = null;
     private _gl: any = null;
     private _onXRFrame:XRFrameFunction | null = null;
+    
     private _plane: WebXRPlane | null = null;
+    private _anchor: WebXRAnchor | null = null;
     private _camera: Camera | null = null;
     get Camera (): Camera | null {
         return this._camera;
@@ -59,6 +67,8 @@ export class WebXR {
 
     constructor(mode: string, supportCallback: () => void, frameCallback: (t: number) => void) {
         this._mode = mode;
+        globalThis.__globalXR.xrENV = 2;
+        globalThis.__globalXR.xrType = 2;
         
         console.log(_xr);
         if (_xr) {
@@ -71,21 +81,21 @@ export class WebXR {
 
         this._onXRFrame = (t, frame) => {
             let session = frame.session;
-            let refSpace = this.getSessionReferenceSpace(frame.session);
-            //const baseLayer = session.renderState.baseLayer;
             this._baseLayer = session.renderState.baseLayer;
 
             this._plane && this._plane.processPlanes(frame, this._immersiveRefSpace);
+            this._anchor && this._anchor.processAnchors(frame, this._immersiveRefSpace);
 
             //window.cancelAnimationFrame();
             session.requestAnimationFrame(this._onXRFrame);
 
-            this._cameraPose = frame.getViewerPose(refSpace);
+            this._cameraPose = frame.getViewerPose(this._immersiveRefSpace);
             this._framebuffer = frame.session.renderState.baseLayer.framebuffer;
 
             if (this._inputSource) {
                 let targetRayPose = frame.getPose(this._inputSource.targetRaySpace, this._immersiveRefSpace);
                 if (targetRayPose !== null ) {
+                    this._targetRayPose = targetRayPose;
                     const eventInitDict = this.getTouchInit(targetRayPose.transform.position);
                     this._gl!.canvas.dispatchEvent(new TouchEvent("touchmove", eventInitDict));
 				}
@@ -128,7 +138,25 @@ export class WebXR {
 
                 this.attachController();
             });
-        });
+            // session.requestReferenceSpace('viewer').then((refSpace) => {
+            //     this._immersiveViewSpace = refSpace;
+            //     session.requestHitTestSource({ space: this._immersiveViewSpace }).then((hitTestSource) => {
+            //         this._hitTestSource = hitTestSource;
+            //     });
+            // });
+        }).catch((err) => {
+            console.warn("requestSession err:", err);
+            for (let index = 0; index < this._sessionInit.requiredFeatures.length; index++) {
+                const element = this._sessionInit.requiredFeatures[index];
+                if (element === 'plane-detection') {
+                    this._sessionInit.requiredFeatures.splice(index, 1);
+                    break;
+                }
+            }
+            this._sessionInit.requiredFeatures.push('anchors');
+            this._anchor = new WebXRAnchor();
+            this.requestSession();
+        });;
     };
 
     private attachController(){
@@ -179,7 +207,7 @@ export class WebXR {
         let outPos = new Vec3();
         this._camera!.worldToScreen(worldPosition, outPos);
         
-        console.log("screen pos:", outPos);
+        //console.log("screen pos:", outPos);
 
         let touchInitDict: TouchInit = {
             identifier: 0,
@@ -213,16 +241,19 @@ export class WebXR {
         if (!targetRayPose || !this._camera) {
             return;
         }
+        this._targetRayPose = targetRayPose;
         //console.log("targetRayPose =========", event.type, targetRayPose);
         const eventInitDict = this.getTouchInit(targetRayPose.transform.position);
   
         switch(event.type) {
-          case "selectstart":
+            case "selectstart":
                 this._gl!.canvas.dispatchEvent(new TouchEvent("touchstart", eventInitDict));
+                webXRInputEvent.dispatch(WebXRInputEventType.SELECT_START, {transform: this._targetRayPose.transform});
                 break;
-          case "selectend":
-                this._inputSource = null;
+            case "selectend":
                 this._gl!.canvas.dispatchEvent(new TouchEvent("touchend", eventInitDict));
+                webXRInputEvent.dispatch(WebXRInputEventType.SELECT_END, {transform: this._targetRayPose.transform});
+                this._inputSource = null;
                 break;
         }
     }
@@ -245,15 +276,8 @@ export class WebXR {
        
     };
 
-    private getSessionReferenceSpace(session) {
-        return this._immersiveRefSpace;
-    }
-
     getAPIState() {
-        if(this._session) {
-            return 3; 
-        }
-        return -1;
+        return this._session ? 3 : -1;
     };
 
     // camera & background
@@ -319,17 +343,28 @@ export class WebXR {
     };
 
     // raycast
-    tryHitTest(touchPoint: Vec2): boolean {
-        let outRay = new geometry.Ray();
-        this._camera!.screenPointToRay(touchPoint.x, touchPoint.y, outRay);
-        return this._plane!.tryHitTest(outRay);
+    async tryWebXRHitTest(): Promise<ARTrackable>  {
+        if (this._anchor) {
+            return this._anchor!.tryHitTest(this._targetRayPose.transform, this._inputSource.targetRaySpace);
+        }
+        if (this._plane) {
+            return this._plane!.tryHitTest(this._targetRayPose.transform);
+        }
+        return {id: 0};
     }
-    getHitResult(): number[] {
-        return this._plane!.getHitResult();
-    }
-    getHitId(): number {
-        return this._plane!.getHitId();
-    }
+
+    enableAnchor(enable: boolean) {
+        this._anchor!.enableAnchor(enable);
+    };
+    getAddedAnchorsInfo() {
+        return this._anchor!.getAddedAnchorsInfo();
+    };
+    getUpdatedAnchorInfo() {
+        return this._anchor!.getUpdatedAnchorInfo();
+    };
+    getRemovedAnchorsInfo() {
+        return this._anchor!.getRemovedAnchorsInfo();
+    };
 
     // plane detection
     enablePlane(enable: boolean) {

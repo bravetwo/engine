@@ -23,13 +23,14 @@
 */
 
 import { ccclass, property } from '../../../core/data/class-decorator'
-import { ARFeature, ARPose, ARTrackable, FeatureEvent, FeatureType, IFeatureData, ARFeatureData} from '../ar-feature-base';
+import { ARFeature, FeatureEvent, FeatureType, IFeatureData, ARFeatureData} from '../ar-feature-base';
 import { ccenum } from '../../../core/value-types/enum';
 import { Quat, Vec2, Vec3 } from '../../../core/math';
 import { Prefab } from '../../../asset/assets/prefab';
 import { resources } from '../../../asset/asset-manager/bundle';
 import { ARModuleX } from '../ar-module';
 import { sys } from '../../../core';
+import { ARPose, ARTrackable } from '../ar-define';
 
 export enum ARPlaneDetectionMode {
     Horizontal_Upward = 1 << 0,
@@ -139,7 +140,7 @@ export class ARFeaturePlaneDetection extends ARFeature {
         if(!this._enable) {
             return;
         }
-        if (sys.isBrowser) {
+        if (globalThis.__globalXR.xrENV === 2) {
             this.processWebXRChanges();        
         } else {
             this.processChanges();

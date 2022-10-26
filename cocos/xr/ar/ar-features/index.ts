@@ -27,3 +27,4 @@ export * from "./ar-feature-scene-mesh";
 export * from "./ar-feature-image";
 export * from "./ar-feature-object";
 export * from "./ar-feature-face";
+export * from "./ar-feature-anchor";
