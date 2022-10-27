@@ -25,7 +25,6 @@
 import { Vec3 } from '../../core';
 import { WebXRPlane } from './ar-plane';
 import { WebXRAnchor } from './ar-anchor';
-import { webXRInputEvent, WebXRInputEventType } from './webxr-input-event';
 import { ARTrackable } from '../ar';
 import { Camera } from '../../misc';
 

@@ -29,7 +29,7 @@ import { IARModule } from './ar-module-base';
 import { director } from '../../game/director';
 import { game } from '../../game';
 import { WebXR } from '../webxr/web-xr';
-import { ARPose, ARTrackable, IWebXRAnchor } from './ar-define';
+import { ARPose, ARTrackable } from './ar-define';
 import { Camera } from '../../misc';
 
 // WebXR

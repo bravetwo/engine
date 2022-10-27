@@ -1,4 +1,4 @@
-import { math } from "../../core";
+import { ccenum, math, Vec2 } from "../../core";
 //webxr interface begin
 // tslint:disable-next-line no-empty-interface
 interface XRSpace extends EventTarget {}
@@ -41,9 +41,21 @@ export interface ARTrackable {
     pose? : ARPose;
 }
 
-export interface IWebXRAnchor extends ARTrackable {
-    /**
-     *Remove this anchor from the scene
-    */
-    remove(): void;
+export interface ARAnchor extends ARTrackable {
+
+}
+
+export enum ARPlaneDetectionMode {
+    Horizontal_Upward = 1 << 0,
+    Horizontal_Downward = 1 << 1, 
+    Vertical = 1 << 2,
+    Horizontal = Horizontal_Upward | Horizontal_Downward,
+    All = Horizontal | Vertical
+}
+ccenum(ARPlaneDetectionMode)
+
+export interface ARPlane extends ARTrackable {
+    type : ARPlaneDetectionMode;
+    extent : Vec2;
+    center : ARPose;
 }

@@ -22,16 +22,12 @@
  THE SOFTWARE.
 */
 import { Quat, Vec2, Vec3 } from "../../core";
-import { ARPose, ARTrackable} from "../ar/ar-define";
+import { ARPlane, ARTrackable} from "../ar/ar-define";
 
-interface ARPlane {
-    id : number;
-    pose? : ARPose;
-    type : number;
-    extent : Vec2;
-    center : ARPose;
-    timestamp?: number;
-    plane_pose?: any;
+interface IWebXRPlane {
+    id: number;
+    planePose: XRPose;
+    xrPlane: XRPlane;
 }
 
 // Negates a vector. All componenes except |w| are negated.
@@ -104,8 +100,9 @@ export class WebXRPlane {
     private _updatedPlanes: any[] = [];
     
     private planeId = 1;
-    private allPlanes = new Map();
+    private _allPlanes = new Map();
     private _hitResult:any = null;
+
     public processPlanes(frame, immersiveRefSpace) {
         if (!this._enable || !frame) {
             return;
@@ -117,69 +114,65 @@ export class WebXRPlane {
         this._updatedPlanes.length = 0;
 
         if (detectedPlanes) {
-            this.allPlanes.forEach((planeContext, plane) => {
-                if (!detectedPlanes.has(plane)) {
+            this._allPlanes.forEach((planeContext, xrPlane) => {
+                if (!detectedPlanes.has(xrPlane)) {
                     // plane was removed
-                    this.allPlanes.delete(plane);
+                    this._allPlanes.delete(xrPlane);
                     console.debug("plane was removed, id=" + planeContext.id);
                     this._removedPlanes.push(planeContext);
                 }
             });
             
-            //XRPlane {planeSpace: XRSpace, polygon: Array(18), orientation: 'Horizontal', lastChangedTime: 16623.012}
-            detectedPlanes.forEach(plane => {
-                const planePose = frame.getPose(plane.planeSpace, immersiveRefSpace);
+            detectedPlanes.forEach(xrPlane => {
+                const planePose = frame.getPose(xrPlane.planeSpace, immersiveRefSpace);
                 const nPlanes = this._addedPlanes.length + this._updatedPlanes.length;
                 if (planePose && nPlanes < this._planesMaxCount) {
-                    if (this.allPlanes.has(plane)) {
+                    if (this._allPlanes.has(xrPlane)) {
                         // may have been updated:
-                        const planeContext = this.allPlanes.get(plane);
-                        if (planeContext.timestamp < plane.lastChangedTime) {
+                        const planeContext: IWebXRPlane = this._allPlanes.get(xrPlane);
+                        if (planeContext.xrPlane.lastChangedTime < xrPlane.lastChangedTime) {
                             // updated!
-                            //console.log("update ======>", plane, planePose);
-                            planeContext.timestamp = plane.lastChangedTime;
-                            planeContext.extent = this.calPolygonSize(plane.polygon);
-                            planeContext.center = {
-                                position: new Vec3(
-                                    planePose.transform.position.x,
-                                    planePose.transform.position.y,
-                                    planePose.transform.position.z
-                                ),
-                                rotation: planePose.transform.orientation
-                            };
-                            planeContext.plane_pose = planePose;
-    
-                            this._updatedPlanes.push(planeContext);
+                            planeContext.planePose = planePose;
+                            let plane: ARPlane = this._updatePlaneWithXRPlane(planeContext);
+                           
+                            this._updatedPlanes.push(plane);
                         }
                     } else {
                         // new plane
-                        if (this.checkPlaneOrientation(plane.orientation) ) {
-                            //console.log("add =======>", plane, planePose);
-                            const planeContext: ARPlane = {
+                        if (this.checkPlaneOrientation(xrPlane.orientation) ) {
+                            //console.log("add =======>", xrPlane, planePose);
+                            const planeContext: IWebXRPlane = {
                                 id: this.planeId,
-                                type: plane.orientation == 'Horizontal' ? 3 : 4,
-                                extent: this.calPolygonSize(plane.polygon),
-                                center: {
-                                    position: new Vec3(
-                                        planePose.transform.position.x,
-                                        planePose.transform.position.y,
-                                        planePose.transform.position.z
-                                    ),
-                                    rotation: planePose.transform.orientation
-                                },
-                                timestamp: plane.lastChangedTime,
-                                plane_pose: planePose
+                                planePose: planePose,
+                                xrPlane: xrPlane,
                             };
-                            this.allPlanes.set(plane, planeContext);
+                            this._allPlanes.set(xrPlane, planeContext);
+                            let plane: ARPlane = this._updatePlaneWithXRPlane(planeContext);
                             console.debug("New plane detected, id=" + this.planeId);
+                            this._addedPlanes.push(plane);
                             this.planeId++;
-        
-                            this._addedPlanes.push(planeContext);
                         };
                     }
                 }
             });
         }
+    }
+
+    private _updatePlaneWithXRPlane(planeContext: IWebXRPlane): ARPlane {
+        const plane: ARPlane = {
+            id: planeContext.id,
+            type: planeContext.xrPlane.orientation == 'Horizontal' ? 3 : 4,
+            extent: this.calPolygonSize(planeContext.xrPlane.polygon),
+            center: {
+                position: new Vec3(
+                    planeContext.planePose.transform.position.x,
+                    planeContext.planePose.transform.position.y,
+                    planeContext.planePose.transform.position.z
+                ),
+                rotation: planeContext.planePose.transform.orientation
+            },
+        };
+        return <ARPlane>plane;
     }
 
     private checkPlaneOrientation(orientation: string){
@@ -255,8 +248,8 @@ export class WebXRPlane {
 
     private hitTest(ray) {
         let hit_test_results: any[] = [];
-        this.allPlanes.forEach((planeContext, plane) => {
-            let result = this.hitTestPlane(ray, plane, planeContext.plane_pose);
+        this._allPlanes.forEach((planeContext, xrPlane) => {
+            let result = this.hitTestPlane(ray, xrPlane, planeContext.planePose);
             if(result) {
                 result["id"] = planeContext.id;
                 // throw away results with no intersection with plane

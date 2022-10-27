@@ -22,7 +22,7 @@
  THE SOFTWARE.
 */
 
-import { IWebXRAnchor} from "../ar/ar-define";
+import { ARAnchor } from "../ar/ar-define";
 
 interface IWebXRFutureAnchor {
     /**
@@ -40,7 +40,7 @@ interface IWebXRFutureAnchor {
     /**
      * A resolve function
      */
-    resolve: (xrAnchor: IWebXRAnchor) => void;
+    resolve: (xrAnchor: ARAnchor) => void;
     /**
      * A reject function
      */
@@ -51,6 +51,12 @@ interface IWebXRFutureAnchor {
     xrTransformation: XRRigidTransform;
 
     targetRaySpace: any
+}
+
+export interface IWebXRAnchor {
+    id: number;
+    anchorPose: XRPose;
+    remove(): void;
 }
 
 export class WebXRAnchor {
@@ -75,42 +81,47 @@ export class WebXRAnchor {
         this._updatedAnchors.length = 0;
 
         if (trackedAnchors) {
-            this.allAnchors.forEach((anchorContext, anchor) => {
-                if (!trackedAnchors.has(anchor)) {
+            this.allAnchors.forEach((anchorContext, xrAnchor) => {
+                if (!trackedAnchors.has(xrAnchor)) {
                     // anchor was removed
-                    this.allAnchors.delete(anchor);
+                    this.allAnchors.delete(xrAnchor);
                     console.debug("Anchor no longer tracked, id=" + anchorContext.id);
                     this._removedAnchors.push(anchorContext);
                 }
             });
             
-            trackedAnchors.forEach(anchor => {
-                const anchorPose = frame.getPose(anchor.anchorSpace, immersiveRefSpace);
+            trackedAnchors.forEach(xrAnchor => {
+                const anchorPose = frame.getPose(xrAnchor.anchorSpace, immersiveRefSpace);
                 //console.log("==>", anchor, anchorPose);
                 if (anchorPose) {
-                    if (this.allAnchors.has(anchor)) {
+                    if (this.allAnchors.has(xrAnchor)) {
                         // may have been updated:
-                        const anchorContext = this.allAnchors.get(anchor);
-                        anchorContext.pose = anchorPose.transform,
-                        this._updatedAnchors.push(anchorContext);
+                        const anchorContext: IWebXRAnchor = this.allAnchors.get(xrAnchor);
+                        anchorContext.anchorPose = anchorPose;
+
+                        let anchor = this._updateAnchorWithXRAnchor(anchorContext);
+                        this._updatedAnchors.push(anchor);
                     } else {
                         // new anchor created:
                         const anchorContext: IWebXRAnchor  = {
                             id: this.anchorId,
-                            pose: anchorPose.transform,
-                            remove: () => anchor.delete(),
+                            anchorPose: anchorPose,
+                            remove: () => xrAnchor.delete(),
                         }
-                        this.allAnchors.set(anchor, anchorContext);
+                        this.allAnchors.set(xrAnchor, anchorContext);
+                        let anchor = this._updateAnchorWithXRAnchor(anchorContext);
+                        this._addedAnchors.push(anchor);
                         console.debug("New anchor created, id=" + this.anchorId);
-                        this.anchorId ++;
 
                         // search for the future anchor promise that matches this
-                        const results = this._futureAnchors.filter((futureAnchor) => futureAnchor.nativeAnchor === anchor);
+                        const results = this._futureAnchors.filter((futureAnchor) => futureAnchor.nativeAnchor === xrAnchor);
                         const result = results[0];
                         if (result) {
-                            result.resolve(anchorContext);
+                            result.resolve(anchor);
                             result.resolved = true;
                         }
+
+                        this.anchorId ++;
                     }
                 }
             });
@@ -133,6 +144,15 @@ export class WebXRAnchor {
         });
     }
 
+    private _updateAnchorWithXRAnchor(anchorContext: IWebXRAnchor): ARAnchor {
+        const anchor: ARAnchor = {
+            id: anchorContext.id,
+            pose: anchorContext.anchorPose.transform,
+        };
+        return <ARAnchor>anchor;
+    }
+
+
     private async _createAnchorAtTransformation(xrTransformation: XRRigidTransform, frame, targetRaySpace) {
         if (frame.createAnchor) {
             try {
@@ -150,9 +170,9 @@ export class WebXRAnchor {
         }
     }
 
-    tryHitTest(xrTransformation: XRRigidTransform, targetRaySpace): Promise<IWebXRAnchor>  {
+    tryHitTest(xrTransformation: XRRigidTransform, targetRaySpace): Promise<ARAnchor>  {
         console.log("hit test", xrTransformation);
-        return new Promise<IWebXRAnchor>((resolve, reject) => {
+        return new Promise<ARAnchor>((resolve, reject) => {
             this._futureAnchors.push({
                 nativeAnchor: null,
                 resolved: false,

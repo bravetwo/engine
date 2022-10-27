@@ -23,13 +23,11 @@
 */
 
 import { ccclass } from '../../../core/data/class-decorator'
-import { ARTrackable } from '../ar-define';
+import { ARAnchor } from '../ar-define';
 import { ARFeature, ARFeatureData, FeatureEvent, FeatureType, IFeatureData} from '../ar-feature-base';
 import { ARModuleX } from '../ar-module';
 
-export interface ARAnchor extends ARTrackable {
 
-}
 
 @ccclass('cc.AnchorTrackingConfig')
 export class AnchorTrackingConfig extends ARFeatureData {

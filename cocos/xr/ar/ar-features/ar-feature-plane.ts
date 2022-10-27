@@ -30,22 +30,7 @@ import { Prefab } from '../../../asset/assets/prefab';
 import { resources } from '../../../asset/asset-manager/bundle';
 import { ARModuleX } from '../ar-module';
 import { sys } from '../../../core';
-import { ARPose, ARTrackable } from '../ar-define';
-
-export enum ARPlaneDetectionMode {
-    Horizontal_Upward = 1 << 0,
-    Horizontal_Downward = 1 << 1, 
-    Vertical = 1 << 2,
-    Horizontal = Horizontal_Upward | Horizontal_Downward,
-    All = Horizontal | Vertical
-}
-ccenum(ARPlaneDetectionMode)
-
-export interface ARPlane extends ARTrackable {
-    type : ARPlaneDetectionMode;
-    extent : Vec2;
-    center : ARPose;
-}
+import { ARPlane, ARPlaneDetectionMode, ARPose, ARTrackable } from '../ar-define';
 
 @ccclass('cc.PlaneDetectionConfig')
 export class PlaneDetectionConfig extends ARFeatureData {
