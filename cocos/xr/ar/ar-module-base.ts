@@ -41,6 +41,7 @@ export abstract class IARModule {
     getAddedPlanesInfo(): any[] {return [];};
     getUpdatedPlanesInfo(): any[] {return [];};
     getRemovedPlanesInfo(): any[] {return [];};
+    getPlanePolygon(planeId: number) : Array<Vec3> {return [];};
 
     enableImageTracking (enable : boolean) {};
     addImageToLib(name: string){};

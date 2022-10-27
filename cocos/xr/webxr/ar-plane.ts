@@ -155,7 +155,7 @@ export class WebXRPlane {
                     }
                 }
             });
-        }
+        } 
     }
 
     private _updatePlaneWithXRPlane(planeContext: IWebXRPlane): ARPlane {
@@ -184,14 +184,14 @@ export class WebXRPlane {
         }
         return false;
     }
-
+  
     private calPolygonSize(polygon) {
         let x: number[] = [];
         let z: number[] = [];
         for(let i = 0; i < polygon.length; ++i) {
-          const cur: Vec3 = polygon[i];
-          x.push(cur.x);  
-          z.push(cur.z);
+            const cur: Vec3 = polygon[i];
+            x.push(cur.x);  
+            z.push(cur.z);
         }
         x.sort((a, b)=>{return a - b});
         z.sort((a, b)=>{return a - b});
@@ -269,7 +269,7 @@ export class WebXRPlane {
         return hit_test_results_with_points;
     }
 
-    private hitTestPlane(ray, plane, plane_pose) {
+    private hitTestPlane(ray, xrPlane, plane_pose) {
         if(!plane_pose) {
             return null;
         }
@@ -287,11 +287,11 @@ export class WebXRPlane {
             // parallel planes
             if(numerator < 0.0001 && numerator > -0.0001) {
                 // contained in the plane
-                console.debug("Ray contained in the plane", plane);
-                return { plane : plane };
+                console.debug("Ray contained in the plane", xrPlane);
+                return { plane : xrPlane };
             } else {
                 // no hit
-                console.debug("No hit", plane);
+                console.debug("No hit", xrPlane);
                 return null;
             }
         } else {
@@ -299,7 +299,7 @@ export class WebXRPlane {
             const d =  numerator / denominator;
             if(d < 0) {
                 // no hit - plane-line intersection exists but not for half-line
-                console.debug("No hit", d, plane);
+                console.debug("No hit", d, xrPlane);
                 return null;
             } else {
                 // hit test point coordinates in frameOfReference
@@ -313,7 +313,7 @@ export class WebXRPlane {
                 let hitMatrix = this.calculateHitMatrix(ray_vector, plane_normal, point);      
                 return {
                     distance : d,
-                    plane : plane,
+                    plane : xrPlane,
                     ray : ray,
                     point : point,
                     point_on_plane : point_on_plane,
@@ -443,4 +443,17 @@ export class WebXRPlane {
     getRemovedPlanesInfo() {
         return this._removedPlanes;
     };
+
+    getPlanePolygon(planeId: number) : Array<Vec3>{
+        const polygon = new Array<Vec3>();
+        this._allPlanes.forEach((planeContext, xrPlane) => {
+            if (planeContext.id === planeId) {
+                let xrPolygon = xrPlane.polygon;
+                for(let i = 0; i < xrPolygon.length; ++i) {
+                    polygon.push(new Vec3(xrPolygon[i].x, xrPolygon[i].y, xrPolygon[i].z));
+                }
+            }
+        });
+        return polygon;
+    }
 };

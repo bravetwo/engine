@@ -384,7 +384,9 @@ export class WebXR {
     getRemovedPlanesInfo() {
         return this._plane!.getRemovedPlanesInfo();
     };
-    getAdded() {};
+    getPlanePolygon(planeId: number) : Array<Vec3>{
+        return this._plane!.getPlanePolygon(planeId);
+    }
 
     // scene mesh reruction
     enableSceneMesh(enable) {};

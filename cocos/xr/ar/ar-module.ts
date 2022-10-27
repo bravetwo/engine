@@ -270,7 +270,7 @@ export class ARModuleX extends IARModule {
     async tryWebXRHitTest(): Promise<ARTrackable>  {
         return this._webXR!.tryWebXRHitTest();
     }
-
+    
     enableAnchor(enable: boolean) {
         this._webXR!.enableAnchor(enable);
     }
@@ -308,4 +308,7 @@ export class ARModuleX extends IARModule {
         return this._webXR!.getRemovedPlanesInfo();
     }
 
+    getPlanePolygon(planeId: number) : Array<Vec3>{
+        return this._webXR!.getPlanePolygon(planeId);
+    }
 }
