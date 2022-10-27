@@ -42,3 +42,4 @@
 -dontwarn android.webkit.WebViewClient
 
 -keep public class com.qualcomm.** { *; }
+-keep public class hilt_aggregated_deps.** { *; }

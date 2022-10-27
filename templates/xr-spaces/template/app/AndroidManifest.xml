@@ -17,6 +17,8 @@
         <!-- Tell CocosNativeActivity the name of our .so -->
         <meta-data android:name="android.app.lib_name"
             android:value="cocos" />
+        <meta-data android:name='com.qualcomm.snapdragon.spaces.ALTERNATE_LAUNCH_ACTIVITY'
+            android:value="com.cocos.game.AppActivity" />
 
         <activity
             android:name="com.cocos.game.AppActivity"
@@ -36,6 +38,8 @@
             android:configChanges="orientation|keyboardHidden|screenSize|screenLayout"
             android:screenOrientation="behind"
             android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen" />
+
+    <meta-data android:name="com.qualcomm.snapdragon.spaces.SKIP_PERMISSION_CHECKS" android:value="true" />
     </application>
 
 </manifest>
