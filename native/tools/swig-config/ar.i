@@ -2,19 +2,20 @@
 // target_namespace means the name exported to JS, could be same as which in other modules
 // 'your_module' at the last means the suffix of binding function name, different modules should use unique name
 // Note: doesn't support number prefix
-%module(target_namespace="xr") xr
+%module(target_namespace="jsb") ar
 
 // Insert code at the beginning of generated header file (.h)
 %insert(header_file) %{
 #pragma once
 #include "bindings/jswrapper/SeApi.h"
 #include "bindings/manual/jsb_conversions.h"
-#include "xr/Xr.h"
+#include "xr/ar/IARAPI.h"
+#include "xr/ar/ARModule.h"
 %}
 
 // Insert code at the beginning of generated source file (.cpp)
 %{
-#include "bindings/auto/jsb_xr_auto.h"
+#include "bindings/auto/jsb_ar_auto.h"
 %}
 
 // ----- Ignore Section ------
@@ -30,18 +31,28 @@
 //  1. 'Ignore Section' should be placed before attribute definition and %import/%include
 //  2. namespace is needed
 //
-%ignore cc::xr::XrEntry::initPlatformData;
-%ignore cc::xr::XrEntry::initXrSession;
-%ignore cc::xr::XrEntry::getCocosXrSwapchains;
-%ignore cc::xr::XrEntry::getCurrentXrSwapchain;
-%ignore cc::xr::XrEntry::acquireXrSwapchain;
-%ignore cc::xr::XrEntry::setGamepadCallback;
-%ignore cc::xr::XrEntry::setHandleCallback;
-%ignore cc::xr::XrEntry::setHMDCallback;
-%ignore cc::xr::XrEntry::setXRConfigCallback;
-%ignore cc::xr::XrEntry::setXRConfig;
-%ignore cc::xr::XrEntry::getXRConfig;
-%ignore cc::xr::XrEntry::getXrPose;
+%ignore cc::ar::ARModule::getInfoLength;
+%ignore cc::ar::ARModule::getAnchorPose;
+%ignore cc::ar::ARModule::getHitResult;
+%ignore cc::ar::ARModule::getAddedPlanesInfo;
+%ignore cc::ar::ARModule::getRemovedPlanesInfo;
+%ignore cc::ar::ARModule::getUpdatedPlanesInfo;
+%ignore cc::ar::ARModule::getAddedSceneMesh;
+%ignore cc::ar::ARModule::getUpdatedSceneMesh;
+%ignore cc::ar::ARModule::getRemovedSceneMesh;
+%ignore cc::ar::ARModule::requireSceneMesh;
+%ignore cc::ar::ARModule::getSceneMeshVertices;
+%ignore cc::ar::ARModule::getSceneMeshTriangleIndices;
+%ignore cc::ar::ARModule::getAddedImagesInfo;
+%ignore cc::ar::ARModule::getUpdatedImagesInfo;
+%ignore cc::ar::ARModule::getRemovedImagesInfo;
+%ignore cc::ar::ARModule::getAddedObjectsInfo;
+%ignore cc::ar::ARModule::getUpdatedObjectsInfo;
+%ignore cc::ar::ARModule::getRemovedObjectsInfo;
+%ignore cc::ar::ARModule::getAddedFacesInfo;
+%ignore cc::ar::ARModule::getUpdatedFacesInfo;
+%ignore cc::ar::ARModule::getRemovedFacesInfo;
+%ignore cc::ar::ARModule::getFaceBlendShapesOf;
 
 // ----- Rename Section ------
 // Brief: Classes, methods or attributes needs to be renamed
@@ -90,8 +101,9 @@
 // Brief: Import header files which are depended by 'Include Section'
 // Note: 
 //   %import "your_header_file.h" will not generate code for that header file
-%import "platform/interfaces/modules/XRCommon.h"
+//
+%import "base/Macros.h"
 
 // ----- Include Section ------
 // Brief: Include header files in which classes and methods will be bound
-%include "xr/Xr.h"
+%include "xr/ar/ARModule.h"

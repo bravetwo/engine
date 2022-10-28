@@ -26,7 +26,7 @@
 #pragma once
 
 namespace se {
-    class Object;
+class Object;
 }
 
 bool register_all_ar_manual(se::Object* obj); // NOLINT(readability-identifier-naming)
