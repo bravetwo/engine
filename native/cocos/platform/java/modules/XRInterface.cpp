@@ -191,7 +191,7 @@ void XRInterface::dispatchGamepadEventInternal(const xr::XRControllerEvent &xrCo
         }
     }
 #endif
-    static_cast<AndroidPlatform *>(BasePlatform::getPlatform())->dispatchEvent(_controllerEvent);
+    events::Controller::broadcast(_controllerEvent);
     _controllerEvent.type = ControllerEvent::Type::UNKNOWN;
     _controllerEvent.controllerInfos.clear();
 }
@@ -327,7 +327,7 @@ void XRInterface::dispatchHandleEventInternal(const xr::XRControllerEvent &xrCon
             }
         }
 #endif
-        EventDispatcher::dispatchControllerEvent(_controllerEvent);
+        events::Controller::broadcast(_controllerEvent);
         _controllerEvent.type = ControllerEvent::Type::UNKNOWN;
         _controllerEvent.controllerInfos.clear();
     } else {
