@@ -30,7 +30,7 @@ import { resources } from '../../../asset/asset-manager/bundle';
 import { ARModuleX } from '../ar-module';
 import { sys } from '../../../core';
 import { ARPlane, ARPlaneDetectionMode, ARPose, ARTrackable } from '../ar-define';
-import { Prefab } from '../../../scene-graph';
+import { Prefab } from '../../../scene-graph/prefab';
 
 @ccclass('cc.PlaneDetectionConfig')
 export class PlaneDetectionConfig extends ARFeatureData {
