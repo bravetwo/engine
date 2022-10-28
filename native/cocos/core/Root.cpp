@@ -375,8 +375,8 @@ void Root::frameMoveBegin() {
     _cameraList.clear();
 }
 
-void Root::frameMoveProcess(bool isNeedUpdateScene, int32_t totalFrames, const ccstd::vector<IntrusivePtr<scene::RenderWindow>> &windows) {
-    for (const auto &window : windows) {
+void Root::frameMoveProcess(bool isNeedUpdateScene, int32_t totalFrames) {
+    for (const auto &window : _renderWindows) {
         window->extractRenderCameras(_cameraList);
     }
 
@@ -445,7 +445,7 @@ void Root::frameMove(float deltaTime, int32_t totalFrames) {
         doXRFrameMove(totalFrames);
     } else {
         frameMoveBegin();
-        frameMoveProcess(true, totalFrames, _renderWindows);
+        frameMoveProcess(true, totalFrames);
         frameMoveEnd();
     }
 }
@@ -565,17 +565,15 @@ void Root::doXRFrameMove(int32_t totalFrames) {
             //condition1: mainwindow has left camera && right camera,
             //but we only need left/right camera when in left/right eye loop
             //condition2: main camera draw twice
-            ccstd::vector<IntrusivePtr<scene::RenderWindow>> xrWindows;
             for (const auto &window : _renderWindows) {
                 if (window->getSwapchain()) {
                     // not rt
                     _xr->bindXREyeWithRenderWindow(window, static_cast<xr::XREye>(xrEye));
                 }
-                xrWindows.emplace_back(window);
             }
 
             bool isNeedUpdateScene = xrEye == static_cast<uint32_t>(xr::XREye::LEFT) || (xrEye == static_cast<uint32_t>(xr::XREye::RIGHT) && !isSceneUpdated);
-            frameMoveProcess(isNeedUpdateScene, totalFrames, xrWindows);
+            frameMoveProcess(isNeedUpdateScene, totalFrames);
             auto camIter = _cameraList.begin();
             while (camIter != _cameraList.end()) {
                 scene::Camera *cam = *camIter;
