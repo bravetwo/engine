@@ -149,6 +149,7 @@ namespace cc { namespace gfx {
 %attribute(cc::gfx::Texture, cc::gfx::Format, format, getFormat);
 %attribute(cc::gfx::Texture, uint32_t, size, getSize);
 %attribute(cc::gfx::Texture, ccstd::hash_t, hash, getHash);
+%attribute(cc::gfx::Texture, uint32_t, nativeTexturePtr, getNativeTexturePtr);
 
 // Queue
 %attribute(cc::gfx::Queue, cc::gfx::QueueType, type, getType);

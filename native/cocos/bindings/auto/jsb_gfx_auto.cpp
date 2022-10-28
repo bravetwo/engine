@@ -133,6 +133,9 @@
 #define cc_gfx_Texture_hash_get(self_) self_->getHash()
   
 
+#define cc_gfx_Texture_nativeTexturePtr_get(self_) self_->getNativeTexturePtr()
+  
+
 #define cc_gfx_Queue_type_get(self_) self_->getType()
   
 
@@ -27259,6 +27262,26 @@ static bool js_cc_gfx_Texture_hash_get(se::State& s)
 }
 SE_BIND_PROP_GET(js_cc_gfx_Texture_hash_get) 
 
+static bool js_cc_gfx_Texture_nativeTexturePtr_get(se::State& s)
+{
+    CC_UNUSED bool ok = true;
+    cc::gfx::Texture *arg1 = (cc::gfx::Texture *) NULL ;
+    uint32_t result;
+    
+    arg1 = SE_THIS_OBJECT<cc::gfx::Texture>(s);
+    SE_PRECONDITION2(arg1, false, "%s: Invalid Native Object", __FUNCTION__); 
+    result = cc_gfx_Texture_nativeTexturePtr_get(arg1);
+    // %typemap(out) SWIGTYPE
+    ok &= nativevalue_to_se(result, s.rval(), s.thisObject() /*ctx*/);
+    SE_PRECONDITION2(ok, false, "Texture_nativeTexturePtr_get, Error processing arguments");
+    SE_HOLD_RETURN_VALUE(result, s.thisObject(), s.rval());
+    
+    
+    
+    return true;
+}
+SE_BIND_PROP_GET(js_cc_gfx_Texture_nativeTexturePtr_get) 
+
 bool js_register_cc_gfx_Texture(se::Object* obj) {
     auto* cls = se::Class::create("Texture", obj, __jsb_cc_gfx_GFXObject_proto, nullptr); 
     
@@ -27269,6 +27292,7 @@ bool js_register_cc_gfx_Texture(se::Object* obj) {
     cls->defineProperty("format", _SE(js_cc_gfx_Texture_format_get), nullptr); 
     cls->defineProperty("size", _SE(js_cc_gfx_Texture_size_get), nullptr); 
     cls->defineProperty("hash", _SE(js_cc_gfx_Texture_hash_get), nullptr); 
+    cls->defineProperty("nativeTexturePtr", _SE(js_cc_gfx_Texture_nativeTexturePtr_get), nullptr); 
     
     cls->defineFunction("initialize", _SE(js_cc_gfx_Texture_initialize)); 
     cls->defineFunction("resize", _SE(js_cc_gfx_Texture_resize)); 
