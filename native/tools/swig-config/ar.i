@@ -16,6 +16,8 @@
 // Insert code at the beginning of generated source file (.cpp)
 %{
 #include "bindings/auto/jsb_ar_auto.h"
+
+using namespace cc::ar;
 %}
 
 // ----- Ignore Section ------

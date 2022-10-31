@@ -63,6 +63,8 @@
 
 #include "bindings/auto/jsb_ar_auto.h"
 
+using namespace cc::ar;
+
 
 
 se::Class* __jsb_cc_ar_ARModule_class = nullptr;
