@@ -30,6 +30,10 @@
 #include <vector>
 #include "XRCommon.h"
 
+#ifndef XR_USE_GRAPHICS_API_OPENGL_ES
+#define XR_USE_GRAPHICS_API_OPENGL_ES 1
+#endif
+
 #ifdef XR_USE_GRAPHICS_API_VULKAN
     #include "vulkan/vulkan_core.h"
 #endif
@@ -74,6 +78,8 @@ public:
 
 #ifdef XR_USE_GRAPHICS_API_OPENGL_ES
     virtual void initXrSession(PFNGLES3WLOADPROC gles3wLoadFuncProc, void *eglDisplay, void *eglConfig, void *eglDefaultContext) = 0;
+
+    virtual void setXrFrameBuffer(unsigned int fbo) = 0;
 
     virtual unsigned int getXrFrameBuffer() = 0;
 

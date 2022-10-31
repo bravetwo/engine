@@ -191,7 +191,7 @@ void XRInterface::dispatchGamepadEventInternal(const xr::XRControllerEvent &xrCo
         }
     }
 #endif
-    static_cast<AndroidPlatform *>(BasePlatform::getPlatform())->dispatchEvent(_controllerEvent);
+    events::Controller::broadcast(_controllerEvent);
     _controllerEvent.type = ControllerEvent::Type::UNKNOWN;
     _controllerEvent.controllerInfos.clear();
 }
@@ -327,7 +327,7 @@ void XRInterface::dispatchHandleEventInternal(const xr::XRControllerEvent &xrCon
             }
         }
 #endif
-        EventDispatcher::dispatchControllerEvent(_controllerEvent);
+        events::Controller::broadcast(_controllerEvent);
         _controllerEvent.type = ControllerEvent::Type::UNKNOWN;
         _controllerEvent.controllerInfos.clear();
     } else {
@@ -945,28 +945,30 @@ void XRInterface::loadAssetsImage(const std::string &imageInfo) {
     std::string imagePath = segments.at(1);
     float physicalSizeX = atof(segments.at(2).c_str());
     float physicalSizeY = atof(segments.at(3).c_str());
-    Image spaceTownImage;
-    bool res = spaceTownImage.initWithImageFile(imagePath);
+    Image *spaceTownImage = new Image();
+    spaceTownImage->addRef();
+    bool res = spaceTownImage->initWithImageFile(imagePath);
     if (!res) {
         CC_LOG_ERROR("[XRInterface] loadAssetsImage init failed, %s!!!", imageInfo.c_str());
         return;
     }
-    const uint32_t bufferSize = spaceTownImage.getWidth() * spaceTownImage.getHeight() * 3;
+    uint32_t imageWidth = spaceTownImage->getWidth();
+    uint32_t imageHeight = spaceTownImage->getHeight();
+    const uint32_t bufferSize = imageWidth * imageHeight * 3;
     auto *buffer = new uint8_t[bufferSize];
-    for (int j = 0; j < spaceTownImage.getHeight(); ++j) {
-        for (int i = 0; i < spaceTownImage.getWidth(); ++i) {
-            const int pixel = i + j * spaceTownImage.getWidth();
-            const int pixelFlip = i + (spaceTownImage.getHeight() - j - 1) * spaceTownImage.getWidth();
+    for (int j = 0; j < imageHeight; ++j) {
+        for (int i = 0; i < imageWidth; ++i) {
+            const int pixel = i + j * imageWidth;
+            const int pixelFlip = i + (imageHeight - j - 1) * imageWidth;
 
-            const uint8_t *originalPixel = &spaceTownImage.getData()[pixel * 4];
+            const uint8_t *originalPixel = &spaceTownImage->getData()[pixel * 4];
             uint8_t *convertedPixel = &buffer[pixelFlip * 3];
             convertedPixel[0] = originalPixel[0];
             convertedPixel[1] = originalPixel[1];
             convertedPixel[2] = originalPixel[2];
         }
     }
-    uint32_t imageWidth = spaceTownImage.getWidth();
-    uint32_t imageHeight = spaceTownImage.getHeight();
+    spaceTownImage->release();
 
     auto app = CC_CURRENT_APPLICATION();
     if (!app) {

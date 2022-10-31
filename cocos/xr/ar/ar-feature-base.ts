@@ -22,8 +22,7 @@
  THE SOFTWARE.
 */
 
-import { math } from '../../core';
-import { ccclass, property, type } from '../../core/data/class-decorator';
+import { ccclass, property } from '../../core/data/class-decorator';
 import { ARModuleX } from './ar-module';
 
 interface IFeatureEvent<T> {
@@ -46,16 +45,6 @@ export class FeatureEvent<T> implements IFeatureEvent<T> {
     }
 }
 
-export interface ARPose {
-    position : math.Vec3;
-    rotation : math.Quat;
-}
-
-export interface ARTrackable {
-    id : number;
-    pose? : ARPose;
-}
-
 export interface IFeature {
     name : string;
     enable : boolean;
@@ -71,11 +60,12 @@ export interface IFeatureData {
 
 export enum FeatureType {
     None = 0,
-    PlaneDetection = 1 << 0, 
-    SceneMesh = 1 << 1,
-    ImageTracking = 1 << 2,
-    ObjectTracking = 1 << 3,
-    FaceTracking = 1 << 4
+    Anchor = 1 << 0, 
+    PlaneDetection = 1 << 1, 
+    SceneMesh = 1 << 2,
+    ImageTracking = 1 << 3,
+    ObjectTracking = 1 << 4,
+    FaceTracking = 1 << 5
 }
 
 @ccclass('cc.ARFeatureData')

@@ -23,11 +23,11 @@
 */
 
 import { ccclass, property} from '../../../core/data/class-decorator'
-import { ARFeature, ARTrackable, FeatureEvent, FeatureType, IFeatureData, ARFeatureData} from '../ar-feature-base';
+import { ARFeature, FeatureEvent, FeatureType, IFeatureData, ARFeatureData} from '../ar-feature-base';
 import { ccenum } from '../../../core/value-types/enum';
 import { Quat, Vec3 } from '../../../core/math';
 import { ARModuleX } from '../ar-module';
-import { callFunc } from '../../../tween/actions/action-instant';
+import { ARTrackable } from '../ar-define';
 
 export enum ARFaceBlendShapeType {
     None,

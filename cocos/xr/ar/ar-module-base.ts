@@ -23,7 +23,6 @@
 */
 
 import { Vec2 } from "../../core";
-
 export abstract class IARModule {
     start (): void {};
     resume (): void {};
@@ -31,16 +30,18 @@ export abstract class IARModule {
     update (): void {};
 
     tryHitTest(touchPoint: Vec2): boolean {return false;} 
-    tryWebXRHitTest(transform): boolean {return false;}
     getHitResult(): number[] {return [];}
     getHitId(): number {return 0;}
     
+    enableAnchor(enable: boolean) {}
+
     enablePlane (enable : boolean) {};
     setPlaneDetectionMode (mode : number) {};
     setPlaneMaxTrackingNumber (count : number) {};
     getAddedPlanesInfo(): any[] {return [];};
     getUpdatedPlanesInfo(): any[] {return [];};
     getRemovedPlanesInfo(): any[] {return [];};
+    getPlanePolygon(planeId: number) : Array<Vec3> {return [];};
 
     enableImageTracking (enable : boolean) {};
     addImageToLib(name: string){};

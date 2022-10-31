@@ -23,9 +23,10 @@
 */
 
 import { ccclass } from '../../../core/data/class-decorator'
-import { ARFeature, ARPose, FeatureEvent, FeatureType, IFeatureData } from '../ar-feature-base';
+import { ARFeature, FeatureEvent, FeatureType, IFeatureData } from '../ar-feature-base';
 import { Quat, Vec3 } from '../../../core/math';
 import { ARModuleX } from '../ar-module';
+import { ARPose } from '../ar-define';
 
 export interface ARTrackingObject {
     anchorId : number;

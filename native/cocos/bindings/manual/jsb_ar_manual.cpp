@@ -25,11 +25,7 @@
 
 #include "jsb_ar_manual.h"
 
-#if USE_AR_MODULE > 0
-
-#include "bindings/manual/jsb_conversions.h"
 #include "bindings/manual/jsb_global.h"
-#include "ar/ARModule.h"
 #include "bindings/auto/jsb_ar_auto.h"
 
 static bool js_ar_ARModule_getAnchorPose(se::State& s)
@@ -522,5 +518,3 @@ bool register_all_ar_manual(se::Object *obj) {
 
     return true;
 }
-
-#endif //#if USE_AR_MODULE > 0

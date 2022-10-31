@@ -23,28 +23,14 @@
 */
 
 import { ccclass, property } from '../../../core/data/class-decorator'
-import { ARFeature, ARPose, ARTrackable, FeatureEvent, FeatureType, IFeatureData, ARFeatureData} from '../ar-feature-base';
+import { ARFeature, FeatureEvent, FeatureType, IFeatureData, ARFeatureData} from '../ar-feature-base';
 import { ccenum } from '../../../core/value-types/enum';
 import { Quat, Vec2, Vec3 } from '../../../core/math';
-import { Prefab } from '../../../asset/assets/prefab';
 import { resources } from '../../../asset/asset-manager/bundle';
 import { ARModuleX } from '../ar-module';
 import { sys } from '../../../core';
-
-export enum ARPlaneDetectionMode {
-    Horizontal_Upward = 1 << 0,
-    Horizontal_Downward = 1 << 1, 
-    Vertical = 1 << 2,
-    Horizontal = Horizontal_Upward | Horizontal_Downward,
-    All = Horizontal | Vertical
-}
-ccenum(ARPlaneDetectionMode)
-
-export interface ARPlane extends ARTrackable {
-    type : ARPlaneDetectionMode;
-    extent : Vec2;
-    center : ARPose;
-}
+import { ARPlane, ARPlaneDetectionMode, ARPose, ARTrackable } from '../ar-define';
+import { Prefab } from '../../../scene-graph/prefab';
 
 @ccclass('cc.PlaneDetectionConfig')
 export class PlaneDetectionConfig extends ARFeatureData {
@@ -139,7 +125,7 @@ export class ARFeaturePlaneDetection extends ARFeature {
         if(!this._enable) {
             return;
         }
-        if (sys.isBrowser) {
+        if (globalThis.__globalXR.xrEnv === 2) {
             this.processWebXRChanges();        
         } else {
             this.processChanges();

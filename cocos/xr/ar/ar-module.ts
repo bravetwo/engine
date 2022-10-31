@@ -22,14 +22,15 @@
  THE SOFTWARE.
 */
 
-import { ARFeature, ARPose, FeatureType, ARFeatureData } from './ar-feature-base';
+import { ARFeature, FeatureType, ARFeatureData } from './ar-feature-base';
 import * as features from './ar-features';
 import { Quat, Vec2, Vec3 } from '../../core/math';
 import { IARModule } from './ar-module-base';
 import { director } from '../../game/director';
 import { game } from '../../game';
-import { Camera } from '../../render-scene/scene';
 import { WebXR } from '../webxr/web-xr';
+import { ARPose, ARTrackable } from './ar-define';
+import { Camera } from '../../misc';
 
 // WebXR
 export class ARModuleX extends IARModule {
@@ -170,6 +171,7 @@ export class ARModuleX extends IARModule {
         const matArr = this._webXR?.getCameraProjectionMatrix();
         if(matArr) {
             const fov = 2 * Math.atan(1 / matArr[5]) * 180 / Math.PI;
+
             return fov;
         }
         return 45;
@@ -265,17 +267,22 @@ export class ARModuleX extends IARModule {
         }
     }
     //#endregion
-    tryHitTest(touchPoint: Vec2): boolean {
-        return this._webXR!.tryHitTest(touchPoint);
+    async tryWebXRHitTest(): Promise<ARTrackable>  {
+        return this._webXR!.tryWebXRHitTest();
     }
-
-    getHitResult(): number[] {
-        return this._webXR!.getHitResult();
+    
+    enableAnchor(enable: boolean) {
+        this._webXR!.enableAnchor(enable);
     }
-
-    getHitId(): number {
-        return this._webXR!.getHitId();
-    }
+    getAddedAnchorsInfo() {
+        return this._webXR!.getAddedAnchorsInfo();
+    };
+    getUpdatedAnchorInfo() {
+        return this._webXR!.getUpdatedAnchorInfo();
+    };
+    getRemovedAnchorsInfo() {
+        return this._webXR!.getRemovedAnchorsInfo();
+    };
 
     enablePlane(enable: boolean) {
         this._webXR!.enablePlane(enable);
@@ -301,4 +308,7 @@ export class ARModuleX extends IARModule {
         return this._webXR!.getRemovedPlanesInfo();
     }
 
+    getPlanePolygon(planeId: number) : Array<Vec3>{
+        return this._webXR!.getPlanePolygon(planeId);
+    }
 }

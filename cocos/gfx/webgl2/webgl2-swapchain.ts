@@ -25,7 +25,7 @@
 
 import { EDITOR } from 'internal:constants';
 import { systemInfo } from 'pal/system-info';
-import { warnID, warn, debug, macro } from '../../core';
+import { warnID, warn, debug, macro, settings, Settings } from '../../core';
 import { WebGL2StateCache } from './webgl2-state-cache';
 import { WebGL2Texture } from './webgl2-texture';
 import { Format, TextureInfo, TextureFlagBit, TextureType,
@@ -144,10 +144,11 @@ export function getContext (canvas: HTMLCanvasElement): WebGL2RenderingContext |
             xrCompatible: true
         };
 
-        if (globalThis.__globalXR.xrENV === 0) {
-            context = canvas.getContext('webgl2', webGLCtxAttribs);
-        } else {
+        const xrCompatible = settings.querySettings(Settings.Category.XR, 'xrCompatible') ?? false;
+        if (xrCompatible) {
             context = canvas.getContext('webgl2', glAttribs) as WebGL2RenderingContext;
+        } else {
+            context = canvas.getContext('webgl2', webGLCtxAttribs);
         }
     } catch (err) {
         return null;

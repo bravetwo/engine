@@ -9,6 +9,7 @@
 #pragma once
 #include "bindings/jswrapper/SeApi.h"
 #include "bindings/manual/jsb_conversions.h"
+#include "bindings/auto/jsb_gi_auto.h"
 #include "core/Root.h"
 #include "core/scene-graph/Node.h"
 #include "core/scene-graph/Scene.h"
@@ -67,6 +68,9 @@ using namespace cc;
 //
 %ignore cc::scene::Pass::getBlocks;
 %ignore cc::scene::Pass::initPassFromTarget;
+
+%ignore cc::Root::getEventProcessor;
+%ignore cc::Node::getEventProcessor;
 
 %ignore cc::Node::setRTSInternal;
 %ignore cc::Node::setRTS;
@@ -178,6 +182,8 @@ using namespace cc;
 
 %rename(_initLocalDescriptors) cc::scene::Model::initLocalDescriptors;
 %rename(_updateLocalDescriptors) cc::scene::Model::updateLocalDescriptors;
+%rename(_initLocalSHDescriptors) cc::scene::Model::initLocalSHDescriptors;
+%rename(_updateLocalSHDescriptors) cc::scene::Model::updateLocalSHDescriptors;
 
 %rename(_load) cc::Scene::load;
 %rename(_activate) cc::Scene::activate;
@@ -267,6 +273,7 @@ using namespace cc;
 %attribute_writeonly(cc::Node, Mat4&, matrix, setMatrix);
 %attribute(cc::Node, uint32_t, hasChangedFlags, getChangedFlags, setChangedFlags);
 %attribute(cc::Node, bool, _persistNode, isPersistNode, setPersistNode);
+%attribute(cc::Node, cc::MobilityMode, _mobility, getMobility, setMobility);
 
 %attribute(cc::scene::Ambient, cc::Vec4&, skyColor, getSkyColor, setSkyColor);
 %attribute(cc::scene::Ambient, float, skyIllum, getSkyIllum, setSkyIllum);
@@ -282,6 +289,7 @@ using namespace cc;
 %attribute(cc::scene::Light, cc::scene::LightType, type, getType, setType);
 %attribute(cc::scene::Light, ccstd::string&, name, getName, setName);
 %attribute(cc::scene::Light, cc::scene::RenderScene*, scene, getScene);
+%attribute(cc::scene::Light, uint32_t, visibility, getVisibility, setVisibility);
 
 %attribute(cc::scene::DirectionalLight, cc::Vec3&, direction, getDirection, setDirection);
 %attribute(cc::scene::DirectionalLight, float, illuminance, getIlluminance, setIlluminance);
@@ -417,6 +425,7 @@ using namespace cc;
 %attribute(cc::scene::Model, cc::scene::Model::Type, type, getType, setType);
 %attribute(cc::scene::Model, bool, isDynamicBatching, isDynamicBatching, setDynamicBatching);
 %attribute(cc::scene::Model, uint32_t, priority, getPriority, setPriority);
+%attribute(cc::scene::Model, bool, useLightProbe, getUseLightProbe, setUseLightProbe);
 
 %attribute(cc::scene::SubModel, std::shared_ptr<ccstd::vector<cc::IntrusivePtr<cc::scene::Pass>>> &, passes, getPasses, setPasses);
 %attribute(cc::scene::SubModel, ccstd::vector<cc::IntrusivePtr<cc::gfx::Shader>> &, shaders, getShaders, setShaders);
@@ -509,6 +518,8 @@ using namespace cc;
 %import "math/Mat3.h"
 %import "math/Mat4.h"
 %import "math/Quaternion.h"
+
+%import "core/event/Event.h"
 
 // %import "renderer/gfx-base/GFXDef-common.h"
 %import "core/data/Object.h"

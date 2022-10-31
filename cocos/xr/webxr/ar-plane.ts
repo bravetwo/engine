@@ -21,20 +21,13 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
 */
-import { geometry, math, Quat, Vec2, Vec3 } from "../../core";
+import { Quat, Vec2, Vec3 } from "../../core";
+import { ARPlane, ARTrackable} from "../ar/ar-define";
 
-interface ARPose {
-    position : math.Vec3;
-    rotation : math.Quat;
-}
-interface ARPlane {
-    id : number;
-    pose? : ARPose;
-    type : number;
-    extent : Vec2;
-    center : ARPose;
-    timestamp?: number;
-    plane_pose?: any;
+interface IWebXRPlane {
+    id: number;
+    planePose: XRPose;
+    xrPlane: XRPlane;
 }
 
 // Negates a vector. All componenes except |w| are negated.
@@ -107,8 +100,8 @@ export class WebXRPlane {
     private _updatedPlanes: any[] = [];
     
     private planeId = 1;
-    private allPlanes = new Map();
-    private _hitResult = null;
+    private _allPlanes = new Map();
+    private _hitResult:any = null;
 
     public processPlanes(frame, immersiveRefSpace) {
         if (!this._enable || !frame) {
@@ -121,83 +114,84 @@ export class WebXRPlane {
         this._updatedPlanes.length = 0;
 
         if (detectedPlanes) {
-            this.allPlanes.forEach((planeContext, plane) => {
-                if (!detectedPlanes.has(plane)) {
+            this._allPlanes.forEach((planeContext, xrPlane) => {
+                if (!detectedPlanes.has(xrPlane)) {
                     // plane was removed
-                    this.allPlanes.delete(plane);
+                    this._allPlanes.delete(xrPlane);
                     console.debug("plane was removed, id=" + planeContext.id);
                     this._removedPlanes.push(planeContext);
                 }
             });
             
-            //XRPlane {planeSpace: XRSpace, polygon: Array(18), orientation: 'Horizontal', lastChangedTime: 16623.012}
-            detectedPlanes.forEach(plane => {
-                const planePose = frame.getPose(plane.planeSpace, immersiveRefSpace);
-                if (planePose) {
-                    if (this.allPlanes.has(plane)) {
+            detectedPlanes.forEach(xrPlane => {
+                const planePose = frame.getPose(xrPlane.planeSpace, immersiveRefSpace);
+                const nPlanes = this._addedPlanes.length + this._updatedPlanes.length;
+                if (planePose && nPlanes < this._planesMaxCount) {
+                    if (this._allPlanes.has(xrPlane)) {
                         // may have been updated:
-                        const planeContext = this.allPlanes.get(plane);
-                        if (planeContext.timestamp < plane.lastChangedTime) {
+                        const planeContext: IWebXRPlane = this._allPlanes.get(xrPlane);
+                        if (planeContext.xrPlane.lastChangedTime < xrPlane.lastChangedTime) {
                             // updated!
-                            planeContext.timestamp = plane.lastChangedTime;
-                            planeContext.extent = this.calPolygonSize(plane.polygon);
-                            planeContext.center = {
-                                position: new Vec3(
-                                    planePose.transform.position.x,
-                                    planePose.transform.position.y,
-                                    planePose.transform.position.z
-                                ),
-                                rotation: planePose.transform.orientation
-                            };
-                            planeContext.plane_pose = planePose;
-    
-                            this._updatedPlanes.push(planeContext);
+                            planeContext.planePose = planePose;
+                            let plane: ARPlane = this._updatePlaneWithXRPlane(planeContext);
+                           
+                            this._updatedPlanes.push(plane);
                         }
                     } else {
                         // new plane
-                        if (this._addedPlanes.length >= this._planesMaxCount) {
-                            return;
-                        }
-                       
-                        // 3 --Horizontal 4 --Vertical 7 --All
-                        if (this._detectionMode === 3 && plane.orientation == 'Horizontal' || 
-                            this._detectionMode === 4 && plane.orientation == 'Vertical' || 
-                            this._detectionMode === 7) {
-                            console.log("==>", plane, planePose);
-                            const planeContext: ARPlane = {
+                        if (this.checkPlaneOrientation(xrPlane.orientation) ) {
+                            //console.log("add =======>", xrPlane, planePose);
+                            const planeContext: IWebXRPlane = {
                                 id: this.planeId,
-                                type: plane.orientation == 'Horizontal' ? 3 : 4,
-                                extent: this.calPolygonSize(plane.polygon),
-                                center: {
-                                    position: new Vec3(
-                                        planePose.transform.position.x,
-                                        planePose.transform.position.y,
-                                        planePose.transform.position.z
-                                    ),
-                                    rotation: planePose.transform.orientation
-                                },
-                                timestamp: plane.lastChangedTime,
-                                plane_pose: planePose
+                                planePose: planePose,
+                                xrPlane: xrPlane,
                             };
-                            this.allPlanes.set(plane, planeContext);
+                            this._allPlanes.set(xrPlane, planeContext);
+                            let plane: ARPlane = this._updatePlaneWithXRPlane(planeContext);
                             console.debug("New plane detected, id=" + this.planeId);
+                            this._addedPlanes.push(plane);
                             this.planeId++;
-        
-                            this._addedPlanes.push(planeContext);
                         };
-                    } 
+                    }
                 }
             });
-        }
+        } 
     }
 
+    private _updatePlaneWithXRPlane(planeContext: IWebXRPlane): ARPlane {
+        const plane: ARPlane = {
+            id: planeContext.id,
+            type: planeContext.xrPlane.orientation == 'Horizontal' ? 3 : 4,
+            extent: this.calPolygonSize(planeContext.xrPlane.polygon),
+            center: {
+                position: new Vec3(
+                    planeContext.planePose.transform.position.x,
+                    planeContext.planePose.transform.position.y,
+                    planeContext.planePose.transform.position.z
+                ),
+                rotation: planeContext.planePose.transform.orientation
+            },
+        };
+        return <ARPlane>plane;
+    }
+
+    private checkPlaneOrientation(orientation: string){
+        // 3 --Horizontal 4 --Vertical 7 --All
+        if (this._detectionMode === 3 && orientation == 'Horizontal' || 
+            this._detectionMode === 4 && orientation == 'Vertical' || 
+            this._detectionMode === 7) {
+            return true;
+        }
+        return false;
+    }
+  
     private calPolygonSize(polygon) {
         let x: number[] = [];
         let z: number[] = [];
         for(let i = 0; i < polygon.length; ++i) {
-          const cur: Vec3 = polygon[i];
-          x.push(cur.x);  
-          z.push(cur.z);
+            const cur: Vec3 = polygon[i];
+            x.push(cur.x);  
+            z.push(cur.z);
         }
         x.sort((a, b)=>{return a - b});
         z.sort((a, b)=>{return a - b});
@@ -254,8 +248,8 @@ export class WebXRPlane {
 
     private hitTest(ray) {
         let hit_test_results: any[] = [];
-        this.allPlanes.forEach((planeContext, plane) => {
-            let result = this.hitTestPlane(ray, plane, planeContext.plane_pose);
+        this._allPlanes.forEach((planeContext, xrPlane) => {
+            let result = this.hitTestPlane(ray, xrPlane, planeContext.planePose);
             if(result) {
                 result["id"] = planeContext.id;
                 // throw away results with no intersection with plane
@@ -275,7 +269,7 @@ export class WebXRPlane {
         return hit_test_results_with_points;
     }
 
-    private hitTestPlane(ray, plane, plane_pose) {
+    private hitTestPlane(ray, xrPlane, plane_pose) {
         if(!plane_pose) {
             return null;
         }
@@ -293,11 +287,11 @@ export class WebXRPlane {
             // parallel planes
             if(numerator < 0.0001 && numerator > -0.0001) {
                 // contained in the plane
-                console.debug("Ray contained in the plane", plane);
-                return { plane : plane };
+                console.debug("Ray contained in the plane", xrPlane);
+                return { plane : xrPlane };
             } else {
                 // no hit
-                console.debug("No hit", plane);
+                console.debug("No hit", xrPlane);
                 return null;
             }
         } else {
@@ -305,7 +299,7 @@ export class WebXRPlane {
             const d =  numerator / denominator;
             if(d < 0) {
                 // no hit - plane-line intersection exists but not for half-line
-                console.debug("No hit", d, plane);
+                console.debug("No hit", d, xrPlane);
                 return null;
             } else {
                 // hit test point coordinates in frameOfReference
@@ -319,7 +313,7 @@ export class WebXRPlane {
                 let hitMatrix = this.calculateHitMatrix(ray_vector, plane_normal, point);      
                 return {
                     distance : d,
-                    plane : plane,
+                    plane : xrPlane,
                     ray : ray,
                     point : point,
                     point_on_plane : point_on_plane,
@@ -401,62 +395,29 @@ export class WebXRPlane {
         return result;
     }
 
-    // raycast
-    tryHitTest(ray: geometry.Ray): boolean {
-        console.log("test hit ", ray);
-
-        const xrRay = new XRRay({ x: ray.o.x, y: ray.o.y, z: ray.o.z, w: 1.0 }, { x: ray.d.x, y: ray.d.y, z: ray.d.z, w: 0.0 });
-        // Perform a JS-side hit test against mathematical (infinte) planes:
-        const hitTestResults = this.hitTest(xrRay);
-        console.log("test hit results ...", hitTestResults);
-        // Filter results down to the ones that fall within plane's polygon:
-        const hitTestFiltered = this.filterHitTestResults(hitTestResults);
-
-        if (hitTestFiltered && hitTestFiltered.length > 0) {
-            this._hitResult = hitTestFiltered[0];
-            console.debug("hit result:", this._hitResult);
-            return true;
-        }
-        return false;
-    }
-
-    tryWebXRHitTest(transform: XRRigidTransform): boolean {
-        console.log("test hit ");
-        const ray = new XRRay(transform);
-        // Perform a JS-side hit test against mathematical (infinte) planes:
-        const hitTestResults = this.hitTest(ray);
-        console.log("test hit results ...", hitTestResults);
-        // Filter results down to the ones that fall within plane's polygon:
-        const hitTestFiltered = this.filterHitTestResults(hitTestResults);
-
-        if (hitTestFiltered && hitTestFiltered.length > 0) {
-            this._hitResult = hitTestFiltered[0];
-            console.debug("hit result:", this._hitResult);
-            return true;
-        }
-        return false;
-    }
-
-    getHitResult(): number[] {
-        if (this._hitResult) {
-            return [
-                this._hitResult.hitMatrix[12],
-                this._hitResult.hitMatrix[13],
-                this._hitResult.hitMatrix[14],
-                0,
-                0,
-                0,
-                0
-            ];
-        }
-        return [0,0,0,0,0,0,0];
-    }
-
-    getHitId(): number {
-        if (this._hitResult) {
-            return this._hitResult.id;
-        }
-        return 0;
+    tryHitTest(xrTransformation: XRRigidTransform): Promise<ARTrackable>  {
+        console.log("test hit ", xrTransformation);
+        return new Promise<ARTrackable>((resolve, reject) => {
+            const ray = new XRRay(xrTransformation);
+            // Perform a JS-side hit test against mathematical (infinte) planes:
+            const hitTestResults = this.hitTest(ray);
+            console.log("test hit results ...", hitTestResults);
+            // Filter results down to the ones that fall within plane's polygon:
+            const hitTestFiltered = this.filterHitTestResults(hitTestResults);
+    
+            if (hitTestFiltered && hitTestFiltered.length > 0) {
+                this._hitResult = hitTestFiltered[0];
+                resolve({
+                    id: this._hitResult.id, 
+                    pose: {
+                        position: new Vec3(this._hitResult.hitMatrix[12],this._hitResult.hitMatrix[13],this._hitResult.hitMatrix[14] ),
+                        rotation: new Quat(0,0,0,0)
+                    }
+                });
+            } else {
+                reject("not hit plane");
+            }
+        });
     }
 
     enablePlane(enable: boolean) {
@@ -482,4 +443,17 @@ export class WebXRPlane {
     getRemovedPlanesInfo() {
         return this._removedPlanes;
     };
+
+    getPlanePolygon(planeId: number) : Array<Vec3>{
+        const polygon = new Array<Vec3>();
+        this._allPlanes.forEach((planeContext, xrPlane) => {
+            if (planeContext.id === planeId) {
+                let xrPolygon = xrPlane.polygon;
+                for(let i = 0; i < xrPolygon.length; ++i) {
+                    polygon.push(new Vec3(xrPolygon[i].x, xrPolygon[i].y, xrPolygon[i].z));
+                }
+            }
+        });
+        return polygon;
+    }
 };
