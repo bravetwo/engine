@@ -155,6 +155,7 @@ public class CocosXRVideoManager {
 
     HashMap<String, CocosXRVideoPlayer> xrVideoPlayerHashMap = new HashMap<>();
     CocosXRVideoGLThread videoGLThread = null;
+    boolean isPaused = false;
 
     public void onCreate(Activity activity) {
         activityWeakReference = new WeakReference<>(activity);
@@ -162,6 +163,10 @@ public class CocosXRVideoManager {
             JsbBridgeWrapper.getInstance().addScriptEventListener(XR_VIDEO_PLAYER_EVENT_NAME + i, new JsbBridgeWrapper.OnScriptEventListener() {
                 @Override
                 public void onScriptEvent(String eventData) {
+                    if(isPaused) {
+                        Log.e(TAG, "onScriptEvent failed, because is paused !!!");
+                        return;
+                    }
                     processVideoEvent(eventData);
                 }
             });
@@ -169,11 +174,26 @@ public class CocosXRVideoManager {
     }
 
     public void onResume() {
-
+        Log.d(TAG, "onResume");
+        isPaused = false;
+        if(videoGLThread != null) {
+            videoGLThread.onResume();
+        }
     }
 
     public void onPause() {
+        Log.d(TAG, "onPause");
+        isPaused = true;
+        if(videoGLThread != null) {
+            videoGLThread.onPause();
+        }
 
+        Set<Map.Entry<String, CocosXRVideoPlayer>> entrySets = xrVideoPlayerHashMap.entrySet();
+        for (Map.Entry<String, CocosXRVideoPlayer> entrySet : entrySets) {
+            if(entrySet.getValue() != null) {
+                entrySet.getValue().pause();
+            }
+        }
     }
 
     public void sendVideoEvent(VideoEventData videoEventData, String... eventData) {
@@ -189,6 +209,10 @@ public class CocosXRVideoManager {
         }
 
         if(videoGLThread == null) return;
+        if(isPaused) {
+            Log.e(TAG, "sendVideoEvent failed, because is paused !!!");
+            return;
+        }
         JsbBridgeWrapper.getInstance().dispatchEventToScript(eventName, data.toString());
     }
 
