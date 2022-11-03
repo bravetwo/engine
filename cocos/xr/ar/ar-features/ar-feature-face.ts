@@ -27,7 +27,7 @@ import { ARFeature, FeatureEvent, FeatureType, IFeatureData, ARFeatureData} from
 import { ccenum } from '../../../core/value-types/enum';
 import { Quat, Vec3 } from '../../../core/math';
 import { ARModuleX } from '../ar-module';
-import { ARTrackable } from '../ar-define';
+import { ARAnchor } from '../ar-define';
 
 export enum ARFaceBlendShapeType {
     None,
@@ -98,7 +98,7 @@ export interface ARFaceBlendShape {
     value : number;
 }
 
-export interface ARFace extends ARTrackable {
+export interface ARFace extends ARAnchor {
     //vertices : number[];
     //indices : number[];
     blendShapes : ARFaceBlendShape[];

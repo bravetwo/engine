@@ -29,7 +29,7 @@ import { IARModule } from './ar-module-base';
 import { director } from '../../game/director';
 import { game } from '../../game';
 import { WebXR } from '../webxr/web-xr';
-import { ARPose, ARTrackable } from './ar-define';
+import { ARAnchor, ARPose } from './ar-define';
 import { Camera } from '../../misc';
 
 // WebXR
@@ -267,7 +267,7 @@ export class ARModuleX extends IARModule {
         }
     }
     //#endregion
-    async tryWebXRHitTest(): Promise<ARTrackable>  {
+    async tryWebXRHitTest(): Promise<ARAnchor>  {
         return this._webXR!.tryWebXRHitTest();
     }
     

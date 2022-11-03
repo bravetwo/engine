@@ -29,9 +29,9 @@ import { Material } from '../../../asset/assets/material';
 import { Quat, Vec3, Vec4 } from '../../../core/math';
 import { resources } from '../../../asset/asset-manager/bundle';
 import { ARModuleX } from '../ar-module';
-import { ARTrackable } from '../ar-define';
+import { ARAnchor } from '../ar-define';
 
-export interface ARMesh extends ARTrackable {
+export interface ARMesh extends ARAnchor {
     vertices : number[];
     indices : number[];
     useMaterial : Material;

@@ -36,13 +36,9 @@ export interface ARPose {
     rotation : math.Quat;
 }
 
-export interface ARTrackable {
+export interface ARAnchor {
     id : number;
     pose? : ARPose;
-}
-
-export interface ARAnchor extends ARTrackable {
-
 }
 
 export enum ARPlaneDetectionMode {
@@ -54,7 +50,7 @@ export enum ARPlaneDetectionMode {
 }
 ccenum(ARPlaneDetectionMode)
 
-export interface ARPlane extends ARTrackable {
+export interface ARPlane extends ARAnchor {
     type : ARPlaneDetectionMode;
     extent : Vec2;
     center : ARPose;

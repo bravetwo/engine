@@ -22,7 +22,7 @@
  THE SOFTWARE.
 */
 import { Quat, Vec2, Vec3 } from "../../core";
-import { ARPlane, ARTrackable} from "../ar/ar-define";
+import { ARAnchor, ARPlane} from "../ar/ar-define";
 
 interface IWebXRPlane {
     id: number;
@@ -395,9 +395,9 @@ export class WebXRPlane {
         return result;
     }
 
-    tryHitTest(xrTransformation: XRRigidTransform): Promise<ARTrackable>  {
+    tryHitTest(xrTransformation: XRRigidTransform): Promise<ARAnchor>  {
         console.log("test hit ", xrTransformation);
-        return new Promise<ARTrackable>((resolve, reject) => {
+        return new Promise<ARAnchor>((resolve, reject) => {
             const ray = new XRRay(xrTransformation);
             // Perform a JS-side hit test against mathematical (infinte) planes:
             const hitTestResults = this.hitTest(ray);
