@@ -23,26 +23,22 @@
  THE SOFTWARE.
  */
 
-import { Pool } from './core/memop';
+import { Pool, cclegacy, warnID, settings, Settings, macro, sys } from './core';
 import { RenderPipeline, createDefaultPipeline, DeferredPipeline } from './rendering';
 import { DebugView } from './rendering/debug-view';
-import { Camera, Light, Model } from './render-scene/scene';
+import { Camera, Light, Model, TrackingType, CameraType } from './render-scene/scene';
 import type { DataPoolManager } from './3d/skeletal-animation/data-pool-manager';
 import { LightType } from './render-scene/scene/light';
 import { IRenderSceneInfo, RenderScene } from './render-scene/core/render-scene';
 import { DirectionalLight } from './render-scene/scene/directional-light';
 import { SphereLight } from './render-scene/scene/sphere-light';
 import { SpotLight } from './render-scene/scene/spot-light';
-import { legacyCC } from './core/global-exports';
 import { RenderWindow, IRenderWindowInfo } from './render-scene/core/render-window';
 import { ColorAttachment, DepthStencilAttachment, RenderPassInfo, StoreOp, Device, Swapchain, Feature, deviceManager } from './gfx';
-import { warnID } from './core/platform/debug';
 import { Pipeline, PipelineRuntime } from './rendering/custom/pipeline';
 import { Batcher2D } from './2d/renderer/batcher-2d';
 import { IPipelineEvent } from './rendering/pipeline-event';
-import { settings, Settings } from './core/settings';
-import { localDescriptorSetLayout_ResizeMaxJoints } from './rendering/define';
-import { macro } from './core/platform/macro';
+import { localDescriptorSetLayout_ResizeMaxJoints, UBOCamera, UBOGlobal, UBOLocal, UBOShadow } from './rendering/define';
 
 /**
  * @en Initialization information for the Root
@@ -119,7 +115,7 @@ export class Root {
      * 启用自定义渲染管线
      */
     public get usesCustomPipeline (): boolean {
-        return this._usesCustomPipeline && macro.CUSTOM_PIPELINE_NAME !== '';
+        return this._usesCustomPipeline;
     }
 
     /**
@@ -282,7 +278,7 @@ export class Root {
      */
     constructor (device: Device) {
         this._device = device;
-        this._dataPoolMgr = legacyCC.internal.DataPoolManager && new legacyCC.internal.DataPoolManager(device) as DataPoolManager;
+        this._dataPoolMgr = cclegacy.internal.DataPoolManager && new cclegacy.internal.DataPoolManager(device) as DataPoolManager;
 
         RenderScene.registerCreateFunc(this);
         RenderWindow.registerCreateFunc(this);
@@ -349,6 +345,11 @@ export class Root {
      * @param windowId The system window ID, optional for now.
      */
     public resize (width: number, height: number, windowId?: number) {
+        if (sys.isXR) {
+            // xr platform, window's width and height should not change by device
+            return;
+        }
+
         for (const window of this._windows) {
             if (window.swapchain) {
                 window.resize(width, height);
@@ -386,8 +387,8 @@ export class Root {
         //-----------------------------------------------
         // choose pipeline
         //-----------------------------------------------
-        if (this.usesCustomPipeline && legacyCC.rendering) {
-            this._customPipeline = legacyCC.rendering.createCustomPipeline();
+        if (macro.CUSTOM_PIPELINE_NAME !== '' && cclegacy.rendering && this.usesCustomPipeline) {
+            this._customPipeline = cclegacy.rendering.createCustomPipeline();
             isCreateDefaultPipeline = true;
             this._pipeline = this._customPipeline!;
         } else {
@@ -412,14 +413,14 @@ export class Root {
         //-----------------------------------------------
         // pipeline initialization completed
         //-----------------------------------------------
-        const scene = legacyCC.director.getScene();
+        const scene = cclegacy.director.getScene();
         if (scene) {
             scene.globals.activate();
         }
 
         this.onGlobalPipelineStateChanged();
-        if (!this._batcher && legacyCC.internal.Batcher2D) {
-            this._batcher = new legacyCC.internal.Batcher2D(this);
+        if (!this._batcher && cclegacy.internal.Batcher2D) {
+            this._batcher = new cclegacy.internal.Batcher2D(this);
             if (!this._batcher!.initialize()) {
                 this.destroy();
                 return false;
@@ -485,44 +486,14 @@ export class Root {
             this._frameCount = 0;
             this._fpsTime = 0.0;
         }
-        for (let i = 0; i < this._scenes.length; ++i) {
-            this._scenes[i].removeBatches();
+
+        if (sys.isXR) {
+            this._doXRFrameMove();
+        } else {
+            this._frameMoveBegin();
+            this._frameMoveProcess(true);
+            this._frameMoveEnd();
         }
-
-        const windows = this._windows;
-        const cameraList = this._cameraList;
-        cameraList.length = 0;
-
-        for (let i = 0; i < windows.length; i++) {
-            const window = windows[i];
-            window.extractRenderCameras(cameraList);
-        }
-
-        if (this._pipeline && cameraList.length > 0) {
-            this._device.acquire([deviceManager.swapchain]);
-            const scenes = this._scenes;
-            const stamp = legacyCC.director.getTotalFrames();
-            if (this._batcher) {
-                this._batcher.update();
-                this._batcher.uploadBuffers();
-            }
-
-            for (let i = 0; i < scenes.length; i++) {
-                scenes[i].update(stamp);
-            }
-
-            legacyCC.director.emit(legacyCC.Director.EVENT_BEFORE_COMMIT);
-            cameraList.sort((a: Camera, b: Camera) => a.priority - b.priority);
-
-            for (let i = 0; i < cameraList.length; ++i) {
-                cameraList[i].geometryRenderer?.update();
-            }
-            legacyCC.director.emit(legacyCC.Director.EVENT_BEFORE_RENDER);
-            this._pipeline.render(cameraList);
-            this._device.present();
-        }
-
-        if (this._batcher) this._batcher.reset();
     }
 
     /**
@@ -713,11 +684,154 @@ export class Root {
         }
     }
 
+    private _frameMoveBegin () {
+        for (let i = 0; i < this._scenes.length; ++i) {
+            this._scenes[i].removeBatches();
+        }
+
+        this._cameraList.length = 0;
+    }
+
+    private _frameMoveProcess (isNeedUpdateScene: boolean) {
+        const windows = this._windows;
+        const cameraList = this._cameraList;
+
+        for (let i = 0; i < windows.length; i++) {
+            const window = windows[i];
+            window.extractRenderCameras(cameraList);
+        }
+
+        if (this._pipeline && cameraList.length > 0) {
+            this._device.acquire([deviceManager.swapchain]);
+            const scenes = this._scenes;
+            const stamp = cclegacy.director.getTotalFrames();
+            if (this._batcher) {
+                this._batcher.update();
+                this._batcher.uploadBuffers();
+            }
+
+            if (isNeedUpdateScene) {
+                for (let i = 0; i < scenes.length; i++) {
+                    scenes[i].update(stamp);
+                }
+            }
+        }
+    }
+
+    private _frameMoveEnd () {
+        const cameraList = this._cameraList;
+        if (this._pipeline && cameraList.length > 0) {
+            cclegacy.director.emit(cclegacy.Director.EVENT_BEFORE_COMMIT);
+            cameraList.sort((a: Camera, b: Camera) => a.priority - b.priority);
+
+            for (let i = 0; i < cameraList.length; ++i) {
+                cameraList[i].geometryRenderer?.update();
+            }
+            cclegacy.director.emit(cclegacy.Director.EVENT_BEFORE_RENDER);
+            this._pipeline.render(cameraList);
+            this._device.present();
+        }
+
+        if (this._batcher) this._batcher.reset();
+    }
+
+    private _doXRFrameMove () {
+        if (xr.entry.isRenderAllowable()) {
+            let isSceneUpdated = false;
+            const windows = this._windows;
+            const cameraList = this._cameraList;
+            const viewCount = xr.entry.getXRIntConfig(6); // XRConfigKey::VIEW_COUNT
+            for (let xrEye = 0; xrEye < viewCount; xrEye++) {
+                xr.entry.beginRenderEyeFrame(xrEye);
+
+                let allCameras: Camera[] = [];
+                for (let i = 0; i < windows.length; i++) {
+                    const wndCams = windows[i].cameras;
+                    allCameras = allCameras.concat(wndCams);
+                }
+
+                // when choose PreEyeCamera, only hmd has PoseTracker
+                // draw left eye change hmd node's position to -ipd/2 | draw right eye  change hmd node's position to ipd/2
+                for (let i = 0; i < allCameras.length; i++) {
+                    const camera = allCameras[i];
+                    if (camera.trackingType !== TrackingType.NO_TRACKING) {
+                        const camNode = camera.node;
+                        if (camNode) {
+                            const viewPosition = xr.entry.getHMDViewPosition(xrEye, camera.trackingType);
+                            camNode.setPosition(viewPosition[0], viewPosition[1], viewPosition[2]);
+                        }
+                    }
+                }
+
+                this._frameMoveBegin();
+                //condition1: mainwindow has left camera && right camera,
+                //but we only need left/right camera when in left/right eye loop
+                //condition2: main camera draw twice
+                for (let i = 0; i < windows.length; i++) {
+                    const window = windows[i];
+                    if (window.swapchain) {
+                        // not rt
+                        if (!xr.xrWindowMap) {
+                            xr.xrWindowMap = new Map<RenderWindow, number>();
+                        }
+                        xr.xrWindowMap.set(window, xrEye); 
+                    }
+                }
+
+                // XREye::LEFT 0 XREye::RIGHT 1
+                const isNeedUpdateScene = xrEye === 0 || (xrEye === 1 && !isSceneUpdated);
+                this._frameMoveProcess(isNeedUpdateScene);
+                for (let i = cameraList.length - 1; i >= 0 ; i--) {
+                    const camera = cameraList[i];
+                    const isMismatchedCam =
+                        (xrEye === 0 && camera.cameraType === CameraType.RIGHT_EYE) ||
+                        (xrEye === 1 && camera.cameraType === CameraType.LEFT_EYE);
+                    if (isMismatchedCam) {
+                        // currently is left eye loop, so right camera do not need active
+                        cameraList.splice(i, 1);
+                    }
+                }
+
+                // if (this._pipeline && cameraList.length > 0) {
+                //     if (isNeedUpdateScene) {
+                //         isSceneUpdated = true;
+                //         // only one eye enable culling (without other cameras)
+                //         if (cameraList.length === 1 && cameraList[0].trackingType !== TrackingType.NO_TRACKING) {
+                //             cameraList[0].cullingEnable = true;
+                //             this._pipeline.resetRenderQueue(true);
+                //         }
+                //     } else {
+                //         // another eye disable culling (without other cameras)
+                //         if (cameraList.length === 1 && cameraList[0].trackingType !== TrackingType.NO_TRACKING) {
+                //             cameraList[0].cullingEnable = false;
+                //             this._pipeline.resetRenderQueue(false);
+                //         }
+                //     }
+                // }
+
+                this._frameMoveEnd();
+                xr.entry.endRenderEyeFrame(xrEye);
+            }
+            // // recovery to normal status (condition: xr scene jump to normal scene)
+            // if (this._pipeline) {
+            //     this._pipeline.resetRenderQueue(true);
+            // }
+
+            // for (let i = 0; i < cameraList.length; i++) {
+            //     const camera = cameraList[i];
+            //     camera.cullingEnable = true;
+            // }
+        } else {
+            console.warn("[XR] isRenderAllowable is false !!!");
+        }
+    }
+
     private _resizeMaxJointForDS () {
-        let maxJoints = Math.floor((deviceManager.gfxDevice.capabilities.maxVertexUniformVectors - 38) / 3);
+        const usedUBOVectorCount = (UBOGlobal.COUNT + UBOCamera.COUNT + UBOShadow.COUNT + UBOLocal.COUNT) / 4;
+        let maxJoints = Math.floor((deviceManager.gfxDevice.capabilities.maxVertexUniformVectors - usedUBOVectorCount) / 3);
         maxJoints = maxJoints < 256 ? maxJoints : 256;
         localDescriptorSetLayout_ResizeMaxJoints(maxJoints);
     }
 }
 
-legacyCC.Root = Root;
+cclegacy.Root = Root;

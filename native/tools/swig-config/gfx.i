@@ -78,6 +78,14 @@ namespace cc { namespace gfx {
 
 %ignore Device::copyBuffersToTexture;
 %ignore Device::copyTextureToBuffers;
+%ignore Device::createBuffer;
+%ignore Device::createTexture;
+%ignore Device::getInstance;
+%ignore Device::setOptions;
+%ignore Device::getOptions;
+
+%ignore DeviceManager::isDetachDeviceThread;
+%ignore DeviceManager::getGFXName;
 
 %ignore FormatInfo;
 
@@ -141,6 +149,7 @@ namespace cc { namespace gfx {
 %attribute(cc::gfx::Texture, cc::gfx::Format, format, getFormat);
 %attribute(cc::gfx::Texture, uint32_t, size, getSize);
 %attribute(cc::gfx::Texture, ccstd::hash_t, hash, getHash);
+%attribute(cc::gfx::Texture, uint32_t, nativeTexturePtr, getNativeTexturePtr);
 
 // Queue
 %attribute(cc::gfx::Queue, cc::gfx::QueueType, type, getType);
@@ -175,6 +184,7 @@ namespace cc { namespace gfx {
 %attribute(cc::gfx::InputAssembler, uint32_t, firstIndex, getFirstIndex, setFirstIndex);
 %attribute(cc::gfx::InputAssembler, uint32_t, vertexOffset, getVertexOffset, setVertexOffset);
 %attribute(cc::gfx::InputAssembler, uint32_t, instanceCount, getInstanceCount, setInstanceCount);
+%attribute(cc::gfx::InputAssembler, uint32_t, firstInstance, getFirstInstance, setFirstInstance);
 
 // CommandBuffer
 %attribute(cc::gfx::CommandBuffer, cc::gfx::CommandBufferType, type, getType);

@@ -26,11 +26,11 @@ import { ccclass, property } from '../../../core/data/class-decorator'
 import { ARFeature, FeatureEvent, FeatureType, IFeatureData, ARFeatureData} from '../ar-feature-base';
 import { ccenum } from '../../../core/value-types/enum';
 import { Quat, Vec2, Vec3 } from '../../../core/math';
-import { Prefab } from '../../../asset/assets/prefab';
 import { resources } from '../../../asset/asset-manager/bundle';
 import { ARModuleX } from '../ar-module';
 import { sys } from '../../../core';
 import { ARPlane, ARPlaneDetectionMode, ARPose, ARTrackable } from '../ar-define';
+import { Prefab } from '../../../scene-graph/prefab';
 
 @ccclass('cc.PlaneDetectionConfig')
 export class PlaneDetectionConfig extends ARFeatureData {

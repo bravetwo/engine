@@ -93,7 +93,7 @@ public class CocosXRVideoPlayer {
         this.mediaPlayer.setOnSeekCompleteListener(new MediaPlayer.OnSeekCompleteListener() {
             @Override
             public void onSeekComplete(MediaPlayer mp) {
-                Log.d(TAG, "onSeekComplete." + mp.toString());
+                // Log.d(TAG, "onSeekComplete." + mp.toString());
                 CocosXRVideoManager.getInstance().sendVideoEvent(CocosXRVideoManager.VIDEO_EVENT_MEDIA_PLAYER_SEEK_COMPLETE, eventName, uniqueKey);
             }
         });
@@ -249,6 +249,7 @@ public class CocosXRVideoPlayer {
     }
 
     public void pause() {
+        if(!mediaPlayer.isPlaying()) return;
         runOnUIThread(new Runnable() {
             @Override
             public void run() {
@@ -340,7 +341,7 @@ public class CocosXRVideoPlayer {
         runOnUIThread(new Runnable() {
             @Override
             public void run() {
-                Log.d(TAG, "- seekTo." + mSec);
+                // Log.d(TAG, "- seekTo." + mSec);
                 mediaPlayer.seekTo(mSec);
             }
         });
