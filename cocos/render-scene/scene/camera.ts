@@ -34,6 +34,7 @@ import { RenderWindow } from '../core/render-window';
 import { preTransforms } from '../../core/math/mat4';
 import { warnID } from '../../core/platform/debug';
 import { GeometryRenderer } from '../../rendering/geometry-renderer';
+import { sys } from '../../core';
 
 export enum CameraFOVAxis {
     VERTICAL,
@@ -705,7 +706,6 @@ export class Camera {
         if (!this._window) return;
 
         this._width = width;
-        this._width = width;
         this._height = height;
         this._aspect = (width * this._viewport.width) / (height * this._viewport.height);
         this._isProjDirty = true;
@@ -779,6 +779,19 @@ export class Camera {
             Mat4.invert(this._matProjInv, this._matProj);
             viewProjDirty = true;
             this._isProjDirty = false;
+        }
+
+        if (sys.isXR && xr.xrWindowMap && this._window) {
+            const xrWindowMap = xr.xrWindowMap as Map<RenderWindow, number>;
+            const wndXREye = xrWindowMap.get(this._window);
+            // XREye::NONE -1 XRConfigKey::SESSION_RUNNING 2
+            if (wndXREye !== -1 && this._proj == CameraProjection.PERSPECTIVE && xr.entry.getXRBoolConfig(2)) {
+                // xr flow
+                const projFloat = xr.entry.computeViewProjection(wndXREye, this._nearClip, this._farClip, 1);
+                Mat4.fromArray(this._matProj, projFloat);
+                Mat4.invert(this._matProjInv, this._matProj);
+                viewProjDirty = true;
+            }
         }
 
         // view-projection
