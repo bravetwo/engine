@@ -34,8 +34,8 @@ export class AnchorTrackingConfig extends ARFeatureData {
 
 }
 
-@ccclass('cc.ARFeatureAnchor')
-export class ARFeatureAnchor extends ARFeature {
+@ccclass('cc.ARFeatureAnchorTracking')
+export class ARFeatureAnchorTracking extends ARFeature {
     public get featureId(): FeatureType {
         return FeatureType.Anchor;
     }

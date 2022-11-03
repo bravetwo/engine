@@ -24,12 +24,13 @@
 
 import { ccclass, property } from '../../../core/data/class-decorator'
 import { ARFeature, FeatureEvent, FeatureType, IFeatureData, ARFeatureData} from '../ar-feature-base';
-import { Quat, Vec3 } from '../../../core/math';
+import { Quat, Size, Vec3 } from '../../../core/math';
 import { ARModuleX } from '../ar-module';
 import { ARTrackable } from '../ar-define';
 
 export interface ARImage extends ARTrackable {
-    libIndex : number;
+    libIndex: number;
+    imageSize: Size;
 }
 
 @ccclass('cc.ImageTrackingConfig')
@@ -163,7 +164,8 @@ export class ARFeatureImageTracking extends ARFeature {
                             src[offset + 7],
                             src[offset + 8]
                         )
-                    }
+                    },
+                    imageSize: new Size(0, 0)
                 };
                 dst.push(image);
             }
