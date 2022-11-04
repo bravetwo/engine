@@ -222,8 +222,9 @@ cc_inspect_values(
 )
 
 if(USE_XR)
-    set(USE_WEBSOCKET_SERVER ON)
-    set(USE_XR_REMOTE_PREVIEW ON)
+    if(USE_XR_REMOTE_PREVIEW)
+        set(USE_WEBSOCKET_SERVER ON)
+    endif()
 endif()
 
 include(${EXTERNAL_ROOT}/CMakeLists.txt)
