@@ -191,7 +191,7 @@ export class ARFeaturePlaneDetection extends ARFeature {
                         src[offset + 3],
                         src[offset + 4]
                     ),
-                    center: {
+                    pose: {
                         position: new Vec3(
                             src[offset + 5],
                             src[offset + 6],

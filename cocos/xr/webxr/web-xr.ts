@@ -22,11 +22,11 @@
  THE SOFTWARE.
 */
 
-import { Vec3 } from '../../core';
+import { Quat, Vec3 } from '../../core';
 import { WebXRPlane } from './ar-plane';
 import { WebXRAnchor } from './ar-anchor';
-import { ARTrackable } from '../ar';
 import { Camera } from '../../misc';
+import { ARAnchor } from '../ar';
 
 const _xr = navigator.xr;
 declare type XRFrameFunction = (t: number, frame: any) => void;
@@ -143,7 +143,7 @@ export class WebXR {
             //         this._hitTestSource = hitTestSource;
             //     });
             // });
-        }).catch((err) => {
+        }).catch((err: DOMException) => {
             console.warn("requestSession err:", err);
             for (let index = 0; index < this._sessionInit.requiredFeatures.length; index++) {
                 const element = this._sessionInit.requiredFeatures[index];
@@ -342,14 +342,14 @@ export class WebXR {
     };
 
     // raycast
-    async tryWebXRHitTest(): Promise<ARTrackable>  {
+    async tryWebXRHitTest(): Promise<ARAnchor>  {
         if (this._anchor) {
             return this._anchor!.tryHitTest(this._targetRayPose.transform, this._inputSource.targetRaySpace);
         }
         if (this._plane) {
             return this._plane!.tryHitTest(this._targetRayPose.transform);
         }
-        return {id: 0};
+        return {id: -1, pose: {position: new Vec3(0,0,0), rotation: new Quat(0,0,0,0)}};
     }
 
     enableAnchor(enable: boolean) {

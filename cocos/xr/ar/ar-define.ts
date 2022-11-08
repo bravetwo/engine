@@ -37,8 +37,9 @@ export interface ARPose {
 }
 
 export interface ARAnchor {
-    id : number;
-    pose? : ARPose;
+    id: number;
+    pose: ARPose;
+    trackingState?: number;
 }
 
 export enum ARPlaneDetectionMode {
@@ -53,5 +54,4 @@ ccenum(ARPlaneDetectionMode)
 export interface ARPlane extends ARAnchor {
     type : ARPlaneDetectionMode;
     extent : Vec2;
-    center : ARPose;
 }
