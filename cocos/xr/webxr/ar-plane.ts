@@ -163,7 +163,7 @@ export class WebXRPlane {
             id: planeContext.id,
             type: planeContext.xrPlane.orientation == 'Horizontal' ? 3 : 4,
             extent: this.calPolygonSize(planeContext.xrPlane.polygon),
-            center: {
+            pose: {
                 position: new Vec3(
                     planeContext.planePose.transform.position.x,
                     planeContext.planePose.transform.position.y,

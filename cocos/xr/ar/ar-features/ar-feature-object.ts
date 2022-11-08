@@ -26,14 +26,12 @@ import { ccclass } from '../../../core/data/class-decorator'
 import { ARFeature, FeatureEvent, FeatureType, IFeatureData } from '../ar-feature-base';
 import { Quat, Vec3 } from '../../../core/math';
 import { ARModuleX } from '../ar-module';
-import { ARPose } from '../ar-define';
+import { ARAnchor } from '../ar-define';
 
-export interface ARTrackingObject {
-    anchorId : number;
+export interface ARTrackingObject extends ARAnchor {
     libIndex : number;
     extent : Vec3;
     scale : Vec3;
-    pose : ARPose;
 }
 
 @ccclass('cc.ARFeatureObject')
@@ -126,7 +124,7 @@ export class ARFeatureObject extends ARFeature {
                 offset = i * ARFeatureObject.OBJECT_INFO_SIZE;
                 
                 let obj : ARTrackingObject = {
-                    anchorId : src[offset],
+                    id : src[offset],
                     libIndex : src[offset + 1],
                     extent : new Vec3(src[offset + 2], src[offset + 3], src[offset + 4]),
                     scale : new Vec3(src[offset + 5], src[offset + 6], src[offset + 7]),
