@@ -153,14 +153,6 @@ export abstract class Texture extends GFXObject {
         return this._isTextureView;
     }
 
-    /**
-     * @en Get texture id.
-     * @zh 纹理ID。
-     */
-    get nativeTexturePtr (): number {
-        return 0;
-    }
-
     protected _info: TextureInfo = new TextureInfo();
     protected _viewInfo: TextureViewInfo = new TextureViewInfo();
 
