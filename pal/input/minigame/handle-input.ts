@@ -4,6 +4,7 @@ import { EventTarget } from '../../../cocos/core/event/event-target';
 import { EventHandle } from '../../../cocos/input/types';
 import { InputSourceButton, InputSourceStick, InputSourcePosition, InputSourceOrientation } from '../input-source';
 import { Vec3, Quat } from '../../../cocos/core/math';
+import { ControllerInfo, PoseInfo, minigame } from 'pal/minigame';
 
 enum Button {
     BUTTON_EAST,
@@ -144,7 +145,7 @@ export class HandleInputDevice {
     }
 
     private _registerEvent () {
-        jsb.onHandleInput = (infoList: jsb.ControllerInfo[]) => {
+        minigame.onHandleInput = (infoList: ControllerInfo[]) => {
             for (let i = 0; i < infoList.length; ++i) {
                 const info = infoList[i];
                 this._updateNativeButtonState(info);
@@ -152,7 +153,7 @@ export class HandleInputDevice {
             }
         };
 
-        jsb.onHandlePoseInput = (infoList: jsb.PoseInfo[]) => {
+        minigame.onHandlePoseInput = (infoList: PoseInfo[]) => {
             for (let i = 0; i < infoList.length; ++i) {
                 const info = infoList[i];
                 this._updateNativePoseState(info);
@@ -179,7 +180,7 @@ export class HandleInputDevice {
         }
     }
 
-    private _updateNativeButtonState (info: jsb.ControllerInfo) {
+    private _updateNativeButtonState (info: ControllerInfo) {
         const { buttonInfoList, axisInfoList } = info;
         for (let i = 0; i < buttonInfoList.length; ++i) {
             const buttonInfo = buttonInfoList[i];
@@ -232,7 +233,7 @@ export class HandleInputDevice {
         }
     }
 
-    private _updateNativePoseState (info: jsb.PoseInfo) {
+    private _updateNativePoseState (info: PoseInfo) {
         switch (info.code) {
             case 1:
                 this._nativePoseState[Pose.HAND_LEFT] = { position: new Vec3(info.x, info.y, info.z), orientation: new Quat(info.quaternionX, info.quaternionY, info.quaternionZ, info.quaternionW) };

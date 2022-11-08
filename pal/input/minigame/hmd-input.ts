@@ -4,6 +4,7 @@ import { EventTarget } from '../../../cocos/core/event/event-target';
 import { EventHMD } from '../../../cocos/input/types';
 import { InputSourcePosition, InputSourceOrientation } from '../input-source';
 import { Vec3, Quat } from '../../../cocos/core/math';
+import { PoseInfo, minigame } from 'pal/minigame';
 
 enum Pose {
     VIEW_LEFT,
@@ -47,7 +48,7 @@ export class HMDInputDevice {
     }
 
     private _registerEvent () {
-        jsb.onHMDPoseInput = (infoList: jsb.PoseInfo[]) => {
+        minigame.onHMDPoseInput = (infoList: PoseInfo[]) => {
             for (let i = 0; i < infoList.length; ++i) {
                 const info = infoList[i];
                 this._updateNativePoseState(info);
@@ -63,7 +64,7 @@ export class HMDInputDevice {
         this._eventTarget.on(eventType, callback, target);
     }
 
-    private _updateNativePoseState (info: jsb.PoseInfo) {
+    private _updateNativePoseState (info: PoseInfo) {
         switch (info.code) {
             case 0:
                 this._nativePoseState[Pose.VIEW_LEFT] = { position: new Vec3(info.x, info.y, info.z), orientation: new Quat(info.quaternionX, info.quaternionY, info.quaternionZ, info.quaternionW) };
