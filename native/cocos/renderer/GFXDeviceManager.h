@@ -30,11 +30,11 @@
 #include "gfx-agent/DeviceAgent.h"
 #include "gfx-validator/DeviceValidator.h"
 
-//#undef CC_USE_NVN
-//#undef CC_USE_VULKAN
-//#undef CC_USE_METAL
-//#undef CC_USE_GLES3
-//#undef CC_USE_GLES2
+// #undef CC_USE_NVN
+// #undef CC_USE_VULKAN
+// #undef CC_USE_METAL
+// #undef CC_USE_GLES3
+// #undef CC_USE_GLES2
 
 // arengine only supports gles2, arcore supports gles2 and gles3
 // setting the CC_USE_GLES3 off is needed while using USE_AR_AUTO or USE_AR_ENGINE
@@ -109,6 +109,9 @@ public:
         if (tryCreate<GLES2Device>(info, &device)) return device;
 #endif
 
+#ifdef CC_EDITOR
+        Device::isSupportDetachDeviceThread = false;
+#endif
         if (tryCreate<EmptyDevice>(info, &device)) return device;
 
         return nullptr;

@@ -23,16 +23,12 @@
  THE SOFTWARE.
  */
 import { EDITOR } from 'internal:constants';
-import { Frustum, Ray } from '../../core/geometry';
 import { SurfaceTransform, ClearFlagBit, Device, Color, ClearFlags } from '../../gfx';
-import { lerp, Mat4, Rect, toRadian, Vec3, IVec4Like } from '../../core/math';
+import { lerp, Mat4, Rect, toRadian, Vec3, IVec4Like, preTransforms, warnID, geometry, cclegacy } from '../../core';
 import { CAMERA_DEFAULT_MASK } from '../../rendering/define';
 import { Node } from '../../scene-graph';
 import { RenderScene } from '../core/render-scene';
-import { legacyCC } from '../../core/global-exports';
 import { RenderWindow } from '../core/render-window';
-import { preTransforms } from '../../core/math/mat4';
-import { warnID } from '../../core/platform/debug';
 import { GeometryRenderer } from '../../rendering/geometry-renderer';
 import { sys } from '../../core';
 
@@ -100,7 +96,6 @@ export enum CameraType {
     LEFT_EYE = 0,
     RIGHT_EYE = 1,
     MAIN = 2,
-    REFLECTION_PROBE = 3,
 }
 
 export enum TrackingType {
@@ -579,7 +574,7 @@ export class Camera {
     private _matProjInv: Mat4 = new Mat4();
     private _matViewProj: Mat4 = new Mat4();
     private _matViewProjInv: Mat4 = new Mat4();
-    private _frustum: Frustum = new Frustum();
+    private _frustum: geometry.Frustum = new geometry.Frustum();
     private _forward: Vec3 = new Vec3();
     private _position: Vec3 = new Vec3();
     private _priority = 0;
@@ -859,7 +854,7 @@ export class Camera {
      */
     public initGeometryRenderer () {
         if (!this._geometryRenderer) {
-            this._geometryRenderer = legacyCC.internal.GeometryRenderer ? new legacyCC.internal.GeometryRenderer() : null;
+            this._geometryRenderer = cclegacy.internal.GeometryRenderer ? new cclegacy.internal.GeometryRenderer() : null;
             this._geometryRenderer?.activate(this._device);
         }
     }
@@ -906,7 +901,7 @@ export class Camera {
         if (this._window) {
             this._window.detachCamera(this);
         }
-        const win = window || legacyCC.director.root.mainWindow;
+        const win = window || cclegacy.director.root.mainWindow;
         if (win) {
             win.attachCamera(this);
             this.window = win;
@@ -937,7 +932,7 @@ export class Camera {
      * @param y the screen y of the position
      * @returns the resulting ray
      */
-    public screenPointToRay (out: Ray, x: number, y: number): Ray {
+    public screenPointToRay (out: geometry.Ray, x: number, y: number): geometry.Ray {
         if (!this._node) return null!;
 
         const width = this.width;
@@ -961,7 +956,7 @@ export class Camera {
         if (isProj) {
             // camera origin
             this._node.getWorldPosition(v_b);
-            Ray.fromPoints(out, v_b, v_a);
+            geometry.Ray.fromPoints(out, v_b, v_a);
         } else {
             Vec3.transformQuat(out.d, Vec3.FORWARD, this._node.worldRotation);
         }
@@ -1090,7 +1085,7 @@ export class Camera {
 
     private setDefaultUsage () {
         if (EDITOR) {
-            if (legacyCC.GAME_VIEW) {
+            if (cclegacy.GAME_VIEW) {
                 this._usage = CameraUsage.GAME_VIEW;
             } else {
                 this._usage = CameraUsage.EDITOR;
