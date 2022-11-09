@@ -27,9 +27,9 @@
 
 /* spell-checker:words COORD, Quesada, INITED, Renerer */
 
-import { DEBUG, EDITOR, BUILD, TEST } from 'internal:constants';
+import { DEBUG, EDITOR, BUILD, TEST, RUNTIME_BASED } from 'internal:constants';
 import { SceneAsset } from '../asset/assets/scene-asset';
-import { System, EventTarget, Scheduler, js, errorID, error, assertID, warnID, macro, cclegacy, CCObject } from '../core';
+import { System, EventTarget, Scheduler, js, errorID, error, assertID, warnID, macro, cclegacy, CCObject, sys } from '../core';
 import { input } from '../input';
 import { Root } from '../root';
 import { Node, Scene } from '../scene-graph';
@@ -691,6 +691,14 @@ export class Director extends EventTarget {
         if(armodule && armodule.replaceFrameMoveFlag === true) return;
 
         if (!this._invalid) {
+            // XRConfigKey::SESSION_RUNNING 2
+            if (RUNTIME_BASED && sys.isXR) {
+                if (!xr.entry.platformLoopStart() && !xr.entry.getXRBoolConfig(2)) {
+                    return;
+                }
+                xr.entry.frameStart();
+            }
+
             this.emit(Director.EVENT_BEGIN_FRAME);
             if (!EDITOR || cclegacy.GAME_VIEW) {
                 // @ts-expect-error _frameDispatchEvents is a private method.
@@ -730,6 +738,11 @@ export class Director extends EventTarget {
             containerManager.update(dt);
             this.emit(Director.EVENT_END_FRAME);
             this._totalFrames++;
+
+            if (RUNTIME_BASED && sys.isXR) {
+                xr.entry.frameEnd();
+                xr.entry.platformLoopEnd();
+            }
         }
     }
 
