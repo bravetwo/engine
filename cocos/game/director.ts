@@ -751,7 +751,7 @@ export class Director extends EventTarget {
         //console.log("xrTick dt", dt, this._invalid, this._paused);
         if (!this._invalid) {
             this.emit(Director.EVENT_BEGIN_FRAME);
-            if (!EDITOR || legacyCC.GAME_VIEW) {
+            if (!EDITOR || cclegacy.GAME_VIEW) {
                 // @ts-expect-error _frameDispatchEvents is a private method.
                 input._frameDispatchEvents();
             }
