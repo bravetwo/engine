@@ -56,6 +56,13 @@ declare module 'pal/minigame' {
         offAccelerometerChange(cb?: AccelerometerChangeCallback);
         startAccelerometer(obj: AccelerometerStartParameter);
         stopAccelerometer(obj: AccelerometerStopParameter);
+
+        // xr
+        onControllerInput: (infoList: ControllerInfo[]) => void | undefined;
+        onHandleInput: (infoList: ControllerInfo[]) => void | undefined;
+        onControllerChange: (controllerIds: number[]) => void | undefined;
+        onHandlePoseInput: (infoList: PoseInfo[]) => void | undefined;
+        onHMDPoseInput: (infoList: PoseInfo[]) => void | undefined;
     }
 
     interface WeChatAPI {
@@ -66,6 +73,33 @@ declare module 'pal/minigame' {
         onMouseMove?: (cb: (res: MouseEventData) => void) => void;
         onMouseUp?: (cb: (res: MouseEventData) => void) => void;
         onWheel?: (cb: (res: MouseWheelEventData) => void) => void;
+    }
+
+    export interface ControllerInfo {
+        id: number;
+        axisInfoList: AxisInfo[],
+        buttonInfoList: ButtonInfo[],
+    }
+
+    export interface AxisInfo {
+        code: number,
+        value: number,
+    }
+
+    export interface ButtonInfo {
+        code: number,
+        isPressed: boolean,
+    }
+
+    export interface PoseInfo {
+        code: number,
+        x: number,
+        y: number,
+        z: number,
+        quaternionX: number,
+        quaternionY: number,
+        quaternionZ: number,
+        quaternionW: number,
     }
 
     export interface KeyboardEventData {

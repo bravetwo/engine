@@ -7,6 +7,7 @@ import { EventTarget } from '../../../cocos/core/event/event-target';
 import { EventGamepad } from '../../../cocos/input/types';
 import { InputSourceButton, InputSourceDpad, InputSourceStick } from '../input-source';
 import { js } from '../../../cocos/core';
+import { ControllerInfo, minigame } from 'pal/minigame';
 
 enum Button {
     BUTTON_SOUTH,
@@ -188,7 +189,7 @@ export class GamepadInputDevice {
     }
 
     private static _registerEvent () {
-        jsb.onControllerInput = (infoList: jsb.ControllerInfo[]) => {
+        minigame.onControllerInput = (infoList: ControllerInfo[]) => {
             for (let i = 0; i < infoList.length; ++i) {
                 const info = infoList[i];
                 const device = GamepadInputDevice._getOrCreateInputDevice(info.id, true);
@@ -197,7 +198,7 @@ export class GamepadInputDevice {
             }
         };
 
-        jsb.onControllerChange = (controllerIds) => {
+        minigame.onControllerChange = (controllerIds) => {
             // check connecting
             for (let i = 0; i < controllerIds.length; ++i) {
                 const id = controllerIds[i];
@@ -231,7 +232,7 @@ export class GamepadInputDevice {
         }
     }
 
-    private _updateNativeButtonState (info: jsb.ControllerInfo) {
+    private _updateNativeButtonState (info: ControllerInfo) {
         const { buttonInfoList, axisInfoList } = info;
         for (let i = 0; i < buttonInfoList.length; ++i) {
             const buttonInfo = buttonInfoList[i];
