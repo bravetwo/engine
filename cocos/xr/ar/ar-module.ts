@@ -22,14 +22,14 @@
  THE SOFTWARE.
 */
 
-import { ARFeature, FeatureType, ARFeatureData } from './ar-feature-base';
+import { ARFeature, ARFeatureData } from './ar-feature-base';
 import * as features from './ar-features';
 import { Quat, Vec2, Vec3 } from '../../core/math';
 import { IARModule } from './ar-module-base';
 import { director } from '../../game/director';
 import { game } from '../../game';
 import { WebXR } from '../webxr/web-xr';
-import { ARAnchor, ARPose } from './ar-define';
+import { ARAnchor, ARPose, FeatureType } from './ar-define';
 import { Camera } from '../../misc';
 
 // WebXR

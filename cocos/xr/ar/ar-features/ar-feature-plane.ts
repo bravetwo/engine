@@ -23,11 +23,11 @@
 */
 
 import { ccclass, property } from '../../../core/data/class-decorator'
-import { ARFeature, FeatureEvent, FeatureType, IFeatureData, ARFeatureData} from '../ar-feature-base';
+import { ARFeature, FeatureEvent, IFeatureData, ARFeatureData} from '../ar-feature-base';
 import { Quat, Vec2, Vec3 } from '../../../core/math';
 import { resources } from '../../../asset/asset-manager/bundle';
 import { ARModuleX } from '../ar-module';
-import { ARPlane, ARPlaneDetectionMode } from '../ar-define';
+import { ARPlane, ARPlaneDetectionMode, FeatureType } from '../ar-define';
 import { Prefab } from '../../../scene-graph/prefab';
 
 @ccclass('cc.PlaneDetectionConfig')

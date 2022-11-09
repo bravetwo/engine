@@ -23,10 +23,10 @@
 */
 
 import { ccclass, property } from '../../../core/data/class-decorator'
-import { ARFeature, FeatureEvent, FeatureType, IFeatureData, ARFeatureData} from '../ar-feature-base';
+import { ARFeature, FeatureEvent, IFeatureData, ARFeatureData} from '../ar-feature-base';
 import { Quat, Size, Vec3 } from '../../../core/math';
 import { ARModuleX } from '../ar-module';
-import { ARAnchor } from '../ar-define';
+import { ARAnchor, FeatureType } from '../ar-define';
 
 export interface ARImage extends ARAnchor {
     libIndex: number;
