@@ -23,8 +23,8 @@
 */
 
 import { ccclass } from '../../../core/data/class-decorator'
-import { ARAnchor } from '../ar-define';
-import { ARFeature, ARFeatureData, FeatureEvent, FeatureType, IFeatureData} from '../ar-feature-base';
+import { ARAnchor, FeatureType } from '../ar-define';
+import { ARFeature, ARFeatureData, FeatureEvent, IFeatureData} from '../ar-feature-base';
 import { ARModuleX } from '../ar-module';
 
 
