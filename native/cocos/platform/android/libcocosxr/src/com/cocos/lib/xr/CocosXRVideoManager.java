@@ -390,7 +390,7 @@ public class CocosXRVideoManager {
             lastTickTime = System.nanoTime();
             Set<Map.Entry<String, CocosXRVideoPlayer>> entrySets = xrVideoPlayerHashMap.entrySet();
             for (Map.Entry<String, CocosXRVideoPlayer> entrySet : entrySets) {
-                if(!entrySet.getValue().isPlaying() || entrySet.getValue().getVideoTextureWidth() == 0 || entrySet.getValue().getVideoTextureHeight() == 0) {
+                if(entrySet.getValue().isStopped() || entrySet.getValue().getVideoTextureWidth() == 0 || entrySet.getValue().getVideoTextureHeight() == 0) {
                     continue;
                 }
                 GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, renderTargetFboId);
