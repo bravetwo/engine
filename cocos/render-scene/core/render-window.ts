@@ -37,7 +37,6 @@ export interface IRenderWindowInfo {
     height: number;
     renderPassInfo: RenderPassInfo;
     swapchain?: Swapchain;
-    externalSrc?: any; // for webxr framebuffer
 }
 
 const orientationMap: Record<Orientation, SurfaceTransform> = {
@@ -155,7 +154,6 @@ export class RenderWindow {
             this._renderPass,
             this._colorTextures,
             this._depthStencilTexture,
-            info.externalSrc
         ));
 
         return true;

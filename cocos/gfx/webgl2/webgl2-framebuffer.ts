@@ -25,7 +25,6 @@
 
 import { FramebufferInfo } from '../base/define';
 import { Framebuffer } from '../base/framebuffer';
-import { WebGLFramebuffer } from '../webgl/webgl-framebuffer';
 import { WebGL2CmdFuncCreateFramebuffer, WebGL2CmdFuncDestroyFramebuffer } from './webgl2-commands';
 import { WebGL2DeviceManager } from './webgl2-define';
 import { IWebGL2GPUFramebuffer, IWebGL2GPUTextureView } from './webgl2-gpu-objects';
@@ -63,8 +62,7 @@ export class WebGL2Framebuffer extends Framebuffer {
             gpuRenderPass: (info.renderPass as WebGL2RenderPass).gpuRenderPass,
             gpuColorViews,
             gpuDepthStencilView,
-            //glFramebuffer: null,
-            glFramebuffer: info.externalSrc as WebGLFramebuffer, // for webxr framebuffer
+            glFramebuffer: null,
             isOffscreen: true,
             get width () {
                 if (this.isOffscreen) {

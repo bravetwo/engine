@@ -35,7 +35,7 @@ import { WebGL2Device } from '../../../gfx/webgl2/webgl2-device';
 import { legacyCC } from '../../../core/global-exports';
 import { Root } from '../../../root';
 import { RenderWindow } from '../../../render-scene/core/render-window';
-import { WebGLFramebuffer } from '../../../gfx/webgl/webgl-framebuffer';
+import { WebGL2Framebuffer } from '../../../gfx/webgl2/webgl2-framebuffer';
 
 const colors: Color[] = [new Color(0, 0, 0, 1)];
 const layerList = {
@@ -129,9 +129,10 @@ export class ARBackgroundStage extends RenderStage {
                         width: viewport.width,
                         height: viewport.height,
                         renderPassInfo,
-                        swapchain,
-                        externalSrc: xrgpuframebuffer
+                        swapchain
                     });
+                    const webGL2FBO = this._xrWindow?.framebuffer as WebGL2Framebuffer;
+                    webGL2FBO.gpuFramebuffer.glFramebuffer = xrgpuframebuffer;
                 }
 
                 if(!this._xrWindowSetFlag && (armodule.CameraId == camera.node.uuid)) { 
