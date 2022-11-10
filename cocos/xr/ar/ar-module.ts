@@ -91,7 +91,7 @@ export class ARModuleX extends IARModule {
 
             this.replaceFrameMoveFlag = true;
             game.stopPacer();
-            director.xrTick(dt/1000);
+            director.tick(dt/1000);
 
             this._lastTime = t;
         });
