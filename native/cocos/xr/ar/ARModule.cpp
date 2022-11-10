@@ -28,7 +28,7 @@
 
 #include "ar/ARModule.h"
 
-#define USE_AR_NDK
+#define USE_AR_NDK 1
 
 #if CC_PLATFORM == CC_PLATFORM_ANDROID
 
@@ -84,15 +84,13 @@ int ARModule::getSupportMask() {
 }
 
 void ARModule::start() {
-#ifdef USE_AR_NDK
-#if CC_PLATFORM == CC_PLATFORM_ANDROID
+#if CC_PLATFORM == CC_PLATFORM_ANDROID && USE_AR_NDK > 0
     auto *platform = cc::BasePlatform::getPlatform();
     auto *androidPlatform = static_cast<cc::AndroidPlatform *>(platform);
     auto *env = cc::AndroidPlatform::getEnv();
     auto *activity = androidPlatform->getActivity();
     //_impl->start(androidPlatform->getActivity());
     _impl->start(env, activity);
-#endif
 #else
     _impl->start();
 #endif
@@ -203,7 +201,8 @@ float* ARModule::getUpdatedPlanesInfo() const {
     return _impl->getUpdatedPlanesInfo();
 }
 std::vector<ARPlane> ARModule::getAdded() const {
-    return _impl->getAdded();
+//    return _impl->getAdded();
+    return {};
 }
 #pragma endregion // plane detection
 

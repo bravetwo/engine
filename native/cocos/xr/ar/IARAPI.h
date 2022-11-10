@@ -25,7 +25,6 @@
 
 #pragma once
 
-#include <cstdint>
 #include <array>
 
 namespace cc {
@@ -97,7 +96,7 @@ public:
     virtual float* getAddedPlanesInfo() = 0;
     virtual float* getUpdatedPlanesInfo() = 0;
     virtual float* getRemovedPlanesInfo() = 0;
-    virtual std::vector<ARPlane> getAdded() = 0;
+//    virtual std::vector<ARPlane> getAdded(){return {};}
 
     // scene mesh reconstruction
     virtual void enableSceneMesh(bool enable) = 0;

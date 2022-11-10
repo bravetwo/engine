@@ -113,6 +113,10 @@ void CCMTLTexture::doInit(const TextureInfo &info) {
         #endif
 
         CC_ASSERT(_mtlTexture); // Failed to create Metal texture CoreVideo Metal Texture
+    
+        #if USE_AR_MODULE
+        return;
+        #endif
     }
 
     if (!createMTLTexture()) {

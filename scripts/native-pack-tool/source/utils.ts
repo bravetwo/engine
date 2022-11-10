@@ -575,6 +575,7 @@ export class Paths {
      * [project]/native/engine/[platformTemplateDirName]
      */
     get platformTemplateDirInPrj() {
+        if(this.platformTemplateDirName == 'ar') this.platformTemplateDirName = 'ar-ios';
         return ps.join(this.nativeTemplateDirInPrj, this.platformTemplateDirName);
     }
 

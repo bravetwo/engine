@@ -63,24 +63,23 @@ private:
     T& getAppropriateShaderSource(ShaderSources<T>& sources);
 
     RenderPipeline* _pipeline{nullptr};
-    gfx::Device*    _device{nullptr};
+    gfx::Device* _device{nullptr};
 
     gfx::Shader* _shader{nullptr};
     gfx::Buffer* _vertexBuffer{nullptr};
 
-    gfx::InputAssembler*      _inputAssembler{nullptr};
+    gfx::InputAssembler* _inputAssembler{nullptr};
     gfx::DescriptorSetLayout* _descriptorSetLayout{nullptr};
-    gfx::DescriptorSet*       _descriptorSet{nullptr};
-    gfx::PipelineLayout*      _pipelineLayout{nullptr};
-    gfx::PipelineState*       _pipelineState{nullptr};
+    gfx::DescriptorSet* _descriptorSet{nullptr};
+    gfx::PipelineLayout* _pipelineLayout{nullptr};
+    gfx::PipelineState* _pipelineState{nullptr};
 
+    bool _setTexFlag = false;
 #if CC_PLATFORM == CC_PLATFORM_ANDROID
     gfx::Buffer* _uniformBuffer{nullptr};
-    GLuint       _glTex{0U};
-    bool         _setTexFlag = false;
+    GLuint _glTex{0U};
 #elif CC_PLATFORM == CC_PLATFORM_MAC_IOS
-    gfx::Buffer*          _ycbcrTransferBuffer{nullptr};
-    vector<gfx::Texture*> _textures;
+    gfx::Buffer* _ycbcrTransferBuffer{nullptr};
 #endif
 };
 

@@ -132,15 +132,17 @@ export class ARModuleX extends IARModule {
     }
 
     public update() {
-        if(this._camera && !this._setGeoFlag) {
-            const rotation = orientationMap[screenAdapter.orientation];
-            this._nativeObj.setDisplayGeometry(rotation, this._camera.camera.width, this._camera.camera.height);
-            console.log(`screen scale ${this._camera.camera.screenScale}`);
-            console.log(`set display===> ro:${rotation}, w:${this._camera.camera.width}, h:${this._camera.camera.height}`);
-            this._setGeoFlag = true;
-        }
+        if(sys.platform == Platform.ANDROID) {
+            if(this._camera && !this._setGeoFlag) {
+                const rotation = orientationMap[screenAdapter.orientation];
+                this._nativeObj.setDisplayGeometry(rotation, this._camera.camera.width, this._camera.camera.height);
+                console.log(`screen scale ${this._camera.camera.screenScale}`);
+                console.log(`set display===> ro:${rotation}, w:${this._camera.camera.width}, h:${this._camera.camera.height}`);
+                this._setGeoFlag = true;
+            }
 
-        this._nativeObj.update();
+            this._nativeObj.update();
+        }
 
         this._featuresMap.forEach((feature, id) => {
             feature.update();

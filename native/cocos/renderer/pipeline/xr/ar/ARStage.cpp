@@ -95,7 +95,7 @@ void ARStage::render(scene::Camera *camera) {
 
     struct RenderData {
         framegraph::TextureHandle outputTex;
-        //framegraph::TextureHandle depth;
+        framegraph::TextureHandle depth;
     };
     auto *const sceneData = _pipeline->getPipelineSceneData();
 
@@ -119,7 +119,7 @@ void ARStage::render(scene::Camera *camera) {
 
         data.outputTex   = builder.write(data.outputTex, colorAttachmentInfo);
 
-        /*/ depth
+        // depth
         gfx::TextureInfo depthTexInfo{
             gfx::TextureType::TEX2D,
             gfx::TextureUsageBit::DEPTH_STENCIL_ATTACHMENT,
@@ -138,9 +138,8 @@ void ARStage::render(scene::Camera *camera) {
         data.depth = builder.write(data.depth, depthAttachmentInfo);
         //*/
         builder.writeToBlackboard(RenderPipeline::fgStrHandleOutColorTexture, data.outputTex);
-        //builder.writeToBlackboard(RenderPipeline::fgStrHandleOutDepthTexture, data.depth);
+        builder.writeToBlackboard(RenderPipeline::fgStrHandleOutDepthTexture, data.depth);
         builder.setViewport(_pipeline->getViewport(camera), _pipeline->getScissor(camera));
-
     };
 
     auto offset = _pipeline->getPipelineUBO()->getCurrentCameraUBOOffset();

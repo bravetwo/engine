@@ -291,19 +291,13 @@ void ARBackground::activate(RenderPipeline *pipeline, gfx::Device *dev) {
         -.7010f, 0.5291f, -.8860f, 1.0000f};
     _ycbcrTransferBuffer = _device->createBuffer(transferUniformBufferInfo);
     _ycbcrTransferBuffer->update(transferMats, sizeof(Mat4));
-
-    _textures.resize(2);
 #endif
 
     _pipelineLayout = _device->createPipelineLayout({{pipeline->getDescriptorSetLayout(), _descriptorSetLayout}});
 
 #if CC_PLATFORM == CC_PLATFORM_ANDROID
     // background id
-    //auto *deviceAgent = gfx::DeviceAgent::getInstance();
-    //deviceAgent->setMultithreaded(false);
-    // GL-Specific invocations
     glGenTextures(1, &_glTex);
-    //deviceAgent->setMultithreaded(true);
 #endif
 }
 
@@ -354,32 +348,43 @@ void ARBackground::render(cc::scene::Camera *camera, gfx::RenderPass *renderPass
     _device->copyBuffersToTexture(buffers, depthTex, &region, 1);
     */
 #elif CC_PLATFORM == CC_PLATFORM_MAC_IOS
-    gfx::SamplerInfo samplerInfo;
-    auto *           sampler     = _device->getSampler(samplerInfo);
-    auto *           pixelBuffer = armodule->getCameraTextureRef();
-    gfx::TextureInfo yTexInfo;
-    yTexInfo.usage  = gfx::TextureUsage::SAMPLED | gfx::TextureUsage::TRANSFER_SRC;
-    yTexInfo.format = gfx::Format::R8;
-    //yTexInfo.width = camera->width;
-    //yTexInfo.height = camera->height;
-    yTexInfo.externalRes = pixelBuffer;
-    yTexInfo.layerCount  = 0;
-    gfx::TextureInfo cbcrTexInfo;
-    cbcrTexInfo.usage  = gfx::TextureUsage::SAMPLED | gfx::TextureUsage::TRANSFER_SRC;
-    cbcrTexInfo.format = gfx::Format::RG8;
-    //cbcrTexInfo.width = camera->width * 0.5f;
-    //cbcrTexInfo.height = camera->height * 0.5f;
-    cbcrTexInfo.externalRes = pixelBuffer;
-    cbcrTexInfo.layerCount  = 1;
-    gfx::Texture *yTex      = _device->createTexture(yTexInfo);
-    gfx::Texture *cbcrTex   = _device->createTexture(cbcrTexInfo);
+    if (!_setTexFlag) {
+        auto* pixelBuffer = armodule->getCameraTextureRef();
+        if (pixelBuffer != nullptr) {
+            gfx::SamplerInfo samplerInfo;
+            auto* sampler = _device->getSampler(samplerInfo);
+            
+            gfx::TextureInfo yTexInfo;
+            yTexInfo.usage  = gfx::TextureUsage::SAMPLED | gfx::TextureUsage::TRANSFER_SRC;
+            yTexInfo.format = gfx::Format::R8;
+            // TODO: need improvement
+            // here do not effect exactly, just for CC_ASSERT in TextureValidator::doInit
+            yTexInfo.width = 1;
+            yTexInfo.height = 1;
+            yTexInfo.externalRes = pixelBuffer;
+            yTexInfo.layerCount = 0;
+            gfx::TextureInfo cbcrTexInfo;
+            cbcrTexInfo.usage  = gfx::TextureUsage::SAMPLED | gfx::TextureUsage::TRANSFER_SRC;
+            cbcrTexInfo.format = gfx::Format::RG8;
+            // TODO: need improvement
+            // here do not effect exactly, just for CC_ASSERT in TextureValidator::doInit
+            cbcrTexInfo.width = 1;
+            cbcrTexInfo.height = 1;
+            cbcrTexInfo.externalRes = pixelBuffer;
+            cbcrTexInfo.layerCount  = 1;
+            gfx::Texture *yTex = _device->createTexture(yTexInfo);
+            gfx::Texture *cbcrTex = _device->createTexture(cbcrTexInfo);
+            
+            _descriptorSet->bindSampler(0, sampler);
+            _descriptorSet->bindTexture(0, yTex);
+            _descriptorSet->bindSampler(1, sampler);
+            _descriptorSet->bindTexture(1, cbcrTex);
+            _descriptorSet->bindBuffer(2, _ycbcrTransferBuffer);
+            _descriptorSet->update();
 
-    _descriptorSet->bindSampler(0, sampler);
-    _descriptorSet->bindTexture(0, yTex);
-    _descriptorSet->bindSampler(1, sampler);
-    _descriptorSet->bindTexture(1, cbcrTex);
-    _descriptorSet->bindBuffer(2, _ycbcrTransferBuffer);
-    _descriptorSet->update();
+            _setTexFlag = true;
+        }
+    }
 #endif
 
     const auto data = armodule->getCameraTexCoords();
