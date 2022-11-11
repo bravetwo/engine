@@ -23,13 +23,11 @@
 */
 
 import { ccclass, property } from '../../../core/data/class-decorator'
-import { ARFeature, FeatureEvent, FeatureType, IFeatureData, ARFeatureData} from '../ar-feature-base';
-import { ccenum } from '../../../core/value-types/enum';
+import { ARFeature, FeatureEvent, IFeatureData, ARFeatureData} from '../ar-feature-base';
 import { Quat, Vec2, Vec3 } from '../../../core/math';
 import { resources } from '../../../asset/asset-manager/bundle';
 import { ARModuleX } from '../ar-module';
-import { sys } from '../../../core';
-import { ARPlane, ARPlaneDetectionMode, ARPose, ARTrackable } from '../ar-define';
+import { ARPlane, ARPlaneDetectionMode, FeatureType } from '../ar-define';
 import { Prefab } from '../../../scene-graph/prefab';
 
 @ccclass('cc.PlaneDetectionConfig')
@@ -193,7 +191,7 @@ export class ARFeaturePlaneDetection extends ARFeature {
                         src[offset + 3],
                         src[offset + 4]
                     ),
-                    center: {
+                    pose: {
                         position: new Vec3(
                             src[offset + 5],
                             src[offset + 6],

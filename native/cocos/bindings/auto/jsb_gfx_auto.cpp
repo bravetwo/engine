@@ -133,9 +133,6 @@
 #define cc_gfx_Texture_hash_get(self_) self_->getHash()
   
 
-#define cc_gfx_Texture_nativeTexturePtr_get(self_) self_->getNativeTexturePtr()
-  
-
 #define cc_gfx_Queue_type_get(self_) self_->getType()
   
 
@@ -27126,6 +27123,34 @@ static bool js_cc_gfx_Texture_getRaw(se::State& s)
 }
 SE_BIND_FUNC(js_cc_gfx_Texture_getRaw) 
 
+static bool js_cc_gfx_Texture_getGLTextureHandle(se::State& s)
+{
+    // js_function
+    
+    CC_UNUSED bool ok = true;
+    const auto& args = s.args();
+    size_t argc = args.size();
+    cc::gfx::Texture *arg1 = (cc::gfx::Texture *) NULL ;
+    uint32_t result;
+    
+    if(argc != 0) {
+        SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 0);
+        return false;
+    }
+    arg1 = SE_THIS_OBJECT<cc::gfx::Texture>(s);
+    SE_PRECONDITION2(arg1, false, "%s: Invalid Native Object", __FUNCTION__); 
+    result = ((cc::gfx::Texture const *)arg1)->getGLTextureHandle();
+    // %typemap(out) SWIGTYPE
+    ok &= nativevalue_to_se(result, s.rval(), s.thisObject() /*ctx*/);
+    SE_PRECONDITION2(ok, false, "Texture_getGLTextureHandle, Error processing arguments");
+    SE_HOLD_RETURN_VALUE(result, s.thisObject(), s.rval());
+    
+    
+    
+    return true;
+}
+SE_BIND_FUNC(js_cc_gfx_Texture_getGLTextureHandle) 
+
 static bool js_cc_gfx_Texture_info_get(se::State& s)
 {
     CC_UNUSED bool ok = true;
@@ -27262,26 +27287,6 @@ static bool js_cc_gfx_Texture_hash_get(se::State& s)
 }
 SE_BIND_PROP_GET(js_cc_gfx_Texture_hash_get) 
 
-static bool js_cc_gfx_Texture_nativeTexturePtr_get(se::State& s)
-{
-    CC_UNUSED bool ok = true;
-    cc::gfx::Texture *arg1 = (cc::gfx::Texture *) NULL ;
-    uint32_t result;
-    
-    arg1 = SE_THIS_OBJECT<cc::gfx::Texture>(s);
-    SE_PRECONDITION2(arg1, false, "%s: Invalid Native Object", __FUNCTION__); 
-    result = cc_gfx_Texture_nativeTexturePtr_get(arg1);
-    // %typemap(out) SWIGTYPE
-    ok &= nativevalue_to_se(result, s.rval(), s.thisObject() /*ctx*/);
-    SE_PRECONDITION2(ok, false, "Texture_nativeTexturePtr_get, Error processing arguments");
-    SE_HOLD_RETURN_VALUE(result, s.thisObject(), s.rval());
-    
-    
-    
-    return true;
-}
-SE_BIND_PROP_GET(js_cc_gfx_Texture_nativeTexturePtr_get) 
-
 bool js_register_cc_gfx_Texture(se::Object* obj) {
     auto* cls = se::Class::create("Texture", obj, __jsb_cc_gfx_GFXObject_proto, nullptr); 
     
@@ -27292,13 +27297,13 @@ bool js_register_cc_gfx_Texture(se::Object* obj) {
     cls->defineProperty("format", _SE(js_cc_gfx_Texture_format_get), nullptr); 
     cls->defineProperty("size", _SE(js_cc_gfx_Texture_size_get), nullptr); 
     cls->defineProperty("hash", _SE(js_cc_gfx_Texture_hash_get), nullptr); 
-    cls->defineProperty("nativeTexturePtr", _SE(js_cc_gfx_Texture_nativeTexturePtr_get), nullptr); 
     
     cls->defineFunction("initialize", _SE(js_cc_gfx_Texture_initialize)); 
     cls->defineFunction("resize", _SE(js_cc_gfx_Texture_resize)); 
     cls->defineFunction("destroy", _SE(js_cc_gfx_Texture_destroy)); 
     cls->defineFunction("isTextureView", _SE(js_cc_gfx_Texture_isTextureView)); 
     cls->defineFunction("getRaw", _SE(js_cc_gfx_Texture_getRaw)); 
+    cls->defineFunction("getGLTextureHandle", _SE(js_cc_gfx_Texture_getGLTextureHandle)); 
     
     
     cls->defineStaticFunction("computeHash", _SE(js_cc_gfx_Texture_computeHash_static)); 

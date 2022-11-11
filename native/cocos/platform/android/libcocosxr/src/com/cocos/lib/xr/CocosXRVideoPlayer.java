@@ -36,6 +36,19 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 
 public class CocosXRVideoPlayer {
+    enum MediaPlayerState {
+        IDLE,
+        INITIALIZED,
+        PREPARING,
+        PREPARED,
+        STARTED,
+        STOPPED,
+        PAUSED,
+        END,
+        ERROR,
+        COMPLETED
+    };
+
     private static final String TAG = "CocosXRVideoPlayer";
     private String uniqueKey;
     private String eventName;
@@ -48,6 +61,7 @@ public class CocosXRVideoPlayer {
     private int videoSourceSizeHeight = 0;
     private int videoTextureWidth = 0;
     private int videoTextureHeight = 0;
+    private MediaPlayerState mediaPlayerState = MediaPlayerState.IDLE;
 
     CocosXRGLHelper.GLQuadScreen quadScreen;
     MediaPlayer mediaPlayer;
@@ -62,6 +76,7 @@ public class CocosXRVideoPlayer {
         this.mediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
             @Override
             public boolean onError(MediaPlayer mp, int what, int extra) {
+                mediaPlayerState = MediaPlayerState.ERROR;
                 Log.e(TAG, "onError " + what + "," + extra + "." + mp.toString());
                 CocosXRVideoManager.getInstance().sendVideoEvent(CocosXRVideoManager.VIDEO_EVENT_MEDIA_PLAYER_ERROR, eventName, uniqueKey);
                 return false;
@@ -78,6 +93,7 @@ public class CocosXRVideoPlayer {
         this.mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mp) {
+                mediaPlayerState = MediaPlayerState.PREPARED;
                 CocosXRVideoManager.getInstance().sendVideoEvent(CocosXRVideoManager.VIDEO_EVENT_MEDIA_PLAYER_PREPARED, eventName, uniqueKey);
                 CocosXRVideoManager.getInstance().sendVideoEvent(CocosXRVideoManager.VIDEO_EVENT_GET_DURATION, eventName, uniqueKey, String.valueOf(mp.getDuration()));
                 Log.d(TAG, "onPrepared." + mp+ ", getDuration." + mp.getDuration() + "," + mp.getVideoWidth() + "X" + mp.getVideoHeight() + "," + mp.isPlaying());
@@ -87,13 +103,14 @@ public class CocosXRVideoPlayer {
             @Override
             public void onCompletion(MediaPlayer mp) {
                 Log.d(TAG, "onCompletion." + mp.toString());
+                mediaPlayerState = MediaPlayerState.COMPLETED;
                 CocosXRVideoManager.getInstance().sendVideoEvent(CocosXRVideoManager.VIDEO_EVENT_MEDIA_PLAYER_PLAY_COMPLETE, eventName, uniqueKey);
             }
         });
         this.mediaPlayer.setOnSeekCompleteListener(new MediaPlayer.OnSeekCompleteListener() {
             @Override
             public void onSeekComplete(MediaPlayer mp) {
-                Log.d(TAG, "onSeekComplete." + mp.toString());
+                // Log.d(TAG, "onSeekComplete." + mp.toString());
                 CocosXRVideoManager.getInstance().sendVideoEvent(CocosXRVideoManager.VIDEO_EVENT_MEDIA_PLAYER_SEEK_COMPLETE, eventName, uniqueKey);
             }
         });
@@ -110,7 +127,7 @@ public class CocosXRVideoPlayer {
             }
         });
         this.mediaPlayer.setAudioAttributes(new AudioAttributes.Builder().setLegacyStreamType(AudioManager.STREAM_MUSIC).build());
-
+        mediaPlayerState = MediaPlayerState.INITIALIZED;
         Log.d(TAG, "constructor() " + key + "|" + eventName + "|" + quadScreen.toString());
     }
 
@@ -161,6 +178,7 @@ public class CocosXRVideoPlayer {
             runOnUIThread(new Runnable() {
                 @Override
                 public void run() {
+                    mediaPlayerState = MediaPlayerState.PREPARING;
                     mediaPlayer.prepareAsync();
                 }
             });
@@ -243,17 +261,20 @@ public class CocosXRVideoPlayer {
             public void run() {
                 Log.d(TAG, "- start");
                 mediaPlayer.start();
+                mediaPlayerState = MediaPlayerState.STARTED;
                 CocosXRVideoManager.getInstance().sendVideoEvent(CocosXRVideoManager.VIDEO_EVENT_GET_IS_PALYING, eventName, uniqueKey, String.valueOf(mediaPlayer.isPlaying() ? 1 : 0));
             }
         });
     }
 
     public void pause() {
+        if(!mediaPlayer.isPlaying()) return;
         runOnUIThread(new Runnable() {
             @Override
             public void run() {
                 Log.d(TAG, "- pause");
                 mediaPlayer.pause();
+                mediaPlayerState = MediaPlayerState.PAUSED;
                 CocosXRVideoManager.getInstance().sendVideoEvent(CocosXRVideoManager.VIDEO_EVENT_GET_IS_PALYING, eventName, uniqueKey, String.valueOf(mediaPlayer.isPlaying() ? 1 : 0));
             }
         });
@@ -265,6 +286,7 @@ public class CocosXRVideoPlayer {
             public void run() {
                 Log.d(TAG, "- stop");
                 mediaPlayer.stop();
+                mediaPlayerState = MediaPlayerState.STOPPED;
             }
         });
     }
@@ -275,6 +297,7 @@ public class CocosXRVideoPlayer {
             public void run() {
                 Log.d(TAG, "- reset");
                 mediaPlayer.reset();
+                mediaPlayerState = MediaPlayerState.IDLE;
             }
         });
     }
@@ -291,6 +314,7 @@ public class CocosXRVideoPlayer {
                         mediaPlayer.stop();
                         mediaPlayer.release();
                         mediaPlayer = null;
+                        mediaPlayerState = MediaPlayerState.END;
                     } catch (Exception e) {
                         e.printStackTrace();
                         Log.e(TAG, e.getLocalizedMessage());
@@ -302,7 +326,11 @@ public class CocosXRVideoPlayer {
     }
 
     public boolean isPlaying() {
-        return mediaPlayer.isPlaying();
+        return mediaPlayer == null ? false : mediaPlayer.isPlaying();
+    }
+
+    public boolean isStopped() {
+        return mediaPlayerState == MediaPlayerState.STOPPED;
     }
 
     public boolean isLooping() {
@@ -340,7 +368,7 @@ public class CocosXRVideoPlayer {
         runOnUIThread(new Runnable() {
             @Override
             public void run() {
-                Log.d(TAG, "- seekTo." + mSec);
+                // Log.d(TAG, "- seekTo." + mSec);
                 mediaPlayer.seekTo(mSec);
             }
         });

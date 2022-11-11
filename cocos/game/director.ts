@@ -27,10 +27,9 @@
 
 /* spell-checker:words COORD, Quesada, INITED, Renerer */
 
-import { DEBUG, EDITOR, BUILD, TEST } from 'internal:constants';
+import { DEBUG, EDITOR, BUILD, TEST, RUNTIME_BASED } from 'internal:constants';
 import { SceneAsset } from '../asset/assets/scene-asset';
-import { System, EventTarget, Scheduler, js, errorID, error, assertID, warnID, macro, cclegacy } from '../core';
-import { CCObject } from '../core/data/object';
+import { System, EventTarget, Scheduler, js, errorID, error, assertID, warnID, macro, cclegacy, CCObject, sys } from '../core';
 import { input } from '../input';
 import { Root } from '../root';
 import { Node, Scene } from '../scene-graph';
@@ -39,7 +38,6 @@ import NodeActivator from '../scene-graph/node-activator';
 import { containerManager } from '../core/memop/container-manager';
 import { uiRendererManager } from '../2d/framework/ui-renderer-manager';
 import { deviceManager } from '../gfx';
-import { ARModuleX } from '../xr/ar/ar-module';
 
 // ----------------------------------------------------------------------------------------------------------------------
 
@@ -687,11 +685,15 @@ export class Director extends EventTarget {
      * @param dt Delta time in seconds
      */
     public tick (dt: number) {
-        //console.log("tick dt", dt);
-        const armodule = ARModuleX.getInstance();
-        if(armodule && armodule.replaceFrameMoveFlag === true) return;
-
         if (!this._invalid) {
+            // XRConfigKey::SESSION_RUNNING 2
+            if (RUNTIME_BASED && sys.isXR) {
+                if (!xr.entry.platformLoopStart() && !xr.entry.getXRBoolConfig(2)) {
+                    return;
+                }
+                xr.entry.frameStart();
+            }
+
             this.emit(Director.EVENT_BEGIN_FRAME);
             if (!EDITOR || cclegacy.GAME_VIEW) {
                 // @ts-expect-error _frameDispatchEvents is a private method.
@@ -731,52 +733,11 @@ export class Director extends EventTarget {
             containerManager.update(dt);
             this.emit(Director.EVENT_END_FRAME);
             this._totalFrames++;
-        }
-    }
 
-    // for webxr, temporary copy of tick
-    public xrTick (dt: number) {
-        //console.log("xrTick dt", dt, this._invalid, this._paused);
-        if (!this._invalid) {
-            this.emit(Director.EVENT_BEGIN_FRAME);
-            if (!EDITOR || legacyCC.GAME_VIEW) {
-                // @ts-expect-error _frameDispatchEvents is a private method.
-                input._frameDispatchEvents();
+            if (RUNTIME_BASED && sys.isXR) {
+                xr.entry.frameEnd();
+                xr.entry.platformLoopEnd();
             }
-            // Update
-            if (!this._paused) {
-                this.emit(Director.EVENT_BEFORE_UPDATE);
-                // Call start for new added components
-                this._compScheduler.startPhase();
-                // Update for components
-                this._compScheduler.updatePhase(dt);
-                // Update systems
-                for (let i = 0; i < this._systems.length; ++i) {
-                    this._systems[i].update(dt);
-                }
-                // Late update for components
-                this._compScheduler.lateUpdatePhase(dt);
-                // User can use this event to do things after update
-                this.emit(Director.EVENT_AFTER_UPDATE);
-                // Destroy entities that have been removed recently
-                CCObject._deferredDestroy();
-
-                // Post update systems
-                for (let i = 0; i < this._systems.length; ++i) {
-                    this._systems[i].postUpdate(dt);
-                }
-            }
-
-            this.emit(Director.EVENT_BEFORE_DRAW);
-            uiRendererManager.updateAllDirtyRenderers();
-            this._root!.frameMove(dt);
-            this.emit(Director.EVENT_AFTER_DRAW);
-
-            Node.resetHasChangedFlags();
-            Node.clearNodeArray();
-            containerManager.update(dt);
-            this.emit(Director.EVENT_END_FRAME);
-            this._totalFrames++;
         }
     }
 

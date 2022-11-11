@@ -97,7 +97,7 @@ int CocosApplication::init() {
     IScreen *screen = _engine->getInterface<IScreen>();
     float pixelRatio = screen->getDevicePixelRatio();
     uint32_t windowId = _systemWindow->getWindowId();
-    events::Resize::broadcast(logicSize.x * pixelRatio, logicSize.y * pixelRatio, windowId);
+    events::Resize::broadcast(logicSize.width * pixelRatio, logicSize.height * pixelRatio, windowId);
 #endif
     return 0;
 }
@@ -126,6 +126,18 @@ void CocosApplication::close() {
 
 BaseEngine::Ptr CocosApplication::getEngine() const {
     return _engine;
+}
+
+const std::vector<std::string> &CocosApplication::getArguments() const {
+    return _argv;
+}
+
+void CocosApplication::setArgumentsInternal(int argc, const char *argv[]) {
+    _argv.clear();
+    _argv.reserve(argc);
+    for (int i = 0; i < argc; ++i) {
+        _argv.emplace_back(argv[i]);
+    }
 }
 
 void CocosApplication::onStart() {

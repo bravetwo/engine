@@ -31,18 +31,24 @@ declare class XRRay {
 }
 //end
 
+export enum FeatureType {
+    None = 0,
+    Anchor = 1 << 0, 
+    PlaneDetection = 1 << 1, 
+    SceneMesh = 1 << 2,
+    ImageTracking = 1 << 3,
+    ObjectTracking = 1 << 4,
+    FaceTracking = 1 << 5
+}
 export interface ARPose {
     position : math.Vec3;
     rotation : math.Quat;
 }
 
-export interface ARTrackable {
-    id : number;
-    pose? : ARPose;
-}
-
-export interface ARAnchor extends ARTrackable {
-
+export interface ARAnchor {
+    id: number;
+    pose: ARPose;
+    trackingState?: number;
 }
 
 export enum ARPlaneDetectionMode {
@@ -54,8 +60,7 @@ export enum ARPlaneDetectionMode {
 }
 ccenum(ARPlaneDetectionMode)
 
-export interface ARPlane extends ARTrackable {
+export interface ARPlane extends ARAnchor {
     type : ARPlaneDetectionMode;
     extent : Vec2;
-    center : ARPose;
 }

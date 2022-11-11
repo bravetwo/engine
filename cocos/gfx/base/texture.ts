@@ -153,14 +153,6 @@ export abstract class Texture extends GFXObject {
         return this._isTextureView;
     }
 
-    /**
-     * @en Get texture id.
-     * @zh 纹理ID。
-     */
-    get nativeTexturePtr (): number {
-        return 0;
-    }
-
     protected _info: TextureInfo = new TextureInfo();
     protected _viewInfo: TextureViewInfo = new TextureViewInfo();
 
@@ -175,6 +167,8 @@ export abstract class Texture extends GFXObject {
     public abstract initialize (info: Readonly<TextureInfo> | Readonly<TextureViewInfo>): void;
 
     public abstract destroy (): void;
+
+    public abstract getGLTextureHandle (): number;
 
     /**
      * @en Resize texture.

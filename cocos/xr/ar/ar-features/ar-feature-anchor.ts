@@ -23,8 +23,8 @@
 */
 
 import { ccclass } from '../../../core/data/class-decorator'
-import { ARAnchor } from '../ar-define';
-import { ARFeature, ARFeatureData, FeatureEvent, FeatureType, IFeatureData} from '../ar-feature-base';
+import { ARAnchor, FeatureType } from '../ar-define';
+import { ARFeature, ARFeatureData, FeatureEvent, IFeatureData} from '../ar-feature-base';
 import { ARModuleX } from '../ar-module';
 
 
@@ -34,8 +34,8 @@ export class AnchorTrackingConfig extends ARFeatureData {
 
 }
 
-@ccclass('cc.ARFeatureAnchor')
-export class ARFeatureAnchor extends ARFeature {
+@ccclass('cc.ARFeatureAnchorTracking')
+export class ARFeatureAnchorTracking extends ARFeature {
     public get featureId(): FeatureType {
         return FeatureType.Anchor;
     }

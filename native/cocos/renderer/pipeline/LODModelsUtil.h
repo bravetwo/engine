@@ -1,5 +1,5 @@
 /****************************************************************************
- Copyright (c) 2020-2022 Xiamen Yaji Software Co., Ltd.
+ Copyright (c) 2022 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos.com
 
@@ -25,28 +25,20 @@
 
 #pragma once
 
-#include "physics/physx/joints/PhysXJoint.h"
-
 namespace cc {
-namespace physics {
+namespace scene {
+class Model;
+class Camera;
+class RenderScene;
+} // namespace scene
 
-class PhysXDistance final : public PhysXJoint, public IDistanceJoint {
+namespace pipeline {
+
+class LODModelsCachedUtils {
 public:
-    PhysXDistance() : _mPivotA(physx::PxZero),
-                      _mPivotB(physx::PxZero){};
-
-    ~PhysXDistance() override = default;
-    void setPivotA(float x, float y, float z) override;
-    void setPivotB(float x, float y, float z) override;
-    void updateScale0() override;
-    void updateScale1() override;
-
-private:
-    void onComponentSet() override;
-    void updatePose();
-    physx::PxVec3 _mPivotA;
-    physx::PxVec3 _mPivotB;
+    static void updateCachedLODModels(const scene::RenderScene *scene, const scene::Camera *camera);
+    static bool isLODModelCulled(scene::Model *model);
+    static void clearCachedLODModels();
 };
-
-} // namespace physics
+} // namespace pipeline
 } // namespace cc

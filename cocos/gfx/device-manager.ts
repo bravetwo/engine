@@ -166,6 +166,10 @@ export class DeviceManager {
         const windowSize = screen.windowSize;
         swapchainInfo.width = windowSize.width;
         swapchainInfo.height = windowSize.height;
+        if (sys.isXR) {
+            swapchainInfo.width = xr.entry.getXRIntConfig(7); // XRConfigKey::SWAPCHAIN_WIDTH
+            swapchainInfo.height = xr.entry.getXRIntConfig(8); // XRConfigKey::SWAPCHAIN_HEIGHT
+        }
         this._swapchain = this._gfxDevice.createSwapchain(swapchainInfo);
     }
 

@@ -34,7 +34,7 @@ import { Sampler } from './states/sampler';
 import { GeneralBarrier } from './states/general-barrier';
 import { TextureBarrier } from './states/texture-barrier';
 import { BufferBarrier } from './states/buffer-barrier';
-import { GCObject } from '../../core/data/gc-object';
+import { GCObject } from '../../core';
 
 interface ICopyable { copy (info: ICopyable): ICopyable; }
 
@@ -1689,14 +1689,12 @@ export class FramebufferInfo {
         public renderPass: RenderPass = null!,
         public colorTextures: Texture[] = [],
         public depthStencilTexture: Texture | null = null,
-        public externalSrc: any = null // for webxr framebuffer
     ) {}
 
     public copy (info: Readonly<FramebufferInfo>) {
         this.renderPass = info.renderPass;
         this.colorTextures = info.colorTextures.slice();
         this.depthStencilTexture = info.depthStencilTexture;
-        this.externalSrc = info.externalSrc;
         return this;
     }
 }

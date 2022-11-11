@@ -222,8 +222,9 @@ cc_inspect_values(
 )
 
 if(USE_XR)
-    set(USE_WEBSOCKET_SERVER ON)
-    set(USE_XR_REMOTE_PREVIEW ON)
+    if(USE_XR_REMOTE_PREVIEW)
+        set(USE_WEBSOCKET_SERVER ON)
+    endif()
 endif()
 
 include(${EXTERNAL_ROOT}/CMakeLists.txt)
@@ -402,6 +403,7 @@ cocos_source_files(
     cocos/core/event/EventBus.cpp
     cocos/core/event/EventTarget.h
     cocos/core/event/intl/EventIntl.h
+    cocos/core/event/intl/List.h
     cocos/core/event/intl/EventTargetMacros.h
     cocos/core/event/intl/EventBusMacros.h
 )
@@ -626,6 +628,8 @@ if(WINDOWS)
             cocos/platform/empty/modules/Screen.h
             cocos/platform/empty/modules/SystemWindow.cpp
             cocos/platform/empty/modules/SystemWindow.h
+            cocos/platform/empty/modules/SystemWindowManager.cpp
+            cocos/platform/empty/modules/SystemWindowManager.h
         )
     else()
         cocos_source_files(
@@ -693,6 +697,8 @@ elseif(MACOSX)
             cocos/platform/empty/modules/Screen.h
             cocos/platform/empty/modules/SystemWindow.cpp
             cocos/platform/empty/modules/SystemWindow.h
+            cocos/platform/empty/modules/SystemWindowManager.cpp
+            cocos/platform/empty/modules/SystemWindowManager.h
         )
     else()
         cocos_source_files(
@@ -742,6 +748,8 @@ elseif(LINUX)
             cocos/platform/empty/modules/Screen.h
             cocos/platform/empty/modules/SystemWindow.cpp
             cocos/platform/empty/modules/SystemWindow.h
+            cocos/platform/empty/modules/SystemWindowManager.cpp
+            cocos/platform/empty/modules/SystemWindowManager.h
         )
     else()
         cocos_source_files(
@@ -1234,6 +1242,8 @@ cocos_source_files(
                  cocos/renderer/pipeline/Define.cpp
                  cocos/renderer/pipeline/GlobalDescriptorSetManager.h
                  cocos/renderer/pipeline/GlobalDescriptorSetManager.cpp
+                 cocos/renderer/pipeline/LODModelsUtil.cpp
+                 cocos/renderer/pipeline/LODModelsUtil.h
                  cocos/renderer/pipeline/InstancedBuffer.cpp
                  cocos/renderer/pipeline/InstancedBuffer.h
                  cocos/renderer/pipeline/PipelineStateManager.cpp
@@ -1386,6 +1396,8 @@ cocos_source_files(
                  cocos/scene/Fog.cpp
                  cocos/scene/Light.h
                  cocos/scene/Light.cpp
+                 cocos/scene/LODGroup.h
+                 cocos/scene/LODGroup.cpp
                  cocos/scene/Model.h
                  cocos/scene/Model.cpp
                  cocos/scene/Pass.h
@@ -1792,8 +1804,8 @@ if(USE_PHYSICS_PHYSX)
         cocos/physics/physx/joints/PhysXJoint.cpp
         cocos/physics/physx/joints/PhysXRevolute.h
         cocos/physics/physx/joints/PhysXRevolute.cpp
-        cocos/physics/physx/joints/PhysXDistance.h
-        cocos/physics/physx/joints/PhysXDistance.cpp
+        cocos/physics/physx/joints/PhysXSpherical.h
+        cocos/physics/physx/joints/PhysXSpherical.cpp
     )
     cocos_source_files(
         NO_WERROR NO_UBUILD cocos/bindings/auto/jsb_physics_auto.cpp

@@ -52,8 +52,7 @@ import {
     IWebGL2GPUUniformSamplerTexture,
     IWebGL2GPURenderPass,
 } from './webgl2-gpu-objects';
-import { CachedArray, error, errorID, debug } from '../../core';
-//import { WebGLFramebuffer } from '../webgl/webgl-framebuffer';
+import { CachedArray, error, errorID, debug, sys } from '../../core';
 
 const WebGLWraps: GLenum[] = [
     0x2901, // WebGLRenderingContext.REPEAT
@@ -1439,21 +1438,20 @@ export function WebGL2CmdFuncCreateFramebuffer (device: WebGL2Device, gpuFramebu
         const tex = gpuFramebuffer.gpuColorViews[i].gpuTexture;
         if (tex.isSwapchainTexture) {
             gpuFramebuffer.isOffscreen = false;
+            if (sys.isXR) {
+                // huaweivr, step frame need change
+                gpuFramebuffer.glFramebuffer = xr.entry.getXrFrameBuffer();
+            }
             return;
         }
     }
 
     const { gl } = device;
     const attachments: GLenum[] = [];
-    
-    if(!gpuFramebuffer.glFramebuffer) { // for webxr framebuffer
-        const glFramebuffer = gl.createFramebuffer();
-        if (glFramebuffer) gpuFramebuffer.glFramebuffer = glFramebuffer;
-    }
-    //const glFramebuffer = gl.createFramebuffer();
-    //if (glFramebuffer) {
-    if(gpuFramebuffer.glFramebuffer) {
-        //gpuFramebuffer.glFramebuffer = glFramebuffer;
+
+    const glFramebuffer = gl.createFramebuffer();
+    if (glFramebuffer) {
+        gpuFramebuffer.glFramebuffer = glFramebuffer;
 
         if (device.stateCache.glFramebuffer !== gpuFramebuffer.glFramebuffer) {
             gl.bindFramebuffer(gl.FRAMEBUFFER, gpuFramebuffer.glFramebuffer);

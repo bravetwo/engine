@@ -1,8 +1,23 @@
 import { HMDCallback } from 'pal/input';
 import { InputEventType } from '../../../cocos/input/types/event-enum';
 import { EventTarget } from '../../../cocos/core/event/event-target';
+import { EventHMD } from '../../../cocos/input/types';
 import { InputSourcePosition, InputSourceOrientation } from '../input-source';
 import { Vec3, Quat } from '../../../cocos/core/math';
+import { PoseInfo, minigame } from 'pal/minigame';
+
+enum Pose {
+    VIEW_LEFT,
+    VIEW_RIGHT,
+    HEAD_MIDDLE,
+}
+
+interface IPoseValue {
+    position: Vec3;
+    orientation: Quat;
+}
+
+type NativePoseState = Record<Pose, IPoseValue>
 
 export class HMDInputDevice {
     public get viewLeftPosition () { return this._viewLeftPosition; }
@@ -21,8 +36,25 @@ export class HMDInputDevice {
     private _headMiddlePosition!: InputSourcePosition;
     private _headMiddleOrientation!: InputSourceOrientation;
 
+    private _nativePoseState: NativePoseState = {
+        [Pose.VIEW_LEFT]: { position: Vec3.ZERO, orientation: Quat.IDENTITY },
+        [Pose.VIEW_RIGHT]: { position: Vec3.ZERO, orientation: Quat.IDENTITY },
+        [Pose.HEAD_MIDDLE]: { position: Vec3.ZERO, orientation: Quat.IDENTITY },
+    }
+
     constructor () {
         this._initInputSource();
+        this._registerEvent();
+    }
+
+    private _registerEvent () {
+        minigame.onHMDPoseInput = (infoList: PoseInfo[]) => {
+            for (let i = 0; i < infoList.length; ++i) {
+                const info = infoList[i];
+                this._updateNativePoseState(info);
+            }
+            this._eventTarget.emit(InputEventType.HMD_POSE_INPUT, new EventHMD(InputEventType.HMD_POSE_INPUT, this));
+        };
     }
 
     /**
@@ -32,20 +64,36 @@ export class HMDInputDevice {
         this._eventTarget.on(eventType, callback, target);
     }
 
+    private _updateNativePoseState (info: PoseInfo) {
+        switch (info.code) {
+            case 0:
+                this._nativePoseState[Pose.VIEW_LEFT] = { position: new Vec3(info.x, info.y, info.z), orientation: new Quat(info.quaternionX, info.quaternionY, info.quaternionZ, info.quaternionW) };
+                break;
+            case 3:
+                this._nativePoseState[Pose.VIEW_RIGHT] = { position: new Vec3(info.x, info.y, info.z), orientation: new Quat(info.quaternionX, info.quaternionY, info.quaternionZ, info.quaternionW) };
+                break;
+            case 6:
+                this._nativePoseState[Pose.HEAD_MIDDLE] = { position: new Vec3(info.x, info.y, info.z), orientation: new Quat(info.quaternionX, info.quaternionY, info.quaternionZ, info.quaternionW) };
+                break;
+            default:
+                break;
+        }
+    }
+
     private _initInputSource () {
         this._viewLeftPosition = new InputSourcePosition();
-        this._viewLeftPosition.getValue = () => Vec3.ZERO;
+        this._viewLeftPosition.getValue = () => this._nativePoseState[Pose.VIEW_LEFT].position;
         this._viewLeftOrientation = new InputSourceOrientation();
-        this._viewLeftOrientation.getValue = () =>  Quat.IDENTITY;
+        this._viewLeftOrientation.getValue = () => this._nativePoseState[Pose.VIEW_LEFT].orientation;
 
         this._viewRightPosition = new InputSourcePosition();
-        this._viewRightPosition.getValue = () => Vec3.ZERO;
+        this._viewRightPosition.getValue = () => this._nativePoseState[Pose.VIEW_RIGHT].position;
         this._viewRightOrientation = new InputSourceOrientation();
-        this._viewRightOrientation.getValue = () =>  Quat.IDENTITY;
+        this._viewRightOrientation.getValue = () => this._nativePoseState[Pose.VIEW_RIGHT].orientation;
 
         this._headMiddlePosition = new InputSourcePosition();
-        this._headMiddlePosition.getValue = () => Vec3.ZERO;
+        this._headMiddlePosition.getValue = () => this._nativePoseState[Pose.HEAD_MIDDLE].position;
         this._headMiddleOrientation = new InputSourceOrientation();
-        this._headMiddleOrientation.getValue = () =>  Quat.IDENTITY;
+        this._headMiddleOrientation.getValue = () => this._nativePoseState[Pose.HEAD_MIDDLE].orientation;
     }
 }
