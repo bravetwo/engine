@@ -27,8 +27,9 @@
 
 #include <memory>
 #include <string>
-#include "base/Macros.h"
 #include "ar/IARAPI.h"
+#include "base/Macros.h"
+
 
 namespace cc {
 namespace ar {
@@ -54,7 +55,7 @@ public:
     Matrix getCameraViewMatrix() const;
     Matrix getCameraProjectionMatrix() const;
     TexCoords getCameraTexCoords() const;
-    
+
     void setDisplayGeometry(uint32_t rotation, uint32_t width, uint32_t height) const;
     void setCameraTextureName(int id);
     void* getCameraTextureRef() const;
@@ -108,7 +109,7 @@ public:
     float* getAddedFacesInfo() const;
     float* getUpdatedFacesInfo() const;
     float* getRemovedFacesInfo() const;
-    float* getFaceBlendShapesOf(int faceRef)  const;
+    float* getFaceBlendShapesOf(int faceRef) const;
 
 private:
     std::unique_ptr<IARAPI> _impl;

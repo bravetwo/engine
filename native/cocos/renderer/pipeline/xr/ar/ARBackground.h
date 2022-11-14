@@ -23,17 +23,16 @@
  ****************************************************************************/
 
 #pragma once
-#include "pipeline/RenderStage.h"
-#include "gfx-base/GFXPipelineLayout.h"
-#include "gfx-base/GFXPipelineState.h"
-
-#if CC_PLATFORM == CC_PLATFORM_ANDROID
-#include "gfx-gles3/GLES3Wrangler.h"
-#endif
 
 #include "gfx-agent/DeviceAgent.h"
 #include "gfx-base/GFXDef.h"
 #include "gfx-base/GFXDevice.h"
+#include "gfx-base/GFXPipelineLayout.h"
+#include "gfx-base/GFXPipelineState.h"
+#include "pipeline/RenderStage.h"
+#if CC_PLATFORM == CC_PLATFORM_ANDROID
+    #include "gfx-gles3/GLES3Wrangler.h"
+#endif
 
 namespace cc {
 namespace pipeline {

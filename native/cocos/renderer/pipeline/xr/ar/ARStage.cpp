@@ -22,9 +22,10 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
 ****************************************************************************/
-#include "pipeline/xr/ar/ARBackground.h"
 #include "pipeline/xr/ar/ARStage.h"
 #include "ar/ARModule.h"
+#include "pipeline/xr/ar/ARBackground.h"
+
 //#include "pipeline/BatchedBuffer.h"
 #include "pipeline/Enum.h"
 //#include "pipeline/InstancedBuffer.h"
@@ -37,14 +38,15 @@
 //#include "pipeline/RenderQueue.h"
 #include "pipeline/forward/ForwardPipeline.h"
 //#include "pipeline/helper/Utils.h"
+#include "core/scene-graph/Node.h"
 #include "gfx-base/GFXCommandBuffer.h"
 #include "gfx-base/GFXDef-common.h"
 #include "gfx-base/GFXFramebuffer.h"
 #include "gfx-base/GFXTexture.h"
 #include "pipeline/RenderPipeline.h"
-#include "core/scene-graph/Node.h"
 #include "scene/Camera.h"
 #include "scene/RenderWindow.h"
+
 
 namespace cc {
 namespace pipeline {
@@ -91,7 +93,7 @@ void ARStage::render(scene::Camera *camera) {
     int apiState = armodule->getAPIState();
     if (apiState < 0) return;
     const Node *camNode = camera->getNode();
-    if(armodule->getCameraId() != camNode->_id) return;
+    if (armodule->getCameraId() != camNode->_id) return;
 
     struct RenderData {
         framegraph::TextureHandle outputTex;
@@ -112,12 +114,12 @@ void ARStage::render(scene::Camera *camera) {
         data.outputTex = builder.create(RenderPipeline::fgStrHandleOutColorTexture, colorTexInfo);
 
         framegraph::RenderTargetAttachment::Descriptor colorAttachmentInfo;
-        colorAttachmentInfo.usage      = framegraph::RenderTargetAttachment::Usage::COLOR;
-        colorAttachmentInfo.loadOp     = gfx::LoadOp::CLEAR;
+        colorAttachmentInfo.usage = framegraph::RenderTargetAttachment::Usage::COLOR;
+        colorAttachmentInfo.loadOp = gfx::LoadOp::CLEAR;
 
         colorAttachmentInfo.endAccesses = {gfx::AccessFlagBit::COLOR_ATTACHMENT_WRITE};
 
-        data.outputTex   = builder.write(data.outputTex, colorAttachmentInfo);
+        data.outputTex = builder.write(data.outputTex, colorAttachmentInfo);
 
         // depth
         gfx::TextureInfo depthTexInfo{
@@ -128,11 +130,11 @@ void ARStage::render(scene::Camera *camera) {
             static_cast<uint>(_pipeline->getHeight() * shadingScale),
         };
         framegraph::RenderTargetAttachment::Descriptor depthAttachmentInfo;
-        depthAttachmentInfo.usage        = framegraph::RenderTargetAttachment::Usage::DEPTH_STENCIL;
-        depthAttachmentInfo.loadOp       = gfx::LoadOp::CLEAR;
-        depthAttachmentInfo.clearDepth   = camera->getClearDepth();
+        depthAttachmentInfo.usage = framegraph::RenderTargetAttachment::Usage::DEPTH_STENCIL;
+        depthAttachmentInfo.loadOp = gfx::LoadOp::CLEAR;
+        depthAttachmentInfo.clearDepth = camera->getClearDepth();
         depthAttachmentInfo.clearStencil = camera->getClearStencil();
-        depthAttachmentInfo.endAccesses  = {gfx::AccessFlagBit::DEPTH_STENCIL_ATTACHMENT_WRITE};
+        depthAttachmentInfo.endAccesses = {gfx::AccessFlagBit::DEPTH_STENCIL_ATTACHMENT_WRITE};
 
         data.depth = builder.create(RenderPipeline::fgStrHandleOutDepthTexture, depthTexInfo);
         data.depth = builder.write(data.depth, depthAttachmentInfo);

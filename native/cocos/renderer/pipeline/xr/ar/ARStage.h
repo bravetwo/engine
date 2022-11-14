@@ -46,9 +46,9 @@ public:
     void render(scene::Camera *camera) override;
 
 private:
-    static RenderStageInfo    initInfo;
+    static RenderStageInfo initInfo;
 
-    ARBackground * _arBackground = nullptr;
+    ARBackground *_arBackground = nullptr;
 };
 
 } // namespace pipeline

@@ -30,8 +30,8 @@
 namespace cc {
 namespace ar {
 
-using Pose      = std::array<float, 7>;
-using Matrix    = std::array<float, 16>;
+using Pose = std::array<float, 7>;
+using Matrix = std::array<float, 16>;
 using TexCoords = std::array<float, 8>;
 using Color = std::array<float, 4>;
 using Plane = std::array<float, 12>;
@@ -39,7 +39,7 @@ using LightDir = std::array<float, 3>;
 
 enum class ARPlaneDetectionMode : uint32_t {
     HORIZONTAL_UPWARD = 1 << 0,
-    HORIZONTAL_DOWNWARD = 1 << 1, 
+    HORIZONTAL_DOWNWARD = 1 << 1,
     VERTICAL = 1 << 2,
     HORIZONTAL = HORIZONTAL_UPWARD | HORIZONTAL_DOWNWARD,
     ALL = HORIZONTAL | VERTICAL
@@ -62,9 +62,9 @@ public:
     virtual void config(int featureMask) = 0;
     virtual uint32_t getSupportMask() = 0;
     virtual void start() = 0;
-    virtual void start(void *env, void *context) = 0;
+    virtual void start(void* env, void* context) = 0;
     virtual void resume() = 0;
-    virtual void resume(void *env, void *context) = 0;
+    virtual void resume(void* env, void* context) = 0;
     virtual void pause() = 0;
     virtual void update() = 0;
     virtual int getAPIState() = 0;
@@ -96,7 +96,6 @@ public:
     virtual float* getAddedPlanesInfo() = 0;
     virtual float* getUpdatedPlanesInfo() = 0;
     virtual float* getRemovedPlanesInfo() = 0;
-//    virtual std::vector<ARPlane> getAdded(){return {};}
 
     // scene mesh reconstruction
     virtual void enableSceneMesh(bool enable) = 0;
@@ -128,7 +127,7 @@ public:
     virtual float* getAddedFacesInfo() = 0;
     virtual float* getUpdatedFacesInfo() = 0;
     virtual float* getRemovedFacesInfo() = 0;
-    virtual float* getFaceBlendShapesOf(int faceRef)  = 0;
+    virtual float* getFaceBlendShapesOf(int faceRef) = 0;
 };
 
 } // namespace ar

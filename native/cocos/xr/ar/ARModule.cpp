@@ -28,32 +28,33 @@
 
 #include "ar/ARModule.h"
 
-#define USE_AR_NDK 1
+#define USE_AR_NDK 0
 
 #if CC_PLATFORM == CC_PLATFORM_ANDROID
 
-#ifdef USE_AR_NDK
-#include "platform/android/AndroidPlatform.h"
-#include "platform/BasePlatform.h"
-#include "ar/ARNDKLib.h"
+    #if USE_AR_NDK > 0
+        #include "ar/ARNDKLib.h"
+        #include "platform/BasePlatform.h"
+        #include "platform/android/AndroidPlatform.h"
+
 //#include "ar/module/ARNDKLib.h"
 using ARAPIImpl = cc::ar::ARNDKLib;
-#else
-#include "ar/ARAndroidLib.h"
+    #else
+        #include "ar/ARAndroidLib.h"
 using ARAPIImpl = cc::ar::ARAndroidLib;
-#endif
+    #endif
 
 #elif CC_PLATFORM == CC_PLATFORM_MAC_IOS
-//#include "ar/ios/ARKitAPIImpl.h"
-//using ARAPIImpl = cc::ar::ARKitAPIImpl;
-//#include "ar/ios/ARKitLibImpl.h"
-#include "ar/ARKitLibImpl.h"
+    //#include "ar/ios/ARKitAPIImpl.h"
+    //using ARAPIImpl = cc::ar::ARKitAPIImpl;
+    //#include "ar/ios/ARKitLibImpl.h"
+    #include "ar/ARKitLibImpl.h"
 using ARAPIImpl = cc::ar::ARKitLibImpl;
 #elif CC_PLATFORM == CC_PLATFORM_WINDOWS
-#include "ar/IARAPI.h"
+    #include "ar/IARAPI.h"
 #endif
 
-#include  "bindings/jswrapper/SeApi.h"
+#include "bindings/jswrapper/SeApi.h"
 
 namespace cc {
 namespace ar {
@@ -65,8 +66,7 @@ ARModule::ARModule() {
 #endif
 }
 
-ARModule::~ARModule()
-{
+ARModule::~ARModule() {
     //DLLOG("Destruct ARModule %p", this);
 }
 
@@ -85,10 +85,10 @@ int ARModule::getSupportMask() {
 
 void ARModule::start() {
 #if CC_PLATFORM == CC_PLATFORM_ANDROID && USE_AR_NDK > 0
-    auto *platform = cc::BasePlatform::getPlatform();
-    auto *androidPlatform = static_cast<cc::AndroidPlatform *>(platform);
-    auto *env = cc::AndroidPlatform::getEnv();
-    auto *activity = androidPlatform->getActivity();
+    auto* platform = cc::BasePlatform::getPlatform();
+    auto* androidPlatform = static_cast<cc::AndroidPlatform*>(platform);
+    auto* env = cc::AndroidPlatform::getEnv();
+    auto* activity = androidPlatform->getActivity();
     //_impl->start(androidPlatform->getActivity());
     _impl->start(env, activity);
 #else
@@ -125,7 +125,6 @@ void ARModule::setCameraTextureName(int id) {
     _impl->setCameraTextureName(id);
 }
 
-
 Pose ARModule::getCameraPose() const {
     return _impl->getCameraPose();
 }
@@ -137,7 +136,6 @@ Matrix ARModule::getCameraViewMatrix() const {
 Matrix ARModule::getCameraProjectionMatrix() const {
     return _impl->getCameraProjectionMatrix();
 }
-
 
 TexCoords ARModule::getCameraTexCoords() const {
     return _impl->getCameraTexCoords();
@@ -201,7 +199,7 @@ float* ARModule::getUpdatedPlanesInfo() const {
     return _impl->getUpdatedPlanesInfo();
 }
 std::vector<ARPlane> ARModule::getAdded() const {
-//    return _impl->getAdded();
+    //    return _impl->getAdded();
     return {};
 }
 #pragma endregion // plane detection
@@ -233,7 +231,7 @@ void ARModule::endRequireSceneMesh() const {
 }
 #pragma endregion // scene mesh reconstruction
 
-#pragma region image recognition & tracking
+#pragma region image recognition& tracking
 void ARModule::enableImageTracking(bool enable) const {
     _impl->enableImageTracking(enable);
 }
@@ -254,7 +252,7 @@ float* ARModule::getRemovedImagesInfo() const {
 }
 #pragma endregion // image recognition & tracking
 
-#pragma region object recognition & tracking
+#pragma region object recognition& tracking
 void ARModule::enableObjectTracking(bool enable) const {
     _impl->enableObjectTracking(enable);
 }
@@ -272,7 +270,7 @@ float* ARModule::getRemovedObjectsInfo() const {
 }
 #pragma endregion // object recognition & tracking
 
-#pragma region face detection & tracking
+#pragma region face detection& tracking
 void ARModule::enableFaceTracking(bool enable) const {
     _impl->enableFaceTracking(enable);
 }
@@ -285,7 +283,7 @@ float* ARModule::getUpdatedFacesInfo() const {
 float* ARModule::getRemovedFacesInfo() const {
     return _impl->getRemovedFacesInfo();
 }
-float* ARModule::getFaceBlendShapesOf(int faceRef)  const {
+float* ARModule::getFaceBlendShapesOf(int faceRef) const {
     return _impl->getFaceBlendShapesOf(faceRef);
 }
 #pragma endregion // face detection & tracking
