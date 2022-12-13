@@ -192,6 +192,7 @@ using namespace cc;
 %rename(_initLocalSHDescriptors) cc::scene::Model::initLocalSHDescriptors;
 %rename(_updateLocalSHDescriptors) cc::scene::Model::updateLocalSHDescriptors;
 %rename(_updateInstancedAttributes) cc::scene::Model::updateInstancedAttributes;
+%rename(_updateWorldBoundDescriptors) cc::scene::Model::updateWorldBoundDescriptors;
 
 %rename(_load) cc::Scene::load;
 %rename(_activate) cc::Scene::activate;
@@ -448,6 +449,7 @@ using namespace cc;
 %attribute(cc::scene::Model, cc::scene::Model::Type, type, getType, setType);
 %attribute(cc::scene::Model, bool, isDynamicBatching, isDynamicBatching, setDynamicBatching);
 %attribute(cc::scene::Model, uint32_t, priority, getPriority, setPriority);
+%attribute(cc::scene::Model, int32_t, tetrahedronIndex, getTetrahedronIndex, setTetrahedronIndex);
 %attribute(cc::scene::Model, bool, useLightProbe, getUseLightProbe, setUseLightProbe);
 %attribute(cc::scene::Model, bool, bakeToReflectionProbe, getBakeToReflectionProbe, setBakeToReflectionProbe);
 %attribute(cc::scene::Model, uint32_t, reflectionProbeType, getReflectionProbeType, setReflectionProbeType);
@@ -531,7 +533,10 @@ using namespace cc;
 %attribute(cc::scene::ReflectionProbe, uint32_t, visibility, getVisibility, setVisibility);
 %attribute(cc::scene::ReflectionProbe, cc::Vec3&, size, getBoudingSize, setBoudingSize);
 %attribute(cc::scene::ReflectionProbe, cc::geometry::AABB *, boundingBox, getBoundingBox);
+%attribute(cc::scene::ReflectionProbe, cc::Node*, previewSphere, getPreviewSphere, setPreviewSphere);
+%attribute(cc::scene::ReflectionProbe, cc::Node*, previewPlane, getPreviewPlane, setPreviewPlane);
 
+%attribute(cc::SceneGlobals, bool, bakedWithStationaryMainLight, getBakedWithStationaryMainLight, setBakedWithStationaryMainLight);
 
 
 // ----- Import Section ------

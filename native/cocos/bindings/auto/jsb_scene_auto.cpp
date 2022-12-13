@@ -813,6 +813,10 @@ using namespace cc;
 #define cc_scene_Model_priority_set(self_, val_) self_->setPriority(val_)
   
 
+#define cc_scene_Model_tetrahedronIndex_get(self_) self_->getTetrahedronIndex()
+#define cc_scene_Model_tetrahedronIndex_set(self_, val_) self_->setTetrahedronIndex(val_)
+  
+
 #define cc_scene_Model_useLightProbe_get(self_) self_->getUseLightProbe()
 #define cc_scene_Model_useLightProbe_set(self_, val_) self_->setUseLightProbe(val_)
   
@@ -1097,6 +1101,18 @@ using namespace cc;
   
 
 #define cc_scene_ReflectionProbe_boundingBox_get(self_) self_->getBoundingBox()
+  
+
+#define cc_scene_ReflectionProbe_previewSphere_get(self_) self_->getPreviewSphere()
+#define cc_scene_ReflectionProbe_previewSphere_set(self_, val_) self_->setPreviewSphere(val_)
+  
+
+#define cc_scene_ReflectionProbe_previewPlane_get(self_) self_->getPreviewPlane()
+#define cc_scene_ReflectionProbe_previewPlane_set(self_, val_) self_->setPreviewPlane(val_)
+  
+
+#define cc_SceneGlobals_bakedWithStationaryMainLight_get(self_) self_->getBakedWithStationaryMainLight()
+#define cc_SceneGlobals_bakedWithStationaryMainLight_set(self_, val_) self_->setBakedWithStationaryMainLight(val_)
   
 
 
@@ -4667,10 +4683,48 @@ static bool js_cc_SceneGlobals_setLightProbeInfo(se::State& s)
 }
 SE_BIND_FUNC(js_cc_SceneGlobals_setLightProbeInfo) 
 
+static bool js_cc_SceneGlobals_bakedWithStationaryMainLight_set(se::State& s)
+{
+    CC_UNUSED bool ok = true;
+    const auto& args = s.args();
+    size_t argc = args.size();
+    cc::SceneGlobals *arg1 = (cc::SceneGlobals *) NULL ;
+    bool arg2 ;
+    
+    arg1 = SE_THIS_OBJECT<cc::SceneGlobals>(s);
+    if (nullptr == arg1) return true;
+    
+    ok &= sevalue_to_native(args[0], &arg2);
+    SE_PRECONDITION2(ok, false, "Error processing arguments"); 
+    cc_SceneGlobals_bakedWithStationaryMainLight_set(arg1,arg2);
+    
+    
+    return true;
+}
+SE_BIND_PROP_SET(js_cc_SceneGlobals_bakedWithStationaryMainLight_set) 
+
+static bool js_cc_SceneGlobals_bakedWithStationaryMainLight_get(se::State& s)
+{
+    CC_UNUSED bool ok = true;
+    cc::SceneGlobals *arg1 = (cc::SceneGlobals *) NULL ;
+    bool result;
+    
+    arg1 = SE_THIS_OBJECT<cc::SceneGlobals>(s);
+    if (nullptr == arg1) return true;
+    result = (bool)cc_SceneGlobals_bakedWithStationaryMainLight_get(arg1);
+    
+    ok &= nativevalue_to_se(result, s.rval(), s.thisObject());
+    
+    
+    return true;
+}
+SE_BIND_PROP_GET(js_cc_SceneGlobals_bakedWithStationaryMainLight_get) 
+
 bool js_register_cc_SceneGlobals(se::Object* obj) {
     auto* cls = se::Class::create("SceneGlobals", obj, nullptr, _SE(js_new_cc_SceneGlobals)); 
     
     cls->defineStaticProperty("__isJSB", se::Value(true), se::PropertyAttribute::READ_ONLY | se::PropertyAttribute::DONT_ENUM | se::PropertyAttribute::DONT_DELETE);
+    cls->defineProperty("bakedWithStationaryMainLight", _SE(js_cc_SceneGlobals_bakedWithStationaryMainLight_get), _SE(js_cc_SceneGlobals_bakedWithStationaryMainLight_set)); 
     
     cls->defineFunction("activate", _SE(js_cc_SceneGlobals_activate)); 
     cls->defineFunction("getAmbientInfo", _SE(js_cc_SceneGlobals_getAmbientInfo)); 
@@ -13763,7 +13817,7 @@ static bool js_cc_scene_Model__updateLocalSHDescriptors(se::State& s)
 }
 SE_BIND_FUNC(js_cc_scene_Model__updateLocalSHDescriptors) 
 
-static bool js_cc_scene_Model_updateWorldBoundDescriptors(se::State& s)
+static bool js_cc_scene_Model__updateWorldBoundDescriptors(se::State& s)
 {
     CC_UNUSED bool ok = true;
     const auto& args = s.args();
@@ -13789,7 +13843,7 @@ static bool js_cc_scene_Model_updateWorldBoundDescriptors(se::State& s)
     
     return true;
 }
-SE_BIND_FUNC(js_cc_scene_Model_updateWorldBoundDescriptors) 
+SE_BIND_FUNC(js_cc_scene_Model__updateWorldBoundDescriptors) 
 
 static bool js_cc_scene_Model_createBoundingShape(se::State& s)
 {
@@ -14400,53 +14454,6 @@ static bool js_cc_scene_Model_setBounds(se::State& s)
     return true;
 }
 SE_BIND_FUNC(js_cc_scene_Model_setBounds) 
-
-static bool js_cc_scene_Model_getTetrahedronIndex(se::State& s)
-{
-    CC_UNUSED bool ok = true;
-    const auto& args = s.args();
-    size_t argc = args.size();
-    cc::scene::Model *arg1 = (cc::scene::Model *) NULL ;
-    int32_t result;
-    
-    if(argc != 0) {
-        SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 0);
-        return false;
-    }
-    arg1 = SE_THIS_OBJECT<cc::scene::Model>(s);
-    if (nullptr == arg1) return true;
-    result = ((cc::scene::Model const *)arg1)->getTetrahedronIndex();
-    
-    ok &= nativevalue_to_se(result, s.rval(), s.thisObject()); 
-    
-    
-    return true;
-}
-SE_BIND_FUNC(js_cc_scene_Model_getTetrahedronIndex) 
-
-static bool js_cc_scene_Model_setTetrahedronIndex(se::State& s)
-{
-    CC_UNUSED bool ok = true;
-    const auto& args = s.args();
-    size_t argc = args.size();
-    cc::scene::Model *arg1 = (cc::scene::Model *) NULL ;
-    int32_t arg2 ;
-    
-    if(argc != 1) {
-        SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 1);
-        return false;
-    }
-    arg1 = SE_THIS_OBJECT<cc::scene::Model>(s);
-    if (nullptr == arg1) return true;
-    
-    ok &= sevalue_to_native(args[0], &arg2, s.thisObject());
-    SE_PRECONDITION2(ok, false, "Error processing arguments"); 
-    (arg1)->setTetrahedronIndex(arg2);
-    
-    
-    return true;
-}
-SE_BIND_FUNC(js_cc_scene_Model_setTetrahedronIndex) 
 
 static bool js_cc_scene_Model_showTetrahedron(se::State& s)
 {
@@ -15371,6 +15378,43 @@ static bool js_cc_scene_Model_priority_get(se::State& s)
 }
 SE_BIND_PROP_GET(js_cc_scene_Model_priority_get) 
 
+static bool js_cc_scene_Model_tetrahedronIndex_set(se::State& s)
+{
+    CC_UNUSED bool ok = true;
+    const auto& args = s.args();
+    size_t argc = args.size();
+    cc::scene::Model *arg1 = (cc::scene::Model *) NULL ;
+    int32_t arg2 ;
+    
+    arg1 = SE_THIS_OBJECT<cc::scene::Model>(s);
+    if (nullptr == arg1) return true;
+    
+    ok &= sevalue_to_native(args[0], &arg2, s.thisObject());
+    SE_PRECONDITION2(ok, false, "Error processing arguments"); 
+    cc_scene_Model_tetrahedronIndex_set(arg1,SWIG_STD_MOVE(arg2));
+    
+    
+    return true;
+}
+SE_BIND_PROP_SET(js_cc_scene_Model_tetrahedronIndex_set) 
+
+static bool js_cc_scene_Model_tetrahedronIndex_get(se::State& s)
+{
+    CC_UNUSED bool ok = true;
+    cc::scene::Model *arg1 = (cc::scene::Model *) NULL ;
+    int32_t result;
+    
+    arg1 = SE_THIS_OBJECT<cc::scene::Model>(s);
+    if (nullptr == arg1) return true;
+    result = cc_scene_Model_tetrahedronIndex_get(arg1);
+    
+    ok &= nativevalue_to_se(result, s.rval(), s.thisObject()); 
+    
+    
+    return true;
+}
+SE_BIND_PROP_GET(js_cc_scene_Model_tetrahedronIndex_get) 
+
 static bool js_cc_scene_Model_useLightProbe_set(se::State& s)
 {
     CC_UNUSED bool ok = true;
@@ -15510,6 +15554,7 @@ bool js_register_cc_scene_Model(se::Object* obj) {
     cls->defineProperty("type", _SE(js_cc_scene_Model_type_get), _SE(js_cc_scene_Model_type_set)); 
     cls->defineProperty("isDynamicBatching", _SE(js_cc_scene_Model_isDynamicBatching_get), _SE(js_cc_scene_Model_isDynamicBatching_set)); 
     cls->defineProperty("priority", _SE(js_cc_scene_Model_priority_get), _SE(js_cc_scene_Model_priority_set)); 
+    cls->defineProperty("tetrahedronIndex", _SE(js_cc_scene_Model_tetrahedronIndex_get), _SE(js_cc_scene_Model_tetrahedronIndex_set)); 
     cls->defineProperty("useLightProbe", _SE(js_cc_scene_Model_useLightProbe_get), _SE(js_cc_scene_Model_useLightProbe_set)); 
     cls->defineProperty("bakeToReflectionProbe", _SE(js_cc_scene_Model_bakeToReflectionProbe_get), _SE(js_cc_scene_Model_bakeToReflectionProbe_set)); 
     cls->defineProperty("reflectionProbeType", _SE(js_cc_scene_Model_reflectionProbeType_get), _SE(js_cc_scene_Model_reflectionProbeType_set)); 
@@ -15523,7 +15568,7 @@ bool js_register_cc_scene_Model(se::Object* obj) {
     cls->defineFunction("updateUBOs", _SE(js_cc_scene_Model_updateUBOs)); 
     cls->defineFunction("_updateLocalDescriptors", _SE(js_cc_scene_Model__updateLocalDescriptors)); 
     cls->defineFunction("_updateLocalSHDescriptors", _SE(js_cc_scene_Model__updateLocalSHDescriptors)); 
-    cls->defineFunction("updateWorldBoundDescriptors", _SE(js_cc_scene_Model_updateWorldBoundDescriptors)); 
+    cls->defineFunction("_updateWorldBoundDescriptors", _SE(js_cc_scene_Model__updateWorldBoundDescriptors)); 
     cls->defineFunction("createBoundingShape", _SE(js_cc_scene_Model_createBoundingShape)); 
     cls->defineFunction("initialize", _SE(js_cc_scene_Model_initialize)); 
     cls->defineFunction("initLightingmap", _SE(js_cc_scene_Model_initLightingmap)); 
@@ -15549,8 +15594,6 @@ bool js_register_cc_scene_Model(se::Object* obj) {
     cls->defineFunction("detachFromScene", _SE(js_cc_scene_Model_detachFromScene)); 
     cls->defineFunction("setLocalSHBuffer", _SE(js_cc_scene_Model_setLocalSHBuffer)); 
     cls->defineFunction("setBounds", _SE(js_cc_scene_Model_setBounds)); 
-    cls->defineFunction("getTetrahedronIndex", _SE(js_cc_scene_Model_getTetrahedronIndex)); 
-    cls->defineFunction("setTetrahedronIndex", _SE(js_cc_scene_Model_setTetrahedronIndex)); 
     cls->defineFunction("showTetrahedron", _SE(js_cc_scene_Model_showTetrahedron)); 
     cls->defineFunction("getLocalSHBuffer", _SE(js_cc_scene_Model_getLocalSHBuffer)); 
     cls->defineFunction("getLocalSHData", _SE(js_cc_scene_Model_getLocalSHData)); 
@@ -24572,6 +24615,84 @@ static bool js_cc_scene_ReflectionProbe_boundingBox_get(se::State& s)
 }
 SE_BIND_PROP_GET(js_cc_scene_ReflectionProbe_boundingBox_get) 
 
+static bool js_cc_scene_ReflectionProbe_previewSphere_set(se::State& s)
+{
+    CC_UNUSED bool ok = true;
+    const auto& args = s.args();
+    size_t argc = args.size();
+    cc::scene::ReflectionProbe *arg1 = (cc::scene::ReflectionProbe *) NULL ;
+    cc::Node *arg2 = (cc::Node *) NULL ;
+    
+    arg1 = SE_THIS_OBJECT<cc::scene::ReflectionProbe>(s);
+    if (nullptr == arg1) return true;
+    
+    ok &= sevalue_to_native(args[0], &arg2, s.thisObject());
+    SE_PRECONDITION2(ok, false, "Error processing arguments"); 
+    cc_scene_ReflectionProbe_previewSphere_set(arg1,arg2);
+    
+    
+    return true;
+}
+SE_BIND_PROP_SET(js_cc_scene_ReflectionProbe_previewSphere_set) 
+
+static bool js_cc_scene_ReflectionProbe_previewSphere_get(se::State& s)
+{
+    CC_UNUSED bool ok = true;
+    cc::scene::ReflectionProbe *arg1 = (cc::scene::ReflectionProbe *) NULL ;
+    cc::Node *result = 0 ;
+    
+    arg1 = SE_THIS_OBJECT<cc::scene::ReflectionProbe>(s);
+    if (nullptr == arg1) return true;
+    result = (cc::Node *)cc_scene_ReflectionProbe_previewSphere_get(arg1);
+    
+    ok &= nativevalue_to_se(result, s.rval(), s.thisObject());
+    SE_PRECONDITION2(ok, false, "Error processing arguments");
+    SE_HOLD_RETURN_VALUE(result, s.thisObject(), s.rval()); 
+    
+    
+    return true;
+}
+SE_BIND_PROP_GET(js_cc_scene_ReflectionProbe_previewSphere_get) 
+
+static bool js_cc_scene_ReflectionProbe_previewPlane_set(se::State& s)
+{
+    CC_UNUSED bool ok = true;
+    const auto& args = s.args();
+    size_t argc = args.size();
+    cc::scene::ReflectionProbe *arg1 = (cc::scene::ReflectionProbe *) NULL ;
+    cc::Node *arg2 = (cc::Node *) NULL ;
+    
+    arg1 = SE_THIS_OBJECT<cc::scene::ReflectionProbe>(s);
+    if (nullptr == arg1) return true;
+    
+    ok &= sevalue_to_native(args[0], &arg2, s.thisObject());
+    SE_PRECONDITION2(ok, false, "Error processing arguments"); 
+    cc_scene_ReflectionProbe_previewPlane_set(arg1,arg2);
+    
+    
+    return true;
+}
+SE_BIND_PROP_SET(js_cc_scene_ReflectionProbe_previewPlane_set) 
+
+static bool js_cc_scene_ReflectionProbe_previewPlane_get(se::State& s)
+{
+    CC_UNUSED bool ok = true;
+    cc::scene::ReflectionProbe *arg1 = (cc::scene::ReflectionProbe *) NULL ;
+    cc::Node *result = 0 ;
+    
+    arg1 = SE_THIS_OBJECT<cc::scene::ReflectionProbe>(s);
+    if (nullptr == arg1) return true;
+    result = (cc::Node *)cc_scene_ReflectionProbe_previewPlane_get(arg1);
+    
+    ok &= nativevalue_to_se(result, s.rval(), s.thisObject());
+    SE_PRECONDITION2(ok, false, "Error processing arguments");
+    SE_HOLD_RETURN_VALUE(result, s.thisObject(), s.rval()); 
+    
+    
+    return true;
+}
+SE_BIND_PROP_GET(js_cc_scene_ReflectionProbe_previewPlane_get) 
+
 bool js_register_cc_scene_ReflectionProbe(se::Object* obj) {
     auto* cls = se::Class::create("ReflectionProbe", obj, nullptr, _SE(js_new_cc_scene_ReflectionProbe)); 
     
@@ -24583,6 +24704,8 @@ bool js_register_cc_scene_ReflectionProbe(se::Object* obj) {
     cls->defineProperty("visibility", _SE(js_cc_scene_ReflectionProbe_visibility_get), _SE(js_cc_scene_ReflectionProbe_visibility_set)); 
     cls->defineProperty("size", _SE(js_cc_scene_ReflectionProbe_size_get), _SE(js_cc_scene_ReflectionProbe_size_set)); 
     cls->defineProperty("boundingBox", _SE(js_cc_scene_ReflectionProbe_boundingBox_get), nullptr); 
+    cls->defineProperty("previewSphere", _SE(js_cc_scene_ReflectionProbe_previewSphere_get), _SE(js_cc_scene_ReflectionProbe_previewSphere_set)); 
+    cls->defineProperty("previewPlane", _SE(js_cc_scene_ReflectionProbe_previewPlane_get), _SE(js_cc_scene_ReflectionProbe_previewPlane_set)); 
     
     cls->defineFunction("initialize", _SE(js_cc_scene_ReflectionProbe_initialize)); 
     cls->defineFunction("getProbeId", _SE(js_cc_scene_ReflectionProbe_getProbeId)); 
