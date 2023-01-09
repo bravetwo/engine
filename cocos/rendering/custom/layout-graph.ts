@@ -1,18 +1,17 @@
 /****************************************************************************
- Copyright (c) 2021-2022 Xiamen Yaji Software Co., Ltd.
+ Copyright (c) 2021-2023 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos.com
 
  Permission is hereby granted, free of charge, to any person obtaining a copy
- of this software and associated engine source code (the "Software"), a limited,
- worldwide, royalty-free, non-assignable, revocable and non-exclusive license
- to use Cocos Creator solely to develop games on your target platforms. You shall
- not use Cocos Creator software for developing other software or tools that's
- used for developing games. You are not granted to publish, distribute,
- sublicense, and/or sell copies of Cocos Creator.
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights to
+ use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ of the Software, and to permit persons to whom the Software is furnished to do so,
+ subject to the following conditions:
 
- The software or tools in this License Agreement are licensed, not sold.
- Xiamen Yaji Software Co., Ltd. reserves all rights not expressly granted to you.
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
 
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -620,6 +619,8 @@ export class DescriptorSetLayoutData {
     }
     slot: number;
     capacity: number;
+    uniformBlockCapacity = 0;
+    samplerTextureCapacity = 0;
     readonly descriptorBlocks: DescriptorBlockData[];
     readonly uniformBlocks: Map<number, UniformBlock>;
     readonly bindingMap: Map<number, number>;
@@ -1419,6 +1420,8 @@ export function loadDescriptorBlockData (ar: InputArchive, v: DescriptorBlockDat
 export function saveDescriptorSetLayoutData (ar: OutputArchive, v: DescriptorSetLayoutData) {
     ar.writeNumber(v.slot);
     ar.writeNumber(v.capacity);
+    ar.writeNumber(v.uniformBlockCapacity);
+    ar.writeNumber(v.samplerTextureCapacity);
     ar.writeNumber(v.descriptorBlocks.length); // DescriptorBlockData[]
     for (const v1 of v.descriptorBlocks) {
         saveDescriptorBlockData(ar, v1);
@@ -1438,6 +1441,8 @@ export function saveDescriptorSetLayoutData (ar: OutputArchive, v: DescriptorSet
 export function loadDescriptorSetLayoutData (ar: InputArchive, v: DescriptorSetLayoutData) {
     v.slot = ar.readNumber();
     v.capacity = ar.readNumber();
+    v.uniformBlockCapacity = ar.readNumber();
+    v.samplerTextureCapacity = ar.readNumber();
     let sz = 0;
     sz = ar.readNumber(); // DescriptorBlockData[]
     v.descriptorBlocks.length = sz;
