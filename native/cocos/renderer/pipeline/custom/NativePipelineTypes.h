@@ -113,6 +113,8 @@ public:
     RasterQueueBuilder *addQueue(QueueHint hint) override;
     void setViewport(const gfx::Viewport &viewport) override;
     void setVersion(const ccstd::string &name, uint64_t version) override;
+    bool getShowStatistics() const override;
+    void setShowStatistics(bool enable) override;
 
     const PipelineRuntime* pipelineRuntime{nullptr};
     RenderGraph* renderGraph{nullptr};
@@ -229,30 +231,6 @@ public:
     const scene::RenderScene* scene{nullptr};
 };
 
-struct PersistentRenderPassAndFramebuffer {
-    using allocator_type = boost::container::pmr::polymorphic_allocator<char>;
-    allocator_type get_allocator() const noexcept { // NOLINT
-        return {clearColors.get_allocator().resource()};
-    }
-
-    PersistentRenderPassAndFramebuffer(const allocator_type& alloc) noexcept; // NOLINT
-    PersistentRenderPassAndFramebuffer(PersistentRenderPassAndFramebuffer&& rhs, const allocator_type& alloc);
-    PersistentRenderPassAndFramebuffer(PersistentRenderPassAndFramebuffer const& rhs, const allocator_type& alloc);
-
-    PersistentRenderPassAndFramebuffer(PersistentRenderPassAndFramebuffer&& rhs) noexcept = default;
-    PersistentRenderPassAndFramebuffer(PersistentRenderPassAndFramebuffer const& rhs) = delete;
-    PersistentRenderPassAndFramebuffer& operator=(PersistentRenderPassAndFramebuffer&& rhs) = default;
-    PersistentRenderPassAndFramebuffer& operator=(PersistentRenderPassAndFramebuffer const& rhs) = default;
-
-    IntrusivePtr<gfx::RenderPass> renderPass;
-    IntrusivePtr<gfx::Framebuffer> framebuffer;
-    ccstd::pmr::vector<gfx::Color> clearColors;
-    float clearDepth{0};
-    uint8_t clearStencil{0};
-    int32_t refCount{1};
-    uint32_t hash{0};
-};
-
 struct RenderInstancingQueue {
     using allocator_type = boost::container::pmr::polymorphic_allocator<char>;
     allocator_type get_allocator() const noexcept { // NOLINT
@@ -280,7 +258,7 @@ struct RenderInstancingQueue {
     ccstd::pmr::vector<pipeline::InstancedBuffer*> sortedBatches;
 };
 
-struct alignas(32) DrawInstance {
+struct DrawInstance {
     const scene::SubModel* subModel{nullptr};
     uint32_t priority{0};
     uint32_t hash{0};
@@ -321,7 +299,7 @@ struct NativeRenderQueue {
     }
 
     NativeRenderQueue(const allocator_type& alloc) noexcept; // NOLINT
-    NativeRenderQueue(SceneFlags sceneFlagsIn, const allocator_type& alloc) noexcept;
+    NativeRenderQueue(SceneFlags sceneFlagsIn, uint32_t layoutPassIDIn, const allocator_type& alloc) noexcept;
     NativeRenderQueue(NativeRenderQueue&& rhs, const allocator_type& alloc);
 
     NativeRenderQueue(NativeRenderQueue&& rhs) noexcept = default;
@@ -336,6 +314,7 @@ struct NativeRenderQueue {
     RenderInstancingQueue opaqueInstancingQueue;
     RenderInstancingQueue transparentInstancingQueue;
     SceneFlags sceneFlags{SceneFlags::NONE};
+    uint32_t layoutPassID{0xFFFFFFFF};
 };
 
 class DefaultSceneVisitor final : public SceneVisitor {
@@ -516,7 +495,7 @@ struct QuadResource {
 struct NativeRenderContext {
     using allocator_type = boost::container::pmr::polymorphic_allocator<char>;
     allocator_type get_allocator() const noexcept { // NOLINT
-        return {renderPasses.get_allocator().resource()};
+        return {resourceGroups.get_allocator().resource()};
     }
 
     NativeRenderContext(std::unique_ptr<gfx::DefaultResource> defaultResourceIn, const allocator_type& alloc) noexcept;
@@ -528,7 +507,6 @@ struct NativeRenderContext {
     void clearPreviousResources(uint64_t finishedFenceValue) noexcept;
 
     std::unique_ptr<gfx::DefaultResource> defaultResource;
-    ccstd::pmr::unordered_map<RasterPass, PersistentRenderPassAndFramebuffer> renderPasses;
     ccstd::pmr::map<uint64_t, ResourceGroup> resourceGroups;
     ccstd::pmr::vector<LayoutGraphNodeResource> layoutGraphResources;
     QuadResource fullscreenQuad;

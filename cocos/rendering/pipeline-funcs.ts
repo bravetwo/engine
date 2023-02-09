@@ -65,6 +65,10 @@ export function LinearToSRGB (out: IVec4Like, linear: IVec4Like) {
 
 let profilerCamera: Camera | null = null;
 
+export function getProfilerCamera (): Camera | null {
+    return profilerCamera;
+}
+
 export function decideProfilerCamera (cameras: Camera[]) {
     for (let i = cameras.length - 1; i >= 0; --i) {
         const camera = cameras[i];
@@ -77,9 +81,6 @@ export function decideProfilerCamera (cameras: Camera[]) {
 }
 
 export function renderProfiler (device: Device, renderPass: RenderPass, cmdBuff: CommandBuffer, profiler: Model | null, camera: Camera) {
-    if (isEnableEffect()) {
-        return;
-    }
     if (!profiler || !profiler.enabled) {
         return;
     }
