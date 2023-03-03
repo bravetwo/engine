@@ -70,6 +70,10 @@ using namespace cc::render;
 // Note: Should be placed before 'Attribute Section'
 %module_macro(CC_USE_GEOMETRY_RENDERER) cc::render::PipelineRuntime::geometryRenderer;
 
+// ----- Release Returned Cpp Object in GC Section ------
+%release_returned_cpp_object_in_gc(cc::render::Pipeline::addRasterPass);
+%release_returned_cpp_object_in_gc(cc::render::RasterPassBuilder::addQueue);
+
 // ----- Attribute Section ------
 // Brief: Define attributes ( JS properties with getter and setter )
 // Usage:
